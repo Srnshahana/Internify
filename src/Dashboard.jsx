@@ -4,23 +4,26 @@ import Explore from './pages/Explore.jsx'
 import Classroom from './pages/Classroom.jsx'
 import Calendar from './pages/Calendar.jsx'
 import Profile from './pages/Profile.jsx'
-import { HomeIcon, ExploreIcon, ClassroomIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon } from './components/Icons.jsx'
+import { HomeIcon, ExploreIcon, ClassroomIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
 function Dashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
+  const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('dashboard-theme')
+    return savedTheme || 'light'
+  })
   
-  // Set light theme for dashboard only (doesn't affect landing page)
+  // Set theme for dashboard
   useEffect(() => {
-    // Store original theme before changing
-    const originalTheme = document.documentElement.getAttribute('data-theme') || 'dark'
-    document.documentElement.setAttribute('data-theme', 'light')
-    
-    return () => {
-      // Restore original theme when component unmounts (on logout)
-      document.documentElement.setAttribute('data-theme', originalTheme)
-    }
-  }, [])
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('dashboard-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }
 
   const menuItems = [
     { id: 'Home', label: 'Home', icon: HomeIcon },
@@ -37,7 +40,7 @@ function Dashboard({ onLogout }) {
       case 'Explore':
         return <Explore />
       case 'Classroom':
-        return <Classroom />
+        return <Classroom onLiveClassroomChange={setIsLiveClassroomActive} />
       case 'Calendar':
         return <Calendar />
       case 'Profile':
@@ -46,9 +49,9 @@ function Dashboard({ onLogout }) {
         return <Home onNavigate={(pageName) => setPage(pageName)} />
     }
   }
-
   return (
-    <div className="dashboard-layout">
+    <div className={`dashboard-layout ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
+      {!isLiveClassroomActive && (
       <header className="dashboard-topbar">
         <div className="topbar-left">
           <div className="brand">
@@ -75,17 +78,22 @@ function Dashboard({ onLogout }) {
         </nav>
 
         <div className="topbar-right">
+          <button
+            className="theme-toggle-dashboard"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <SunIcon className="sun-icon-white" /> : <MoonIcon />}
+          </button>
           <button className="notification-btn">
             <NotificationIcon />
           </button>
-          <div className="user-menu">
-            <div className="user-avatar">JD</div>
-          </div>
           <button className="logout-btn" onClick={onLogout}>
             <LogoutIcon />
           </button>
         </div>
       </header>
+      )}
 
       <main className="dashboard-main">
         <div className="dashboard-content">

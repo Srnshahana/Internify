@@ -98,7 +98,7 @@ function Explore() {
       </div>
 
       {/* Browse by Category Section */}
-      <div className="dashboard-section">
+      <div className="dashboard-section browse-category-section">
         <h2 className="section-title">Browse by Category</h2>
         <div className="category-scroll-container">
           <div className="category-scroll">
@@ -118,8 +118,8 @@ function Explore() {
                   <div className="category-icon">
                     <IconComponent />
                   </div>
-                  <h3>{category.name}</h3>
-                  <p>{category.count} items</p>
+                  <h3>{category.name}({category.count})</h3>
+                  {/* <p className="category-count">{category.count}</p> */}
                 </div>
               )
             })}
@@ -155,7 +155,7 @@ function Explore() {
           }}
         />
         <button className="mini search-go" onClick={() => setQuery(term.trim())}>
-          <ExploreIcon />
+          <ExploreIcon className="search-icon" />
         </button>
       </div>
 
@@ -188,10 +188,10 @@ function Explore() {
                 <p className="explore-course-description">{course.description}</p>
                 <div className="explore-course-meta">
                   <span>{course.duration} weeks</span>
-                  <span>•</span>
+                  <span>|</span>
                   <span>{course.level}</span>
-                  <span>•</span>
-                  <span>⭐ {course.rating}</span>
+                  <span>|</span>
+                  <span>{course.rating} rating</span>
                 </div>
                 <div className="explore-course-skills">
                   {course.skills.slice(0, 4).map((skill, idx) => (
@@ -231,7 +231,7 @@ function Explore() {
                     {renderStars(mentor.rating)}
                   </span>
                   <div className="mentor-actions">
-                    <button className="tiny book-session-btn">Book your free session</button>
+                    <button className="tiny book-session-btn" onClick={() => onNavigate && onNavigate('Login')}>Book your free session</button>
                   </div>
                 </div>
               </div>

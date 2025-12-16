@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { searchCourses, searchMentors, getMentorsByCourse } from './Data.jsx'
 import './App.css'
 
-export default function Explore({ mentors, courses = [], onBack, renderStars, initialQuery, onMentorClick }) {
+export default function Explore({
+  mentors,
+  courses = [],
+  onBack,
+  renderStars,
+  initialQuery,
+  onMentorClick,
+  onBookSession,
+}) {
   const [activeTab, setActiveTab] = useState('mentors')
   const [term, setTerm] = useState(initialQuery || '')
   const [query, setQuery] = useState(initialQuery || '')
@@ -99,7 +107,7 @@ export default function Explore({ mentors, courses = [], onBack, renderStars, in
           }}
         />
         <button className="mini search-go" onClick={() => setQuery(term.trim())}>
-          🔍
+          Search
         </button>
       </div>
 
@@ -123,10 +131,10 @@ export default function Explore({ mentors, courses = [], onBack, renderStars, in
                 <p className="explore-course-description">{course.description}</p>
                 <div className="explore-course-meta">
                   <span>{course.duration} weeks</span>
-                  <span>•</span>
+                  <span>|</span>
                   <span>{course.level}</span>
-                  <span>•</span>
-                  <span>⭐ {course.rating}</span>
+                  <span>|</span>
+                  <span>{course.rating} rating</span>
                 </div>
                 <div className="explore-course-skills">
                   {course.skills.slice(0, 4).map((skill, idx) => (
@@ -166,9 +174,14 @@ export default function Explore({ mentors, courses = [], onBack, renderStars, in
                 <span className="rating-outlined">
                   {renderStars(mentor.rating)}
                 </span>
-                <div className="mentor-actions">
-                  <button className="tiny book-session-btn">Book your free session</button>
-                </div>
+                  <div className="mentor-actions">
+                    <button
+                      className="tiny book-session-btn"
+                      onClick={() => onBookSession && onBookSession()}
+                    >
+                      Book your free session
+                    </button>
+                  </div>
               </div>
             </div>
           ))

@@ -1,6 +1,15 @@
+import { useState, useEffect } from 'react'
 import '../App.css'
+import LiveClassroom from '../liveClassroom.jsx'
 
-function Classroom() {
+function Classroom({ onLiveClassroomChange }) {
+  const [activeCourse, setActiveCourse] = useState(null)
+
+  useEffect(() => {
+    if (onLiveClassroomChange) {
+      onLiveClassroomChange(!!activeCourse)
+    }
+  }, [activeCourse, onLiveClassroomChange])
   const enrolledCourses = [
     {
       id: 1,
@@ -27,6 +36,10 @@ function Classroom() {
       assignments: 1,
     },
   ]
+
+  if (activeCourse) {
+    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
+  }
 
   return (
     <div className="dashboard-page">
@@ -66,7 +79,9 @@ function Classroom() {
             </div>
 
             <div className="course-actions">
-              <button className="primary">Continue Learning</button>
+              <button className="primary" onClick={() => setActiveCourse(course)}>
+                Continue Learning
+              </button>
               <button className="ghost">View Materials</button>
             </div>
           </div>
@@ -77,28 +92,28 @@ function Classroom() {
         <h2>Course Materials</h2>
         <div className="materials-grid">
           <div className="material-item">
-            <div className="material-icon">📄</div>
+            <div className="material-icon">PDF</div>
             <div className="material-info">
               <h4>React Hooks Deep Dive</h4>
               <p>PDF • 2.4 MB</p>
             </div>
-            <button className="download-btn">⬇️</button>
+            <button className="download-btn">Download</button>
           </div>
           <div className="material-item">
-            <div className="material-icon">🎥</div>
+            <div className="material-icon">VID</div>
             <div className="material-info">
               <h4>State Management Tutorial</h4>
               <p>Video • 45 min</p>
             </div>
-            <button className="download-btn">▶️</button>
+            <button className="download-btn">Open</button>
           </div>
           <div className="material-item">
-            <div className="material-icon">📝</div>
+            <div className="material-icon">DOC</div>
             <div className="material-info">
               <h4>Assignment Template</h4>
               <p>DOCX • 125 KB</p>
             </div>
-            <button className="download-btn">⬇️</button>
+            <button className="download-btn">Download</button>
           </div>
         </div>
       </div>

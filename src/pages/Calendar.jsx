@@ -1,42 +1,11 @@
 import { useState } from 'react'
 import '../App.css'
+import { calendarSessions } from '../Data.jsx'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const sessions = [
-    {
-      id: 1,
-      title: 'React Advanced Patterns',
-      mentor: 'Sarah Chen',
-      time: '2:00 PM - 3:00 PM',
-      date: 'Today',
-      type: 'mentorship',
-    },
-    {
-      id: 2,
-      title: 'UI/UX Design Review',
-      mentor: 'Michael Torres',
-      time: '10:00 AM - 11:00 AM',
-      date: 'Tomorrow',
-      type: 'review',
-    },
-    {
-      id: 3,
-      title: 'Data Science Office Hours',
-      mentor: 'Emily Johnson',
-      time: '4:00 PM - 5:00 PM',
-      date: 'Today',
-      type: 'office-hours',
-    },
-    {
-      id: 4,
-      title: 'Assignment Deadline',
-      time: '11:59 PM',
-      date: 'Friday',
-      type: 'deadline',
-    },
-  ]
+  const sessions = calendarSessions
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })

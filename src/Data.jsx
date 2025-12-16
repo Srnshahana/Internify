@@ -1154,6 +1154,245 @@ export const mentors = [
   },
 ]
 
+// Dashboard/Home page: featured mentors for quick recommendation
+export const homeMentorShowcase = [
+  {
+    name: 'James Smith',
+    experience: '8 years experience',
+    role: 'Mobile Application developer',
+    rating: 4,
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Liam Miller',
+    experience: '13 years experience',
+    role: 'Mobile Application developer',
+    rating: 4,
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Sarah Chen',
+    experience: '10 years experience',
+    role: 'React Native Expert',
+    rating: 5,
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'David Park',
+    experience: '12 years experience',
+    role: 'Full Stack Developer',
+    rating: 5,
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Emma Wilson',
+    experience: '9 years experience',
+    role: 'UI/UX Designer',
+    rating: 5,
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Michael Brown',
+    experience: '15 years experience',
+    role: 'DevOps Engineer',
+    rating: 4,
+    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Sophia Martinez',
+    experience: '7 years experience',
+    role: 'Data Scientist',
+    rating: 5,
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Ryan Taylor',
+    experience: '11 years experience',
+    role: 'Backend Developer',
+    rating: 4,
+    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=faces',
+  },
+  {
+    name: 'Olivia Davis',
+    experience: '6 years experience',
+    role: 'Frontend Developer',
+    rating: 5,
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=faces',
+  },
+]
+
+// Dashboard/Home page: skills marquee icons
+export const homeSkillsIcons = [
+  { name: 'GitHub', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' },
+  { name: 'Flutter', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg' },
+  { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+  { name: 'TypeScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { name: 'Next.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
+  { name: 'Node.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+  { name: 'Python', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { name: 'Vue.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg' },
+  { name: 'Angular', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg' },
+  { name: 'Tailwind CSS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
+  { name: 'PostgreSQL', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
+  { name: 'MongoDB', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg' },
+  { name: 'Docker', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
+  { name: 'Kubernetes', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg' },
+  { name: 'AWS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg' },
+  { name: 'GraphQL', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg' },
+  { name: 'Redis', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg' },
+  { name: 'TensorFlow', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg' },
+]
+
+// Dashboard/Home page: market-highlight courses for hero stats
+export const homeMarketCourses = [
+  {
+    name: 'Dart development',
+    marketStanding: '3rd on market 2025',
+    description:
+      "High demand for Dart specialists exists in junior to senior software engineering roles due to Flutter's growth.",
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg',
+  },
+  {
+    name: 'React Native',
+    marketStanding: '1st on market 2025',
+    description:
+      'Leading framework for cross-platform mobile development with growing industry adoption.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+  },
+  {
+    name: 'Flutter Development',
+    marketStanding: '2nd on market 2025',
+    description:
+      'Rapidly growing framework for building beautiful, natively compiled applications.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg',
+  },
+  {
+    name: 'Python Programming',
+    marketStanding: '1st on market 2025',
+    description:
+      'Most versatile programming language used in web development, data science, AI, and automation.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  },
+  {
+    name: 'Node.js Backend',
+    marketStanding: '2nd on market 2025',
+    description:
+      'Server-side JavaScript runtime for building scalable and efficient web applications.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+  },
+  {
+    name: 'JavaScript Mastery',
+    marketStanding: '1st on market 2025',
+    description:
+      'Essential programming language for web development, frontend, and full-stack applications.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+  },
+  {
+    name: 'AWS Cloud',
+    marketStanding: '1st on market 2025',
+    description:
+      'Leading cloud platform for deploying and managing scalable applications and infrastructure.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
+  },
+  {
+    name: 'Docker & Kubernetes',
+    marketStanding: '2nd on market 2025',
+    description:
+      'Containerization and orchestration tools essential for modern DevOps and deployment workflows.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+  },
+  {
+    name: 'Machine Learning',
+    marketStanding: '3rd on market 2025',
+    description:
+      'Cutting-edge AI and ML technologies for building intelligent systems and data-driven solutions.',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg',
+  },
+]
+
+// Dashboard/Home page: progress graph data (last 8 weeks)
+export const homeProgressData = [
+  { week: 'W1', completion: 35, engagement: 78, assignments: 55 },
+  { week: 'W2', completion: 40, engagement: 68, assignments: 30 },
+  { week: 'W3', completion: 42, engagement: 70, assignments: 35 },
+  { week: 'W4', completion: 38, engagement: 62, assignments: 10 },
+  { week: 'W5', completion: 50, engagement: 75, assignments: 75 },
+  { week: 'W6', completion: 45, engagement: 12, assignments: 45 },
+  { week: 'W7', completion: 70, engagement: 78, assignments: 30 },
+  { week: 'W8', completion: 82, engagement: 98, assignments: 30 },
+]
+
+// Dashboard/Home page: upcoming sessions stack
+export const homeUpcomingSessions = [
+  {
+    id: 1,
+    time: '10.00',
+    period: 'AM',
+    location: 'classroom 208',
+    course: 'mobile application',
+    mentor: 'by Amelie Griffith',
+  },
+  {
+    id: 2,
+    time: '02.30',
+    period: 'PM',
+    location: 'classroom 105',
+    course: 'React Advanced Patterns',
+    mentor: 'by Sarah Chen',
+  },
+  {
+    id: 3,
+    time: '04.00',
+    period: 'PM',
+    location: 'classroom 312',
+    course: 'UI/UX Design Principles',
+    mentor: 'by Michael Torres',
+  },
+  {
+    id: 4,
+    time: '11.00',
+    period: 'AM',
+    location: 'classroom 201',
+    course: 'Python Programming',
+    mentor: 'by David Park',
+  },
+]
+
+// Calendar page: scheduled sessions
+export const calendarSessions = [
+  {
+    id: 1,
+    title: 'React Advanced Patterns',
+    mentor: 'Sarah Chen',
+    time: '2:00 PM - 3:00 PM',
+    date: 'Today',
+    type: 'mentorship',
+  },
+  {
+    id: 2,
+    title: 'UI/UX Design Review',
+    mentor: 'Michael Torres',
+    time: '10:00 AM - 11:00 AM',
+    date: 'Tomorrow',
+    type: 'review',
+  },
+  {
+    id: 3,
+    title: 'Data Science Office Hours',
+    mentor: 'Emily Johnson',
+    time: '4:00 PM - 5:00 PM',
+    date: 'Today',
+    type: 'office-hours',
+  },
+  {
+    id: 4,
+    title: 'Assignment Deadline',
+    time: '11:59 PM',
+    date: 'Friday',
+    type: 'deadline',
+  },
+]
+
 // Helper function to get mentors by course
 export const getMentorsByCourse = (courseId) => {
   return mentors.filter((mentor) => mentor.courses.includes(courseId))
@@ -1175,5 +1414,174 @@ export const searchMentors = (query) => {
       mentor.focus.toLowerCase().includes(lowerQuery) ||
       mentor.skills.some((skill) => skill.toLowerCase().includes(lowerQuery)),
   )
+}
+
+// Student Profile Data
+export const studentProfileData = {
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  role: 'Software Developer',
+  bio: 'Passionate about learning and building great products. Currently focusing on React and modern web development. Always eager to learn new technologies and contribute to meaningful projects.',
+  location: 'San Francisco, CA',
+  joinedDate: 'January 2024',
+  avatar: 'JD',
+  enrolledCourses: [
+    {
+      id: 1,
+      name: 'Full-Stack Web Development',
+      category: 'Programming',
+      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+      progress: 75,
+      status: 'In Progress',
+      enrolledDate: 'Jan 15, 2024',
+      completionDate: null,
+    },
+    {
+      id: 2,
+      name: 'UI/UX Design Mastery',
+      category: 'Design',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
+      progress: 100,
+      status: 'Completed',
+      enrolledDate: 'Dec 1, 2023',
+      completionDate: 'Feb 20, 2024',
+    },
+    {
+      id: 3,
+      name: 'Data Science & Analytics',
+      category: 'Data',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
+      progress: 45,
+      status: 'In Progress',
+      enrolledDate: 'Feb 10, 2024',
+      completionDate: null,
+    },
+    {
+      id: 7,
+      name: 'Mobile App Development',
+      category: 'Programming',
+      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80',
+      progress: 30,
+      status: 'In Progress',
+      enrolledDate: 'Mar 1, 2024',
+      completionDate: null,
+    },
+  ],
+  certificates: [
+    {
+      id: 1,
+      name: 'Full-Stack Web Development Certificate',
+      issuer: 'Internify',
+      issueDate: 'Feb 20, 2024',
+      credentialId: 'INT-FSWD-2024-001',
+      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      id: 2,
+      name: 'UI/UX Design Mastery Certificate',
+      issuer: 'Internify',
+      issueDate: 'Feb 20, 2024',
+      credentialId: 'INT-UX-2024-002',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      id: 3,
+      name: 'React Advanced Patterns',
+      issuer: 'Internify',
+      issueDate: 'Jan 15, 2024',
+      credentialId: 'INT-REACT-2024-003',
+      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      id: 4,
+      name: 'JavaScript Fundamentals',
+      issuer: 'Internify',
+      issueDate: 'Dec 10, 2023',
+      credentialId: 'INT-JS-2023-004',
+      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      id: 5,
+      name: 'Node.js Backend Development',
+      issuer: 'Internify',
+      issueDate: 'Nov 25, 2023',
+      credentialId: 'INT-NODE-2023-005',
+      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    },
+  ],
+  education: [
+    {
+      id: 1,
+      degree: 'Bachelor of Science in Computer Science',
+      institution: 'University of California, Berkeley',
+      startYear: 2020,
+      endYear: 2024,
+      gpa: '3.8',
+      description: 'Focused on software engineering, algorithms, and web development. Completed capstone project on full-stack web applications.',
+    },
+    {
+      id: 2,
+      degree: 'High School Diploma',
+      institution: 'San Francisco High School',
+      startYear: 2016,
+      endYear: 2020,
+      gpa: '3.9',
+      description: null,
+    },
+  ],
+  internships: [
+    {
+      id: 1,
+      title: 'Software Engineering Intern',
+      company: 'TechCorp Inc.',
+      location: 'San Francisco, CA',
+      startDate: 'June 2023',
+      endDate: 'August 2023',
+      description: 'Developed and maintained web applications using React and Node.js. Collaborated with senior engineers to implement new features and fix bugs. Participated in code reviews and agile development processes.',
+      skills: ['React', 'Node.js', 'JavaScript', 'Git', 'Agile'],
+    },
+    {
+      id: 2,
+      title: 'Frontend Development Intern',
+      company: 'StartupXYZ',
+      location: 'Remote',
+      startDate: 'September 2023',
+      endDate: 'December 2023',
+      description: 'Built responsive user interfaces for web applications. Worked closely with designers to implement pixel-perfect designs. Optimized application performance and user experience.',
+      skills: ['React', 'TypeScript', 'CSS', 'Figma', 'Responsive Design'],
+    },
+  ],
+  projects: [
+    {
+      id: 1,
+      title: 'E-Commerce Platform',
+      type: 'Personal Project',
+      startDate: 'January 2024',
+      endDate: 'March 2024',
+      description: 'Full-stack e-commerce application built with React, Node.js, and MongoDB. Features include user authentication, product catalog, shopping cart, and payment integration. Deployed on AWS.',
+      skills: ['React', 'Node.js', 'MongoDB', 'Express', 'AWS', 'Stripe API'],
+      link: 'https://github.com/johndoe/ecommerce-platform',
+    },
+    {
+      id: 2,
+      title: 'Task Management App',
+      type: 'Academic Project',
+      startDate: 'September 2023',
+      endDate: 'November 2023',
+      description: 'Collaborative task management application with real-time updates. Built using React for frontend and Firebase for backend. Features drag-and-drop interface and team collaboration tools.',
+      skills: ['React', 'Firebase', 'JavaScript', 'CSS', 'Real-time Updates'],
+      link: 'https://github.com/johndoe/task-manager',
+    },
+    {
+      id: 3,
+      title: 'Weather Dashboard',
+      type: 'Personal Project',
+      startDate: 'May 2023',
+      endDate: 'June 2023',
+      description: 'Weather dashboard application that displays current weather and forecasts for multiple cities. Uses OpenWeatherMap API and features interactive charts and location-based search.',
+      skills: ['React', 'JavaScript', 'API Integration', 'Chart.js', 'CSS'],
+      link: 'https://github.com/johndoe/weather-dashboard',
+    },
+  ],
 }
 

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { getCourseById } from './Data.jsx'
 import './App.css'
 
-export default function MentorProfile({ mentor, onBack, renderStars, courses = [] }) {
+export default function MentorProfile({ mentor, onBack, renderStars, courses = [], onBookSession }) {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -13,6 +13,33 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
     ? mentor.courses.map((courseId) => getCourseById(courseId)).filter(Boolean)
     : courses.slice(0, 3)
 
+  const testimonials =
+    mentor.testimonials && mentor.testimonials.length > 0
+      ? mentor.testimonials
+      : [
+          {
+            rating: 5,
+            quote:
+              'The sessions were super clear and structured. I finally shipped my first real project with confidence.',
+            name: 'Previous mentee',
+            title: 'Mobile app developer',
+          },
+          {
+            rating: 5,
+            quote:
+              'Great mix of theory and hands-on guidance. Weekly feedback kept me accountable and moving.',
+            name: 'Design mentee',
+            title: 'Junior product designer',
+          },
+          {
+            rating: 4.5,
+            quote:
+              'Helped me move from confusion to a clear roadmap. The mock interviews were a game changer.',
+            name: 'Career switcher',
+            title: 'Software engineer in transition',
+          },
+        ]
+
   return (
     <div className="page mentor-profile-page">
       <button className="back-button" onClick={onBack}>
@@ -20,7 +47,7 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
       </button>
 
       <div className="mentor-profile-container">
-        {/* Main Content Column */}
+        {/* Main Content Column - single column like inspo */}
         <div className="mentor-profile-main">
           {/* Header Section */}
           <section className="mentor-header-section">
@@ -53,16 +80,42 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
                     <span className="rate-label">Hourly Rate:</span>
                     <span className="rate-value">${mentor.hourlyRate || '[Hourly Rate]'}/hr</span>
                   </div>
-                  <button className="primary book-session-btn">Book Session</button>
-                  <button className="secondary free-consult-btn">Free Consultation</button>
+                  <button
+                    className="primary book-session-btn"
+                    onClick={() => onBookSession && onBookSession()}
+                  >
+                    Request trial session
+                  </button>
+                  <button className="secondary free-consult-btn">Send message</button>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Experience Section */}
+          {/* Course provided Section */}
           <section className="mentor-section">
-            <h2 className="section-title">Experience</h2>
+            <h2 className="section-title">Course provided</h2>
+            <div className="courses-mentor-grid">
+              {mentorCourses.length > 0 ? (
+                mentorCourses.map((course) => (
+                  <div className="course-mentor-card" key={course.id}>
+                    <h3>{course.name}</h3>
+                    <p className="course-mentor-detail">{course.description}</p>
+                    <div className="course-mentor-meta">
+                      <span className="course-duration">{course.duration} weeks</span>
+                      <span className="course-level">{course.level}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No courses available</p>
+              )}
+            </div>
+          </section>
+
+          {/* Work Experience Section */}
+          <section className="mentor-section">
+            <h2 className="section-title">Work experience</h2>
             <div className="experience-list">
               <div className="experience-item">
                 <div className="experience-header">
@@ -99,143 +152,27 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
             </div>
           </section>
 
-          {/* Courses I Mentor Section */}
+          {/* Testimonials & Feedback Section */}
           <section className="mentor-section">
-            <h2 className="section-title">Courses I Mentor</h2>
-            <div className="courses-mentor-grid">
-              {mentorCourses.length > 0 ? (
-                mentorCourses.map((course) => (
-                  <div className="course-mentor-card" key={course.id}>
-                    <h3>{course.name}</h3>
-                    <p className="course-mentor-detail">{course.description}</p>
-                    <div className="course-mentor-meta">
-                      <span className="course-duration">{course.duration} weeks</span>
-                      <span className="course-level">{course.level}</span>
-                    </div>
-                    <div className="course-skills">
-                      {course.skills.slice(0, 3).map((skill, idx) => (
-                        <span key={idx} className="course-skill-tag">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
+            <h2 className="section-title">Testimonials & feedback</h2>
+            <div className="testimonials-list testimonial-slider">
+              {testimonials.map((item, idx) => (
+                <div key={idx} className="testimonial-card">
+                  <div className="testimonial-rating">
+                    {renderStars ? renderStars(item.rating) : '★★★★★'}
                   </div>
-                ))
-              ) : (
-                <p>No courses available</p>
-              )}
-            </div>
-          </section>
-
-          {/* Testimonials Section */}
-          <section className="mentor-section">
-            <h2 className="section-title">What My Mentees Say</h2>
-            <div className="testimonials-list">
-              <div className="testimonial-card">
-                <div className="testimonial-rating">
-                  {renderStars ? renderStars('[0-5 Star Rating]') : '★★★★★'}
+                  <blockquote className="testimonial-quote">
+                    “{item.quote}”
+                  </blockquote>
+                  <div className="testimonial-author">
+                    <strong>{item.name}</strong>
+                    {item.title && <span className="testimonial-title">{item.title}</span>}
+                  </div>
                 </div>
-                <blockquote className="testimonial-quote">
-                  "[Testimonial Quote] This mentor has been incredibly helpful in guiding me through
-                  my career journey. Their expertise and patience have made a significant impact on
-                  my professional growth."
-                </blockquote>
-                <div className="testimonial-author">
-                  <strong>[Mentee Name]</strong>
-                  <span className="testimonial-title">[Mentee Title]</span>
-                </div>
-              </div>
-              <div className="testimonial-card">
-                <div className="testimonial-rating">
-                  {renderStars ? renderStars('[0-5 Star Rating]') : '★★★★★'}
-                </div>
-                <blockquote className="testimonial-quote">
-                  "[Testimonial Quote] Working with this mentor has transformed my understanding of
-                  the field. The practical insights and real-world examples have been invaluable."
-                </blockquote>
-                <div className="testimonial-author">
-                  <strong>[Mentee Name]</strong>
-                  <span className="testimonial-title">[Mentee Title]</span>
-                </div>
-              </div>
-              <div className="testimonial-card">
-                <div className="testimonial-rating">
-                  {renderStars ? renderStars('[0-5 Star Rating]') : '★★★★★'}
-                </div>
-                <blockquote className="testimonial-quote">
-                  "[Testimonial Quote] I highly recommend this mentor to anyone looking to advance
-                  their career. Their teaching style is clear, engaging, and results-driven."
-                </blockquote>
-                <div className="testimonial-author">
-                  <strong>[Mentee Name]</strong>
-                  <span className="testimonial-title">[Mentee Title]</span>
-                </div>
-              </div>
+              ))}
             </div>
           </section>
         </div>
-
-        {/* Sticky Right Sidebar */}
-        <aside className="mentor-profile-sidebar">
-          {/* Skills & Expertise */}
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Skills & Expertise</h3>
-            <div className="skills-list">
-              {mentor.skills && mentor.skills.length > 0 ? (
-                mentor.skills.map((skill, idx) => (
-                  <span key={idx} className="skill-tag">{skill}</span>
-                ))
-              ) : (
-                <>
-                  <span className="skill-tag">[Skill Tag]</span>
-                  <span className="skill-tag">[Skill Tag]</span>
-                  <span className="skill-tag">[Skill Tag]</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Certifications */}
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Certifications</h3>
-            <ul className="certifications-list">
-              {mentor.certifications && mentor.certifications.length > 0 ? (
-                mentor.certifications.map((cert, idx) => (
-                  <li key={idx}>{cert}</li>
-                ))
-              ) : (
-                <li>[Certification Name]</li>
-              )}
-            </ul>
-          </div>
-
-          {/* Connect Links */}
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Connect</h3>
-            <ul className="connect-links-list">
-              <li>
-                <a href="#" className="connect-link">
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href="#" className="connect-link">
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <a href="#" className="connect-link">
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="#" className="connect-link">
-                  Portfolio
-                </a>
-              </li>
-            </ul>
-          </div>
-        </aside>
       </div>
     </div>
   )

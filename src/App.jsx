@@ -3,6 +3,7 @@ import Explore from './search.jsx'
 import MentorProfile from './mentorProfile.jsx'
 import Login from './login.jsx'
 import Dashboard from './Dashboard.jsx'
+import Payment from './payment.jsx'
 import { courses, mentors } from './Data.jsx'
 import './App.css'
 
@@ -66,22 +67,6 @@ const latestSkills = courses.slice(0, 8).map((course) => ({
   description: course.description,
 }))
 
-// Helper function to get logo emoji based on category
-function getCourseLogo(category) {
-  const logoMap = {
-    Programming: '💻',
-    Design: '🎨',
-    Data: '📊',
-    Marketing: '📱',
-    Cloud: '☁️',
-    Business: '📋',
-    AI: '🤖',
-    Writing: '✍️',
-    Security: '🔒',
-  }
-  return logoMap[category] || '📚'
-}
-
 function App() {
   const mentorTrackRef = useRef(null)
   const skillsTrackRef = useRef(null)
@@ -94,6 +79,7 @@ function App() {
   const [selectedMentor, setSelectedMentor] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme')
     return savedTheme || 'dark'
@@ -119,14 +105,14 @@ function App() {
     let timeoutId
 
       const initAnimations = () => {
-      // Get all animated elements, then filter out outcomes section
+      // Get all animated elements, then filter out outcomes and how-it-works sections
       const allAnimatedElements = document.querySelectorAll(
         '.fade-in-up, .fade-in-left, .fade-in-right, .scale-in'
       )
       
-      // Filter out outcomes section elements (they use scroll-based animation)
+      // Filter out outcomes and how-it-works section elements (they use scroll-based animation)
       const animatedElements = Array.from(allAnimatedElements).filter(
-        (el) => !el.closest('.outcomes')
+        (el) => !el.closest('.outcomes') && !el.closest('.how-it-works')
       )
       
       // First, check if elements are already in view and make them visible immediately
@@ -148,8 +134,8 @@ function App() {
 
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          // Skip outcomes section elements
-          if (entry.target.closest('.outcomes')) return
+          // Skip outcomes and how-it-works section elements
+          if (entry.target.closest('.outcomes') || entry.target.closest('.how-it-works')) return
           
           // Trigger animation when element is approaching viewport
           if (entry.isIntersecting || entry.intersectionRatio > 0) {
@@ -384,6 +370,10 @@ function App() {
     setSelectedMentor(mentor)
   }
 
+  const handleBookSessionClick = () => {
+    setShowLogin(true)
+  }
+
   const handleBackFromProfile = () => {
     setSelectedMentor(null)
   }
@@ -392,8 +382,14 @@ function App() {
     // Handle login logic here
     console.log('Login attempt:', credentials)
     setShowLogin(false)
-    setIsLoggedIn(true)
+    // After successful login, go to payment screen
+    setShowPayment(true)
     // You can add actual authentication logic here
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowPayment(false)
+    setIsLoggedIn(true)
   }
 
   const handleLogout = () => {
@@ -402,10 +398,6 @@ function App() {
     // Restore the saved theme from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') || 'dark'
     document.documentElement.setAttribute('data-theme', savedTheme)
-  }
-
-  if (isLoggedIn) {
-    return <Dashboard onLogout={handleLogout} />
   }
 
   if (showLogin) {
@@ -417,6 +409,19 @@ function App() {
     )
   }
 
+  if (showPayment) {
+    return (
+      <Payment
+        onBack={() => setShowPayment(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    )
+  }
+
+  if (isLoggedIn) {
+    return <Dashboard onLogout={handleLogout} />
+  }
+
   if (selectedMentor) {
     return (
       <MentorProfile
@@ -424,6 +429,7 @@ function App() {
         courses={courses}
         onBack={handleBackFromProfile}
         renderStars={renderStars}
+        onBookSession={handleBookSessionClick}
       />
     )
   }
@@ -437,6 +443,7 @@ function App() {
         renderStars={renderStars}
         initialQuery={exploreInitialQuery}
         onMentorClick={handleMentorClick}
+        onBookSession={handleBookSessionClick}
       />
     )
   }
@@ -457,12 +464,16 @@ function App() {
             }}
           />
           <button className="mini search-go" onClick={handleSearch}>
-            🔍
+            Search
           </button>
         </div>
         <div className="top-actions">
-          <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-            {theme === 'dark' ? '☀️' : '🌙'}
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
           <button className="link" onClick={() => setShowLogin(true)}>Login</button>
           <button className="pill">Apply as mentor</button>
@@ -554,7 +565,7 @@ function App() {
                     {renderStars(mentor.rating)}
                   </span>
                   <div className="mentor-actions">
-                    <button className="tiny book-session-btn">Book your free session</button>
+                    <button className="tiny book-session-btn" onClick={handleBookSessionClick}>Book your free session</button>
                   </div>
                 </div>
               </div>
@@ -574,7 +585,7 @@ function App() {
         </div>
       </section>
 
-      <section ref={howItWorksSectionRef} className="how-it-works fade-in-up">
+      <section ref={howItWorksSectionRef} className="how-it-works">
         <div className="how-it-works-header">
           <h2 className="how-it-works-title">How It Works</h2>
           <p className="how-it-works-subtitle">Three simple steps to accelerate your career journey</p>
@@ -728,11 +739,11 @@ function App() {
               <p className="footer-tagline">Your trusted source to find highly-vetted mentors & industry professionals to move your career ahead.</p>
               <a href="#" className="footer-contact-link">Contact</a>
               <div className="footer-social">
-                <a href="#" className="social-icon" aria-label="Facebook">f</a>
-                <a href="#" className="social-icon" aria-label="Instagram">📷</a>
-                <a href="#" className="social-icon" aria-label="Twitter">X</a>
-                <a href="#" className="social-icon" aria-label="LinkedIn">in</a>
-                <a href="#" className="social-icon" aria-label="YouTube">▶</a>
+                <a href="#" className="social-icon" aria-label="Facebook">FB</a>
+                <a href="#" className="social-icon" aria-label="Instagram">IG</a>
+                <a href="#" className="social-icon" aria-label="Twitter">TW</a>
+                <a href="#" className="social-icon" aria-label="LinkedIn">IN</a>
+                <a href="#" className="social-icon" aria-label="YouTube">YT</a>
               </div>
             </div>
             <div className="footer-column">
