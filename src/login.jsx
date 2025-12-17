@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import './App.css'
+import supabase from './supabaseClient'
 
-function Login({ onBack, onLogin }) {
+function Login({ onBack, onLogin, onShowSignup }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -11,28 +12,30 @@ function Login({ onBack, onLogin }) {
   const theme = document.documentElement.getAttribute('data-theme') || 'dark'
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
+    e.preventDefault();
+    setError('');
+  
     if (!email || !password) {
-      setError('Please fill in all fields')
-      return
+      setError('Please fill in all fields');
+      return;
     }
-
-    setIsLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      if (onLogin) {
-        onLogin({ email, password })
-      } else {
-        // Default behavior - just go back
-        if (onBack) onBack()
-      }
-    }, 1000)
+  
+    setIsLoading(true);
+  
+    // Supabase Auth sign-in
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+  
+    setIsLoading(false);
+  
+    if (error) {
+      setError(error.message);
+    } else {
+      if (onLogin) onLogin(data.user);
+    }
   }
-
   return (
     <div className="login-page">
       <div className="login-container">
@@ -112,19 +115,16 @@ function Login({ onBack, onLogin }) {
           <div className="login-footer">
             <p>
               Don't have an account?{' '}
-              <a 
-                href="#" 
+              <button
+                type="button"
                 className="signup-link"
                 onClick={(e) => {
                   e.preventDefault()
-                  // Sign up also redirects to dashboard
-                  if (onLogin) {
-                    onLogin({ email: email || 'newuser@example.com', password: 'signedup' })
-                  }
+                  if (onShowSignup) onShowSignup()
                 }}
               >
                 Sign up
-              </a>
+              </button>
             </p>
           </div>
 

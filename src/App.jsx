@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import Explore from './search.jsx'
 import MentorProfile from './mentorProfile.jsx'
 import Login from './login.jsx'
+import Signup from './signup.jsx'
 import Dashboard from './Dashboard.jsx'
 import Payment from './payment.jsx'
 import { courses, mentors } from './Data.jsx'
@@ -78,6 +79,7 @@ function App() {
   const [exploreInitialQuery, setExploreInitialQuery] = useState('')
   const [selectedMentor, setSelectedMentor] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
+  const [showSignup, setShowSignup] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [theme, setTheme] = useState(() => {
@@ -115,16 +117,10 @@ function App() {
         (el) => !el.closest('.outcomes') && !el.closest('.how-it-works')
       )
       
-      // First, check if elements are already in view and make them visible immediately
+      // Don't mark any elements as visible initially - let IntersectionObserver handle all animations
+      // This ensures all animations are scroll-triggered, not load-triggered
       animatedElements.forEach((el) => {
-        const rect = el.getBoundingClientRect()
-        // Trigger 200px before element enters viewport
-        const isVisible = rect.top < window.innerHeight + 200 && rect.bottom > -200
-        if (isVisible) {
-          el.classList.add('visible')
-        } else {
-          el.classList.remove('visible')
-        }
+        el.classList.remove('visible')
       })
 
       const observerOptions = {
@@ -140,15 +136,16 @@ function App() {
           // Trigger animation when element is approaching viewport
           if (entry.isIntersecting || entry.intersectionRatio > 0) {
             entry.target.classList.add('visible')
+            // Once animated, unobserve to prevent re-animation
+            observer.unobserve(entry.target)
           }
         })
       }, observerOptions)
 
-      // Observe all elements (excluding outcomes section)
+      // Observe all elements (they all start without 'visible' class)
+      // All animations will trigger via IntersectionObserver when scrolling
       animatedElements.forEach((el) => {
-        if (!el.classList.contains('visible')) {
-          observer.observe(el)
-        }
+        observer.observe(el)
       })
     }
 
@@ -378,13 +375,19 @@ function App() {
     setSelectedMentor(null)
   }
 
-  const handleLogin = (credentials) => {
-    // Handle login logic here
-    console.log('Login attempt:', credentials)
+  const handleLogin = (user) => {
+    console.log('Login success:', user)
     setShowLogin(false)
-    // After successful login, go to payment screen
+    setShowSignup(false)
+    // After successful auth, go to payment screen
     setShowPayment(true)
-    // You can add actual authentication logic here
+  }
+
+  const handleSignup = (user) => {
+    console.log('Signup success:', user)
+    setShowSignup(false)
+    setShowLogin(false)
+    setShowPayment(true)
   }
 
   const handlePaymentSuccess = () => {
@@ -395,9 +398,22 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false)
     setShowLogin(false)
+    setShowSignup(false)
     // Restore the saved theme from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') || 'dark'
     document.documentElement.setAttribute('data-theme', savedTheme)
+  }
+
+  if (showSignup) {
+    return (
+      <Signup
+        onBack={() => {
+          setShowSignup(false)
+          setShowLogin(true)
+        }}
+        onSignup={handleSignup}
+      />
+    )
   }
 
   if (showLogin) {
@@ -405,6 +421,10 @@ function App() {
       <Login
         onBack={() => setShowLogin(false)}
         onLogin={handleLogin}
+        onShowSignup={() => {
+          setShowLogin(false)
+          setShowSignup(true)
+        }}
       />
     )
   }
@@ -713,15 +733,15 @@ function App() {
       <section className="boost fade-in-up">
         <h3>How This Boosts Your Chances of Getting Hired</h3>
         <div className="boost-grid">
-          <div className="boost-item">
+          <div className="boost-item fade-in-up">
             <div className="boost-number">80%</div>
             <p>higher chance of getting hired through real mentor-guided, practical learning.</p>
           </div>
-          <div className="boost-item">
+          <div className="boost-item fade-in-up">
             <div className="boost-number">90%</div>
             <p>skill validation with mentor-issued reference letters and Internify certification.</p>
           </div>
-          <div className="boost-item">
+          <div className="boost-item fade-in-up">
             <div className="boost-number">80%</div>
             <p>stronger portfolio by completing real-world projects guided by experts.</p>
           </div>

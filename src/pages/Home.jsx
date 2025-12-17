@@ -346,8 +346,8 @@ function Home({ onNavigate }) {
             <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#9ca3af" stopOpacity="0.02" />
                 </linearGradient>
               </defs>
               
@@ -361,10 +361,10 @@ function Home({ onNavigate }) {
                     y1={y}
                     x2={padding.left + graphWidth}
                     y2={y}
-                    stroke="currentColor"
+                    stroke="#d1d5db"
                     strokeWidth="1"
                     strokeDasharray="2 4"
-                    opacity="0.1"
+                    opacity="0.3"
                   />
                 )
               })}
@@ -379,8 +379,8 @@ function Home({ onNavigate }) {
                     y={y + 4}
                     textAnchor="end"
                     fontSize="10"
-                    fill="currentColor"
-                    opacity="0.5"
+                    fill="#9ca3af"
+                    opacity="0.8"
                     fontWeight="400"
                   >
                     {value}%
@@ -411,7 +411,7 @@ function Home({ onNavigate }) {
                     <path
                       d={linePath}
                       fill="none"
-                      stroke="currentColor"
+                      stroke="#6b7280"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -425,7 +425,7 @@ function Home({ onNavigate }) {
                         cx={point.x}
                         cy={point.y}
                         r="3"
-                        fill="currentColor"
+                        fill="#6b7280"
                         className="progress-point"
                         opacity="0.9"
                       />
@@ -444,8 +444,8 @@ function Home({ onNavigate }) {
                     y={chartHeight - padding.bottom + 18}
                     textAnchor="middle"
                     fontSize="10"
-                    fill="currentColor"
-                    opacity="0.5"
+                    fill="#9ca3af"
+                    opacity="0.8"
                     fontWeight="400"
                   >
                     {d.week}

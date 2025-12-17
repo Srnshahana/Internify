@@ -9,9 +9,11 @@ function LiveClassroom({ course, onBack }) {
       id: 1,
       from: 'mentor',
       type: 'text',
-      content: "Welcome to today's session. We will focus on building reusable components.",
+      content: "Welcome to today's session. We will focus on building reusable components.", 
       time: '10:00 AM',
       sectionId: 2,
+      highlighted: false,
+      selfNote: '',
     },
     {
       id: 2,
@@ -20,6 +22,8 @@ function LiveClassroom({ course, onBack }) {
       content: 'Should we use function components only, or class components as well?',
       time: '10:02 AM',
       sectionId: 2,
+      highlighted: false,
+      selfNote: '',
     },
     {
       id: 3,
@@ -29,6 +33,8 @@ function LiveClassroom({ course, onBack }) {
       fileSize: '2.1 MB',
       time: '10:05 AM',
       sectionId: 2,
+      highlighted: false,
+      selfNote: '',
     },
     {
       id: 4,
@@ -38,6 +44,8 @@ function LiveClassroom({ course, onBack }) {
       url: 'https://zoom.us/j/123-456',
       time: '10:10 AM',
       sectionId: 2,
+      highlighted: false,
+      selfNote: '',
     },
     {
       id: 5,
@@ -46,9 +54,13 @@ function LiveClassroom({ course, onBack }) {
       content: 'I have pushed my latest changes to GitHub. Please review when possible.',
       time: '10:20 AM',
       sectionId: 2,
+      highlighted: false,
+      selfNote: '',
     },
   ])
   const chatFeedRef = useRef(null)
+  const docInputRef = useRef(null)
+  const imageInputRef = useRef(null)
 
   const classroom = course || {
     title: 'React App Development – Batch 1',
@@ -66,6 +78,12 @@ function LiveClassroom({ course, onBack }) {
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
   const visibleMessages = messages.filter((m) => m.sectionId === activeSession.id)
 
+  const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
+  const [replyTo, setReplyTo] = useState(null)
+  const [showAttachOptions, setShowAttachOptions] = useState(false)
+  const [noteEditingId, setNoteEditingId] = useState(null)
+  const [noteDraft, setNoteDraft] = useState('')
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatFeedRef.current) {
@@ -82,42 +100,156 @@ function LiveClassroom({ course, onBack }) {
     e.preventDefault()
     if (!messageInput.trim()) return
 
-    const newMessage = {
+    const base = {
       id: messages.length + 1,
       from: 'learner',
       type: 'text',
       content: messageInput.trim(),
       time: getCurrentTime(),
       sectionId: activeSessionId,
+      highlighted: false,
+      selfNote: '',
+      replyTo: replyTo
+        ? {
+            id: replyTo.id,
+            preview:
+              replyTo.content ||
+              replyTo.fileName ||
+              replyTo.linkLabel ||
+              replyTo.type.toUpperCase(),
+          }
+        : null,
     }
 
-    setMessages([...messages, newMessage])
+    setMessages([...messages, base])
     setMessageInput('')
+    setReplyTo(null)
+    setShowAttachOptions(false)
+  }
+
+  const handleToggleHighlight = (id) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, highlighted: !m.highlighted } : m
+      )
+    )
+    setActiveMenuMessageId(null)
+  }
+
+  const handleAddSelfNote = (id) => {
+    const current = messages.find((m) => m.id === id)
+    setNoteDraft(current && current.selfNote ? current.selfNote : '')
+    setNoteEditingId(id)
+    setActiveMenuMessageId(null)
+  }
+
+  const handleReplyTo = (message) => {
+    setReplyTo(message)
+    setActiveMenuMessageId(null)
+  }
+
+  const handleAttachDocument = () => {
+    if (docInputRef.current) docInputRef.current.click()
+  }
+
+  const handleAttachImage = () => {
+    if (imageInputRef.current) imageInputRef.current.click()
+  }
+
+  const handleDocSelected = (e) => {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    const newMessage = {
+      id: messages.length + 1,
+      from: 'learner',
+      type: 'file',
+      fileName: file.name,
+      fileSize: `${Math.round(file.size / 1024)} KB`,
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlighted: false,
+      selfNote: '',
+    }
+    setMessages((prev) => [...prev, newMessage])
+    e.target.value = ''
+    setShowAttachOptions(false)
+  }
+
+  const handleImageSelected = (e) => {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    const newMessage = {
+      id: messages.length + 1,
+      from: 'learner',
+      type: 'image',
+      imageUrl: url,
+      fileName: file.name,
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlighted: false,
+      selfNote: '',
+    }
+    setMessages((prev) => [...prev, newMessage])
+    e.target.value = ''
+    setShowAttachOptions(false)
+  }
+
+  const handleAttachVoice = () => {
+    const newMessage = {
+      id: messages.length + 1,
+      from: 'learner',
+      type: 'voice',
+      duration: '0:15',
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlighted: false,
+      selfNote: '',
+    }
+    setMessages((prev) => [...prev, newMessage])
+    setShowAttachOptions(false)
+  }
+
+  const handleAttachLink = () => {
+    const url = window.prompt('Paste a link to share:')
+    if (!url || !url.trim()) return
+    const newMessage = {
+      id: messages.length + 1,
+      from: 'learner',
+      type: 'link',
+      linkLabel: 'Link',
+      url: url.trim(),
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlighted: false,
+      selfNote: '',
+    }
+    setMessages((prev) => [...prev, newMessage])
+    setShowAttachOptions(false)
   }
 
   return (
     <div className="live-classroom-page">
-      {/* Main chat + section header */}
+      {/* Minimal top bar like inspo */}
+      <header className="live-simple-topbar">
+        <button
+          type="button"
+          className="live-topbar-avatars"
+          onClick={onBack}
+          aria-label="Back to classroom"
+        >
+          <div className="live-avatar-circle"></div>
+          <div className="live-avatar-circle second"></div>
+        </button>
+        <div className="live-topbar-title">Classroom name</div>
+        <button type="button" className="live-topbar-chat" aria-label="Classroom info">
+          <span className="live-chat-icon-box" />
+        </button>
+      </header>
+
+      {/* Main chat area */}
       <div className="live-main live-main-full">
-        <div className="live-section-header">
-          <div className="live-section-header-top">
-            <button className="live-back-btn" type="button" onClick={onBack} aria-label="Go back">
-              ← Back
-            </button>
-            <div className="live-section-header-content">
-              <div className="live-section-title">{activeSession.title}</div>
-              <p className="live-section-description">
-                Structured discussion and code review for this part of the course. All messages, files, and links here
-                stay attached to this session.
-              </p>
-              <div className="live-section-meta">
-                <span className="live-section-progress">
-                  Session {sessions.indexOf(activeSession) + 1} of {sessions.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="live-session-label">{activeSession.title}</div>
 
         <div className="live-chat-area">
           <div className="live-chat-feed" ref={chatFeedRef}>
@@ -126,7 +258,7 @@ function LiveClassroom({ course, onBack }) {
                 key={message.id}
                 className={`live-message ${message.from === 'mentor' ? 'from-mentor' : 'from-learner'}`}
               >
-                <div className="live-message-bubble">
+                <div className={`live-message-bubble ${message.highlighted ? 'highlighted' : ''}`}>
                   {message.type === 'text' && <p>{message.content}</p>}
                   {message.type === 'file' && (
                     <div className="live-file-card">
@@ -137,11 +269,90 @@ function LiveClassroom({ course, onBack }) {
                       </div>
                     </div>
                   )}
+                  {message.type === 'image' && (
+                    <div className="live-image-card">
+                      <img src={message.imageUrl} alt={message.fileName || 'Image'} />
+                    </div>
+                  )}
                   {message.type === 'link' && (
                     <a href={message.url} className="live-link-card" target="_blank" rel="noreferrer">
                       <div className="live-link-label">{message.linkLabel}</div>
                       <div className="live-link-url">{message.url}</div>
                     </a>
+                  )}
+                  {message.type === 'voice' && (
+                    <div className="live-voice-card">
+                      <div className="voice-icon">●</div>
+                      <div className="voice-meta">Voice note • {message.duration}</div>
+                    </div>
+                  )}
+                  {noteEditingId === message.id ? (
+                    <div className="live-self-note-editor">
+                      <textarea
+                        value={noteDraft}
+                        onChange={(e) => setNoteDraft(e.target.value)}
+                        placeholder="Type your private note..."
+                      />
+                      <div className="self-note-actions">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const trimmed = noteDraft.trim()
+                            if (trimmed) {
+                              setMessages((prev) =>
+                                prev.map((m) =>
+                                  m.id === message.id ? { ...m, selfNote: trimmed } : m
+                                )
+                              )
+                            }
+                            setNoteEditingId(null)
+                            setNoteDraft('')
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNoteEditingId(null)
+                            setNoteDraft('')
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    message.selfNote && (
+                      <div className="live-self-note">
+                        <span className="self-note-label">Note:</span> {message.selfNote}
+                      </div>
+                    )
+                  )}
+                  <button
+                    type="button"
+                    className="live-message-menu-btn"
+                    onClick={() =>
+                      setActiveMenuMessageId(
+                        activeMenuMessageId === message.id ? null : message.id
+                      )
+                    }
+                    aria-label="Message options"
+                  >
+                    ⋮
+                  </button>
+                  {activeMenuMessageId === message.id && (
+                    <div className="live-message-menu">
+                      <button type="button" onClick={() => handleToggleHighlight(message.id)}>
+                        {message.highlighted ? 'Remove highlight' : 'Highlight'}
+                      </button>
+                      <button type="button" onClick={() => handleAddSelfNote(message.id)}>
+                        Add self note
+                      </button>
+                      <button type="button" onClick={() => handleReplyTo(message)}>
+                        Reply
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="live-message-time">{message.time}</div>
@@ -150,6 +361,30 @@ function LiveClassroom({ course, onBack }) {
           </div>
 
           <form className="live-message-input-container" onSubmit={handleSendMessage}>
+            <button
+              type="button"
+              className="live-attach-btn"
+              aria-label="Add message attachment"
+              onClick={() => setShowAttachOptions((prev) => !prev)}
+            >
+              +
+            </button>
+            {replyTo && (
+              <div className="live-reply-indicator">
+                <span className="reply-label">Replying to</span>
+                <span className="reply-preview">
+                  {replyTo.content || replyTo.fileName || replyTo.linkLabel || replyTo.type}
+                </span>
+                <button
+                  type="button"
+                  className="reply-cancel-btn"
+                  onClick={() => setReplyTo(null)}
+                  aria-label="Cancel reply"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             <input
               type="text"
               className="live-message-input"
@@ -158,33 +393,41 @@ function LiveClassroom({ course, onBack }) {
               onChange={(e) => setMessageInput(e.target.value)}
             />
             <button type="submit" className="live-send-btn" disabled={!messageInput.trim()}>
-              Send
+              ➤
             </button>
           </form>
-        </div>
-      </div>
+          {showAttachOptions && (
+            <div className="live-attach-sheet">
+              <button type="button" onClick={handleAttachDocument}>
+                Document
+              </button>
+              <button type="button" onClick={handleAttachImage}>
+                Image
+              </button>
+              <button type="button" onClick={handleAttachVoice}>
+                Voice note
+              </button>
+              <button type="button" onClick={handleAttachLink}>
+                Send link
+              </button>
+            </div>
+          )}
 
-      {/* Sessions bar at bottom */}
-      <div className="live-sessions-bar">
-        {sessions.map((session) => (
-          <button
-            key={session.id}
-            type="button"
-            className={`live-session-chip ${
-              session.status === 'completed'
-                ? 'completed'
-                : session.id === activeSessionId
-                ? 'current'
-                : 'upcoming'
-            }`}
-            onClick={() => setActiveSessionId(session.id)}
-          >
-            <span className="live-session-title">{session.title}</span>
-            {session.status === 'completed' && <span className="live-session-status">Completed</span>}
-            {session.status === 'current' && <span className="live-session-status">In progress</span>}
-            {session.status === 'upcoming' && <span className="live-session-status">Upcoming</span>}
-          </button>
-        ))}
+          <input
+            ref={docInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+            style={{ display: 'none' }}
+            onChange={handleDocSelected}
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageSelected}
+          />
+        </div>
       </div>
     </div>
   )
