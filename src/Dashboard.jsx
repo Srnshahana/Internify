@@ -4,6 +4,7 @@ import Explore from './pages/Explore.jsx'
 import Classroom from './pages/Classroom.jsx'
 import Calendar from './pages/Calendar.jsx'
 import Profile from './pages/Profile.jsx'
+import Notification from './pages/Notification.jsx'
 import { HomeIcon, ExploreIcon, ClassroomIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
@@ -40,11 +41,13 @@ function Dashboard({ onLogout }) {
       case 'Explore':
         return <Explore />
       case 'Classroom':
-        return <Classroom onLiveClassroomChange={setIsLiveClassroomActive} />
+        return <Classroom  />
       case 'Calendar':
         return <Calendar />
       case 'Profile':
         return <Profile />
+      case 'Notification':
+        return <Notification />
       default:
         return <Home onNavigate={(pageName) => setPage(pageName)} />
     }
@@ -52,47 +55,47 @@ function Dashboard({ onLogout }) {
   return (
     <div className={`dashboard-layout ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
       {!isLiveClassroomActive && (
-      <header className="dashboard-topbar">
-        <div className="topbar-left">
-          <div className="brand">
-            <span>Internify.</span>
+        <header className="dashboard-topbar">
+          <div className="topbar-left">
+            <div className="brand">
+              <span>Internify.</span>
+            </div>
           </div>
-        </div>
 
-        <nav className="dashboard-topnav">
-          {menuItems.map((item) => {
-            const IconComponent = item.icon
-            return (
-              <button
-                key={item.id}
-                className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-                onClick={() => setActivePage(item.id)}
-              >
-                <span className="nav-icon">
-                  <IconComponent />
-                </span>
-                <span className="nav-label">{item.label}</span>
-              </button>
-            )
-          })}
-        </nav>
+          <nav className="dashboard-topnav">
+            {menuItems.map((item) => {
+              const IconComponent = item.icon
+              return (
+                <button
+                  key={item.id}
+                  className={`nav-item ${activePage === item.id ? 'active' : ''}`}
+                  onClick={() => setActivePage(item.id)}
+                >
+                  <span className="nav-icon">
+                    <IconComponent />
+                  </span>
+                  <span className="nav-label">{item.label}</span>
+                </button>
+              )
+            })}
+          </nav>
 
-        <div className="topbar-right">
-          <button
-            className="theme-toggle-dashboard"
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? <SunIcon className="sun-icon-white" /> : <MoonIcon />}
-          </button>
-          <button className="notification-btn">
-            <NotificationIcon />
-          </button>
-          <button className="logout-btn" onClick={onLogout}>
-            <LogoutIcon />
-          </button>
-        </div>
-      </header>
+          <div className="topbar-right">
+            <button
+              className="theme-toggle-dashboard"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <SunIcon className="sun-icon-white" /> : <MoonIcon />}
+            </button>
+            <button className="notification-btn" onClick={() => setActivePage('Notification')}>
+              <NotificationIcon />
+            </button>
+            <button className="logout-btn" onClick={onLogout}>
+              <LogoutIcon />
+            </button>
+          </div>
+        </header>
       )}
 
       <main className="dashboard-main">

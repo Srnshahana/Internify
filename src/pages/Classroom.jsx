@@ -250,29 +250,34 @@ function Classroom({ onLiveClassroomChange }) {
               key={course.id}
               className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
               onClick={() => {
-                if (index === activeCourseIndex) {
-                  // If tapping the active card, expand details
-                  setBottomSheetPosition('full')
-                } else {
-                  // Otherwise switch active course
-                  setActiveCourseIndex(index)
-                  scrollToCard(index)
-                }
+                // Navigate directly to live classroom
+                setActiveCourse(course)
               }}
             >
               <div className="carousel-card-content">
-                <div className="carousel-mentor-photo">
-                  <img src={course.mentorImage} alt={course.mentor} />
+                <div className="carousel-header-section">
+                  <div className="carousel-mentor-photo">
+                    <img src={course.mentorImage} alt={course.mentor} />
+                  </div>
+                  <div className="carousel-header-info">
+                    <p className="carousel-mentor-name">{course.mentor}</p>
+                    <p className="carousel-mentor-role">Mobile Application developer</p>
+                  </div>
                 </div>
-                <h3 className="carousel-course-title">{course.title}</h3>
-                <p className="carousel-mentor-name">{course.mentor}</p>
-                <p className="carousel-mentor-role">Mobile Application developer</p>
-                <div className="carousel-rating">
-                  <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
-                </div>
-                <div className="carousel-course-meta">
-                  <span className="carousel-category">{course.category}</span>
-                  <span className="carousel-level">{course.level}</span>
+                <div className="carousel-details-section">
+                  <h3 className="carousel-course-title">{course.title}</h3>
+                  <div className="carousel-rating">
+                    <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
+                  </div>
+                  <div className="carousel-course-meta">
+                    <span className="carousel-category">{course.category}</span>
+                    <span className="carousel-level">{course.level}</span>
+                  </div>
+                  <div className="carousel-session-info">
+                    <span className="carousel-session-label">Next Session:</span>
+                    <span className="carousel-session-time">{course.nextSession}</span>
+                  </div>
+                  <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
                 </div>
                 <div className="carousel-progress-container">
                   <div className="carousel-progress-bar">
@@ -283,9 +288,22 @@ function Classroom({ onLiveClassroomChange }) {
                   </div>
                   <span className="carousel-progress-text">{course.progress}%</span>
                 </div>
-                <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
               </div>
             </div>
+          ))}
+        </div>
+        {/* Pagination Dots */}
+        <div className="carousel-dots">
+          {enrolledCourses.map((_, index) => (
+            <button
+              key={index}
+              className={`carousel-dot ${index === activeCourseIndex ? 'active' : ''}`}
+              onClick={() => {
+                setActiveCourseIndex(index)
+                scrollToCard(index)
+              }}
+              aria-label={`Go to course ${index + 1}`}
+            />
           ))}
         </div>
       </div>
@@ -543,16 +561,18 @@ function Classroom({ onLiveClassroomChange }) {
             </>
           )}
 
-          {/* Bottom CTA button */}
-          <div className="classroom-bottom-cta">
-            <button
-              type="button"
-              className="enter-classroom-btn"
-              onClick={() => setActiveCourse(currentCourse)}
-            >
-              Enter classroom
-            </button>
-          </div>
+          {/* Bottom CTA button - Only visible when bottom sheet is full */}
+          {bottomSheetPosition === 'full' && (
+            <div className="classroom-bottom-cta">
+              <button
+                type="button"
+                className="enter-classroom-btn"
+                onClick={() => setActiveCourse(currentCourse)}
+              >
+                Enter classroom
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -560,3 +580,4 @@ function Classroom({ onLiveClassroomChange }) {
 }
 
 export default Classroom
+

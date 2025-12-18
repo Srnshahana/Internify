@@ -24,6 +24,8 @@ function Explore() {
   const [term, setTerm] = useState('')
   const [query, setQuery] = useState('')
   const [selectedCourseId, setSelectedCourseId] = useState(null)
+  const [showCategories, setShowCategories] = useState(false)
+  const [selectedCategories, setSelectedCategories] = useState([])
 
   const handleCourseClick = (courseId) => {
     setSelectedCourseId(courseId)
@@ -46,6 +48,16 @@ function Explore() {
       result = getMentorsByCourse(selectedCourseId)
     }
 
+    if (selectedCategories.length > 0) {
+      // Only mentors who have at least one course in the selected categories
+      result = result.filter((mentor) =>
+        mentor.courses.some((cid) => {
+          const course = courses.find((c) => c.id === cid)
+          return course && selectedCategories.includes(course.category)
+        })
+      )
+    }
+
     if (query) {
       result = searchMentors(query).filter((mentor) =>
         result.some((m) => m.id === mentor.id)
@@ -53,12 +65,23 @@ function Explore() {
     }
 
     return result
-  }, [query, selectedCourseId])
+  }, [query, selectedCourseId, selectedCategories])
 
   const filteredCourses = useMemo(() => {
-    if (!query) return courses
-    return searchCourses(query)
-  }, [query])
+    let result = courses
+
+    if (selectedCategories.length > 0) {
+      result = result.filter((course) => selectedCategories.includes(course.category))
+    }
+
+    if (query) {
+      const searched = searchCourses(query)
+      // Intersect category-filtered result with search result
+      result = searched.filter((course) => result.some((r) => r.id === course.id))
+    }
+
+    return result
+  }, [query, selectedCategories])
 
   const renderStars = (rating) => {
     const full = Math.floor(rating)
@@ -89,41 +112,11 @@ function Explore() {
     <div className="dashboard-page">
       <div className="explore-header">
         <div>
-          <p className="eyebrow">Browse</p>
+          {/* <p className="eyebrow">Browse</p> */}
           <h1>Explore Courses & Mentors</h1>
           <p className="lead">
             Discover all courses and mentors. Pick anyone to start your learning journey.
           </p>
-        </div>
-      </div>
-
-      {/* Browse by Category Section */}
-      <div className="dashboard-section browse-category-section">
-        <h2 className="section-title">Browse by Category</h2>
-        <div className="category-scroll-container">
-          <div className="category-scroll">
-            {categoryCounts.map((category) => {
-              const IconComponent = category.Icon
-              return (
-                <div 
-                  key={category.name} 
-                  className="category-card"
-                  onClick={() => {
-                    if (category.firstCourseId) {
-                      handleCourseClick(category.firstCourseId)
-                    }
-                  }}
-                  style={{ cursor: category.firstCourseId ? 'pointer' : 'default' }}
-                >
-                  <div className="category-icon">
-                    <IconComponent />
-                  </div>
-                  <h3>{category.name}({category.count})</h3>
-                  {/* <p className="category-count">{category.count}</p> */}
-                </div>
-              )
-            })}
-          </div>
         </div>
       </div>
 
@@ -150,14 +143,73 @@ function Explore() {
             setTerm(e.target.value)
             setQuery(e.target.value.trim())
           }}
+          onFocus={() => setShowCategories(true)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') setQuery(term.trim())
+            if (e.key === 'Enter') {
+              setShowCategories(false)
+              setQuery(term.trim())
+            }
           }}
         />
-        <button className="mini search-go" onClick={() => setQuery(term.trim())}>
+        <button
+          className="mini search-go"
+          onClick={() => {
+            setShowCategories(false)
+            setQuery(term.trim())
+          }}
+        >
           <ExploreIcon className="search-icon" />
         </button>
       </div>
+
+      {/* Browse by Category options (shown while focusing the search field) */}
+      {showCategories && (
+        <div className="dashboard-section browse-category-section">
+          <div className="category-scroll-container">
+            <div className="category-scroll">
+              {categoryCounts.map((category) => {
+                const IconComponent = category.Icon
+                const isSelected = selectedCategories.includes(category.name)
+                return (
+                  <div 
+                    key={category.name} 
+                    className={`category-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => {
+                      // Toggle visual selection (multi-select)
+                      setSelectedCategories((prev) =>
+                        prev.includes(category.name)
+                          ? prev.filter((c) => c !== category.name)
+                          : [...prev, category.name]
+                      )
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="category-icon">
+                      <IconComponent />
+                    </div>
+                    <h3>{category.name}({category.count})</h3>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected categories summary */}
+      {selectedCategories.length > 0 && (
+        <div className="course-filter-badge">
+          <span>
+            Selected categories: {selectedCategories.join(', ')}
+          </span>
+          <button
+            className="clear-filter-btn"
+            onClick={() => setSelectedCategories([])}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {selectedCourseId && (
         <div className="course-filter-badge">

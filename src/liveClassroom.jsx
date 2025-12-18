@@ -9,10 +9,10 @@ function LiveClassroom({ course, onBack }) {
       id: 1,
       from: 'mentor',
       type: 'text',
-      content: "Welcome to today's session. We will focus on building reusable components.", 
+      content: "Welcome to today's session. We will focus on building reusable components.",
       time: '10:00 AM',
       sectionId: 2,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     },
     {
@@ -22,7 +22,7 @@ function LiveClassroom({ course, onBack }) {
       content: 'Should we use function components only, or class components as well?',
       time: '10:02 AM',
       sectionId: 2,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     },
     {
@@ -33,7 +33,7 @@ function LiveClassroom({ course, onBack }) {
       fileSize: '2.1 MB',
       time: '10:05 AM',
       sectionId: 2,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     },
     {
@@ -44,7 +44,7 @@ function LiveClassroom({ course, onBack }) {
       url: 'https://zoom.us/j/123-456',
       time: '10:10 AM',
       sectionId: 2,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     },
     {
@@ -54,7 +54,7 @@ function LiveClassroom({ course, onBack }) {
       content: 'I have pushed my latest changes to GitHub. Please review when possible.',
       time: '10:20 AM',
       sectionId: 2,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     },
   ])
@@ -67,13 +67,13 @@ function LiveClassroom({ course, onBack }) {
     mentor: 'Sarah Chen',
   }
 
-  const sessions = [
+  const [sessions, setSessions] = useState([
     { id: 1, title: 'Introduction & Setup', status: 'completed' },
-    { id: 2, title: 'Components & Props', status: 'current' },
+    { id: 2, title: 'Components & Props', status: 'upcoming' },
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
     { id: 4, title: 'Routing & Navigation', status: 'upcoming' },
     { id: 5, title: 'Project Wrap-up', status: 'upcoming' },
-  ]
+  ])
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
   const visibleMessages = messages.filter((m) => m.sectionId === activeSession.id)
@@ -83,6 +83,7 @@ function LiveClassroom({ course, onBack }) {
   const [showAttachOptions, setShowAttachOptions] = useState(false)
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -107,7 +108,7 @@ function LiveClassroom({ course, onBack }) {
       content: messageInput.trim(),
       time: getCurrentTime(),
       sectionId: activeSessionId,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
       replyTo: replyTo
         ? {
@@ -129,9 +130,22 @@ function LiveClassroom({ course, onBack }) {
 
   const handleToggleHighlight = (id) => {
     setMessages((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, highlighted: !m.highlighted } : m
-      )
+      prev.map((m) => {
+        if (m.id !== id) return m
+        const nextColor = m.highlightColor ? null : 'yellow'
+        return { ...m, highlightColor: nextColor }
+      })
+    )
+    setActiveMenuMessageId(null)
+  }
+
+  const handleSetHighlightColor = (id, color) => {
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== id) return m
+        const nextColor = m.highlightColor === color ? null : color
+        return { ...m, highlightColor: nextColor }
+      })
     )
     setActiveMenuMessageId(null)
   }
@@ -167,7 +181,7 @@ function LiveClassroom({ course, onBack }) {
       fileSize: `${Math.round(file.size / 1024)} KB`,
       time: getCurrentTime(),
       sectionId: activeSessionId,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     }
     setMessages((prev) => [...prev, newMessage])
@@ -187,7 +201,7 @@ function LiveClassroom({ course, onBack }) {
       fileName: file.name,
       time: getCurrentTime(),
       sectionId: activeSessionId,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     }
     setMessages((prev) => [...prev, newMessage])
@@ -203,7 +217,7 @@ function LiveClassroom({ course, onBack }) {
       duration: '0:15',
       time: getCurrentTime(),
       sectionId: activeSessionId,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     }
     setMessages((prev) => [...prev, newMessage])
@@ -221,11 +235,46 @@ function LiveClassroom({ course, onBack }) {
       url: url.trim(),
       time: getCurrentTime(),
       sectionId: activeSessionId,
-      highlighted: false,
+      highlightColor: null,
       selfNote: '',
     }
     setMessages((prev) => [...prev, newMessage])
     setShowAttachOptions(false)
+  }
+
+  const handleCompleteSession = () => {
+    setSessions((prev) => {
+      if (!prev.length) return prev
+
+      const currentSession = prev.find((s) => s.id === activeSessionId)
+      const isCurrentlyCompleted = currentSession?.status === 'completed'
+
+      if (isCurrentlyCompleted) {
+        // Toggle: uncomplete (back to upcoming), keep it the active one
+        return prev.map((s) => {
+          if (s.id === activeSessionId) {
+            return { ...s, status: 'upcoming' }
+          }
+          return s
+        })
+      }
+
+      // Mark current active session as completed and move to next session
+      const updated = prev.map((s) =>
+        s.id === activeSessionId ? { ...s, status: 'completed' } : s
+      )
+
+      const currentIndex = updated.findIndex((s) => s.id === activeSessionId)
+      if (currentIndex === -1) return updated
+
+      // Find the next session in order (by index)
+      const nextIndex = updated.findIndex((_, i) => i > currentIndex)
+      if (nextIndex !== -1) {
+        setActiveSessionId(updated[nextIndex].id)
+      }
+
+      return updated
+    })
   }
 
   return (
@@ -242,8 +291,15 @@ function LiveClassroom({ course, onBack }) {
           <div className="live-avatar-circle second"></div>
         </button>
         <div className="live-topbar-title">Classroom name</div>
-        <button type="button" className="live-topbar-chat" aria-label="Classroom info">
-          <span className="live-chat-icon-box" />
+        <button
+          type="button"
+          className="live-topbar-chat"
+          onClick={handleCompleteSession}
+          aria-label={activeSession.status === 'completed' ? 'Uncomplete session' : 'Complete session'}
+        >
+          <span
+            className={`live-check-icon ${activeSession.status === 'completed' ? 'checked' : ''}`}
+          />
         </button>
       </header>
 
@@ -258,7 +314,11 @@ function LiveClassroom({ course, onBack }) {
                 key={message.id}
                 className={`live-message ${message.from === 'mentor' ? 'from-mentor' : 'from-learner'}`}
               >
-                <div className={`live-message-bubble ${message.highlighted ? 'highlighted' : ''}`}>
+                <div
+                  className={`live-message-bubble ${
+                    message.highlightColor ? `highlight-${message.highlightColor}` : ''
+                  }`}
+                >
                   {message.type === 'text' && <p>{message.content}</p>}
                   {message.type === 'file' && (
                     <div className="live-file-card">
@@ -344,8 +404,31 @@ function LiveClassroom({ course, onBack }) {
                   {activeMenuMessageId === message.id && (
                     <div className="live-message-menu">
                       <button type="button" onClick={() => handleToggleHighlight(message.id)}>
-                        {message.highlighted ? 'Remove highlight' : 'Highlight'}
+                        {message.highlightColor ? 'Remove highlight' : 'Highlight'}
                       </button>
+                      <div className="live-message-menu-section">
+                        <span className="live-menu-label">Highlight color</span>
+                        <div className="live-highlight-colors">
+                          <button
+                            type="button"
+                            className="live-highlight-color-btn yellow"
+                            onClick={() => handleSetHighlightColor(message.id, 'yellow')}
+                            aria-label="Highlight yellow"
+                          />
+                          <button
+                            type="button"
+                            className="live-highlight-color-btn red"
+                            onClick={() => handleSetHighlightColor(message.id, 'red')}
+                            aria-label="Highlight red"
+                          />
+                          <button
+                            type="button"
+                            className="live-highlight-color-btn green"
+                            onClick={() => handleSetHighlightColor(message.id, 'green')}
+                            aria-label="Highlight green"
+                          />
+                        </div>
+                      </div>
                       <button type="button" onClick={() => handleAddSelfNote(message.id)}>
                         Add self note
                       </button>
@@ -428,6 +511,74 @@ function LiveClassroom({ course, onBack }) {
             onChange={handleImageSelected}
           />
         </div>
+
+        {/* Bottom sessions bar */}
+        <div className="live-sessions-bar">
+          {sessions.map((session) => (
+            <button
+              key={session.id}
+              type="button"
+              className={`live-session-chip ${session.status} ${
+                session.id === activeSessionId ? 'current' : ''
+              }`}
+              onClick={() => setActiveSessionId(session.id)}
+            >
+              <span className="live-session-title">{session.title}</span>
+              <span className="live-session-status">
+                {session.status === 'current'
+                  ? 'Now'
+                  : session.status === 'completed'
+                  ? 'Completed'
+                  : 'Upcoming'}
+              </span>
+            </button>
+          ))}
+          <button
+            type="button"
+            className="live-course-complete-btn"
+            onClick={() => setShowCompletionModal(true)}
+          >
+            <span className="live-session-title">Course Complete</span>
+          </button>
+        </div>
+        
+        {/* Course Completion Modal */}
+        {showCompletionModal && (
+          <div className="live-completion-modal-overlay" onClick={() => setShowCompletionModal(false)}>
+            <div className="live-completion-modal" onClick={(e) => e.stopPropagation()}>
+              <h2 className="live-completion-modal-title">Course Completed!</h2>
+              <p className="live-completion-modal-description">
+                Great job on completing this course. You've taken an important step forward in your learning journey.
+                <br /><br />
+                You can now close this classroom and access your progress and next steps from your dashboard.
+              </p>
+              <div className="live-completion-modal-info">
+                <p>• Your completion will be recorded</p>
+                <p>• You can revisit course materials anytime</p>
+              </div>
+              <div className="live-completion-modal-actions">
+                <button
+                  type="button"
+                  className="live-completion-modal-primary"
+                  onClick={onBack}
+                >
+                  ✅ Close Classroom
+                </button>
+                <button
+                  type="button"
+                  className="live-completion-modal-secondary"
+                  onClick={() => {
+                    setShowCompletionModal(false)
+                    // Navigate to dashboard - you may need to adjust this based on your routing
+                    if (onBack) onBack()
+                  }}
+                >
+                  ⬅️ Go to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
