@@ -71,6 +71,7 @@ function Home({ onNavigate }) {
   }
 
   useEffect(() => {
+    console.log('--------------------------------------')
     const handleMouseMoveEvent = (e) => {
       if (!isDragging) return
       setCurrentY(e.clientY)
