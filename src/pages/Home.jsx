@@ -114,7 +114,7 @@ function Home({ onNavigate }) {
   // Calculate max value for scaling (0-100)
   const maxValue = 100
   const chartHeight = 200
-  const chartWidth = 500
+  const chartWidth = 1000 // Increased for better full-width scaling
   const padding = { top: 20, right: 20, bottom: 40, left: 50 }
   const graphWidth = chartWidth - padding.left - padding.right
   const graphHeight = chartHeight - padding.top - padding.bottom
@@ -343,7 +343,7 @@ function Home({ onNavigate }) {
         </div>
         <div className="progress-graph-wrapper">
           <div className="progress-chart-container">
-            <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet">
+            <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.15" />

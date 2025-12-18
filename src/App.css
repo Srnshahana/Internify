@@ -4574,6 +4574,8 @@ h1 span {
   padding: 32px;
   margin-top: 24px;
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 [data-theme='light'] .progress-graph-wrapper {
@@ -4588,6 +4590,7 @@ h1 span {
   border-radius: 12px;
   overflow: visible;
   color: #6b7280;
+  max-width: 100%;
 }
 
 .progress-chart-svg {
