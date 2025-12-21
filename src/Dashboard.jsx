@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
 import Home from './pages/Home.jsx'
-import Explore from './pages/Explore.jsx'
-import Classroom from './pages/Classroom.jsx'
 import Calendar from './pages/Calendar.jsx'
 import Profile from './pages/Profile.jsx'
 import Notification from './pages/Notification.jsx'
-import { HomeIcon, ExploreIcon, ClassroomIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
+import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
 function Dashboard({ onLogout }) {
@@ -28,8 +26,6 @@ function Dashboard({ onLogout }) {
 
   const menuItems = [
     { id: 'Home', label: 'Home', icon: HomeIcon },
-    { id: 'Explore', label: 'Explore', icon: ExploreIcon },
-    { id: 'Classroom', label: 'Classroom', icon: ClassroomIcon },
     { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
@@ -38,10 +34,6 @@ function Dashboard({ onLogout }) {
     switch (page) {
       case 'Home':
         return <Home onNavigate={(pageName) => setPage(pageName)} />
-      case 'Explore':
-        return <Explore />
-      case 'Classroom':
-        return <Classroom  />
       case 'Calendar':
         return <Calendar />
       case 'Profile':

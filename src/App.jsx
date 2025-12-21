@@ -6,6 +6,7 @@ import Signup from './signup.jsx'
 import Dashboard from './Dashboard.jsx'
 import Payment from './payment.jsx'
 import { courses, mentors } from './Data.jsx'
+import { SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
 const steps = [
@@ -494,7 +495,7 @@ function App() {
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {theme === 'dark' ? 'Light' : 'Dark'}
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
           <button className="link" onClick={() => setShowLogin(true)}>Login</button>
           <button className="pill">Apply as mentor</button>

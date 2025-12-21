@@ -1,462 +1,594 @@
 import { useState, useRef, useEffect } from 'react'
 import '../App.css'
-import dashboardIllustration from '../assets/dashboard.svg'
-import dashboardIllustrationDark from '../assets/dashboard-darktheme.svg'
-import careerIllustration from '../assets/career.svg'
-import {
-  homeMentorShowcase,
-  homeSkillsIcons,
-  homeMarketCourses,
+import LiveClassroom from '../liveClassroom.jsx'
+import { 
   homeProgressData,
-  homeUpcomingSessions,
+  homeUpcomingSessions
 } from '../Data.jsx'
 
 function Home({ onNavigate }) {
-  const mentors = homeMentorShowcase
-  const skills = homeSkillsIcons
-  const courses = homeMarketCourses
-
-  // Multi-line progress data for the graph (last 8 weeks)
-  const progressData = homeProgressData
-
   // Upcoming sessions data
   const upcomingSessions = homeUpcomingSessions
-
-  const metrics = [
-    { name: 'Overall Progress', color: 'var(--text-primary)', dataKey: 'completion' },
+  
+  // Progress data - create data for 3 lines: All, Classroom 1, Classroom 2
+  const allProgressData = homeProgressData.map(d => ({ week: d.week, value: d.completion }))
+  
+  // Generate progress data for Classroom 1 (React Advanced Patterns - currently at 65%)
+  const classroom1ProgressData = [
+    { week: 'W1', value: 15 },
+    { week: 'W2', value: 25 },
+    { week: 'W3', value: 35 },
+    { week: 'W4', value: 45 },
+    { week: 'W5', value: 52 },
+    { week: 'W6', value: 58 },
+    { week: 'W7', value: 62 },
+    { week: 'W8', value: 65 },
   ]
-
-  const [currentSessionIndex, setCurrentSessionIndex] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startY, setStartY] = useState(0)
-  const [currentY, setCurrentY] = useState(0)
-  const sessionsContainerRef = useRef(null)
-
-  const handleTouchStart = (e) => {
-    setIsDragging(true)
-    setStartY(e.touches[0].clientY)
-    setCurrentY(e.touches[0].clientY)
-  }
-
-  const handleTouchMove = (e) => {
-    if (!isDragging) return
-    setCurrentY(e.touches[0].clientY)
-  }
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return
-    
-    const diff = startY - currentY
-    const threshold = 50
-
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0 && currentSessionIndex < upcomingSessions.length - 1) {
-        // Swipe up - next card
-        setCurrentSessionIndex(prev => prev + 1)
-      } else if (diff < 0 && currentSessionIndex > 0) {
-        // Swipe down - previous card
-        setCurrentSessionIndex(prev => prev - 1)
-      }
-    }
-
-    setIsDragging(false)
-    setStartY(0)
-    setCurrentY(0)
-  }
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true)
-    setStartY(e.clientY)
-    setCurrentY(e.clientY)
-  }
-
-  useEffect(() => {
-    console.log('--------------------------------------')
-    const handleMouseMoveEvent = (e) => {
-      if (!isDragging) return
-      setCurrentY(e.clientY)
-    }
-
-    const handleMouseUpEvent = () => {
-      if (!isDragging) return
-      
-      const diff = startY - currentY
-      const threshold = 50
-
-      if (Math.abs(diff) > threshold) {
-        if (diff > 0 && currentSessionIndex < upcomingSessions.length - 1) {
-          setCurrentSessionIndex(prev => prev + 1)
-        } else if (diff < 0 && currentSessionIndex > 0) {
-          setCurrentSessionIndex(prev => prev - 1)
-        }
-      }
-
-      setIsDragging(false)
-      setStartY(0)
-      setCurrentY(0)
-    }
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMoveEvent)
-      document.addEventListener('mouseup', handleMouseUpEvent)
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMoveEvent)
-        document.removeEventListener('mouseup', handleMouseUpEvent)
-      }
-    }
-  }, [isDragging, startY, currentY, currentSessionIndex, upcomingSessions.length])
-
-  const renderStars = (rating) => {
-    return Array(5).fill(0).map((_, i) => (
-      <span key={i} style={{ color: i < rating ? '#facc15' : '#d1d5db' }}>★</span>
-    ))
-  }
-
-  // Calculate max value for scaling (0-100)
+  
+  // Generate progress data for Classroom 2 (UI/UX Design Principles - currently at 40%)
+  const classroom2ProgressData = [
+    { week: 'W1', value: 8 },
+    { week: 'W2', value: 15 },
+    { week: 'W3', value: 22 },
+    { week: 'W4', value: 28 },
+    { week: 'W5', value: 32 },
+    { week: 'W6', value: 35 },
+    { week: 'W7', value: 38 },
+    { week: 'W8', value: 40 },
+  ]
+  
+  const progressLines = [
+    { name: 'All', data: allProgressData, color: '#6b7280', gradientId: 'progressGradient' },
+    { name: 'Classroom 1', data: classroom1ProgressData, color: '#3b82f6', gradientId: 'progressGradient1' },
+    { name: 'Classroom 2', data: classroom2ProgressData, color: '#8b5cf6', gradientId: 'progressGradient2' },
+  ]
+  
   const maxValue = 100
-  const chartHeight = 200
-  const chartWidth = 1000 // Increased for better full-width scaling
-  const padding = { top: 20, right: 20, bottom: 40, left: 50 }
+  const chartHeight = 180
+  const chartWidth = 600
+  const padding = { top: 15, right: 20, bottom: 35, left: 40 }
   const graphWidth = chartWidth - padding.left - padding.right
   const graphHeight = chartHeight - padding.top - padding.bottom
 
+  // Upcoming Sessions state
+  const [currentSessionIndex, setCurrentSessionIndex] = useState(0)
+  const [isDraggingSessions, setIsDraggingSessions] = useState(false)
+  const [startYSessions, setStartYSessions] = useState(0)
+  const [currentYSessions, setCurrentYSessions] = useState(0)
+  const sessionsContainerRef = useRef(null)
+
+  // Classroom/My Classes state
+  const [activeCourseIndex, setActiveCourseIndex] = useState(0)
+  const [activeCourse, setActiveCourse] = useState(null)
+  const carouselRef = useRef(null)
+
+
+  // Calendar state
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+
+
+  // Enrolled courses (from Classroom)
+  const enrolledCourses = [
+    {
+      id: 1,
+      title: 'React Advanced Patterns',
+      mentor: 'James Smith',
+      mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      progress: 65,
+      nextSession: 'Tomorrow, 2:00 PM',
+      assignmentsCount: 3,
+      category: 'Programming',
+      level: 'Advanced',
+      type: 'Live',
+      rating: 4.0,
+      description: 'Master advanced React patterns including hooks, context, and performance optimization.',
+      classes: [
+        { id: 1, title: 'Introduction to Advanced Patterns', duration: '45 min', type: 'Video', completed: true },
+        { id: 2, title: 'Custom Hooks Deep Dive', duration: '60 min', type: 'Live', completed: true },
+        { id: 3, title: 'Context API & State Management', duration: '50 min', type: 'Video', completed: false },
+      ],
+      resources: [
+        { id: 1, title: 'React Patterns Guide', type: 'PDF', size: '2.4 MB' },
+        { id: 2, title: 'Code Examples Repository', type: 'Link', url: 'https://github.com' },
+      ],
+      assignments: [
+        { id: 1, title: 'Build Custom Hook Library', dueDate: '2024-01-15', status: 'In Progress' },
+        { id: 2, title: 'Optimize React App Performance', dueDate: '2024-01-20', status: 'Pending' },
+      ],
+    },
+    {
+      id: 2,
+      title: 'UI/UX Design Principles',
+      mentor: 'Michael Torres',
+      mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      progress: 40,
+      nextSession: 'Friday, 10:00 AM',
+      assignmentsCount: 2,
+      category: 'Design',
+      level: 'Beginner',
+      type: 'Hybrid',
+      rating: 4.5,
+      description: 'Learn user-centered design principles, create stunning interfaces, and build a portfolio.',
+      classes: [
+        { id: 1, title: 'Design Fundamentals', duration: '40 min', type: 'Video', completed: true },
+        { id: 2, title: 'User Research Methods', duration: '50 min', type: 'Live', completed: false },
+      ],
+      resources: [
+        { id: 1, title: 'Design System Guide', type: 'PDF', size: '1.8 MB' },
+      ],
+      assignments: [
+        { id: 1, title: 'Create Design System', dueDate: '2024-01-18', status: 'In Progress' },
+      ],
+    },
+  ]
+
+  // Calculate metrics for overview cards
+  const learningHours = enrolledCourses.reduce((total, course) => {
+    const completedClasses = course.classes.filter(c => c.completed)
+    const hours = completedClasses.reduce((sum, cls) => {
+      // Extract minutes from duration string like "45 min" or "60 min"
+      const match = cls.duration.match(/(\d+)/)
+      const minutes = match ? parseInt(match[1]) : 0
+      return sum + (minutes / 60)
+    }, 0)
+    return total + hours
+  }, 0)
+  const totalLearningHours = 200
+  const learningHoursProgress = Math.round((learningHours / totalLearningHours) * 100)
+
+  const totalAssessments = enrolledCourses.reduce((total, course) => total + course.assignmentsCount, 0)
+  const completedAssessments = enrolledCourses.reduce((total, course) => {
+    const completed = course.assignments.filter(a => a.status === 'Completed' || a.status === 'In Progress').length
+    return total + completed
+  }, 0)
+  const assessmentProgress = totalAssessments > 0 ? Math.round((completedAssessments / totalAssessments) * 100) : 0
+
+  const registeredCoursesCount = enrolledCourses.length
+
+
+  // Upcoming Sessions handlers
+  const handleSessionsTouchStart = (e) => {
+    setIsDraggingSessions(true)
+    setStartYSessions(e.touches[0].clientY)
+    setCurrentYSessions(e.touches[0].clientY)
+  }
+
+  const handleSessionsTouchMove = (e) => {
+    if (!isDraggingSessions) return
+    setCurrentYSessions(e.touches[0].clientY)
+  }
+
+  const handleSessionsTouchEnd = () => {
+    if (!isDraggingSessions) return
+    const diff = startYSessions - currentYSessions
+    const threshold = 50
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && currentSessionIndex < upcomingSessions.length - 1) {
+        setCurrentSessionIndex(prev => prev + 1)
+      } else if (diff < 0 && currentSessionIndex > 0) {
+        setCurrentSessionIndex(prev => prev - 1)
+      }
+    }
+    setIsDraggingSessions(false)
+    setStartYSessions(0)
+    setCurrentYSessions(0)
+  }
+
+  // Classroom carousel handlers - simple slider
+  const handleCarouselScroll = (e) => {
+    const container = e.target
+    const scrollLeft = container.scrollLeft
+    const containerWidth = container.offsetWidth
+    const cardWidth = containerWidth / 3.2 // Approximate card width (33.33% minus gap)
+    const gap = 16
+    const newIndex = Math.round(scrollLeft / (cardWidth + gap))
+    const clampedIndex = Math.max(0, Math.min(newIndex, enrolledCourses.length - 1))
+    if (clampedIndex !== activeCourseIndex) {
+      setActiveCourseIndex(clampedIndex)
+    }
+  }
+
+  const scrollToCard = (index) => {
+    if (carouselRef.current) {
+      const container = carouselRef.current
+      const containerWidth = container.offsetWidth
+      const cardWidth = containerWidth / 3.2
+      const gap = 16
+      const scrollPosition = index * (cardWidth + gap)
+      container.scrollTo({ left: scrollPosition, behavior: 'smooth' })
+    }
+  }
+
+
+
+  const renderStars = (rating) => {
+    const full = Math.floor(rating)
+    const half = rating - full >= 0.5
+    return Array(5).fill('☆').map((star, i) => {
+      if (i < full) return '★'
+      if (i === full && half) return '½'
+      return '☆'
+    }).join('')
+  }
+
+  // If active course is selected, show LiveClassroom
+  if (activeCourse) {
+    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
+  }
+
   return (
-    <div className="dashboard-page">
-      {/* Welcome Hero Section */}
-      <div className="home-hero">
-        <div className="hero-illustration">
-          <img 
-            src={dashboardIllustration}
-            alt="Person working"
-            className="hero-illustration-img hero-illustration-img-light"
-          />
-          <img 
-            src={dashboardIllustrationDark}
-            alt="Person working dark theme"
-            className="hero-illustration-img hero-illustration-img-dark"
-          />
+    <div className="dashboard-page desktop-layout">
+      {/* Top Row: Welcome + Quick Actions */}
+      <div className="dashboard-header">
+        <div className="dashboard-welcome">
+          <h1 className="welcome-title">Welcome back, Sherin</h1>
+          <p className="welcome-subtitle">Here's what's happening with your learning today</p>
         </div>
-        <div className="hero-content">
-          <h1 className="welcome-title">
-            <span className="welcome-hi">Hi</span>
-            <span className="welcome-name">Sherin</span>
-          </h1>
-          <p className="welcome-tagline">Your skill Your pace Your career</p>
-          <p className="welcome-subtagline">Time to make your career journey exciting</p>
-        </div>
-      </div>
-
-      {/* Upcoming Sessions Section */}
-      <div className="dashboard-section">
-        <div className="section-header-with-button">
-          <h2 className="section-title">Upcoming Sessions</h2>
-          <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Calendar')}>
-            View all
-          </button>
-        </div>
-        <div 
-          className="sessions-stack-container"
-          ref={sessionsContainerRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-        >
-          {upcomingSessions.map((session, index) => {
-            const isActive = index === currentSessionIndex
-            const isNext = index === currentSessionIndex + 1
-            const isPrev = index === currentSessionIndex - 1
-            const offset = index - currentSessionIndex
-            const dragOffset = isDragging ? (currentY - startY) / 10 : 0
-            
-            let zIndex = upcomingSessions.length - Math.abs(offset)
-            let translateY = offset * 20 + (isActive ? dragOffset : 0)
-            let scale = 1 - Math.abs(offset) * 0.05
-            // Progressive opacity: cards behind are more visible (lighter)
-            // Active card: opacity 1, next/prev: 0.9, further back: 0.8, 0.7, etc.
-            let opacity = Math.max(0.6, 1 - Math.abs(offset) * 0.15)
-            
-            // Progressive background: cards behind get progressively lighter
-            // Active: #000000, Next/Prev: #1a1a1a, Further: #2a2a2a, #3a3a3a, etc.
-            const backgroundColors = ['#000000', '#1a1a1a', '#2a2a2a', '#3a3a3a', '#4a4a4a']
-            const backgroundColor = backgroundColors[Math.min(Math.abs(offset), backgroundColors.length - 1)]
-
-            return (
-              <div
-                key={session.id}
-                className={`session-card ${isActive ? 'active' : ''} ${isNext ? 'next' : ''} ${isPrev ? 'prev' : ''}`}
-                style={{
-                  transform: `translateY(${translateY}px) scale(${scale})`,
-                  zIndex: zIndex,
-                  opacity: opacity,
-                  backgroundColor: backgroundColor,
-                  cursor: isActive ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
-                }}
-                onClick={() => !isActive && setCurrentSessionIndex(index)}
-              >
-                <div className="session-card-content">
-                  <div className="session-time-section">
-                    <div className="session-clock-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                    </div>
-                    <div className="session-time">
-                      <span className="session-time-value">{session.time}</span>
-                      <span className="session-time-period">{session.period}</span>
-                    </div>
-                  </div>
-                  <div className="session-divider"></div>
-                  <div className="session-details">
-                    <p className="session-location">{session.location}</p>
-                    <p className="session-course">{session.course}</p>
-                    <p className="session-mentor">{session.mentor}</p>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div className="sessions-indicators">
-          {upcomingSessions.map((_, index) => (
-            <button
-              key={index}
-              className={`session-indicator ${index === currentSessionIndex ? 'active' : ''}`}
-              onClick={() => setCurrentSessionIndex(index)}
-              aria-label={`Go to session ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Mentor Recommendation Section */}
-      <div className="dashboard-section">
-        <div className="section-header-with-button">
-          <h2 className="section-title">Mentor recomentation</h2>
-          <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-            View more
-          </button>
-        </div>
-        <div className="mentor-cards-scroll">
-          {mentors.slice(0, 9).map((mentor, index) => (
-            <div key={index} className="mentor-card-home">
-              <div className="mentor-avatar-home">
-                <img src={mentor.image} alt={mentor.name} />
-              </div>
-              <h3 className="mentor-name-home">{mentor.name}</h3>
-              <p className="mentor-experience">{mentor.experience}</p>
-              <p className="mentor-role-home">{mentor.role}</p>
-              <div className="mentor-rating-home">
-                {renderStars(mentor.rating)}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Career Guidance CTA */}
-      <div className="career-guidance-card">
-        <div className="guidance-content">
-          <h3 className="guidance-title">Can't decide on your career?</h3>
-          <p className="guidance-subtitle">Take guidance from professional</p>
-          <button className="primary">Take your first step</button>
-        </div>
-        <div className="guidance-illustration">
-          <img 
-            src={careerIllustration}
-            alt="Career guidance"
-            className="guidance-illustration-img"
-          />
-        </div>
-      </div>
-
-      {/* Latest Skills Section */}
-      <div className="dashboard-section">
-        <h2 className="section-title">Latest Skills</h2>
-        <div className="skills-icons-grid">
-          <div className="skills-icons-track">
-            {/* First set of skills */}
-            {skills.map((skill, index) => (
-              <div key={`skill-1-${index}`} className="skill-icon-item">
-                <div className="skill-icon-large">
-                  <img src={skill.icon} alt={skill.name} />
-                </div>
-                <p className="skill-name">{skill.name}</p>
-              </div>
-            ))}
-            {/* Duplicate set for seamless loop */}
-            {skills.map((skill, index) => (
-              <div key={`skill-2-${index}`} className="skill-icon-item">
-                <div className="skill-icon-large">
-                  <img src={skill.icon} alt={skill.name} />
-                </div>
-                <p className="skill-name">{skill.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Action Cards */}
-      <div className="action-cards">
-        <div className="action-card">
-          <span className="action-text">Referance meterials</span>
-          <span className="action-arrow">→</span>
-        </div>
-        <div className="action-card">
-          <span className="action-text">get certification</span>
-          <span className="action-arrow">→</span>
-        </div>
-      </div>
-
-      {/* Course Recommendation Section */}
-      <div className="dashboard-section">
-        <div className="section-header-with-button">
-          <h2 className="section-title">course recomentation</h2>
-          <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-            View more
-          </button>
-        </div>
-        <div className="course-cards-scroll">
-          {courses.slice(0, 9).map((course, index) => (
-            <div key={index} className="course-card-home">
-              <div className="course-icon-large">
-                <img src={course.icon} alt={course.name} />
-              </div>
-              <div className="course-content-home">
-                <h3 className="course-title-home">{course.name}</h3>
-                <p className="course-market">{course.marketStanding}</p>
-                <p className="course-description-home">{course.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Course Progress Graph Section - Moved to End */}
-      <div className="dashboard-section progress-graph-section">
-        <div className="section-header-with-button">
-          <h2 className="section-title">Your Learning Progress</h2>
-          <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Classroom')}>
-            View details
-          </button>
-        </div>
-        <div className="progress-graph-wrapper">
-          <div className="progress-chart-container">
-            <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
-              <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#9ca3af" stopOpacity="0.02" />
-                </linearGradient>
-              </defs>
-              
-              {/* Grid lines - subtle */}
-              {[0, 25, 50, 75, 100].map((value) => {
-                const y = padding.top + graphHeight - (value / maxValue) * graphHeight
-                return (
-                  <line
-                    key={`grid-${value}`}
-                    x1={padding.left}
-                    y1={y}
-                    x2={padding.left + graphWidth}
-                    y2={y}
-                    stroke="#d1d5db"
-                    strokeWidth="1"
-                    strokeDasharray="2 4"
-                    opacity="0.3"
-                  />
-                )
-              })}
-              
-              {/* Y-axis labels */}
-              {[0, 25, 50, 75, 100].map((value) => {
-                const y = padding.top + graphHeight - (value / maxValue) * graphHeight
-                return (
-                  <text
-                    key={`label-${value}`}
-                    x={padding.left - 12}
-                    y={y + 4}
-                    textAnchor="end"
-                    fontSize="10"
-                    fill="#9ca3af"
-                    opacity="0.8"
-                    fontWeight="400"
-                  >
-                    {value}%
-                  </text>
-                )
-              })}
-              
-              {/* Single progress line */}
-              {(() => {
-                const points = progressData.map((d, i) => {
-                  const x = padding.left + (i / (progressData.length - 1)) * graphWidth
-                  const y = padding.top + graphHeight - (d.completion / maxValue) * graphHeight
-                  return { x, y, value: d.completion }
-                })
-                
-                const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
-                const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
-                
-                return (
-                  <g>
-                    {/* Subtle area fill */}
-                    <path
-                      d={areaPath}
-                      fill="url(#progressGradient)"
-                      className="progress-area"
-                    />
-                    {/* Clean line */}
-                    <path
-                      d={linePath}
-                      fill="none"
-                      stroke="#6b7280"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="progress-line"
-                      opacity="0.8"
-                    />
-                    {/* Minimal data points */}
-                    {points.map((point, i) => (
-                      <circle
-                        key={`point-${i}`}
-                        cx={point.x}
-                        cy={point.y}
-                        r="3"
-                        fill="#6b7280"
-                        className="progress-point"
-                        opacity="0.9"
-                      />
-                    ))}
-                  </g>
-                )
-              })()}
-              
-              {/* X-axis labels */}
-              {progressData.map((d, i) => {
-                const x = padding.left + (i / (progressData.length - 1)) * graphWidth
-                return (
-                  <text
-                    key={`xlabel-${i}`}
-                    x={x}
-                    y={chartHeight - padding.bottom + 18}
-                    textAnchor="middle"
-                    fontSize="10"
-                    fill="#9ca3af"
-                    opacity="0.8"
-                    fontWeight="400"
-                  >
-                    {d.week}
-                  </text>
-                )
-              })}
+        <div className="dashboard-quick-actions">
+          <button className="quick-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
+            <span>Messages</span>
+          </button>
+          <button className="quick-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <path d="M20 8v6M23 11h-6"></path>
+            </svg>
+            <span>Career Help</span>
+          </button>
+          <button className="quick-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Resources</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Progress Overview Cards - Moved to Top */}
+      <div className="dashboard-section progress-overview-section">
+        <div className="progress-overview-cards">
+          {/* Learning Hours Card */}
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div className="progress-card-content">
+              <h3 className="progress-card-title">Learning hours</h3>
+              <p className="progress-card-value">{Math.round(learningHours)}/{totalLearningHours}</p>
+              <div className="progress-card-bar">
+                <div className="progress-card-bar-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Assessment Status Card */}
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <polyline points="9 11 12 14 22 4"></polyline>
+              </svg>
+            </div>
+            <div className="progress-card-content">
+              <h3 className="progress-card-title">Assessment status</h3>
+              <p className="progress-card-value">{completedAssessments}/{totalAssessments}</p>
+              <div className="progress-card-bar">
+                <div className="progress-card-bar-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Registered Courses Card */}
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+                <path d="M12 11l-2 2 2 2"></path>
+              </svg>
+            </div>
+            <div className="progress-card-content">
+              <h3 className="progress-card-title">Registered courses</h3>
+              <p className="progress-card-value">{String(registeredCoursesCount).padStart(2, '0')}</p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Main Grid: Left (My Classes + Progress Graph) | Right (Calendar + Sessions) */}
+      <div className="dashboard-main-grid">
+        {/* Left Column: My Classes + Progress Graph */}
+        <div className="dashboard-main-content">
+          {/* My Classes Section */}
+          <div className="my-classes-section">
+            <h2 className="section-title">My Classes</h2>
+            <div className="classroom-carousel-section">
+              <div className="my-classes-header-inline">
+                <button className="explore-more-courses-btn" onClick={() => onNavigate && onNavigate('Explore')}>
+                  Explore more courses
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div
+                className="classroom-carousel"
+                ref={carouselRef}
+                onScroll={handleCarouselScroll}
+              >
+                {enrolledCourses.map((course, index) => (
+                  <div
+                    key={course.id}
+                    className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveCourse(course)
+                    }}
+                  >
+                    <div className="carousel-card-content">
+                      <div className="carousel-header-section">
+                        <div className="carousel-mentor-photo">
+                          <img src={course.mentorImage} alt={course.mentor} />
+                        </div>
+                        <div className="carousel-header-info">
+                          <p className="carousel-mentor-name">{course.mentor}</p>
+                          <p className="carousel-mentor-role">Mobile Application developer</p>
+                        </div>
+                      </div>
+                      <div className="carousel-details-section">
+                        <h3 className="carousel-course-title">{course.title}</h3>
+                        <div className="carousel-rating">
+                          <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
+                        </div>
+                        <div className="carousel-course-meta">
+                          <span className="carousel-category">{course.category}</span>
+                          <span className="carousel-level">{course.level}</span>
+                        </div>
+                        <div className="carousel-session-info">
+                          <span className="carousel-session-label">Next Session:</span>
+                          <span className="carousel-session-time">{course.nextSession}</span>
+                        </div>
+                        <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
+                      </div>
+                      <div className="carousel-progress-container">
+                        <div className="carousel-progress-bar">
+                          <div
+                            className="carousel-progress-fill"
+                            style={{ width: `${course.progress}%` }}
+                          ></div>
+                        </div>
+                        <span className="carousel-progress-text">{course.progress}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Certifications and Study Materials as Small Buttons */}
+            <div className="my-classes-actions">
+              <button className="compact-action-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span>Certifications</span>
+              </button>
+              <button className="compact-action-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>Study Materials</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Progress Graph Section - Smaller */}
+          <div className="dashboard-section progress-graph-section compact-graph">
+            <div className="section-header-with-button">
+              <h2 className="section-title">Your Learning Progress</h2>
+              <button className="view-all-btn">View details</button>
+            </div>
+            <div className="progress-graph-wrapper">
+              {/* Legend as Buttons */}
+              <div className="progress-legend-buttons">
+                {progressLines.map((line) => (
+                  <button key={line.name} className="progress-legend-button">
+                    <div className="progress-legend-color" style={{ background: line.color }}></div>
+                    <span className="progress-legend-label">{line.name}</span>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="progress-chart-container">
+                <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
+                  <defs>
+                    {progressLines.map((line) => (
+                      <linearGradient key={line.gradientId} id={line.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={line.color} stopOpacity="0.2" />
+                        <stop offset="100%" stopColor={line.color} stopOpacity="0.02" />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  
+                  {/* Grid lines */}
+                  {[0, 25, 50, 75, 100].map((value) => {
+                    const y = padding.top + graphHeight - (value / maxValue) * graphHeight
+                    return (
+                      <line
+                        key={`grid-${value}`}
+                        x1={padding.left}
+                        y1={y}
+                        x2={padding.left + graphWidth}
+                        y2={y}
+                        stroke="#e5e7eb"
+                        strokeWidth="1"
+                        strokeDasharray="2 4"
+                        opacity="0.4"
+                      />
+                    )
+                  })}
+                  
+                  {/* Y-axis labels */}
+                  {[0, 25, 50, 75, 100].map((value) => {
+                    const y = padding.top + graphHeight - (value / maxValue) * graphHeight
+                    return (
+                      <text
+                        key={`label-${value}`}
+                        x={padding.left - 12}
+                        y={y + 4}
+                        textAnchor="end"
+                        fontSize="11"
+                        fill="#6b7280"
+                        opacity="0.9"
+                        fontWeight="400"
+                      >
+                        {value}%
+                      </text>
+                    )
+                  })}
+                  
+                  {/* Progress lines - render each line */}
+                  {progressLines.map((line) => {
+                    const points = line.data.map((d, i) => {
+                      const x = padding.left + (i / (line.data.length - 1)) * graphWidth
+                      const y = padding.top + graphHeight - (d.value / maxValue) * graphHeight
+                      return { x, y, value: d.value }
+                    })
+                    
+                    const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
+                    const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
+                    
+                    return (
+                      <g key={line.name}>
+                        <path d={areaPath} fill={`url(#${line.gradientId})`} className="progress-area" />
+                        <path 
+                          d={linePath} 
+                          fill="none" 
+                          stroke={line.color} 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="progress-line"
+                          opacity="0.9"
+                        />
+                        {points.map((point, i) => (
+                          <circle 
+                            key={`point-${line.name}-${i}`} 
+                            cx={point.x} 
+                            cy={point.y} 
+                            r="3.5" 
+                            fill={line.color}
+                            className="progress-point"
+                            opacity="1"
+                          />
+                        ))}
+                      </g>
+                    )
+                  })}
+                  
+                  {/* X-axis labels */}
+                  {allProgressData.map((d, i) => {
+                    const x = padding.left + (i / (allProgressData.length - 1)) * graphWidth
+                    return (
+                      <text
+                        key={`xlabel-${i}`}
+                        x={x}
+                        y={chartHeight - padding.bottom + 20}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fill="#6b7280"
+                        opacity="0.9"
+                        fontWeight="400"
+                      >
+                        {d.week}
+                      </text>
+                    )
+                  })}
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Sidebar: Upcoming Sessions (Left) + Calendar (Right) */}
+        <div className="dashboard-sidebar">
+          <div className="sidebar-content-grid">
+            {/* Upcoming Sessions - Left */}
+            <div className="dashboard-section sidebar-section sidebar-sessions-compact">
+              <div className="section-header-with-button">
+                <h2 className="section-title">Upcoming Sessions</h2>
+                <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Calendar')}>
+                  View all
+                </button>
+              </div>
+              <div className="sidebar-sessions-list">
+                {upcomingSessions.slice(0, 3).map((session) => (
+                  <div key={session.id} className="sidebar-session-card">
+                    <div className="sidebar-session-time">
+                      <span className="sidebar-session-time-value">{session.time}</span>
+                      <span className="sidebar-session-time-period">{session.period}</span>
+                    </div>
+                    <div className="sidebar-session-details">
+                      <p className="sidebar-session-course">{session.course}</p>
+                      <p className="sidebar-session-mentor">{session.mentor}</p>
+                      <p className="sidebar-session-location">{session.location}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mini Calendar - Right */}
+            <div className="dashboard-section sidebar-section compact-calendar">
+              <h2 className="section-title">Calendar</h2>
+              <div className="calendar-mini">
+                <div className="calendar-month-selector">
+                  <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>←</button>
+                  <h3>{currentMonth}</h3>
+                  <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>→</button>
+                </div>
+                <div className="calendar-weekdays">
+                  {weekDays.map((day) => (
+                    <div key={day} className="calendar-weekday">{day}</div>
+                  ))}
+                </div>
+                <div className="calendar-days-mini">
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const date = i + 1
+                    const isToday = date === new Date().getDate()
+                    return (
+                      <div key={i} className={`calendar-day-mini ${isToday ? 'today' : ''}`}>
+                        {date <= 31 ? date : ''}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }

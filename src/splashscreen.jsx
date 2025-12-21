@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 // 4) When finished, calls onDone() so main app can show
 
 export default function SplashScreen({ onDone }) {
-  const fullText = 'Test api'
+  const fullText = 'Internify'
   const [displayedText, setDisplayedText] = useState('')
   const [stage, setStage] = useState('typing') // typing -> drop -> bounce1 -> bounce2 -> expand -> done
 

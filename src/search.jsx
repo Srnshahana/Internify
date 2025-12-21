@@ -34,7 +34,7 @@ export default function Explore({
     console.log('--------------------------------------')
     setLoading(true)
     const { data, error } = await supabase
-      .from('Courses')          // your table name
+      .from('courses')          // your table name
       .select('*')
       .order('title', { ascending: true })
 
@@ -90,9 +90,15 @@ export default function Explore({
       const lowerQuery = query.toLowerCase()
       return coursesToUse.filter((course) => {
         const title = (course.title || course.name || '').toLowerCase()
-        const category = (course.category || '').toLowerCase()
+        const category = (course.category || course.career_field || '').toLowerCase()
         const description = (course.description || '').toLowerCase()
-        return title.includes(lowerQuery) || category.includes(lowerQuery) || description.includes(lowerQuery)
+        const careerField = (course.career_field || '').toLowerCase()
+        const skillLevel = (course.skill_level || '').toLowerCase()
+        return title.includes(lowerQuery) || 
+               category.includes(lowerQuery) || 
+               description.includes(lowerQuery) ||
+               careerField.includes(lowerQuery) ||
+               skillLevel.includes(lowerQuery)
       })
     }
     return searchCourses(query)
@@ -130,7 +136,7 @@ export default function Explore({
 
       {selectedCourseId && (
         <div className="course-filter-badge">
-          <span>Showing mentors for: {coursesToUse.find((c) => c.id === selectedCourseId)?.name || coursesToUse.find((c) => c.id === selectedCourseId)?.title}</span>
+          <span>Showing mentors for: {coursesToUse.find((c) => c.id === selectedCourseId)?.title || coursesToUse.find((c) => c.id === selectedCourseId)?.name}</span>
           <button className="clear-filter-btn" onClick={() => setSelectedCourseId(null)}>
             ✕
           </button>
@@ -163,7 +169,6 @@ export default function Explore({
             </div>
           ) : (
             filteredCourses.map((course) => (
-             
               <div
                 className="explore-course-card"
                 key={course.id}
@@ -172,10 +177,8 @@ export default function Explore({
               >
                 <div className="explore-course-image">
                   <img
-                    src={
-                      course.image
-                    }
-                    alt={course.name || course.title || 'Course image'}
+                    src={course.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBdt2bdOr6yNUso2UGqXJRcNpnjWeSlpumaw&s'}
+                    alt={course.title || 'Course image'}
                     onError={(e) => {
                       e.target.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBdt2bdOr6yNUso2UGqXJRcNpnjWeSlpumaw&s';
                     }}
@@ -183,26 +186,32 @@ export default function Explore({
                 </div>
                 <div className="explore-course-content">
                   <div className="explore-course-header">
-                    <h3>{course.name || course.title}</h3>
-                    <span className="explore-course-category">{course.category}</span>
+                    <h3>{course.title}</h3>
+                    <span className="explore-course-category">{course.category || course.career_field}</span>
                   </div>
                   <p className="explore-course-description">{course.description}</p>
                   <div className="explore-course-meta">
-                    {course.duration && <><span>{course.duration} weeks</span><span>|</span></>}
-                    {course.level && <><span>{course.level}</span><span>|</span></>}
-                    {course.rating && <span>{course.rating} rating</span>}
+                    {course.estimated_time && <><span>{course.estimated_time}</span><span>|</span></>}
+                    {course.max_time && <><span>Max: {course.max_time}</span><span>|</span></>}
+                    {course.skill_level && <span>{course.skill_level}</span>}
                   </div>
-                  {course.skills && course.skills.length > 0 && (
-                    <div className="explore-course-skills">
-                      {course.skills.slice(0, 4).map((skill, idx) => (
-                        <span key={idx} className="explore-skill-tag">
-                          {skill}
-                        </span>
-                      ))}
+                  {course.prerequisites && (
+                    <div className="explore-course-prerequisites">
+                      <span className="prerequisites-label">Prerequisites:</span>
+                      <span className="prerequisites-text">{course.prerequisites}</span>
+                    </div>
+                  )}
+                  {course.career_field && course.career_field !== course.category && (
+                    <div className="explore-course-career-field">
+                      <span className="career-field-tag">{course.career_field}</span>
                     </div>
                   )}
                   <div className="explore-course-footer">
-                    {course.price && <span className="explore-course-price">${course.price}</span>}
+                    {course.price && (
+                      <span className="explore-course-price">
+                        ₹{typeof course.price === 'number' ? course.price.toLocaleString('en-IN') : course.price}
+                      </span>
+                    )}
                     <button className="tiny">View Mentors</button>
                   </div>
                 </div>

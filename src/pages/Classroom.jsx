@@ -136,26 +136,60 @@ function Classroom({ onLiveClassroomChange }) {
 
   const handleCarouselScroll = (e) => {
     const container = e.target
-    const cardWidth = container.offsetWidth
     const scrollLeft = container.scrollLeft
-    const newIndex = Math.round(scrollLeft / cardWidth)
-    if (newIndex !== activeCourseIndex && newIndex >= 0 && newIndex < enrolledCourses.length) {
-      setActiveCourseIndex(newIndex)
+    const containerWidth = container.offsetWidth
+    // Account for padding - cards start after padding
+    const padding = containerWidth * 0.25
+    const cardWidth = containerWidth * 0.5
+    const gap = 12 // gap between cards
+    // Calculate which card is centered in the viewport
+    const viewportCenter = scrollLeft + containerWidth / 2
+    const adjustedCenter = viewportCenter - padding
+    const newIndex = Math.round(adjustedCenter / (cardWidth + gap))
+    const clampedIndex = Math.max(0, Math.min(newIndex, enrolledCourses.length - 1))
+    if (clampedIndex !== activeCourseIndex) {
+      setActiveCourseIndex(clampedIndex)
     }
   }
 
   const scrollToCard = (index) => {
     if (carouselRef.current) {
-      const cardWidth = carouselRef.current.offsetWidth
-      carouselRef.current.scrollTo({
-        left: index * cardWidth,
-        behavior: 'smooth',
-      })
+      const container = carouselRef.current
+      const containerWidth = container.offsetWidth
+      const padding = containerWidth * 0.25
+      const cardWidth = containerWidth * 0.5
+      const gap = 12 // gap between cards
+      
+      // Calculate scroll position to center the card
+      const cardStart = padding + index * (cardWidth + gap)
+      const cardCenter = cardStart + cardWidth / 2
+      const scrollPosition = cardCenter - containerWidth / 2
+      const maxScroll = Math.max(0, container.scrollWidth - containerWidth)
+      
+      // For last card, ensure it's fully visible even if not perfectly centered
+      if (index === enrolledCourses.length - 1) {
+        // Try to center it, but if that exceeds max scroll, use max scroll
+        const lastCardScrollPosition = Math.min(scrollPosition, maxScroll)
+        container.scrollTo({
+          left: lastCardScrollPosition,
+          behavior: 'smooth',
+        })
+      } else {
+        // For other cards, ensure we don't scroll past the maximum
+        const finalScrollPosition = Math.min(Math.max(0, scrollPosition), maxScroll)
+        container.scrollTo({
+          left: finalScrollPosition,
+          behavior: 'smooth',
+        })
+      }
     }
   }
 
   useEffect(() => {
-    scrollToCard(activeCourseIndex)
+    const timer = setTimeout(() => {
+      scrollToCard(activeCourseIndex)
+    }, 100)
+    return () => clearTimeout(timer)
   }, [activeCourseIndex])
 
   // Bottom sheet swipe handlers
@@ -250,8 +284,17 @@ function Classroom({ onLiveClassroomChange }) {
               key={course.id}
               className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
               onClick={() => {
-                // Navigate directly to live classroom
-                setActiveCourse(course)
+                // If clicking the active card, navigate to classroom
+                if (index === activeCourseIndex) {
+                  setActiveCourse(course)
+                } else {
+                  // If clicking a different card, make it active and scroll to it
+                  setActiveCourseIndex(index)
+                  // Use setTimeout to ensure state update happens first
+                  setTimeout(() => {
+                    scrollToCard(index)
+                  }, 10)
+                }
               }}
             >
               <div className="carousel-card-content">
