@@ -4,9 +4,12 @@ import MentorProfile from './mentorProfile.jsx'
 import Login from './login.jsx'
 import Signup from './signup.jsx'
 import Dashboard from './Dashboard.jsx'
+import MentorDashboard from './MentorDashboard.jsx'
 import Payment from './payment.jsx'
 import { courses, mentors } from './Data.jsx'
+import supabase from './supabaseClient'
 import { SunIcon, MoonIcon } from './components/Icons.jsx'
+import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
 import './App.css'
 
 const steps = [
@@ -82,6 +85,7 @@ function App() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState(null) // 'student' | 'mentor'
   const [showPayment, setShowPayment] = useState(false)
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme')
@@ -93,6 +97,32 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
+
+  // Check authentication state on app load/refresh
+  useEffect(() => {
+    const initializeAuth = async () => {
+      // First check localStorage for quick access
+      const storedAuth = getStoredAuthData()
+      
+      if (storedAuth) {
+        // Verify session is still valid
+        const authUser = await getAuthenticatedUser()
+        
+        if (authUser) {
+          // User is authenticated, set state
+          setIsLoggedIn(true)
+          setUserRole(authUser.role)
+        } else {
+          // Session expired, clear stored data
+          clearAuthData()
+          setIsLoggedIn(false)
+          setUserRole(null)
+        }
+      }
+    }
+
+    initializeAuth()
+  }, [])
 
   // Scroll-triggered animations
   useEffect(() => {
@@ -377,16 +407,24 @@ function App() {
     setSelectedMentor(null)
   }
 
-  const handleLogin = (user) => {
+  const handleLogin = async (user) => {
     console.log('Login success:', user)
     setShowLogin(false)
     setShowSignup(false)
+
+    // Role is already fetched and stored in login.jsx
+    const role = user?.role || 'student'
+    setUserRole(role)
+
     // After successful auth, go to payment screen
+    // (You can modify this to skip payment if already paid)
     setShowPayment(true)
   }
 
   const handleSignup = (user) => {
     console.log('Signup success:', user)
+    // New signups are inserted as students in Supabase
+    setUserRole('student')
     setShowSignup(false)
     setShowLogin(false)
     setShowPayment(true)
@@ -397,10 +435,19 @@ function App() {
     setIsLoggedIn(true)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Sign out from Supabase
+    await supabase.auth.signOut()
+    
+    // Clear stored auth data
+    clearAuthData()
+    
+    // Reset state
     setIsLoggedIn(false)
+    setUserRole(null)
     setShowLogin(false)
     setShowSignup(false)
+    
     // Restore the saved theme from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') || 'dark'
     document.documentElement.setAttribute('data-theme', savedTheme)
@@ -440,22 +487,7 @@ function App() {
     )
   }
 
-  if (isLoggedIn) {
-    return <Dashboard onLogout={handleLogout} />
-  }
-
-  if (selectedMentor) {
-    return (
-      <MentorProfile
-        mentor={selectedMentor}
-        courses={courses}
-        onBack={handleBackFromProfile}
-        renderStars={renderStars}
-        onBookSession={handleBookSessionClick}
-      />
-    )
-  }
-
+  // Global Explore (search) page should work even when logged in
   if (showExplore) {
     return (
       <Explore
@@ -465,6 +497,31 @@ function App() {
         renderStars={renderStars}
         initialQuery={exploreInitialQuery}
         onMentorClick={handleMentorClick}
+        onBookSession={handleBookSessionClick}
+      />
+    )
+  }
+
+  if (isLoggedIn) {
+    if (userRole === 'mentor') {
+      return <MentorDashboard onLogout={handleLogout} />
+    }
+    // Default to student dashboard
+    return (
+      <Dashboard
+        onLogout={handleLogout}
+        onOpenExplore={() => setShowExplore(true)}
+      />
+    )
+  }
+
+  if (selectedMentor) {
+    return (
+      <MentorProfile
+        mentor={selectedMentor}
+        courses={courses}
+        onBack={handleBackFromProfile}
+        renderStars={renderStars}
         onBookSession={handleBookSessionClick}
       />
     )

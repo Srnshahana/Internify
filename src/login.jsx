@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import supabase from './supabaseClient'
+import { fetchUserRole, storeAuthData } from './utils/auth.js'
 
 function Login({ onBack, onLogin, onShowSignup }) {
   const [email, setEmail] = useState('')
@@ -22,20 +23,48 @@ function Login({ onBack, onLogin, onShowSignup }) {
   
     setIsLoading(true);
   
-    // Supabase Auth sign-in
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+    // 1️⃣ Log in with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password.trim()
     });
   
     setIsLoading(false);
   
-    if (error) {
-      setError(error.message);
-    } else {
-      if (onLogin) onLogin(data.user);
+    console.log('Supabase Auth Response:', authData);
+    console.log('Supabase Auth Error:', authError);
+  
+    if (authError) {
+      setError(authError.message);
+      return;
     }
-  }
+  
+    if (!authData.user) {
+      setError('User not found');
+      return;
+    }
+  
+    // 2️⃣ Fetch the app-specific role from your users table
+    const role = await fetchUserRole(authData.user.id);
+  
+    if (!role) {
+      setError('Failed to fetch user role');
+      return;
+    }
+  
+    console.log('User role:', role); // student or mentor
+  
+    // 3️⃣ Store auth data in localStorage for persistence
+    storeAuthData({ id: authData.user.id, role });
+  
+    // 4️⃣ Call your onLogin callback with user info + role
+    if (onLogin) {
+      onLogin({
+        ...authData.user,
+        role: role
+      });
+    }
+  };
   return (
     <div className="login-page">
       <div className="login-container">
@@ -103,8 +132,8 @@ function Login({ onBack, onLogin, onShowSignup }) {
               <a href="#" className="forgot-password">Forgot password?</a>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="primary login-button"
               disabled={isLoading}
             >
@@ -133,7 +162,7 @@ function Login({ onBack, onLogin, onShowSignup }) {
           </div>
 
           <div className="social-login">
-            <button 
+            <button
               className="social-button"
               onClick={(e) => {
                 e.preventDefault()
@@ -145,7 +174,7 @@ function Login({ onBack, onLogin, onShowSignup }) {
               <span>🔵</span>
               Continue with Google
             </button>
-            <button 
+            <button
               className="social-button"
               onClick={(e) => {
                 e.preventDefault()

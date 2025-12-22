@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import '../App.css'
-import { studentProfileData } from '../Data.jsx'
-import { getCourseById } from '../Data.jsx'
-import { CertificateIcon } from '../components/Icons.jsx'
+import '../../App.css'
+import { studentProfileData } from '../../Data.jsx'
+import { getCourseById } from '../../Data.jsx'
+import { CertificateIcon } from '../../components/Icons.jsx'
 
 function Profile() {
   const [isEditing, setIsEditing] = useState(false)

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import supabase from './supabaseClient'
+import { storeAuthData } from './utils/auth.js'
 
 function Signup({ onBack, onSignup }) {
     const [fullName, setFullName] = useState('')
@@ -72,7 +73,14 @@ function Signup({ onBack, onSignup }) {
           return
         }
       
-        onSignup?.(data.user)
+        // Store auth data with role (defaults to 'student' for new signups)
+        storeAuthData({ id: userId, role: 'student' })
+      
+        // Pass user with role to onSignup callback
+        onSignup?.({
+          ...data.user,
+          role: 'student'
+        })
       }
 
     return (
@@ -143,10 +151,7 @@ function Signup({ onBack, onSignup }) {
                                     {showPassword ? 'Hide' : 'Show'}
                                 </button>
                             </div>
-                        </div>
-{/* Realities all the way from veetin vidula , paisa illa to top of kedarkantha , and this was no dream , but we were not jumoping out of that , we were calm and proud made it our ground benchmark , were never going 
-below this benchmark , we took the photos , we with everyone laughing and enjoying the moment , and i was having the feeling ,  */}
-                        <div className="form-group">
+                        </div> <div className="form-group">
                             <label htmlFor="confirmPassword">Confirm password</label>
                             <input
                                 id="confirmPassword"

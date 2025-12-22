@@ -1,20 +1,36 @@
 import { useState } from 'react'
-import '../App.css'
-import { calendarSessions } from '../Data.jsx'
+import '../../App.css'
 
-function Calendar() {
+import { calendarSessions as baseSessions } from '../../Data.jsx'
+
+// Adapt student calendar sessions to mentor view (show as mentee sessions)
+const mentorCalendarSessions = baseSessions.map((s, index) => ({
+  ...s,
+  id: s.id || index + 1,
+  title: s.title || 'Mentorship session',
+}))
+
+function MentorCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const sessions = calendarSessions
+  const sessions = mentorCalendarSessions
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
+  const handleJoin = (sessionId) => {
+    console.log('Mentor join session:', sessionId)
+  }
+
+  const handleReschedule = (sessionId) => {
+    console.log('Mentor reschedule session:', sessionId)
+  }
+
   return (
     <div className="dashboard-page">
       <div className="page-header">
-        <h1>Calendar</h1>
-        <p className="page-subtitle">Manage your sessions and important dates</p>
+        <h1>Mentor Calendar</h1>
+        <p className="page-subtitle">See all your mentee sessions and important dates</p>
       </div>
 
       <div className="calendar-container">
@@ -28,7 +44,9 @@ function Calendar() {
           <div className="calendar-mini">
             <div className="calendar-weekdays">
               {weekDays.map((day) => (
-                <div key={day} className="calendar-weekday">{day}</div>
+                <div key={day} className="calendar-weekday">
+                  {day}
+                </div>
               ))}
             </div>
             <div className="calendar-days-mini">
@@ -36,10 +54,7 @@ function Calendar() {
                 const date = i + 1
                 const isToday = date === new Date().getDate()
                 return (
-                  <div
-                    key={i}
-                    className={`calendar-day-mini ${isToday ? 'today' : ''}`}
-                  >
+                  <div key={i} className={`calendar-day-mini ${isToday ? 'today' : ''}`}>
                     {date <= 31 ? date : ''}
                   </div>
                 )
@@ -49,7 +64,7 @@ function Calendar() {
         </div>
 
         <div className="calendar-events">
-          <h2>Upcoming Sessions</h2>
+          <h2>Upcoming mentee sessions</h2>
           <div className="sessions-list">
             {sessions.map((session) => (
               <div key={session.id} className={`session-card ${session.type}`}>
@@ -62,14 +77,20 @@ function Calendar() {
                     <h4>{session.title}</h4>
                     <span className="session-date-badge">{session.date}</span>
                   </div>
-                  {session.mentor && (
-                    <p className="session-mentor">with {session.mentor}</p>
-                  )}
+                  {session.mentor && <p className="session-mentor">With {session.mentor}</p>}
                   <div className="session-type-badge">{session.type}</div>
                 </div>
-                <button className="session-action-btn">
-                  {session.type === 'deadline' ? 'View' : 'Join'}
-                </button>
+                <div className="session-actions">
+                  <button
+                    className="session-action-btn session-btn-secondary"
+                    onClick={() => handleReschedule(session.id)}
+                  >
+                    Reschedule
+                  </button>
+                  <button className="session-action-btn session-btn-primary" onClick={() => handleJoin(session.id)}>
+                    Join now
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -79,4 +100,6 @@ function Calendar() {
   )
 }
 
-export default Calendar
+export default MentorCalendar
+
+

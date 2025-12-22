@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import '../App.css'
-import { NotificationIcon } from '../components/Icons.jsx'
+import '../../App.css'
+import { NotificationIcon } from '../../components/Icons.jsx'
 
 function Notification() {
   const [notifications, setNotifications] = useState([
@@ -178,4 +178,3 @@ function Notification() {
 }
 
 export default Notification
-

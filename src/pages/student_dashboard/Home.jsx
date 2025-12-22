@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import '../App.css'
-import LiveClassroom from '../liveClassroom.jsx'
+import '../../App.css'
+import LiveClassroom from '../../liveClassroom.jsx'
+import CourseDetail from './CourseDetail.jsx'
+import MyCourses from './MyCourses.jsx'
 import { 
   homeProgressData,
   homeUpcomingSessions
-} from '../Data.jsx'
+} from '../../Data.jsx'
 
-function Home({ onNavigate }) {
+function Home({ onNavigate, onMentorClick }) {
   // Upcoming sessions data
   const upcomingSessions = homeUpcomingSessions
   
@@ -60,6 +62,9 @@ function Home({ onNavigate }) {
   // Classroom/My Classes state
   const [activeCourseIndex, setActiveCourseIndex] = useState(0)
   const [activeCourse, setActiveCourse] = useState(null)
+  const [showCourseDetail, setShowCourseDetail] = useState(false)
+  const [showMyCourses, setShowMyCourses] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState(null)
   const carouselRef = useRef(null)
 
 
@@ -213,6 +218,40 @@ function Home({ onNavigate }) {
     }).join('')
   }
 
+  // If My Courses screen is shown
+  if (showMyCourses) {
+    return (
+      <MyCourses
+        courses={enrolledCourses}
+        onBack={() => setShowMyCourses(false)}
+        onEnterClassroom={(course) => {
+          setActiveCourse(course)
+          setShowMyCourses(false)
+        }}
+        onMentorClick={onMentorClick}
+      />
+    )
+  }
+
+  // If course detail is shown
+  if (showCourseDetail && selectedCourse) {
+    return (
+      <CourseDetail 
+        course={selectedCourse} 
+        onBack={() => {
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+        }}
+        onEnterClassroom={(course) => {
+          setActiveCourse(course)
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+        }}
+        onMentorClick={onMentorClick}
+      />
+    )
+  }
+
   // If active course is selected, show LiveClassroom
   if (activeCourse) {
     return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
@@ -227,6 +266,12 @@ function Home({ onNavigate }) {
           <p className="welcome-subtitle">Here's what's happening with your learning today</p>
         </div>
         <div className="dashboard-quick-actions">
+          <button className="explore-more-courses-btn" onClick={() => onNavigate && onNavigate('Explore')}>
+            Explore more courses
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
           <button className="quick-action-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -315,16 +360,13 @@ function Home({ onNavigate }) {
         <div className="dashboard-main-content">
           {/* My Classes Section */}
           <div className="my-classes-section">
-            <h2 className="section-title">My Classes</h2>
+            <div className="section-header-with-button">
+              <h2 className="section-title">My Classes</h2>
+              <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
+                View All
+              </button>
+            </div>
             <div className="classroom-carousel-section">
-              <div className="my-classes-header-inline">
-                <button className="explore-more-courses-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-                  Explore more courses
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-              </div>
               <div
                 className="classroom-carousel"
                 ref={carouselRef}
@@ -335,7 +377,8 @@ function Home({ onNavigate }) {
                     key={course.id}
                     className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
                     onClick={() => {
-                      setActiveCourse(course)
+                      setSelectedCourse(course)
+                      setShowCourseDetail(true)
                     }}
                   >
                     <div className="carousel-card-content">
@@ -371,6 +414,11 @@ function Home({ onNavigate }) {
                           ></div>
                         </div>
                         <span className="carousel-progress-text">{course.progress}%</span>
+                      </div>
+                      <div className="carousel-card-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                       </div>
                     </div>
                   </div>
@@ -589,6 +637,44 @@ function Home({ onNavigate }) {
         </div>
       </div>
 
+      {/* Featured Sessions Section - At Bottom */}
+      <div className="dashboard-section featured-sessions-section">
+        <h2 className="featured-sessions-title">Featured Sessions</h2>
+        <div className="featured-sessions-grid">
+          <div className="featured-session-card">
+            <h3 className="featured-session-title">Intro Call</h3>
+            <p className="featured-session-description">
+              If you're looking for a mentor, and you're just not sure about how this all works - this should be for you.
+            </p>
+            <div className="featured-session-footer">
+              <span className="featured-session-duration">Approx. 30 minutes</span>
+              <span className="featured-session-price">$39</span>
+            </div>
+          </div>
+
+          <div className="featured-session-card">
+            <h3 className="featured-session-title">Work Review</h3>
+            <p className="featured-session-description">
+              In this session, a mentor will sit down with you, and give you some inputs to make your work better, be it a review, inputs on your design, or some inspiration.
+            </p>
+            <div className="featured-session-footer">
+              <span className="featured-session-duration">Approx. 45 minutes</span>
+              <span className="featured-session-price">$89</span>
+            </div>
+          </div>
+
+          <div className="featured-session-card">
+            <h3 className="featured-session-title">Interview Preparation</h3>
+            <p className="featured-session-description">
+              Some big interviews coming up? In this 1-hour session, a mentor with hiring experience will act as a technical interviewer and ask you some standard hiring questions.
+            </p>
+            <div className="featured-session-footer">
+              <span className="featured-session-duration">Approx. 60 minutes</span>
+              <span className="featured-session-price">$99</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

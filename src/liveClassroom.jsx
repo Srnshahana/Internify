@@ -9,7 +9,7 @@ function LiveClassroom({ course, onBack }) {
       id: 1,
       from: 'mentor',
       type: 'text',
-      content: "Welcome to today's session. We will focus on building reusable components.",
+      content: "Welcome to today's session. We will focus on building reusable components.", 
       time: '10:00 AM',
       sectionId: 2,
       highlightColor: null,

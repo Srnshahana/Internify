@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
-import Home from './pages/Home.jsx'
-import Calendar from './pages/Calendar.jsx'
-import Profile from './pages/Profile.jsx'
-import Notification from './pages/Notification.jsx'
+import Home from './pages/student_dashboard/Home.jsx'
+import Calendar from './pages/student_dashboard/Calendar.jsx'
+import Profile from './pages/student_dashboard/Profile.jsx'
+import Notification from './pages/student_dashboard/Notification.jsx'
+import MentorProfile from './mentorProfile.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
+import { courses } from './Data.jsx'
 import './App.css'
 
-function Dashboard({ onLogout }) {
+function Dashboard({ onLogout, onOpenExplore }) {
   const [activePage, setActivePage] = useState('Home')
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
+  const [selectedMentor, setSelectedMentor] = useState(null)
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('dashboard-theme')
     return savedTheme || 'light'
@@ -30,10 +33,39 @@ function Dashboard({ onLogout }) {
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
+  const renderStars = (rating) => {
+    const full = Math.floor(rating)
+    const half = rating - full >= 0.5
+    return Array(5).fill(0).map((_, i) => {
+      if (i < full) return '★'
+      if (i === full && half) return '½'
+      return '☆'
+    }).join('')
+  }
+
+  const handleMentorClick = (mentor) => {
+    setSelectedMentor(mentor)
+  }
+
+  const handleBackFromProfile = () => {
+    setSelectedMentor(null)
+  }
+
   const renderPage = (page, setPage) => {
     switch (page) {
       case 'Home':
-        return <Home onNavigate={(pageName) => setPage(pageName)} />
+        return (
+          <Home
+            onNavigate={(pageName) => {
+              if (pageName === 'Explore' && onOpenExplore) {
+                onOpenExplore()
+              } else {
+                setPage(pageName)
+              }
+            }}
+            onMentorClick={handleMentorClick}
+          />
+        )
       case 'Calendar':
         return <Calendar />
       case 'Profile':
@@ -41,8 +73,23 @@ function Dashboard({ onLogout }) {
       case 'Notification':
         return <Notification />
       default:
-        return <Home onNavigate={(pageName) => setPage(pageName)} />
+        return <Home onNavigate={(pageName) => setPage(pageName)} onMentorClick={handleMentorClick} />
     }
+  }
+
+  if (selectedMentor) {
+    return (
+      <MentorProfile
+        mentor={selectedMentor}
+        courses={courses}
+        onBack={handleBackFromProfile}
+        renderStars={renderStars}
+        onBookSession={() => {
+          // Handle book session - could navigate to calendar or show modal
+          console.log('Book session clicked')
+        }}
+      />
+    )
   }
   return (
     <div className={`dashboard-layout ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
