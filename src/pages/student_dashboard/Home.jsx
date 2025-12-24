@@ -316,48 +316,48 @@ function Home({ onNavigate, onMentorClick }) {
   }
 
   return (
-    <div className="dashboard-page desktop-layout">
-      {/* Top Row: Welcome + Quick Actions */}
-      <div className="dashboard-header">
-        <div className="dashboard-welcome">
-          <h1 className="welcome-title">Welcome back, Sherin</h1>
-          <p className="welcome-subtitle">Here's what's happening with your learning today</p>
+    <div className="dashboard-page-new">
+      {/* Welcome Card with Illustration */}
+      <div className="welcome-card-new">
+        <div className="welcome-card-content">
+          <h1 className="welcome-title-new">Welcome back, Sherin</h1>
+          <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
+          <div className="welcome-card-actions">
+            <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
+              Explore more courses
+            </button>
+            <button className="welcome-card-btn" onClick={handleBookSession}>
+              Book Session
+            </button>
+            <button className="welcome-card-btn" onClick={handleContinueLearning}>
+              Continue Learning
+            </button>
+            <button className="welcome-card-btn" onClick={handleGiveFeedback}>
+              Give Feedback
+            </button>
+          </div>
         </div>
-        <div className="dashboard-quick-actions">
-          <button className="explore-more-courses-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-            Explore more courses
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
-          <button className="quick-action-btn" onClick={handleBookSession}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Book Session</span>
-          </button>
-          <button className="quick-action-btn" onClick={handleContinueLearning}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            <span>Continue Learning</span>
-          </button>
-          <button className="quick-action-btn" onClick={handleGiveFeedback}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              <path d="M8 10h8M8 14h5"></path>
-            </svg>
-            <span>Give Feedback</span>
-          </button>
+        <div className="welcome-card-illustration">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Person on laptop */}
+            <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
+            <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
+            <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
+            {/* Books stack */}
+            <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
+            <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
+            <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
+            {/* Abstract shapes */}
+            <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
+            <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
+            <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
+          </svg>
         </div>
       </div>
 
-      {/* Progress Overview Cards - Moved to Top */}
-      <div className="dashboard-section progress-overview-section">
-        <div className="progress-overview-cards">
+      {/* Progress Overview Cards */}
+      <div className="dashboard-section progress-overview-section-new">
+        <div className="progress-overview-cards-new">
           {/* Learning Hours Card */}
           <div className="progress-overview-card">
             <div className="progress-card-icon">
@@ -414,7 +414,7 @@ function Home({ onNavigate, onMentorClick }) {
       </div>
 
       {/* Main Grid: Left (My Classes + Progress Graph) | Right (Calendar + Sessions) */}
-      <div className="dashboard-main-grid">
+      <div className="dashboard-main-grid-new">
         {/* Left Column: My Classes + Progress Graph */}
         <div className="dashboard-main-content">
           {/* My Classes Section */}
