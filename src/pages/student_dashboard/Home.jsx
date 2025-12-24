@@ -317,106 +317,210 @@ function Home({ onNavigate, onMentorClick }) {
 
   return (
     <div className="dashboard-page-new">
-      {/* Welcome Card with Illustration */}
-      <div className="welcome-card-new">
-        <div className="welcome-card-content">
-          <h1 className="welcome-title-new">Welcome back, Sherin</h1>
-          <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
-          <div className="welcome-card-actions">
-            <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-              Explore more courses
-            </button>
-            <button className="welcome-card-btn" onClick={handleBookSession}>
-              Book Session
-            </button>
-            <button className="welcome-card-btn" onClick={handleContinueLearning}>
-              Continue Learning
-            </button>
-            <button className="welcome-card-btn" onClick={handleGiveFeedback}>
-              Give Feedback
-            </button>
+      {/* Welcome Card and Calendar Row */}
+      <div className="welcome-calendar-row">
+        {/* Welcome Card with Illustration - 70% */}
+        <div className="welcome-card-new">
+          <div className="welcome-card-content">
+            <h1 className="welcome-title-new">Welcome back, Sherin</h1>
+            <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
+            <div className="welcome-card-actions">
+              <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
+                Explore more courses
+              </button>
+              <button className="welcome-card-btn" onClick={handleBookSession}>
+                Book Session
+              </button>
+              <button className="welcome-card-btn" onClick={handleContinueLearning}>
+                Continue Learning
+              </button>
+              <button className="welcome-card-btn" onClick={handleGiveFeedback}>
+                Give Feedback
+              </button>
+            </div>
+          </div>
+          <div className="welcome-card-illustration">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Person on laptop */}
+              <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
+              <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
+              <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
+              {/* Books stack */}
+              <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
+              <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
+              <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
+              {/* Abstract shapes */}
+              <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
+              <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
+              <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
+            </svg>
           </div>
         </div>
-        <div className="welcome-card-illustration">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Person on laptop */}
-            <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
-            <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
-            <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
-            {/* Books stack */}
-            <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
-            <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
-            <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
-            {/* Abstract shapes */}
-            <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
-            <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
-            <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
-          </svg>
-        </div>
-      </div>
 
-      {/* Progress Overview Cards */}
-      <div className="dashboard-section progress-overview-section-new">
-        <div className="progress-overview-cards-new">
-          {/* Learning Hours Card */}
-          <div className="progress-overview-card">
-            <div className="progress-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
+        {/* Calendar - 30% */}
+        <div className="calendar-wrapper-new">
+          <div className="dashboard-section compact-calendar-new welcome-calendar">
+            <div className="calendar-header-new">
+              <h2 className="calendar-title-new">Calendar</h2>
             </div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Learning hours</h3>
-              <p className="progress-card-value">{Math.round(learningHours)}/{totalLearningHours}</p>
-              <div className="progress-card-bar">
-                <div className="progress-card-bar-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+            <div className="calendar-month-header">
+              <h3 className="calendar-month-name">{currentMonth}</h3>
+              <div className="calendar-nav-buttons">
+                <button className="calendar-nav-btn" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>
+                  ←
+                </button>
+                <button className="calendar-nav-btn" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>
+                  →
+                </button>
+              </div>
+            </div>
+            <div className="calendar-weekdays-new">
+              {weekDays.map((day) => (
+                <div key={day} className="calendar-weekday-new">{day}</div>
+              ))}
+            </div>
+            <div className="calendar-days-grid-new">
+              {Array.from({ length: 35 }, (_, i) => {
+                const date = i + 1
+                const isToday = date === new Date().getDate()
+                const hasEvent = [14, 19, 22, 23, 24].includes(date) // Sample event dates
+                const isEventRange = date >= 22 && date <= 24
+                return (
+                  <div 
+                    key={i} 
+                    className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isEventRange ? 'event-range' : ''}`}
+                  >
+                    <span className="calendar-day-number">{date <= 31 ? date : ''}</span>
+                    {hasEvent && !isEventRange && <span className="event-dot"></span>}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Today's Events Section */}
+          <div className="today-events-section">
+            <h3 className="today-title">Today</h3>
+            <div className="today-events-list">
+              <div className="today-event-card">
+                <div className="event-icon purple-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                </div>
+                <div className="event-details">
+                  <p className="event-title">Design discussion</p>
+                  <p className="event-time">10:30-11:15</p>
+                </div>
+              </div>
+              <div className="today-event-card">
+                <div className="event-icon purple-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <div className="event-details">
+                  <p className="event-title">Send demo to PM</p>
+                  <p className="event-time">18:00</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Assessment Status Card */}
-          <div className="progress-overview-card">
-            <div className="progress-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <polyline points="9 11 12 14 22 4"></polyline>
-              </svg>
+          {/* Upcoming Sessions Below Calendar */}
+          <div className="upcoming-sessions-compact-new">
+            <div className="section-header-with-button">
+              <h2 className="section-title-small">Upcoming Sessions</h2>
+              <button className="view-all-btn-small" onClick={() => onNavigate && onNavigate('Calendar')}>
+                View all
+              </button>
             </div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Assessment status</h3>
-              <p className="progress-card-value">{completedAssessments}/{totalAssessments}</p>
-              <div className="progress-card-bar">
-                <div className="progress-card-bar-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Registered Courses Card */}
-          <div className="progress-overview-card">
-            <div className="progress-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-                <path d="M12 11l-2 2 2 2"></path>
-              </svg>
-            </div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Registered courses</h3>
-              <p className="progress-card-value">{String(registeredCoursesCount).padStart(2, '0')}</p>
+            <div className="upcoming-sessions-list-compact">
+              {upcomingSessions.slice(0, 2).map((session) => (
+                <div key={session.id} className="upcoming-session-item-compact">
+                  <div className="session-time-compact">
+                    <span className="session-time-value-compact">{session.time}</span>
+                    <span className="session-time-period-compact">{session.period}</span>
+                  </div>
+                  <div className="session-info-compact">
+                    <p className="session-course-compact">{session.course}</p>
+                    <p className="session-mentor-compact">{session.mentor}</p>
+                  </div>
+                  <button
+                    className="btn-primary-compact"
+                    onClick={() => handleJoinUpcomingSession(session)}
+                  >
+                    Join
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Left (My Classes + Progress Graph) | Right (Calendar + Sessions) */}
-      <div className="dashboard-main-grid-new">
-        {/* Left Column: My Classes + Progress Graph */}
-        <div className="dashboard-main-content">
+      {/* Content Below Welcome Card */}
+      <div className="welcome-below-content">
+          {/* Progress Overview Cards */}
+          <div className="dashboard-section progress-overview-section-new">
+            <div className="progress-overview-cards-new">
+              {/* Learning Hours Card */}
+              <div className="progress-overview-card">
+                <div className="progress-card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <div className="progress-card-content">
+                  <h3 className="progress-card-title">Learning hours</h3>
+                  <p className="progress-card-value">{Math.round(learningHours)}/{totalLearningHours}</p>
+                  <div className="progress-card-bar">
+                    <div className="progress-card-bar-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assessment Status Card */}
+              <div className="progress-overview-card">
+                <div className="progress-card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                  </svg>
+                </div>
+                <div className="progress-card-content">
+                  <h3 className="progress-card-title">Assessment status</h3>
+                  <p className="progress-card-value">{completedAssessments}/{totalAssessments}</p>
+                  <div className="progress-card-bar">
+                    <div className="progress-card-bar-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Registered Courses Card */}
+              <div className="progress-overview-card">
+                <div className="progress-card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                    <path d="M12 11l-2 2 2 2"></path>
+                  </svg>
+                </div>
+                <div className="progress-card-content">
+                  <h3 className="progress-card-title">Registered courses</h3>
+                  <p className="progress-card-value">{String(registeredCoursesCount).padStart(2, '0')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* My Classes Section */}
           <div className="my-classes-section">
             <div className="section-header-with-button">
@@ -507,8 +611,13 @@ function Home({ onNavigate, onMentorClick }) {
               </button>
             </div>
           </div>
+      </div>
 
-          {/* Progress Graph Section - Smaller */}
+      {/* Main Grid: Left (Progress Graph) | Right (Assignments) */}
+      <div className="dashboard-main-grid-new">
+        {/* Left Column: Progress Graph */}
+        <div className="dashboard-main-content">
+          {/* Progress Graph Section */}
           <div className="dashboard-section progress-graph-section compact-graph">
             <div className="section-header-with-button">
               <h2 className="section-title">Your Learning Progress</h2>
@@ -637,72 +746,9 @@ function Home({ onNavigate, onMentorClick }) {
 
         </div>
 
-        {/* Right Sidebar: Upcoming Sessions (Left) + Calendar (Right) */}
+        {/* Right Sidebar: Assignments & Tasks */}
         <div className="dashboard-sidebar">
-          <div className="sidebar-content-grid">
-            {/* Upcoming Sessions - Left */}
-            <div className="dashboard-section sidebar-section sidebar-sessions-compact">
-              <div className="section-header-with-button">
-                <h2 className="section-title">Upcoming Sessions</h2>
-                <button className="view-all-btn" onClick={() => onNavigate && onNavigate('Calendar')}>
-                  View all
-                </button>
-              </div>
-              <div className="sidebar-sessions-list">
-                {upcomingSessions.slice(0, 3).map((session) => (
-                  <div key={session.id} className="sidebar-session-card">
-                    <div className="sidebar-session-time">
-                      <span className="sidebar-session-time-value">{session.time}</span>
-                      <span className="sidebar-session-time-period">{session.period}</span>
-                    </div>
-                    <div className="sidebar-session-details">
-                      <p className="sidebar-session-course">{session.course}</p>
-                      <p className="sidebar-session-mentor">{session.mentor}</p>
-                      <p className="sidebar-session-location">{session.location}</p>
-                    </div>
-                    <div className="sidebar-session-actions">
-                      <button
-                        className="btn-primary btn-small"
-                        onClick={() => handleJoinUpcomingSession(session)}
-                      >
-                        Join Class
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Mini Calendar - Right */}
-            <div className="dashboard-section sidebar-section compact-calendar">
-              <h2 className="section-title">Calendar</h2>
-              <div className="calendar-mini">
-                <div className="calendar-month-selector">
-                  <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>←</button>
-                  <h3>{currentMonth}</h3>
-                  <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>→</button>
-                </div>
-                <div className="calendar-weekdays">
-                  {weekDays.map((day) => (
-                    <div key={day} className="calendar-weekday">{day}</div>
-                  ))}
-                </div>
-                <div className="calendar-days-mini">
-                  {Array.from({ length: 35 }, (_, i) => {
-                    const date = i + 1
-                    const isToday = date === new Date().getDate()
-                    return (
-                      <div key={i} className={`calendar-day-mini ${isToday ? 'today' : ''}`}>
-                        {date <= 31 ? date : ''}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Assignments / Tasks Section - Below Calendar and Sessions */}
+          {/* Assignments / Tasks Section */}
           {pendingAssignments.length > 0 && (
             <div className="dashboard-section sidebar-section assignments-section">
               <div className="section-header-with-button">
