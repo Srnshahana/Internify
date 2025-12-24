@@ -38,7 +38,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   if (showLiveClassroom) {
-    return <LiveClassroom course={course} onBack={() => setShowLiveClassroom(false)} />
+    return <LiveClassroom course={course} onBack={() => setShowLiveClassroom(false)} userRole="student" />
   }
 
   if (!course) {

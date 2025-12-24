@@ -1,9 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import './App.css'
 
-function LiveClassroom({ course, onBack }) {
+function LiveClassroom({ course, onBack, userRole = 'student' }) {
   const [activeSessionId, setActiveSessionId] = useState(2)
   const [messageInput, setMessageInput] = useState('')
+  const [showAssessmentForm, setShowAssessmentForm] = useState(false)
+  const [newAssessment, setNewAssessment] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+  })
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -17,7 +23,7 @@ function LiveClassroom({ course, onBack }) {
     },
     {
       id: 2,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'text',
       content: 'Should we use function components only, or class components as well?',
       time: '10:02 AM',
@@ -49,10 +55,23 @@ function LiveClassroom({ course, onBack }) {
     },
     {
       id: 5,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'text',
       content: 'I have pushed my latest changes to GitHub. Please review when possible.',
       time: '10:20 AM',
+      sectionId: 2,
+      highlightColor: null,
+      selfNote: '',
+    },
+    {
+      id: 6,
+      from: 'mentor',
+      type: 'assessment',
+      assessmentTitle: 'React Hooks Implementation Assignment',
+      assessmentDescription: 'Create a custom hook for managing form state with validation. Your hook should handle:\n\n1. Form field values and updates\n2. Validation rules for each field\n3. Error messages\n4. Form submission handling\n\nSubmit your code file and a brief explanation of your implementation approach.',
+      assessmentDueDate: '2024-03-25',
+      assessmentId: 1001,
+      time: '10:25 AM',
       sectionId: 2,
       highlightColor: null,
       selfNote: '',
@@ -61,6 +80,7 @@ function LiveClassroom({ course, onBack }) {
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
   const imageInputRef = useRef(null)
+  const assessmentFileInputRef = useRef(null)
 
   const classroom = course || {
     title: 'React App Development – Batch 1',
@@ -84,6 +104,11 @@ function LiveClassroom({ course, onBack }) {
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [selectedAssessment, setSelectedAssessment] = useState(null)
+  const [assessmentSubmission, setAssessmentSubmission] = useState({
+    textSubmission: '',
+    attachments: [],
+  })
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -103,7 +128,7 @@ function LiveClassroom({ course, onBack }) {
 
     const base = {
       id: messages.length + 1,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'text',
       content: messageInput.trim(),
       time: getCurrentTime(),
@@ -175,7 +200,7 @@ function LiveClassroom({ course, onBack }) {
     if (!file) return
     const newMessage = {
       id: messages.length + 1,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'file',
       fileName: file.name,
       fileSize: `${Math.round(file.size / 1024)} KB`,
@@ -195,7 +220,7 @@ function LiveClassroom({ course, onBack }) {
     const url = URL.createObjectURL(file)
     const newMessage = {
       id: messages.length + 1,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'image',
       imageUrl: url,
       fileName: file.name,
@@ -212,7 +237,7 @@ function LiveClassroom({ course, onBack }) {
   const handleAttachVoice = () => {
     const newMessage = {
       id: messages.length + 1,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'voice',
       duration: '0:15',
       time: getCurrentTime(),
@@ -229,7 +254,7 @@ function LiveClassroom({ course, onBack }) {
     if (!url || !url.trim()) return
     const newMessage = {
       id: messages.length + 1,
-      from: 'learner',
+      from: userRole === 'mentor' ? 'mentor' : 'learner',
       type: 'link',
       linkLabel: 'Link',
       url: url.trim(),
@@ -240,6 +265,86 @@ function LiveClassroom({ course, onBack }) {
     }
     setMessages((prev) => [...prev, newMessage])
     setShowAttachOptions(false)
+  }
+
+  const handleSendAssessment = () => {
+    if (!newAssessment.title || !newAssessment.description || !newAssessment.dueDate) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    const assessmentMessage = {
+      id: messages.length + 1,
+      from: 'mentor',
+      type: 'assessment',
+      assessmentTitle: newAssessment.title,
+      assessmentDescription: newAssessment.description,
+      assessmentDueDate: newAssessment.dueDate,
+      assessmentId: Date.now(), // Simple ID generation
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlightColor: null,
+      selfNote: '',
+    }
+
+    setMessages((prev) => [...prev, assessmentMessage])
+    setNewAssessment({ title: '', description: '', dueDate: '' })
+    setShowAssessmentForm(false)
+    setShowAttachOptions(false)
+  }
+
+  const handleViewAssessment = (assessmentMessage) => {
+    setSelectedAssessment(assessmentMessage)
+    // Reset submission form when opening assessment
+    setAssessmentSubmission({ textSubmission: '', attachments: [] })
+  }
+
+  const handleAssessmentFileUpload = (e) => {
+    const files = Array.from(e.target.files)
+    const newAttachments = files.map(file => ({
+      name: file.name,
+      type: file.name.split('.').pop(),
+      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      file: file,
+    }))
+    setAssessmentSubmission({
+      ...assessmentSubmission,
+      attachments: [...assessmentSubmission.attachments, ...newAttachments],
+    })
+  }
+
+  const handleRemoveAssessmentAttachment = (index) => {
+    setAssessmentSubmission({
+      ...assessmentSubmission,
+      attachments: assessmentSubmission.attachments.filter((_, i) => i !== index),
+    })
+  }
+
+  const handleSubmitAssessment = () => {
+    if (!assessmentSubmission.textSubmission && assessmentSubmission.attachments.length === 0) {
+      alert('Please provide either text submission or attach files')
+      return
+    }
+
+    // Create a submission confirmation message
+    const submissionMessage = {
+      id: messages.length + 1,
+      from: 'learner',
+      type: 'text',
+      content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
+      time: getCurrentTime(),
+      sectionId: activeSessionId,
+      highlightColor: null,
+      selfNote: '',
+    }
+
+    setMessages((prev) => [...prev, submissionMessage])
+    
+    // Mark assessment as submitted (you could add a submitted flag to the assessment)
+    alert('Assessment submitted successfully!')
+    
+    setSelectedAssessment(null)
+    setAssessmentSubmission({ textSubmission: '', attachments: [] })
   }
 
   const handleCompleteSession = () => {
@@ -344,6 +449,26 @@ function LiveClassroom({ course, onBack }) {
                     <div className="live-voice-card">
                       <div className="voice-icon">●</div>
                       <div className="voice-meta">Voice note • {message.duration}</div>
+                    </div>
+                  )}
+                  {message.type === 'assessment' && (
+                    <div 
+                      className="live-assessment-card"
+                      onClick={() => userRole === 'student' && handleViewAssessment(message)}
+                      style={{ cursor: userRole === 'student' ? 'pointer' : 'default' }}
+                    >
+                      <div className="assessment-card-header">
+                        <div className="assessment-icon">📝</div>
+                        <div className="assessment-badge">Assessment</div>
+                      </div>
+                      <h4 className="assessment-card-title">{message.assessmentTitle}</h4>
+                      <p className="assessment-card-description">{message.assessmentDescription}</p>
+                      <div className="assessment-card-footer">
+                        <span className="assessment-due-date">Due: {new Date(message.assessmentDueDate).toLocaleDateString()}</span>
+                        {userRole === 'student' && (
+                          <button className="assessment-view-btn">View & Submit</button>
+                        )}
+                      </div>
                     </div>
                   )}
                   {noteEditingId === message.id ? (
@@ -493,6 +618,202 @@ function LiveClassroom({ course, onBack }) {
               <button type="button" onClick={handleAttachLink}>
                 Send link
               </button>
+              {userRole === 'mentor' && (
+                <button type="button" onClick={() => {
+                  setShowAssessmentForm(true)
+                  setShowAttachOptions(false)
+                }}>
+                  📝 Send Assessment
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Assessment Form Modal */}
+          {showAssessmentForm && (
+            <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentForm(false)}>
+              <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="assessment-modal-header">
+                  <h2>Create Assessment</h2>
+                  <button 
+                    className="modal-close-btn"
+                    onClick={() => setShowAssessmentForm(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="assessment-modal-content">
+                  <div className="form-group">
+                    <label className="form-label">Assessment Title</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g., React Hooks Implementation"
+                      value={newAssessment.title}
+                      onChange={(e) => setNewAssessment({ ...newAssessment, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Instructions / What to Do</label>
+                    <textarea
+                      className="form-textarea"
+                      rows="6"
+                      placeholder="Describe what students need to do for this assessment..."
+                      value={newAssessment.description}
+                      onChange={(e) => setNewAssessment({ ...newAssessment, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Due Date</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={newAssessment.dueDate}
+                      onChange={(e) => setNewAssessment({ ...newAssessment, dueDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="assessment-modal-actions">
+                  <button 
+                    className="btn-primary"
+                    onClick={handleSendAssessment}
+                  >
+                    Send Assessment
+                  </button>
+                  <button 
+                    className="btn-secondary"
+                    onClick={() => {
+                      setShowAssessmentForm(false)
+                      setNewAssessment({ title: '', description: '', dueDate: '' })
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Assessment View Modal for Students */}
+          {selectedAssessment && userRole === 'student' && (
+            <div className="live-assessment-modal-overlay" onClick={() => setSelectedAssessment(null)}>
+              <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="assessment-modal-header">
+                  <h2>Assessment</h2>
+                  <button 
+                    className="modal-close-btn"
+                    onClick={() => setSelectedAssessment(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="assessment-modal-content">
+                  <div className="assessment-view-header">
+                    <h3>{selectedAssessment.assessmentTitle}</h3>
+                    <p className="assessment-view-course">{course?.title || 'Course'}</p>
+                  </div>
+                  <div className="assessment-view-details">
+                    <div className="info-item">
+                      <span className="info-label">Due Date:</span>
+                      <span className="info-value">
+                        {new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="assessment-view-description">
+                    <h4>Instructions</h4>
+                    <p style={{ whiteSpace: 'pre-wrap' }}>{selectedAssessment.assessmentDescription}</p>
+                  </div>
+
+                  {/* Submission Form */}
+                  <div className="assessment-submission-form">
+                    <h4>Your Submission</h4>
+                    
+                    <div className="form-group">
+                      <label className="form-label">Write your response / description</label>
+                      <textarea
+                        className="form-textarea"
+                        rows="8"
+                        placeholder="Describe your work, explain your approach, or provide any additional context..."
+                        value={assessmentSubmission.textSubmission}
+                        onChange={(e) => setAssessmentSubmission({ ...assessmentSubmission, textSubmission: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Attach Files / Documents</label>
+                      <div className="file-upload-area">
+                        <input
+                          type="file"
+                          id="assessment-file-upload"
+                          multiple
+                          className="file-input"
+                          ref={assessmentFileInputRef}
+                          onChange={handleAssessmentFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                        <label htmlFor="assessment-file-upload" className="file-upload-label">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                          </svg>
+                          Click to upload files or drag and drop
+                        </label>
+                      </div>
+
+                      {assessmentSubmission.attachments.length > 0 && (
+                        <div className="attachments-list" style={{ marginTop: '12px' }}>
+                          {assessmentSubmission.attachments.map((attachment, idx) => (
+                            <div key={idx} className="attachment-item">
+                              <div className="attachment-icon">
+                                {attachment.type === 'pdf' && '📄'}
+                                {attachment.type === 'js' && '📜'}
+                                {attachment.type === 'ts' && '📘'}
+                                {attachment.type === 'figma' && '🎨'}
+                                {attachment.type === 'zip' && '📦'}
+                                {!['pdf', 'js', 'ts', 'figma', 'zip'].includes(attachment.type) && '📎'}
+                              </div>
+                              <div className="attachment-info">
+                                <span className="attachment-name">{attachment.name}</span>
+                                <span className="attachment-size">{attachment.size}</span>
+                              </div>
+                              <button 
+                                className="btn-danger btn-small"
+                                onClick={() => handleRemoveAssessmentAttachment(idx)}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="assessment-view-actions">
+                      <button 
+                        className="btn-primary btn-full"
+                        onClick={handleSubmitAssessment}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="22" y1="2" x2="11" y2="13"></line>
+                          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Submit Assessment
+                      </button>
+                      <button 
+                        className="btn-secondary btn-full"
+                        onClick={() => {
+                          setSelectedAssessment(null)
+                          setAssessmentSubmission({ textSubmission: '', attachments: [] })
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

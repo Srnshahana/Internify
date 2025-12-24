@@ -312,7 +312,7 @@ function Home({ onNavigate, onMentorClick }) {
 
   // If active course is selected, show LiveClassroom
   if (activeCourse) {
-    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
+    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} userRole="student" />
   }
 
   return (
@@ -508,50 +508,6 @@ function Home({ onNavigate, onMentorClick }) {
             </div>
           </div>
 
-          {/* Assignments / Tasks Section */}
-          {pendingAssignments.length > 0 && (
-            <div className="dashboard-section assignments-section">
-              <div className="section-header-with-button">
-                <h2 className="section-title">Assignments & Tasks</h2>
-                <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
-                  View all
-                </button>
-              </div>
-              <div className="assignments-list-home">
-                {pendingAssignments.map((assignment) => (
-                  <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
-                    <div className="assignment-header-home">
-                      <h3 className="assignment-title-home">{assignment.title}</h3>
-                      <span className={`assignment-status-badge-home ${assignment.status.toLowerCase().replace(' ', '-')}`}>
-                        {assignment.status}
-                      </span>
-                    </div>
-                    <p className="assignment-course-home">{assignment.courseTitle}</p>
-                    {assignment.dueDate && (
-                      <p className="assignment-due-home">
-                        Due: {assignment.dueDate}
-                      </p>
-                    )}
-                    <button
-                      className="btn-secondary btn-small"
-                      onClick={() => {
-                        const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
-                        if (course) {
-                          setSelectedCourse(course)
-                          setShowCourseDetail(true)
-                        } else {
-                          setShowMyCourses(true)
-                        }
-                      }}
-                    >
-                      Open
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Progress Graph Section - Smaller */}
           <div className="dashboard-section progress-graph-section compact-graph">
             <div className="section-header-with-button">
@@ -745,6 +701,50 @@ function Home({ onNavigate, onMentorClick }) {
               </div>
             </div>
           </div>
+
+          {/* Assignments / Tasks Section - Below Calendar and Sessions */}
+          {pendingAssignments.length > 0 && (
+            <div className="dashboard-section sidebar-section assignments-section">
+              <div className="section-header-with-button">
+                <h2 className="section-title">Assignments & Tasks</h2>
+                <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
+                  View all
+                </button>
+              </div>
+              <div className="assignments-list-home">
+                {pendingAssignments.map((assignment) => (
+                  <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
+                    <div className="assignment-header-home">
+                      <h3 className="assignment-title-home">{assignment.title}</h3>
+                      <span className={`assignment-status-badge-home ${assignment.status.toLowerCase().replace(' ', '-')}`}>
+                        {assignment.status}
+                      </span>
+                    </div>
+                    <p className="assignment-course-home">{assignment.courseTitle}</p>
+                    {assignment.dueDate && (
+                      <p className="assignment-due-home">
+                        Due: {assignment.dueDate}
+                      </p>
+                    )}
+                    <button
+                      className="btn-secondary btn-small"
+                      onClick={() => {
+                        const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
+                        if (course) {
+                          setSelectedCourse(course)
+                          setShowCourseDetail(true)
+                        } else {
+                          setShowMyCourses(true)
+                        }
+                      }}
+                    >
+                      Open
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

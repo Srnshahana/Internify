@@ -5,6 +5,7 @@ import Profile from './pages/mentor_dashboard/Profile.jsx'
 import Notification from './pages/mentor_dashboard/Notification.jsx'
 import Students from './pages/mentor_dashboard/Students.jsx'
 import Earnings from './pages/mentor_dashboard/Earnings.jsx'
+import Assessments from './pages/mentor_dashboard/Assessments.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
@@ -28,6 +29,7 @@ function MentorDashboard({ onLogout }) {
     { id: 'Home', label: 'Home', icon: HomeIcon },
     { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'Students', label: 'Students', icon: HomeIcon },
+    { id: 'Assessments', label: 'Assessments', icon: HomeIcon },
     { id: 'Earnings', label: 'Earnings', icon: HomeIcon },
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
@@ -35,11 +37,13 @@ function MentorDashboard({ onLogout }) {
   const renderPage = (page, setPage) => {
     switch (page) {
       case 'Home':
-        return <Home />
+        return <Home onNavigate={(pageName) => setActivePage(pageName)} />
       case 'Calendar':
         return <Calendar />
       case 'Students':
         return <Students />
+      case 'Assessments':
+        return <Assessments onBack={() => setActivePage('Home')} />
       case 'Earnings':
         return <Earnings />
       case 'Profile':
@@ -47,7 +51,7 @@ function MentorDashboard({ onLogout }) {
       case 'Notification':
         return <Notification />
       default:
-        return <Home />
+        return <Home onNavigate={(pageName) => setActivePage(pageName)} />
     }
   }
 

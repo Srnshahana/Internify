@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import Explore from './search.jsx'
+import Resources from './Resources.jsx'
 import MentorProfile from './mentorProfile.jsx'
 import Login from './login.jsx'
 import Signup from './signup.jsx'
@@ -80,6 +81,7 @@ function App() {
   const howItWorksSectionRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showExplore, setShowExplore] = useState(false)
+  const [showResources, setShowResources] = useState(false)
   const [exploreInitialQuery, setExploreInitialQuery] = useState('')
   const [selectedMentor, setSelectedMentor] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
@@ -488,6 +490,17 @@ function App() {
   }
 
   // Global Explore (search) page should work even when logged in
+  if (showResources) {
+    return (
+      <Resources
+        onBack={() => setShowResources(false)}
+        mentors={mentors}
+        onBookSession={handleBookSessionClick}
+        onMentorClick={handleMentorClick}
+      />
+    )
+  }
+
   if (showExplore) {
     return (
       <Explore
@@ -547,6 +560,7 @@ function App() {
           </button>
         </div>
         <div className="top-actions">
+          <button className="link" onClick={() => setShowResources(true)}>Resources</button>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
@@ -835,6 +849,7 @@ function App() {
             </div>
             <div className="footer-column">
               <h4>Resources</h4>
+              <a href="#" onClick={(e) => { e.preventDefault(); setShowResources(true); }}>Free Study Materials</a>
               <a href="#">Newsletter</a>
               <a href="#">Books</a>
               <a href="#">Perks</a>

@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import '../../App.css'
 import MyCourses from './MyCourses.jsx'
+import CourseDetail from './CourseDetail.jsx'
 import StudentRequests from './StudentRequests.jsx'
 import PendingWork from './PendingWork.jsx'
 import Messages from './Messages.jsx'
+import Assessments from './Assessments.jsx'
+import LiveClassroom from '../../liveClassroom.jsx'
 
 // Simple static data for mentor dashboard
 const mentorName = 'Alex (Mentor)'
@@ -126,41 +129,137 @@ const upcomingMentorSessions = [
   },
 ]
 
-const recentCourses = [
+// Mentor's courses with full details
+const mentorCourses = [
   {
     id: 1,
     title: 'React Advanced Patterns',
+    mentor: 'Alex (Mentor)',
+    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     students: 12,
     progress: 75,
     enrollments: 15,
+    completed: 8,
     status: 'Active',
+    category: 'Programming',
+    level: 'Advanced',
+    type: 'Live',
+    rating: 4.8,
+    description: 'Master advanced React patterns including hooks, context, and performance optimization.',
+    nextSession: 'Tomorrow, 2:00 PM',
+    sessionsCount: 12,
+    classes: [
+      { id: 1, title: 'Introduction to Advanced Patterns', duration: '45 min', type: 'Video', completed: true },
+      { id: 2, title: 'Custom Hooks Deep Dive', duration: '60 min', type: 'Live', completed: true },
+      { id: 3, title: 'Context API & State Management', duration: '50 min', type: 'Video', completed: false },
+      { id: 4, title: 'Performance Optimization', duration: '55 min', type: 'Live', completed: false },
+    ],
+    enrolledStudents: [
+      { id: 1, name: 'Sherin', progress: 85, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80' },
+      { id: 2, name: 'Rahul', progress: 70, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
+      { id: 3, name: 'Fatima', progress: 60, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80' },
+    ],
+    assignments: [
+      { id: 1, title: 'Build Custom Hook Library', dueDate: '2024-01-15', status: 'In Progress' },
+      { id: 2, title: 'Optimize React App Performance', dueDate: '2024-01-20', status: 'Pending' },
+    ],
+    resources: [
+      { id: 1, title: 'React Patterns Guide', type: 'PDF', size: '2.4 MB' },
+      { id: 2, title: 'Code Examples Repository', type: 'Link', url: 'https://github.com' },
+    ],
   },
   {
     id: 2,
     title: 'UI/UX Design Principles',
+    mentor: 'Alex (Mentor)',
+    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     students: 8,
     progress: 60,
     enrollments: 10,
+    completed: 5,
     status: 'Active',
+    category: 'Design',
+    level: 'Beginner',
+    type: 'Hybrid',
+    rating: 4.5,
+    description: 'Learn user-centered design principles, create stunning interfaces, and build a portfolio.',
+    nextSession: 'Friday, 10:00 AM',
+    sessionsCount: 8,
+    classes: [
+      { id: 1, title: 'Design Fundamentals', duration: '40 min', type: 'Video', completed: true },
+      { id: 2, title: 'User Research Methods', duration: '50 min', type: 'Live', completed: false },
+    ],
+    enrolledStudents: [
+      { id: 1, name: 'Priya', progress: 65, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80' },
+      { id: 2, name: 'Amit', progress: 55, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
+    ],
+    assignments: [
+      { id: 1, title: 'Create Design System', dueDate: '2024-01-18', status: 'In Progress' },
+    ],
+    resources: [
+      { id: 1, title: 'Design System Guide', type: 'PDF', size: '1.8 MB' },
+    ],
   },
   {
     id: 3,
     title: 'DSA Mastery',
+    mentor: 'Alex (Mentor)',
+    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     students: 20,
     progress: 85,
     enrollments: 25,
+    completed: 15,
     status: 'Active',
+    category: 'Programming',
+    level: 'Intermediate',
+    type: 'Live',
+    rating: 4.9,
+    description: 'Master data structures and algorithms with hands-on practice and interview preparation.',
+    nextSession: 'Monday, 3:00 PM',
+    sessionsCount: 15,
+    classes: [
+      { id: 1, title: 'Arrays and Strings', duration: '60 min', type: 'Live', completed: true },
+      { id: 2, title: 'Linked Lists', duration: '55 min', type: 'Video', completed: true },
+      { id: 3, title: 'Trees and Graphs', duration: '65 min', type: 'Live', completed: false },
+    ],
+    enrolledStudents: [
+      { id: 1, name: 'Sara', progress: 90, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80' },
+      { id: 2, name: 'John', progress: 80, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
+    ],
+    assignments: [
+      { id: 1, title: 'Implement Binary Tree', dueDate: '2024-01-22', status: 'Pending' },
+    ],
+    resources: [
+      { id: 1, title: 'DSA Cheat Sheet', type: 'PDF', size: '3.2 MB' },
+    ],
   },
 ]
 
-function MentorHome() {
+const recentCourses = mentorCourses.map(c => ({
+  id: c.id,
+  title: c.title,
+  students: c.students,
+  progress: c.progress,
+  enrollments: c.enrollments,
+  status: c.status,
+}))
+
+function MentorHome({ onNavigate }) {
   const [selectedSessionId, setSelectedSessionId] = useState(upcomingMentorSessions[0]?.id || null)
   const [showMyCourses, setShowMyCourses] = useState(false)
   const [showStudentRequests, setShowStudentRequests] = useState(false)
   const [showPendingWork, setShowPendingWork] = useState(false)
   const [showMessages, setShowMessages] = useState(false)
+  const [showAssessments, setShowAssessments] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null)
+  
+  // Course/Classroom state
+  const [activeCourseIndex, setActiveCourseIndex] = useState(0)
+  const [activeCourse, setActiveCourse] = useState(null)
+  const [showCourseDetail, setShowCourseDetail] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const carouselRef = useRef(null)
 
   const selectedSession = upcomingMentorSessions.find((s) => s.id === selectedSessionId) || upcomingMentorSessions[0]
   
@@ -246,6 +345,30 @@ function MentorHome() {
     }
   }
 
+  // Classroom carousel handlers
+  const handleCarouselScroll = (e) => {
+    const container = e.target
+    const scrollLeft = container.scrollLeft
+    const containerWidth = container.offsetWidth
+    const cardWidth = containerWidth / 3.2
+    const gap = 16
+    const newIndex = Math.round(scrollLeft / (cardWidth + gap))
+    const clampedIndex = Math.max(0, Math.min(newIndex, mentorCourses.length - 1))
+    if (clampedIndex !== activeCourseIndex) {
+      setActiveCourseIndex(clampedIndex)
+    }
+  }
+
+  const renderStars = (rating) => {
+    const full = Math.floor(rating)
+    const half = rating - full >= 0.5
+    return Array(5).fill('☆').map((star, i) => {
+      if (i < full) return '★'
+      if (i === full && half) return '½'
+      return '☆'
+    }).join('')
+  }
+
   if (showStudentRequests) {
     return <StudentRequests onBack={() => setShowStudentRequests(false)} />
   }
@@ -256,6 +379,40 @@ function MentorHome() {
 
   if (showMessages) {
     return <Messages onBack={() => setShowMessages(false)} />
+  }
+
+  if (activeCourse) {
+    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} userRole="mentor" />
+  }
+
+  if (showCourseDetail && selectedCourse) {
+    return (
+      <CourseDetail 
+        course={selectedCourse} 
+        onBack={() => {
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+        }}
+        onEnterClassroom={(course) => {
+          setActiveCourse(course)
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+        }}
+        onNavigate={(pageName) => {
+          if (pageName === 'Assessments') {
+            setShowAssessments(true)
+            setShowCourseDetail(false)
+            setSelectedCourse(null)
+          } else if (onNavigate) {
+            onNavigate(pageName)
+          }
+        }}
+      />
+    )
+  }
+
+  if (showAssessments) {
+    return <Assessments onBack={() => setShowAssessments(false)} />
   }
 
   if (showMyCourses) {
@@ -273,6 +430,15 @@ function MentorHome() {
         <div className="dashboard-quick-actions">
           <button className="quick-action-btn" onClick={() => setShowMyCourses(true)}>
             <span>My Courses</span>
+          </button>
+          <button className="quick-action-btn" onClick={() => {
+            if (onNavigate) {
+              onNavigate('Assessments')
+            } else {
+              setShowAssessments(true)
+            }
+          }}>
+            <span>Assessments</span>
           </button>
           <button className="quick-action-btn" onClick={() => setShowPendingWork(true)}>
             <span>Review pending work</span>
@@ -314,9 +480,110 @@ function MentorHome() {
         </div>
       </div>
 
-      {/* Main Grid: Left (Sessions + Courses) | Right (Session Details) */}
+      {/* Main Grid: Left (My Classes + Sessions) | Right (Session Details) */}
       <div className="dashboard-main-grid">
         <div className="dashboard-main-content">
+          {/* My Classes Section */}
+          <div className="my-classes-section">
+            <div className="section-header-with-button">
+              <h2 className="section-title">My Classes</h2>
+              <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
+                View All
+              </button>
+            </div>
+            <div className="classroom-carousel-section">
+              <div
+                className="classroom-carousel"
+                ref={carouselRef}
+                onScroll={handleCarouselScroll}
+              >
+                {mentorCourses.map((course, index) => (
+                  <div
+                    key={course.id}
+                    className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedCourse(course)
+                      setShowCourseDetail(true)
+                    }}
+                  >
+                    <div className="carousel-card-content">
+                      <div className="carousel-header-section">
+                        <div className="carousel-mentor-photo">
+                          <img src={course.mentorImage} alt={course.mentor} />
+                        </div>
+                        <div className="carousel-header-info">
+                          <p className="carousel-mentor-name">{course.mentor}</p>
+                          <p className="carousel-mentor-role">Mentor</p>
+                        </div>
+                      </div>
+                      <div className="carousel-details-section">
+                        <h3 className="carousel-course-title">{course.title}</h3>
+                        <div className="carousel-rating">
+                          <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
+                        </div>
+                        <div className="carousel-course-meta">
+                          <span className="carousel-category">{course.category}</span>
+                          <span className="carousel-level">{course.level}</span>
+                        </div>
+                        <div className="carousel-session-info">
+                          <span className="carousel-session-label">Next Session:</span>
+                          <span className="carousel-session-time">{course.nextSession}</span>
+                        </div>
+                        <div className="carousel-students-info">
+                          <span className="carousel-students-label">Students:</span>
+                          <span className="carousel-students-count">{course.students}</span>
+                        </div>
+                        <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
+                      </div>
+                      <div className="carousel-progress-container">
+                        <div className="carousel-progress-bar">
+                          <div
+                            className="carousel-progress-fill"
+                            style={{ width: `${course.progress}%` }}
+                          ></div>
+                        </div>
+                        <span className="carousel-progress-text">{course.progress}%</span>
+                      </div>
+                      <div className="carousel-card-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Action Buttons */}
+            <div className="my-classes-actions">
+              <button className="compact-action-btn" onClick={() => {
+                if (onNavigate) {
+                  onNavigate('Assessments')
+                } else {
+                  setShowAssessments(true)
+                }
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span>Assessments</span>
+              </button>
+              <button className="compact-action-btn" onClick={() => setShowMyCourses(true)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>Manage Courses</span>
+              </button>
+            </div>
+          </div>
+
           {/* Upcoming Sessions */}
           <div className="dashboard-section">
             <div className="section-header-with-button">
@@ -342,54 +609,6 @@ function MentorHome() {
                     </div>
                   </div>
                   <p className="session-card-inline-location">{session.type}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* My Courses Preview */}
-          <div className="dashboard-section">
-            <div className="section-header-with-button">
-              <h2 className="section-title">My Courses</h2>
-              <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
-                View all
-              </button>
-            </div>
-            <div className="courses-grid-preview">
-              {recentCourses.map((course) => (
-                <div key={course.id} className="course-preview-card">
-                  <div className="course-preview-header">
-                    <h3 className="course-preview-title">{course.title}</h3>
-                    <span className={`course-status-badge ${course.status.toLowerCase()}`}>
-                      {course.status}
-                    </span>
-                  </div>
-                  <div className="course-preview-stats">
-                    <div className="course-preview-stat">
-                      <span className="stat-label">Students:</span>
-                      <span className="stat-value">{course.students}</span>
-                    </div>
-                    <div className="course-preview-stat">
-                      <span className="stat-label">Enrollments:</span>
-                      <span className="stat-value">{course.enrollments}</span>
-                    </div>
-                  </div>
-                  <div className="course-preview-progress">
-                    <div className="progress-header">
-                      <span>Progress</span>
-                      <span>{course.progress}%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${course.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="course-preview-actions">
-                    <button className="btn-secondary">Edit Course</button>
-                    <button className="btn-primary">View Enrollments</button>
-                  </div>
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@ import Home from './pages/student_dashboard/Home.jsx'
 import Calendar from './pages/student_dashboard/Calendar.jsx'
 import Profile from './pages/student_dashboard/Profile.jsx'
 import Notification from './pages/student_dashboard/Notification.jsx'
+import Assessments from './pages/student_dashboard/Assessments.jsx'
 import MentorProfile from './mentorProfile.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import { courses } from './Data.jsx'
@@ -30,6 +31,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
   const menuItems = [
     { id: 'Home', label: 'Home', icon: HomeIcon },
     { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
+    { id: 'Assessments', label: 'Assessments', icon: HomeIcon },
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
@@ -68,6 +70,8 @@ function Dashboard({ onLogout, onOpenExplore }) {
         )
       case 'Calendar':
         return <Calendar />
+      case 'Assessments':
+        return <Assessments onBack={() => setActivePage('Home')} />
       case 'Profile':
         return <Profile />
       case 'Notification':
