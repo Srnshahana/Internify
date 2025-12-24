@@ -3,6 +3,8 @@ import Home from './pages/mentor_dashboard/Home.jsx'
 import Calendar from './pages/mentor_dashboard/Calendar.jsx'
 import Profile from './pages/mentor_dashboard/Profile.jsx'
 import Notification from './pages/mentor_dashboard/Notification.jsx'
+import Students from './pages/mentor_dashboard/Students.jsx'
+import Earnings from './pages/mentor_dashboard/Earnings.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon } from './components/Icons.jsx'
 import './App.css'
 
@@ -25,6 +27,8 @@ function MentorDashboard({ onLogout }) {
   const menuItems = [
     { id: 'Home', label: 'Home', icon: HomeIcon },
     { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
+    { id: 'Students', label: 'Students', icon: HomeIcon },
+    { id: 'Earnings', label: 'Earnings', icon: HomeIcon },
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
@@ -34,6 +38,10 @@ function MentorDashboard({ onLogout }) {
         return <Home />
       case 'Calendar':
         return <Calendar />
+      case 'Students':
+        return <Students />
+      case 'Earnings':
+        return <Earnings />
       case 'Profile':
         return <Profile />
       case 'Notification':

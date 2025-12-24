@@ -218,6 +218,64 @@ function Home({ onNavigate, onMentorClick }) {
     }).join('')
   }
 
+  // Quick action handlers
+  const handleBookSession = () => {
+    if (onNavigate) {
+      onNavigate('Calendar')
+    }
+  }
+
+  const handleContinueLearning = () => {
+    if (enrolledCourses.length > 0) {
+      const courseToContinue = enrolledCourses[activeCourseIndex] || enrolledCourses[0]
+      setActiveCourse(courseToContinue)
+    }
+  }
+
+  const handleGiveFeedback = () => {
+    if (onNavigate) {
+      onNavigate('Notification')
+    }
+  }
+
+  const handleViewCertifications = () => {
+    if (onNavigate) {
+      onNavigate('Profile')
+    }
+  }
+
+  const handleViewStudyMaterials = () => {
+    setShowMyCourses(true)
+  }
+
+  const handleJoinUpcomingSession = (session) => {
+    // Try to find a matching enrolled course by title
+    const matchedCourse = enrolledCourses.find((course) => {
+      const courseTitle = course.title.toLowerCase()
+      const sessionCourse = (session.course || '').toLowerCase()
+      return courseTitle.includes(sessionCourse) || sessionCourse.includes(courseTitle)
+    })
+
+    if (matchedCourse) {
+      setActiveCourse(matchedCourse)
+    } else if (onNavigate) {
+      // Fallback: open full calendar view
+      onNavigate('Calendar')
+    }
+  }
+
+  // Flatten assignments for a compact Tasks view
+  const allAssignments = enrolledCourses.flatMap((course) =>
+    (course.assignments || []).map((assignment) => ({
+      ...assignment,
+      courseTitle: course.title,
+    })),
+  )
+
+  const pendingAssignments = allAssignments
+    .filter((a) => a.status !== 'Completed')
+    .slice(0, 3)
+
   // If My Courses screen is shown
   if (showMyCourses) {
     return (
@@ -272,26 +330,27 @@ function Home({ onNavigate, onMentorClick }) {
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
-          <button className="quick-action-btn">
+          <button className="quick-action-btn" onClick={handleBookSession}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Book Session</span>
+          </button>
+          <button className="quick-action-btn" onClick={handleContinueLearning}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Continue Learning</span>
+          </button>
+          <button className="quick-action-btn" onClick={handleGiveFeedback}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <path d="M8 10h8M8 14h5"></path>
             </svg>
-            <span>Messages</span>
-          </button>
-          <button className="quick-action-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <path d="M20 8v6M23 11h-6"></path>
-            </svg>
-            <span>Career Help</span>
-          </button>
-          <button className="quick-action-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-            <span>Resources</span>
+            <span>Give Feedback</span>
           </button>
         </div>
       </div>
@@ -427,7 +486,7 @@ function Home({ onNavigate, onMentorClick }) {
             </div>
             {/* Certifications and Study Materials as Small Buttons */}
             <div className="my-classes-actions">
-              <button className="compact-action-btn">
+              <button className="compact-action-btn" onClick={handleViewCertifications}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
@@ -436,7 +495,7 @@ function Home({ onNavigate, onMentorClick }) {
                 </svg>
                 <span>Certifications</span>
               </button>
-              <button className="compact-action-btn">
+              <button className="compact-action-btn" onClick={handleViewStudyMaterials}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
@@ -448,6 +507,50 @@ function Home({ onNavigate, onMentorClick }) {
               </button>
             </div>
           </div>
+
+          {/* Assignments / Tasks Section */}
+          {pendingAssignments.length > 0 && (
+            <div className="dashboard-section assignments-section">
+              <div className="section-header-with-button">
+                <h2 className="section-title">Assignments & Tasks</h2>
+                <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
+                  View all
+                </button>
+              </div>
+              <div className="assignments-list-home">
+                {pendingAssignments.map((assignment) => (
+                  <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
+                    <div className="assignment-header-home">
+                      <h3 className="assignment-title-home">{assignment.title}</h3>
+                      <span className={`assignment-status-badge-home ${assignment.status.toLowerCase().replace(' ', '-')}`}>
+                        {assignment.status}
+                      </span>
+                    </div>
+                    <p className="assignment-course-home">{assignment.courseTitle}</p>
+                    {assignment.dueDate && (
+                      <p className="assignment-due-home">
+                        Due: {assignment.dueDate}
+                      </p>
+                    )}
+                    <button
+                      className="btn-secondary btn-small"
+                      onClick={() => {
+                        const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
+                        if (course) {
+                          setSelectedCourse(course)
+                          setShowCourseDetail(true)
+                        } else {
+                          setShowMyCourses(true)
+                        }
+                      }}
+                    >
+                      Open
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Progress Graph Section - Smaller */}
           <div className="dashboard-section progress-graph-section compact-graph">
@@ -600,6 +703,14 @@ function Home({ onNavigate, onMentorClick }) {
                       <p className="sidebar-session-course">{session.course}</p>
                       <p className="sidebar-session-mentor">{session.mentor}</p>
                       <p className="sidebar-session-location">{session.location}</p>
+                    </div>
+                    <div className="sidebar-session-actions">
+                      <button
+                        className="btn-primary btn-small"
+                        onClick={() => handleJoinUpcomingSession(session)}
+                      >
+                        Join Class
+                      </button>
                     </div>
                   </div>
                 ))}

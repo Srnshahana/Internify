@@ -8,6 +8,8 @@ const mentorCalendarSessions = baseSessions.map((s, index) => ({
   ...s,
   id: s.id || index + 1,
   title: s.title || 'Mentorship session',
+  mentee: s.mentor || 'Student',
+  joinLink: `https://meet.google.com/session-${s.id || index + 1}`,
 }))
 
 function MentorCalendar() {
@@ -18,8 +20,12 @@ function MentorCalendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
-  const handleJoin = (sessionId) => {
-    console.log('Mentor join session:', sessionId)
+  const handleJoin = (sessionId, joinLink) => {
+    if (joinLink) {
+      window.open(joinLink, '_blank')
+    } else {
+      console.log('Mentor join session:', sessionId)
+    }
   }
 
   const handleReschedule = (sessionId) => {
@@ -77,7 +83,7 @@ function MentorCalendar() {
                     <h4>{session.title}</h4>
                     <span className="session-date-badge">{session.date}</span>
                   </div>
-                  {session.mentor && <p className="session-mentor">With {session.mentor}</p>}
+                  {session.mentee && <p className="session-mentor">With {session.mentee}</p>}
                   <div className="session-type-badge">{session.type}</div>
                 </div>
                 <div className="session-actions">
@@ -87,10 +93,28 @@ function MentorCalendar() {
                   >
                     Reschedule
                   </button>
-                  <button className="session-action-btn session-btn-primary" onClick={() => handleJoin(session.id)}>
+                  <button 
+                    className="session-action-btn session-btn-primary" 
+                    onClick={() => handleJoin(session.id, session.joinLink)}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
                     Join now
                   </button>
                 </div>
+                {session.joinLink && (
+                  <div className="session-join-link">
+                    <a 
+                      href={session.joinLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="join-link-text"
+                    >
+                      {session.joinLink}
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
