@@ -244,6 +244,46 @@ const recentCourses = mentorCourses.map(c => ({
   status: c.status,
 }))
 
+// Active/ongoing classrooms
+const activeClassrooms = [
+  {
+    id: 1,
+    courseTitle: 'React Advanced Patterns',
+    sessionTitle: 'Custom Hooks Deep Dive',
+    studentsCount: 12,
+    activeStudents: 8,
+    startTime: '2:00 PM',
+    duration: '60 min',
+    status: 'live',
+    joinLink: 'https://meet.google.com/react-session',
+    courseId: 1,
+  },
+  {
+    id: 2,
+    courseTitle: 'DSA Mastery',
+    sessionTitle: 'Trees and Graphs',
+    studentsCount: 20,
+    activeStudents: 15,
+    startTime: '3:00 PM',
+    duration: '65 min',
+    status: 'live',
+    joinLink: 'https://meet.google.com/dsa-session',
+    courseId: 3,
+  },
+  {
+    id: 3,
+    courseTitle: 'UI/UX Design Principles',
+    sessionTitle: 'User Research Methods',
+    studentsCount: 8,
+    activeStudents: 6,
+    startTime: '10:00 AM',
+    duration: '50 min',
+    status: 'scheduled',
+    joinLink: 'https://meet.google.com/design-session',
+    courseId: 2,
+  },
+]
+
 function MentorHome({ onNavigate }) {
   const [selectedSessionId, setSelectedSessionId] = useState(upcomingMentorSessions[0]?.id || null)
   const [showMyCourses, setShowMyCourses] = useState(false)
@@ -253,6 +293,12 @@ function MentorHome({ onNavigate }) {
   const [showAssessments, setShowAssessments] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null)
+  
+  // Calendar state for event details
+  const [clickedDate, setClickedDate] = useState(null)
+  const [showEventDetails, setShowEventDetails] = useState(false)
+  const [dateEvents, setDateEvents] = useState([])
+  const [showAddListForm, setShowAddListForm] = useState(false)
   
   // Course/Classroom state
   const [activeCourseIndex, setActiveCourseIndex] = useState(0)
@@ -419,76 +465,112 @@ function MentorHome({ onNavigate }) {
     return <MyCourses onBack={() => setShowMyCourses(false)} />
   }
 
+  // Function to get events for a specific date (mentor sessions)
+  const getEventsForDate = (date) => {
+    const events = []
+    const dayOfMonth = date.getDate()
+    const month = date.getMonth()
+    const year = date.getFullYear()
+
+    // Check upcoming sessions
+    upcomingMentorSessions.forEach((session) => {
+      if (session.dateValue) {
+        const sessionDate = session.dateValue
+        if (
+          sessionDate.getDate() === dayOfMonth &&
+          sessionDate.getMonth() === month &&
+          sessionDate.getFullYear() === year
+        ) {
+          events.push({
+            type: 'session',
+            title: session.course,
+            mentee: session.mentee,
+            time: session.time,
+            topic: session.topic,
+            sessionType: session.type,
+            joinLink: session.joinLink,
+          })
+        }
+      }
+    })
+
+    return events
+  }
+
   return (
-    <div className="dashboard-page desktop-layout">
-      {/* Top Row: Welcome + Quick Actions */}
-      <div className="dashboard-header">
-        <div className="dashboard-welcome">
-          <h1 className="welcome-title">Welcome back, {mentorName}</h1>
-          <p className="welcome-subtitle">Here's a quick snapshot of your mentees and sessions</p>
-        </div>
-        <div className="dashboard-quick-actions">
-          <button className="quick-action-btn" onClick={() => setShowMyCourses(true)}>
-            <span>My Courses</span>
-          </button>
-          <button className="quick-action-btn" onClick={() => {
-            if (onNavigate) {
-              onNavigate('Assessments')
-            } else {
-              setShowAssessments(true)
-            }
-          }}>
-            <span>Assessments</span>
-          </button>
-          <button className="quick-action-btn" onClick={() => setShowPendingWork(true)}>
-            <span>Review pending work</span>
-          </button>
-          <button className="quick-action-btn" onClick={() => setShowMessages(true)}>
-            <span>Message mentees</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Cards Row */}
-      <div className="dashboard-section progress-overview-section">
-        <div className="progress-overview-cards">
-          {mentorStats.map((stat) => (
-            <div 
-              key={stat.label} 
-              className={`progress-overview-card ${stat.clickable ? 'clickable' : ''}`}
-              style={{ borderTop: `4px solid ${stat.color}` }}
-              onClick={stat.clickable ? () => setShowStudentRequests(true) : undefined}
-            >
-              <div className="progress-card-icon" style={{ fontSize: '32px' }}>
-                {stat.icon}
+    <div className="dashboard-page-new">
+      {/* Welcome Card and Calendar Row */}
+      <div className="welcome-calendar-row">
+        {/* Left Column: Welcome Card + Stats Cards + My Classes + Pending Work */}
+        <div className="welcome-left-column">
+          {/* Welcome Card with Illustration */}
+          <div className="welcome-card-new">
+            <div className="welcome-card-content">
+              <h1 className="welcome-title-new">Welcome back, {mentorName}</h1>
+              <p className="welcome-subtitle-new">Here's what's happening with your mentoring today</p>
+              <div className="welcome-card-actions">
+                <button className="welcome-card-btn" onClick={() => setShowMyCourses(true)}>
+                  Manage Courses
+                </button>
+                <button className="welcome-card-btn" onClick={() => setShowStudentRequests(true)}>
+                  View Requests
+                </button>
+                <button className="welcome-card-btn" onClick={() => setShowPendingWork(true)}>
+                  Review Work
+                </button>
+                <button className="welcome-card-btn" onClick={() => setShowMessages(true)}>
+                  Messages
+                </button>
               </div>
-              <div className="progress-card-content">
-                <h3 className="progress-card-title">{stat.label}</h3>
-                <p className="progress-card-value" style={{ color: stat.color, fontSize: '28px', fontWeight: '700' }}>
-                  {stat.value}
-                </p>
-              </div>
-              {stat.clickable && (
-                <div className="progress-card-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="welcome-card-illustration">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Person on laptop */}
+                <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
+                <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
+                <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
+                {/* Books stack */}
+                <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
+                <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
+                <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
+                {/* Abstract shapes */}
+                <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
+                <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
+                <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
+              </svg>
+            </div>
+          </div>
 
-      {/* Main Grid: Left (My Classes + Sessions) | Right (Session Details) */}
-      <div className="dashboard-main-grid">
-        <div className="dashboard-main-content">
-          {/* My Classes Section */}
+          {/* Stats Overview Cards */}
+          <div className="dashboard-section progress-overview-section-new">
+            <div className="progress-overview-cards-new">
+              {mentorStats.map((stat) => (
+                <div 
+                  key={stat.label} 
+                  className="progress-overview-card"
+                  onClick={stat.clickable ? () => setShowStudentRequests(true) : undefined}
+                  style={{ cursor: stat.clickable ? 'pointer' : 'default' }}
+                >
+                  <div className="progress-card-icon">
+                    <span style={{ fontSize: '20px' }}>{stat.icon}</span>
+                  </div>
+                  <div className="progress-card-content">
+                    <h3 className="progress-card-title">{stat.label}</h3>
+                    <p className="progress-card-value">{stat.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Classrooms Section - Active/Ongoing */}
           <div className="my-classes-section">
             <div className="section-header-with-button">
-              <h2 className="section-title">My Classes</h2>
-              <button className="view-all-btn" onClick={() => setShowMyCourses(true)}>
-                View All
+              <h2 className="section-title">Classrooms</h2>
+              <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
               </button>
             </div>
             <div className="classroom-carousel-section">
@@ -497,61 +579,96 @@ function MentorHome({ onNavigate }) {
                 ref={carouselRef}
                 onScroll={handleCarouselScroll}
               >
-                {mentorCourses.map((course, index) => (
-                  <div
-                    key={course.id}
-                    className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedCourse(course)
-                      setShowCourseDetail(true)
-                    }}
-                  >
-                    <div className="carousel-card-content">
-                      <div className="carousel-header-section">
-                        <div className="carousel-mentor-photo">
-                          <img src={course.mentorImage} alt={course.mentor} />
+                {activeClassrooms.map((classroom, index) => {
+                  const course = mentorCourses.find(c => c.id === classroom.courseId)
+                  return (
+                    <div
+                      key={classroom.id}
+                      className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
+                      onClick={() => {
+                        if (course) {
+                          setSelectedCourse(course)
+                          setShowCourseDetail(true)
+                        }
+                      }}
+                    >
+                      <div className="carousel-card-content">
+                        <div className="carousel-header-section">
+                          <div className="carousel-mentor-photo">
+                            {course && <img src={course.mentorImage} alt={course.mentor} />}
+                          </div>
+                          <div className="carousel-header-info">
+                            <p className="carousel-mentor-name">{course?.mentor || 'Mentor'}</p>
+                            <p className="carousel-mentor-role">Mentor</p>
+                          </div>
+                          {classroom.status === 'live' && (
+                            <div className="live-indicator">
+                              <span className="live-dot"></span>
+                              <span>Live</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="carousel-header-info">
-                          <p className="carousel-mentor-name">{course.mentor}</p>
-                          <p className="carousel-mentor-role">Mentor</p>
+                        <div className="carousel-details-section">
+                          <h3 className="carousel-course-title">{classroom.courseTitle}</h3>
+                          <div className="carousel-session-info">
+                            <span className="carousel-session-label">Session:</span>
+                            <span className="carousel-session-time">{classroom.sessionTitle}</span>
+                          </div>
+                          <div className="carousel-session-info">
+                            <span className="carousel-session-label">Time:</span>
+                            <span className="carousel-session-time">{classroom.startTime} • {classroom.duration}</span>
+                          </div>
+                          <div className="carousel-students-info">
+                            <span className="carousel-students-label">Active:</span>
+                            <span className="carousel-students-count">{classroom.activeStudents}/{classroom.studentsCount} students</span>
+                          </div>
+                          <div className={`carousel-type-tag ${classroom.status}`}>
+                            {classroom.status === 'live' ? 'Live Now' : 'Scheduled'}
+                          </div>
                         </div>
-                      </div>
-                      <div className="carousel-details-section">
-                        <h3 className="carousel-course-title">{course.title}</h3>
-                        <div className="carousel-rating">
-                          <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
+                        <div className="carousel-actions-section">
+                          {classroom.status === 'live' && (
+                            <button
+                              className="join-classroom-btn"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (classroom.joinLink) {
+                                  window.open(classroom.joinLink, '_blank')
+                                } else if (course) {
+                                  setActiveCourse(course)
+                                }
+                              }}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                              </svg>
+                              Join Classroom
+                            </button>
+                          )}
+                          {classroom.status === 'scheduled' && (
+                            <button
+                              className="view-classroom-btn"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (course) {
+                                  setSelectedCourse(course)
+                                  setShowCourseDetail(true)
+                                }
+                              }}
+                            >
+                              View Details
+                            </button>
+                          )}
                         </div>
-                        <div className="carousel-course-meta">
-                          <span className="carousel-category">{course.category}</span>
-                          <span className="carousel-level">{course.level}</span>
+                        <div className="carousel-card-arrow">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
                         </div>
-                        <div className="carousel-session-info">
-                          <span className="carousel-session-label">Next Session:</span>
-                          <span className="carousel-session-time">{course.nextSession}</span>
-                        </div>
-                        <div className="carousel-students-info">
-                          <span className="carousel-students-label">Students:</span>
-                          <span className="carousel-students-count">{course.students}</span>
-                        </div>
-                        <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
-                      </div>
-                      <div className="carousel-progress-container">
-                        <div className="carousel-progress-bar">
-                          <div
-                            className="carousel-progress-fill"
-                            style={{ width: `${course.progress}%` }}
-                          ></div>
-                        </div>
-                        <span className="carousel-progress-text">{course.progress}%</span>
-                      </div>
-                      <div className="carousel-card-arrow">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
             {/* Action Buttons */}
@@ -569,7 +686,7 @@ function MentorHome({ onNavigate }) {
                   <line x1="16" y1="13" x2="8" y2="13"></line>
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                 </svg>
-                <span>Assessments</span>
+                Assessments
               </button>
               <button className="compact-action-btn" onClick={() => setShowMyCourses(true)}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -579,204 +696,317 @@ function MentorHome({ onNavigate }) {
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                   <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                <span>Manage Courses</span>
+                Manage Courses
               </button>
             </div>
           </div>
 
-          {/* Upcoming Sessions */}
-          <div className="dashboard-section">
-            <div className="section-header-with-button">
-              <h2 className="section-title">Upcoming Sessions</h2>
-              <button className="view-all-btn">View all</button>
+          {/* Pending Work Section */}
+          {mentorStats.find(s => s.label === 'Student Requests')?.value > 0 && (
+            <div className="dashboard-section assignments-section-home">
+              <div className="section-header-with-button">
+                <h2 className="section-title">Student Requests</h2>
+                <button className="view-all-btn-arrow" onClick={() => setShowStudentRequests(true)} aria-label="View All">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div className="assignments-list-home">
+                <div className="assignment-card-home">
+                  <div className="assignment-header-home">
+                    <h3 className="assignment-title-home">New student enrollment requests</h3>
+                    <span className="assignment-status-badge-home in-progress">
+                      {mentorStats.find(s => s.label === 'Student Requests')?.value} pending
+                    </span>
+                  </div>
+                  <p className="assignment-course-home">Review and approve student requests</p>
+                  <button
+                    className="btn-secondary btn-small"
+                    onClick={() => setShowStudentRequests(true)}
+                  >
+                    Review
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="sessions-list">
-              {upcomingMentorSessions.map((session) => (
-                <div
-                  key={session.id}
-                  className={`session-card-inline ${session.id === selectedSessionId ? 'active' : ''}`}
-                  onClick={() => setSelectedSessionId(session.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="session-card-inline-header">
-                    <div>
-                      <p className="session-card-inline-course">{session.course}</p>
-                      <p className="session-card-inline-mentor">With {session.mentee}</p>
+          )}
+        </div>
+
+        {/* Right Column: Calendar + Today + Upcoming Sessions */}
+        <div className="calendar-assignments-column">
+          {/* Calendar */}
+          <div className="dashboard-section compact-calendar-new welcome-calendar calendar-inspiration">
+            <div className="calendar-month-header">
+              <button
+                className="calendar-nav-btn"
+                onClick={() => {
+                  setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
+                  setShowAddListForm(false)
+                  setShowEventDetails(false)
+                  setClickedDate(null)
+                  setDateEvents([])
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <h3 className="calendar-month-name">{currentMonth}</h3>
+              <button
+                className="calendar-nav-btn"
+                onClick={() => {
+                  setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
+                  setShowAddListForm(false)
+                  setShowEventDetails(false)
+                  setClickedDate(null)
+                  setDateEvents([])
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+            <div className="calendar-weekdays-new">
+              {weekDays.map((day) => (
+                <div key={day} className="calendar-weekday-new">{day}</div>
+              ))}
+            </div>
+            <div className="calendar-days-grid-new">
+              {(() => {
+                const year = selectedDate.getFullYear()
+                const month = selectedDate.getMonth()
+                const firstDay = new Date(year, month, 1).getDay()
+                const daysInMonth = new Date(year, month + 1, 0).getDate()
+                const days = []
+                
+                for (let i = 0; i < firstDay; i++) {
+                  days.push(null)
+                }
+                
+                for (let date = 1; date <= daysInMonth; date++) {
+                  days.push(date)
+                }
+                
+                while (days.length < 35) {
+                  days.push(null)
+                }
+                
+                return days.map((date, i) => {
+                  if (date === null) {
+                    return <div key={i} className="calendar-day-new empty"></div>
+                  }
+                  
+                  const isToday = date === new Date().getDate() && 
+                                 month === new Date().getMonth() && 
+                                 year === new Date().getFullYear()
+                  
+                  const dayDate = new Date(year, month, date)
+                  const hasEvent = datesWithSessions.has(date)
+                  const isEventRange = false
+                  const isSelected = clickedDate && clickedDate.getDate() === date && 
+                                    clickedDate.getMonth() === month && 
+                                    clickedDate.getFullYear() === year
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isEventRange ? 'event-range' : ''} ${isSelected ? 'selected' : ''}`}
+                      onClick={() => {
+                        const clickedDateObj = new Date(year, month, date)
+                        setClickedDate(clickedDateObj)
+                        const events = getEventsForDate(clickedDateObj)
+                        if (events.length > 0) {
+                          setDateEvents(events)
+                          setShowEventDetails(true)
+                          setShowAddListForm(false)
+                        } else {
+                          setShowEventDetails(false)
+                          setShowAddListForm(true)
+                        }
+                      }}
+                    >
+                      <span className="calendar-day-number">{date}</span>
+                      {hasEvent && !isEventRange && <span className="event-dot"></span>}
                     </div>
-                    <div className="session-card-inline-time">
-                      <div>{session.time}</div>
-                      <div style={{ fontSize: '12px', color: '#6b7280' }}>{session.date}</div>
+                  )
+                })
+              })()}
+            </div>
+
+            {/* Event Details Modal - Shown when clicking a date with events */}
+            {showEventDetails && clickedDate && dateEvents.length > 0 && (
+              <div className="calendar-event-details-modal">
+                <div className="calendar-event-details-header">
+                  <div className="calendar-event-details-title-section">
+                    <h3 className="calendar-event-details-title">
+                      {clickedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </h3>
+                    <span className="calendar-event-details-count">{dateEvents.length} {dateEvents.length === 1 ? 'session' : 'sessions'}</span>
+                  </div>
+                  <button 
+                    className="calendar-event-details-close"
+                    onClick={() => {
+                      setShowEventDetails(false)
+                      setClickedDate(null)
+                      setDateEvents([])
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div className="calendar-event-details-list">
+                  {dateEvents.map((event, index) => (
+                    <div key={index} className="calendar-event-details-item">
+                      <div className="calendar-event-icon session-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                      <div className="calendar-event-content">
+                        <h4 className="calendar-event-item-title">{event.title}</h4>
+                        <div className="calendar-event-meta">
+                          <span className="calendar-event-time">{event.time}</span>
+                          {event.mentee && <span className="calendar-event-mentor">with {event.mentee}</span>}
+                          {event.topic && <span className="calendar-event-location">{event.topic}</span>}
+                        </div>
+                      </div>
+                      <button 
+                        className="calendar-event-action-btn"
+                        onClick={() => event.joinLink && handleJoinSession(event.joinLink)}
+                      >
+                        Join
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add New List Form - Only shown when a date is clicked without events */}
+            {showAddListForm && clickedDate && !showEventDetails && (
+              <div className="calendar-add-list-form">
+                <div className="add-list-header">
+                  <h3 className="add-list-title">Add new session</h3>
+                  <button 
+                    className="add-list-menu-btn"
+                    onClick={() => {
+                      setShowAddListForm(false)
+                      setClickedDate(null)
+                      setDateEvents([])
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div className="add-list-inputs">
+                  <input type="text" placeholder="Session title" className="add-list-input" />
+                  <div className="add-list-input-wrapper">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <input 
+                      type="text" 
+                      placeholder="Date" 
+                      className="add-list-input" 
+                      value={clickedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      readOnly
+                    />
+                  </div>
+                  <div className="add-list-input-wrapper">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <input type="text" placeholder="Time" className="add-list-input" />
+                  </div>
+                  <input type="text" placeholder="Student name" className="add-list-input" />
+                </div>
+                <button 
+                  className="add-list-submit-btn"
+                  onClick={() => {
+                    setShowAddListForm(false)
+                    setClickedDate(null)
+                    setDateEvents([])
+                  }}
+                >
+                  Submit Session
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Today's Sessions Section */}
+          <div className="today-events-section">
+            <h3 className="today-title">Today</h3>
+            <div className="today-events-list">
+              {upcomingMentorSessions
+                .filter(session => {
+                  if (!session.dateValue) return false
+                  return isSameDay(session.dateValue, new Date())
+                })
+                .slice(0, 2)
+                .map((session) => (
+                  <div key={session.id} className="today-event-card">
+                    <div className="event-icon purple-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                    <div className="event-details">
+                      <p className="event-title">{session.course}</p>
+                      <p className="event-time">{session.time} - {session.mentee}</p>
                     </div>
                   </div>
-                  <p className="session-card-inline-location">{session.type}</p>
+                ))}
+            </div>
+          </div>
+
+          {/* Upcoming Sessions Below Calendar */}
+          <div className="upcoming-sessions-compact-new">
+            <div className="section-header-with-button">
+              <h2 className="section-title-small">Upcoming Sessions</h2>
+              <button className="view-all-btn-small" onClick={() => onNavigate && onNavigate('Calendar')}>
+                View all
+              </button>
+            </div>
+            <div className="upcoming-sessions-list-compact">
+              {upcomingMentorSessions.slice(0, 2).map((session) => (
+                <div key={session.id} className="upcoming-session-item-compact">
+                  <div className="session-time-compact">
+                    <span className="session-time-value-compact">{session.time}</span>
+                    <span className="session-time-period-compact">{session.date}</span>
+                  </div>
+                  <div className="session-info-compact">
+                    <p className="session-course-compact">{session.course}</p>
+                    <p className="session-mentor-compact">with {session.mentee}</p>
+                  </div>
+                  <button
+                    className="btn-primary-compact"
+                    onClick={() => session.joinLink && handleJoinSession(session.joinLink)}
+                  >
+                    Join
+                  </button>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Right Sidebar: Selected Session Details */}
-        <div className="dashboard-sidebar">
-          <div className="dashboard-section sidebar-section">
-            <h2 className="section-title">Session Details</h2>
-            {selectedSession ? (
-              <div className="info-card">
-                <div className="info-item">
-                  <span className="info-label">Mentee</span>
-                  <span className="info-value">{selectedSession.mentee}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Course</span>
-                  <span className="info-value">{selectedSession.course}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Time</span>
-                  <span className="info-value">{selectedSession.time}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Date</span>
-                  <span className="info-value">{selectedSession.date}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Topic</span>
-                  <span className="info-value">{selectedSession.topic}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Type</span>
-                  <span className="info-value">{selectedSession.type}</span>
-                </div>
-                {selectedSession.joinLink && (
-                  <div className="session-join-section">
-                    <button 
-                      className="btn-primary btn-full"
-                      onClick={() => handleJoinSession(selectedSession.joinLink)}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                      </svg>
-                      Join Session
-                    </button>
-                    <a 
-                      href={selectedSession.joinLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="join-link-text"
-                    >
-                      {selectedSession.joinLink}
-                    </a>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="page-subtitle">Select a session from the left to see details.</p>
-            )}
-          </div>
-
-          {/* Calendar Section */}
-          <div className="dashboard-section sidebar-section compact-calendar">
-            <h2 className="section-title">Calendar</h2>
-            <div className="calendar-mini">
-              <div className="calendar-month-selector">
-                <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>
-                  ←
-                </button>
-                <h3>{currentMonth}</h3>
-                <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>
-                  →
-                </button>
-              </div>
-              <div className="calendar-weekdays">
-                {weekDays.map((day) => (
-                  <div key={day} className="calendar-weekday">{day}</div>
-                ))}
-              </div>
-              <div className="calendar-days-mini">
-                {calendarDays.map((day, index) => {
-                  if (day === null) {
-                    return <div key={`empty-${index}`} className="calendar-day-mini empty"></div>
-                  }
-                  
-                  const isToday = day === new Date().getDate() && 
-                                  selectedDate.getMonth() === new Date().getMonth() &&
-                                  selectedDate.getFullYear() === new Date().getFullYear()
-                  
-                  const hasSession = datesWithSessions.has(day)
-                  
-                  const dayDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day)
-                  const isSelected = selectedCalendarDate && isSameDay(dayDate, selectedCalendarDate)
-                  
-                  return (
-                    <div
-                      key={day}
-                      className={`calendar-day-mini ${isToday ? 'today' : ''} ${hasSession ? 'has-session' : ''} ${isSelected ? 'selected' : ''}`}
-                      onClick={() => handleDateClick(day)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {day}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Selected Date Sessions */}
-          {selectedCalendarDate && selectedDateSessions.length > 0 && (
-            <div className="dashboard-section sidebar-section">
-              <h2 className="section-title">
-                Sessions for {selectedCalendarDate.toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </h2>
-              <div className="date-sessions-list">
-                {selectedDateSessions.map((session) => (
-                  <div key={session.id} className="date-session-card">
-                    <div className="date-session-header">
-                      <div>
-                        <h4 className="date-session-time">{session.time}</h4>
-                        <p className="date-session-mentee">With {session.mentee}</p>
-                        <p className="date-session-course">{session.course}</p>
-                      </div>
-                    </div>
-                    <div className="date-session-topic">
-                      <span className="session-type-badge">{session.type}</span>
-                      <span>{session.topic}</span>
-                    </div>
-                    <div className="date-session-actions">
-                      <button 
-                        className="btn-secondary btn-small"
-                        onClick={() => handleViewClassroom(session)}
-                      >
-                        View Classroom
-                      </button>
-                      <button 
-                        className="btn-secondary btn-small"
-                        onClick={() => handleReschedule(session.id)}
-                      >
-                        Reschedule
-                      </button>
-                      <button 
-                        className="btn-danger btn-small"
-                        onClick={() => handleCancel(session.id)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedCalendarDate && selectedDateSessions.length === 0 && (
-            <div className="dashboard-section sidebar-section">
-              <p className="page-subtitle" style={{ textAlign: 'center', padding: '16px' }}>
-                No sessions scheduled for this date.
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

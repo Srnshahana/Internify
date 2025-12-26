@@ -30,9 +30,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
 
   const sidebarMenuItems = [
     { id: 'Home', icon: HomeIcon },
-    { id: 'Grid', icon: GridIcon },
     { id: 'Calendar', icon: CalendarIcon },
-    { id: 'Assessments', icon: FolderIcon },
     { id: 'Profile', icon: SettingsIcon },
   ]
 
@@ -112,17 +110,13 @@ function Dashboard({ onLogout, onOpenExplore }) {
             <nav className="sidebar-nav-menu">
               {sidebarMenuItems.map((item) => {
                 const IconComponent = item.icon
-                const isActive = activePage === item.id || (item.id === 'Grid' && activePage === 'Assessments')
+                const isActive = activePage === item.id
                 return (
                   <button
                     key={item.id}
                     className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                     onClick={() => {
-                      if (item.id === 'Grid') {
-                        setActivePage('Assessments')
-                      } else {
-                        setActivePage(item.id)
-                      }
+                      setActivePage(item.id)
                     }}
                     title={item.id}
                   >
@@ -177,7 +171,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
       )}
 
       <main className="dashboard-main-new">
-        <div className="dashboard-content-new">
+        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
           {renderPage(activePage, setActivePage)}
         </div>
       </main>
