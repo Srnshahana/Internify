@@ -194,22 +194,23 @@ function Assessments({ onBack }) {
     const sentToIds = assessment.sentTo || []
 
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
-          <button className="back-button" onClick={() => {
-            setShowSendForm(false)
-            setAssessmentToSend(null)
-            setSelectedStudents([])
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Back
-          </button>
-          <h1 className="page-title">Send Assessment</h1>
-        </div>
+      <div className="dashboard-page-new">
+        <div className="dashboard-section">
+          <div className="course-detail-header">
+            <button className="back-button" onClick={() => {
+              setShowSendForm(false)
+              setAssessmentToSend(null)
+              setSelectedStudents([])
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Back
+            </button>
+            <h1 className="page-title">Send Assessment</h1>
+          </div>
 
-        <div className="work-review-container">
+          <div className="work-review-container">
           <div className="work-review-card">
             <div className="work-review-header">
               <div>
@@ -287,6 +288,7 @@ function Assessments({ onBack }) {
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
     )
@@ -304,9 +306,10 @@ function Assessments({ onBack }) {
     }
 
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
-          <button className="back-button" onClick={() => setSelectedSubmission(null)}>
+      <div className="dashboard-page-new">
+        <div className="dashboard-section">
+          <div className="course-detail-header">
+            <button className="back-button" onClick={() => setSelectedSubmission(null)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -392,6 +395,7 @@ function Assessments({ onBack }) {
             )}
           </div>
         </div>
+        </div>
       </div>
     )
   }
@@ -404,9 +408,10 @@ function Assessments({ onBack }) {
     }
 
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
-          <button className="back-button" onClick={() => setSelectedAssessment(null)}>
+      <div className="dashboard-page-new">
+        <div className="dashboard-section">
+          <div className="course-detail-header">
+            <button className="back-button" onClick={() => setSelectedAssessment(null)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -501,14 +506,16 @@ function Assessments({ onBack }) {
             </div>
           </div>
         </div>
+        </div>
       </div>
     )
   }
 
   if (showCreateForm) {
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
+      <div className="dashboard-page-new">
+        <div className="dashboard-section">
+          <div className="course-detail-header">
           <button className="back-button" onClick={() => setShowCreateForm(false)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"></polyline>
@@ -583,23 +590,23 @@ function Assessments({ onBack }) {
             </div>
           </div>
         </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="course-detail-header">
-        <button className="back-button" onClick={onBack}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Back
-        </button>
-        <h1 className="page-title">Assessments</h1>
-      </div>
-
+    <div className="dashboard-page-new">
       <div className="dashboard-section">
+        <div className="course-detail-header">
+          <button className="back-button" onClick={onBack}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back
+          </button>
+          <h1 className="page-title">Assessments</h1>
+        </div>
         <div className="section-header-with-button">
           <h2 className="section-title">All Assessments</h2>
           <button className="btn-primary" onClick={() => setShowCreateForm(true)}>

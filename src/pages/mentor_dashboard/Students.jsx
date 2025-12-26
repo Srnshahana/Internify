@@ -89,46 +89,54 @@ function Students() {
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <h1>My Students</h1>
-        <p className="page-subtitle">View all enrolled students and their progress</p>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="students-filters">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search students by name, email, or course..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="dashboard-page-new">
+      <div className="dashboard-section">
+        <div className="section-header-with-button">
+          <div>
+            <h2 className="section-title">My Students</h2>
+            <p className="section-subtitle" style={{ marginTop: '8px', opacity: 0.7 }}>View all enrolled students and their progress</p>
+          </div>
         </div>
-        <div className="filter-buttons">
-          <button
-            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All ({enrolledStudents.length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
-            onClick={() => setFilter('active')}
-          >
-            Active ({enrolledStudents.filter(s => s.status === 'Active').length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
-            onClick={() => setFilter('completed')}
-          >
-            Completed ({enrolledStudents.filter(s => s.status === 'Completed').length})
-          </button>
-        </div>
-      </div>
 
-      {/* Students List */}
-      <div className="students-list">
+        {/* Filters and Search */}
+        <div className="students-filters" style={{ marginTop: '24px', marginBottom: '24px' }}>
+          <div className="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search students by name, email, or course..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ paddingLeft: '44px' }}
+            />
+          </div>
+          <div className="filter-buttons">
+            <button
+              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All ({enrolledStudents.length})
+            </button>
+            <button
+              className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
+              onClick={() => setFilter('active')}
+            >
+              Active ({enrolledStudents.filter(s => s.status === 'Active').length})
+            </button>
+            <button
+              className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
+              onClick={() => setFilter('completed')}
+            >
+              Completed ({enrolledStudents.filter(s => s.status === 'Completed').length})
+            </button>
+          </div>
+        </div>
+
+        {/* Students List */}
+        <div className="students-list">
         {filteredStudents.length === 0 ? (
           <div className="empty-state">
             <p>No students found matching your criteria.</p>
@@ -205,6 +213,7 @@ function Students() {
             )
           })
         )}
+        </div>
       </div>
     </div>
   )

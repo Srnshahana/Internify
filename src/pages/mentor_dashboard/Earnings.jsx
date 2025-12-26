@@ -92,59 +92,62 @@ function Earnings() {
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <h1>Earnings</h1>
-        <p className="page-subtitle">Track your earnings, payouts, and transaction history</p>
-      </div>
+    <div className="dashboard-page-new">
+      <div className="dashboard-section">
+        <div className="section-header-with-button">
+          <div>
+            <h2 className="section-title">Earnings</h2>
+            <p className="section-subtitle" style={{ marginTop: '8px', opacity: 0.7 }}>Track your earnings, payouts, and transaction history</p>
+          </div>
+        </div>
 
-      {/* Earnings Overview Cards */}
-      <div className="dashboard-section progress-overview-section">
-        <div className="progress-overview-cards">
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #22c55e' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>💰</div>
+        {/* Earnings Overview Cards */}
+        <div className="progress-overview-section-new" style={{ marginTop: '24px', marginBottom: '32px' }}>
+          <div className="progress-overview-cards-new">
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">💰</div>
             <div className="progress-card-content">
               <h3 className="progress-card-title">Total Earnings</h3>
-              <p className="progress-card-value" style={{ color: '#22c55e', fontSize: '28px', fontWeight: '700' }}>
+              <p className="progress-card-value" style={{ color: '#22c55e' }}>
                 {formatCurrency(earningsData.totalEarnings)}
               </p>
             </div>
           </div>
 
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #f59e0b' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>⏳</div>
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">⏳</div>
             <div className="progress-card-content">
               <h3 className="progress-card-title">Pending Payouts</h3>
-              <p className="progress-card-value" style={{ color: '#f59e0b', fontSize: '28px', fontWeight: '700' }}>
+              <p className="progress-card-value" style={{ color: '#f59e0b' }}>
                 {formatCurrency(earningsData.pendingPayouts)}
               </p>
             </div>
           </div>
 
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #3b82f6' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>📅</div>
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">📅</div>
             <div className="progress-card-content">
               <h3 className="progress-card-title">This Month</h3>
-              <p className="progress-card-value" style={{ color: '#3b82f6', fontSize: '28px', fontWeight: '700' }}>
+              <p className="progress-card-value" style={{ color: '#3b82f6' }}>
                 {formatCurrency(earningsData.thisMonth)}
               </p>
             </div>
           </div>
 
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #8b5cf6' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>📊</div>
+          <div className="progress-overview-card">
+            <div className="progress-card-icon">📊</div>
             <div className="progress-card-content">
               <h3 className="progress-card-title">Last Month</h3>
-              <p className="progress-card-value" style={{ color: '#8b5cf6', fontSize: '28px', fontWeight: '700' }}>
+              <p className="progress-card-value" style={{ color: '#8b5cf6' }}>
                 {formatCurrency(earningsData.lastMonth)}
               </p>
             </div>
           </div>
+          </div>
         </div>
-      </div>
 
-      {/* Transaction History */}
-      <div className="dashboard-section">
+        {/* Transaction History */}
+        <div style={{ marginTop: '32px' }}>
         <div className="section-header-with-button">
           <h2 className="section-title">Transaction History</h2>
           <div className="filter-buttons">
@@ -224,10 +227,10 @@ function Earnings() {
             </table>
           )}
         </div>
-      </div>
+        </div>
 
-      {/* Payout Information */}
-      <div className="dashboard-section">
+        {/* Payout Information */}
+        <div style={{ marginTop: '32px' }}>
         <h2 className="section-title">Payout Information</h2>
         <div className="payout-info-card">
           <div className="info-item">
@@ -248,6 +251,7 @@ function Earnings() {
             <button className="btn-secondary">Update Bank Details</button>
             <button className="btn-primary">Request Early Payout</button>
           </div>
+        </div>
         </div>
       </div>
     </div>
