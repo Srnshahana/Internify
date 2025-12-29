@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import Home from './pages/mentor_dashboard/Home.jsx'
-import Calendar from './pages/mentor_dashboard/Calendar.jsx'
-import Profile from './pages/mentor_dashboard/Profile.jsx'
-import Notification from './pages/mentor_dashboard/Notification.jsx'
-import Students from './pages/mentor_dashboard/Students.jsx'
-import Earnings from './pages/mentor_dashboard/Earnings.jsx'
-import Assessments from './pages/mentor_dashboard/Assessments.jsx'
-import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, SettingsIcon, SearchIcon, GridIcon, FolderIcon } from './components/Icons.jsx'
-import './App.css'
+import Home from './Home.jsx'
+import Calendar from './Calendar.jsx'
+import Profile from './Profile.jsx'
+import Notification from './Notification.jsx'
+import Students from './Students.jsx'
+import Earnings from './Earnings.jsx'
+import Assessments from './Assessments.jsx'
+import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, SettingsIcon, SearchIcon, GridIcon, FolderIcon } from '../../components/Icons.jsx'
+import '../../App.css'
 
 function MentorDashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
@@ -144,5 +144,3 @@ function MentorDashboard({ onLogout }) {
 }
 
 export default MentorDashboard
-
-

@@ -5,9 +5,6 @@ import { searchCourses, searchMentors, getMentorsByCourse } from './Data.jsx'
 import './App.css'
 
 
-
-
-
 export default function Explore({
   mentors,
   courses = [],
@@ -16,6 +13,7 @@ export default function Explore({
   initialQuery,
   onMentorClick,
   onBookSession,
+  isLoading = false,
 }) {
   const [activeTab, setActiveTab] = useState('mentors')
   const [term, setTerm] = useState(initialQuery || '')
@@ -62,19 +60,125 @@ export default function Explore({
     }
   }
 
+  // Helper function to extract mentor data (handles both API and static structures)
+  const getMentorData = (mentor) => {
+    // Check if it's API structure (has mentor_id or profile_image)
+    const isApiStructure = mentor.mentor_id !== undefined || mentor.profile_image !== undefined
+    
+    if (isApiStructure) {
+      // Extract experience years from experience array
+      let experienceYears = 0
+      if (mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0) {
+        const firstExp = mentor.experience[0]
+        experienceYears = firstExp?.years || firstExp?.years_of_experience || firstExp?.duration || 0
+        // If experience is an object with years property
+        if (typeof firstExp === 'object' && firstExp.years) {
+          experienceYears = firstExp.years
+        }
+      }
+      
+      // Extract skill names from skills array (skills might be objects with name property)
+      const skillNames = mentor.skills && Array.isArray(mentor.skills)
+        ? mentor.skills.map(skill => {
+            if (typeof skill === 'string') return skill
+            return skill.name || skill.skill_name || skill.title || ''
+          }).filter(Boolean)
+        : []
+      
+      // Get expertise areas (experties_in is an array of strings)
+      const expertise = mentor.experties_in || []
+      
+      // Get name - check multiple possible fields
+      const name = mentor.name || mentor.full_name || mentor.first_name || mentor.username || 'Mentor'
+      
+      // Get role/company from experience array
+      const currentExp = mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0
+        ? mentor.experience[0]
+        : null
+      const role = currentExp?.role || currentExp?.job_title || currentExp?.position || mentor.role || ''
+      const company = currentExp?.company || currentExp?.organization || currentExp?.employer || mentor.company || ''
+      
+      // Get category (might be array or string)
+      const categoryDisplay = Array.isArray(mentor.category) 
+        ? mentor.category.join(', ') 
+        : mentor.category || ''
+      
+      return {
+        id: mentor.mentor_id || mentor.id,
+        mentor_id: mentor.mentor_id || mentor.id,
+        name,
+        role,
+        company,
+        image: mentor.profile_image || mentor.image,
+        bio: mentor.bio ? mentor.bio.replace(/[""]/g, '').trim() : '',
+        focus: expertise.length > 0 ? expertise.join(', ') : mentor.focus || '',
+        expertise: expertise,
+        skills: skillNames.length > 0 ? skillNames : expertise, // Use expertise if skills array is empty
+        category: categoryDisplay,
+        assured: mentor.is_verified || mentor.assured || false,
+        experience: experienceYears,
+        rating: mentor.rating || mentor.avg_rating || 0,
+        education: mentor.education || [],
+        testimonials: mentor.testimonial || mentor.testimonials || [],
+        // Keep original for backward compatibility
+        ...mentor
+      }
+    }
+    
+    // Static structure - return as is
+    return mentor
+  }
+
   const filteredMentors = useMemo(() => {
     let result = mentors
 
+    // Check if we're using API mentors (has mentor_id or profile_image)
+    const isUsingApiMentors = mentors.length > 0 && (mentors[0]?.mentor_id !== undefined || mentors[0]?.profile_image !== undefined)
+
     // Filter by selected course if a course is selected
     if (selectedCourseId) {
-      result = getMentorsByCourse(selectedCourseId)
+      if (isUsingApiMentors) {
+        // For API mentors, filter by course association (if courses are linked)
+        result = result.filter(mentor => {
+          // Check if mentor has courses array or course_ids
+          const mentorCourses = mentor.courses || mentor.course_ids || []
+          return mentorCourses.includes(selectedCourseId) || 
+                 mentorCourses.some(courseId => (courseId.course_id || courseId) === selectedCourseId)
+        })
+      } else {
+        result = getMentorsByCourse(selectedCourseId)
+      }
     }
 
     // Apply search query if present
     if (query) {
-      result = searchMentors(query).filter((mentor) =>
-        result.some((m) => m.id === mentor.id)
-      )
+      const lowerQuery = query.toLowerCase()
+      if (isUsingApiMentors) {
+        // Search API mentors
+        result = result.filter((mentor) => {
+          const mentorData = getMentorData(mentor)
+          const name = (mentorData.name || '').toLowerCase()
+          const role = (mentorData.role || '').toLowerCase()
+          const company = (mentorData.company || '').toLowerCase()
+          const bio = (mentorData.bio || '').toLowerCase()
+          const expertise = (mentorData.expertise || []).join(' ').toLowerCase()
+          const skills = (mentorData.skills || []).join(' ').toLowerCase()
+          const category = (mentorData.category || '').toLowerCase()
+          
+          return name.includes(lowerQuery) ||
+                 role.includes(lowerQuery) ||
+                 company.includes(lowerQuery) ||
+                 bio.includes(lowerQuery) ||
+                 expertise.includes(lowerQuery) ||
+                 skills.includes(lowerQuery) ||
+                 category.includes(lowerQuery)
+        })
+      } else {
+        // Use static search function
+        result = searchMentors(query).filter((mentor) =>
+          result.some((m) => m.id === mentor.id)
+        )
+      }
     }
 
     return result
@@ -221,38 +325,120 @@ export default function Explore({
         </div>
       ) : (
         <div className="explore-grid">
-          {filteredMentors.length > 0 ? (
-            filteredMentors.map((mentor) => (
-              <div
-                className="mentor-card"
-                key={`explore-${mentor.id || mentor.name}`}
-                onClick={() => onMentorClick && onMentorClick(mentor)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="mentor-card-top">
-                  <div className="avatar-img-left">
-                    <img src={mentor.image} alt={mentor.name} />
+          {isLoading ? (
+            <div className="loading-state">
+              <p>Loading mentors...</p>
+            </div>
+          ) : filteredMentors.length > 0 ? (
+            filteredMentors.map((mentor) => {
+              const mentorData = getMentorData(mentor)
+              const mentorId = mentorData.mentor_id || mentorData.id
+              
+              // Ensure skills are strings, not objects
+              const allSkills = (mentorData.skills || mentorData.expertise || [])
+              const skillsAsStrings = allSkills.map(skill => {
+                if (typeof skill === 'string') return skill
+                if (typeof skill === 'object' && skill !== null) {
+                  return skill.name || skill.skill_name || skill.title || String(skill)
+                }
+                return String(skill)
+              }).filter(Boolean)
+              
+              const topSkills = skillsAsStrings.slice(0, 3)
+              const totalSkillsCount = skillsAsStrings.length
+              
+              return (
+                <div
+                  className="mentor-card"
+                  key={`explore-${mentorId || mentorData.name}`}
+                  onClick={() => onMentorClick && onMentorClick(mentorData)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="mentor-card-top">
+                    <div className="avatar-img-left">
+                      <img 
+                        src={mentorData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'} 
+                        alt={mentorData.name}
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'
+                        }}
+                      />
+                    </div>
+                    <div className="mentor-name-section">
+                      <h4 className="mentor-name-right">{mentorData.name}</h4>
+                      {mentorData.assured && <span className="assured-pill-small">✓ Verified</span>}
+                    </div>
                   </div>
-                  <h4 className="mentor-name-right">{mentor.name}</h4>
-                </div>
-                <p className="meta-role">{mentor.role}, {mentor.company}</p>
-                {mentor.assured && <span className="assured-pill">Platform assured</span>}
-                <p className="mentor-text-small">{mentor.focus}</p>
-                <div className="mentor-card-bottom">
-                  <span className="rating-outlined">
-                    {renderStars(mentor.rating)}
-                  </span>
-                  <div className="mentor-actions">
-                    <button
-                      className="tiny book-session-btn"
-                      onClick={() => onBookSession && onBookSession()}
-                    >
-                      Book your free session
-                    </button>
+                  <p className="meta-role">
+                    {mentorData.role}
+                    {mentorData.company && `, ${mentorData.company}`}
+                  </p>
+                  
+                  {/* Experience and Rating Row */}
+                  {mentorData.experience > 0 && (
+                    <div className="mentor-meta-row">
+                      <span className="mentor-experience">
+                        {mentorData.experience}+ years
+                      </span>
+                      {mentorData.rating > 0 && (
+                        <span className="rating-outlined-small">
+                          {renderStars(mentorData.rating)}
+                          <span className="rating-value-small">({mentorData.rating.toFixed(1)})</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Bio or Focus */}
+                  {mentorData.bio && (
+                    <p className="mentor-text-small">{mentorData.bio}</p>
+                  )}
+                  {!mentorData.bio && mentorData.focus && (
+                    <p className="mentor-text-small">{mentorData.focus}</p>
+                  )}
+
+                  {/* Expertise/Skills Tags */}
+                  {topSkills.length > 0 && (
+                    <div className="mentor-skills-tags">
+                      {topSkills.map((skill, idx) => (
+                        <span key={idx} className="mentor-skill-tag">{skill}</span>
+                      ))}
+                      {totalSkillsCount > 3 && (
+                        <span className="mentor-skill-tag-more">
+                          +{totalSkillsCount - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Category */}
+                  {mentorData.category && (
+                    <div className="mentor-category">
+                      <span className="mentor-category-tag">{mentorData.category}</span>
+                    </div>
+                  )}
+
+                  <div className="mentor-card-bottom">
+                    {mentorData.rating > 0 && !mentorData.experience && (
+                      <span className="rating-outlined">
+                        {renderStars(mentorData.rating)}
+                      </span>
+                    )}
+                    <div className="mentor-actions">
+                      <button
+                        className="tiny book-session-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onBookSession && onBookSession()
+                        }}
+                      >
+                        Book your free session
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           ) : (
             <div className="no-results">
               <p>No mentors found for this course.</p>

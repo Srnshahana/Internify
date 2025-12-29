@@ -5,7 +5,7 @@ import MentorProfile from './mentorProfile.jsx'
 import Login from './login.jsx'
 import Signup from './signup.jsx'
 import Dashboard from './Dashboard.jsx'
-import MentorDashboard from './MentorDashboard.jsx'
+import MentorDashboard from './pages/mentor_dashboard/MentorDashboard.jsx'
 import Payment from './payment.jsx'
 import { courses, mentors } from './Data.jsx'
 import supabase from './supabaseClient'
@@ -93,6 +93,10 @@ function App() {
     const savedTheme = localStorage.getItem('theme')
     return savedTheme || 'dark'
   })
+  // State for API-fetched explore data
+  const [mentorData, setMentorData] = useState(null)
+  const [courseData, setCourseData] = useState(null)
+  const [isLoadingExplore, setIsLoadingExplore] = useState(false)
 
   useEffect(() => {
     // console.log('--------------------------------------')
@@ -125,6 +129,34 @@ function App() {
 
     initializeAuth()
   }, [])
+
+  // Fetch mentors and courses from Supabase when Explore page is shown
+  useEffect(() => {
+    console.log('---------------showExplore----------------')
+    if (showExplore) {
+      const fetchExploreData = async () => {
+        setIsLoadingExplore(true)
+  
+        const { data: mentorsFromApi, error: mentorsError } = await supabase
+          .from('mentors_details')
+          .select('*')
+  console.log('---------------mentorsFromApi----------------', mentorsFromApi)
+        if (mentorsError) console.error('Error fetching mentors:', mentorsError)
+        else setMentorData(mentorsFromApi)
+  
+        const { data: coursesFromApi, error: coursesError } = await supabase
+          .from('courses')
+          .select('*')
+  
+        if (coursesError) console.error('Error fetching courses:', coursesError)
+        else setCourseData(coursesFromApi)
+  
+        setIsLoadingExplore(false)
+      }
+  
+      fetchExploreData()
+    }
+  }, [showExplore])
 
   // Scroll-triggered animations
   useEffect(() => {
@@ -502,15 +534,20 @@ function App() {
   }
 
   if (showExplore) {
+    // Use API data if available, otherwise fallback to static data
+    const mentorsToUse = mentorData || mentors
+    const coursesToUse = courseData || courses
+
     return (
       <Explore
-        mentors={mentors}
-        courses={courses}
+        mentors={mentorsToUse}
+        courses={coursesToUse}
         onBack={() => setShowExplore(false)}
         renderStars={renderStars}
         initialQuery={exploreInitialQuery}
         onMentorClick={handleMentorClick}
         onBookSession={handleBookSessionClick}
+        isLoading={isLoadingExplore}
       />
     )
   }

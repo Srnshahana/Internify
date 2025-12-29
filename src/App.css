@@ -1376,6 +1376,137 @@ h1 span {
   align-self: flex-start;
 }
 
+.mentor-name-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.assured-pill-small {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(161, 182, 163, 0.5);
+  background: rgba(45, 95, 63, 0.15);
+  color: #a1b6a3;
+  font-weight: 600;
+  font-size: 10px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mentor-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.mentor-experience {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.rating-outlined-small {
+  font-weight: 700;
+  color: #facc15;
+  white-space: nowrap;
+  font-size: 13px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-value-small {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mentor-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.mentor-skill-tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.mentor-card:hover .mentor-skill-tag {
+  background: var(--bg-secondary);
+  border-color: var(--border-light);
+  color: var(--text-secondary);
+}
+
+.mentor-skill-tag-more {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.mentor-category {
+  margin: 8px 0;
+}
+
+.mentor-category-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme='light'] .assured-pill-small {
+  border-color: rgba(45, 95, 63, 0.3);
+  background: rgba(45, 95, 63, 0.1);
+  color: #2d5f3f;
+}
+
+[data-theme='light'] .mentor-experience {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .mentor-skill-tag {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .mentor-category-tag {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: #e2e8f0;
+}
+
 .all-mentors {
   display: none;
 }
