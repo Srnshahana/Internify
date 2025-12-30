@@ -99,9 +99,9 @@ function Earnings() {
             <h2 className="section-title">Earnings</h2>
             <p className="section-subtitle" style={{ marginTop: '8px', opacity: 0.7 }}>Track your earnings, payouts, and transaction history</p>
           </div>
-        </div>
+      </div>
 
-        {/* Earnings Overview Cards */}
+      {/* Earnings Overview Cards */}
         <div className="progress-overview-section-new" style={{ marginTop: '24px', marginBottom: '32px' }}>
           <div className="progress-overview-cards-new">
           <div className="progress-overview-card">
@@ -143,10 +143,10 @@ function Earnings() {
               </p>
             </div>
           </div>
-          </div>
         </div>
+      </div>
 
-        {/* Transaction History */}
+      {/* Transaction History */}
         <div style={{ marginTop: '32px' }}>
         <div className="section-header-with-button">
           <h2 className="section-title">Transaction History</h2>
@@ -227,9 +227,9 @@ function Earnings() {
             </table>
           )}
         </div>
-        </div>
+      </div>
 
-        {/* Payout Information */}
+      {/* Payout Information */}
         <div style={{ marginTop: '32px' }}>
         <h2 className="section-title">Payout Information</h2>
         <div className="payout-info-card">
@@ -251,7 +251,7 @@ function Earnings() {
             <button className="btn-secondary">Update Bank Details</button>
             <button className="btn-primary">Request Early Payout</button>
           </div>
-        </div>
+          </div>
         </div>
       </div>
     </div>

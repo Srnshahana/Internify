@@ -511,16 +511,16 @@ function MentorHome({ onNavigate }) {
               <div className="welcome-card-actions">
                 <button className="welcome-card-btn" onClick={() => setShowMyCourses(true)}>
                   Manage Courses
-                </button>
+          </button>
                 <button className="welcome-card-btn" onClick={() => setShowStudentRequests(true)}>
                   View Requests
-                </button>
+          </button>
                 <button className="welcome-card-btn" onClick={() => setShowPendingWork(true)}>
                   Review Work
-                </button>
+          </button>
                 <button className="welcome-card-btn" onClick={() => setShowMessages(true)}>
                   Messages
-                </button>
+          </button>
               </div>
             </div>
             <div className="welcome-card-illustration">
@@ -538,30 +538,30 @@ function MentorHome({ onNavigate }) {
                 <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
                 <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
               </svg>
-            </div>
-          </div>
+        </div>
+      </div>
 
           {/* Stats Overview Cards */}
           <div className="dashboard-section progress-overview-section-new">
             <div className="progress-overview-cards-new">
-              {mentorStats.map((stat) => (
-                <div 
-                  key={stat.label} 
+          {mentorStats.map((stat) => (
+            <div 
+              key={stat.label} 
                   className="progress-overview-card"
-                  onClick={stat.clickable ? () => setShowStudentRequests(true) : undefined}
+              onClick={stat.clickable ? () => setShowStudentRequests(true) : undefined}
                   style={{ cursor: stat.clickable ? 'pointer' : 'default' }}
-                >
+            >
                   <div className="progress-card-icon">
                     <span style={{ fontSize: '20px' }}>{stat.icon}</span>
-                  </div>
-                  <div className="progress-card-content">
-                    <h3 className="progress-card-title">{stat.label}</h3>
+              </div>
+              <div className="progress-card-content">
+                <h3 className="progress-card-title">{stat.label}</h3>
                     <p className="progress-card-value">{stat.value}</p>
-                  </div>
-                </div>
-              ))}
+              </div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
           {/* Classrooms Section - Active/Ongoing */}
           <div className="my-classes-section">
@@ -582,49 +582,49 @@ function MentorHome({ onNavigate }) {
                 {activeClassrooms.map((classroom, index) => {
                   const course = mentorCourses.find(c => c.id === classroom.courseId)
                   return (
-                    <div
+                  <div
                       key={classroom.id}
-                      className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
-                      onClick={() => {
+                    className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
+                    onClick={() => {
                         if (course) {
-                          setSelectedCourse(course)
-                          setShowCourseDetail(true)
+                      setSelectedCourse(course)
+                      setShowCourseDetail(true)
                         }
-                      }}
-                    >
-                      <div className="carousel-card-content">
-                        <div className="carousel-header-section">
-                          <div className="carousel-mentor-photo">
+                    }}
+                  >
+                    <div className="carousel-card-content">
+                      <div className="carousel-header-section">
+                        <div className="carousel-mentor-photo">
                             {course && <img src={course.mentorImage} alt={course.mentor} />}
-                          </div>
-                          <div className="carousel-header-info">
+                        </div>
+                        <div className="carousel-header-info">
                             <p className="carousel-mentor-name">{course?.mentor || 'Mentor'}</p>
-                            <p className="carousel-mentor-role">Mentor</p>
-                          </div>
+                          <p className="carousel-mentor-role">Mentor</p>
+                        </div>
                           {classroom.status === 'live' && (
                             <div className="live-indicator">
                               <span className="live-dot"></span>
                               <span>Live</span>
                             </div>
                           )}
-                        </div>
-                        <div className="carousel-details-section">
+                      </div>
+                      <div className="carousel-details-section">
                           <h3 className="carousel-course-title">{classroom.courseTitle}</h3>
                           <div className="carousel-session-info">
                             <span className="carousel-session-label">Session:</span>
                             <span className="carousel-session-time">{classroom.sessionTitle}</span>
-                          </div>
-                          <div className="carousel-session-info">
+                        </div>
+                        <div className="carousel-session-info">
                             <span className="carousel-session-label">Time:</span>
                             <span className="carousel-session-time">{classroom.startTime} • {classroom.duration}</span>
-                          </div>
-                          <div className="carousel-students-info">
+                        </div>
+                        <div className="carousel-students-info">
                             <span className="carousel-students-label">Active:</span>
                             <span className="carousel-students-count">{classroom.activeStudents}/{classroom.studentsCount} students</span>
-                          </div>
+                        </div>
                           <div className={`carousel-type-tag ${classroom.status}`}>
                             {classroom.status === 'live' ? 'Live Now' : 'Scheduled'}
-                          </div>
+                      </div>
                         </div>
                         <div className="carousel-actions-section">
                           {classroom.status === 'live' && (
@@ -659,14 +659,14 @@ function MentorHome({ onNavigate }) {
                               View Details
                             </button>
                           )}
-                        </div>
-                        <div className="carousel-card-arrow">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                          </svg>
-                        </div>
+                      </div>
+                      <div className="carousel-card-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                       </div>
                     </div>
+                  </div>
                   )
                 })}
               </div>
@@ -704,14 +704,14 @@ function MentorHome({ onNavigate }) {
           {/* Pending Work Section */}
           {mentorStats.find(s => s.label === 'Student Requests')?.value > 0 && (
             <div className="dashboard-section assignments-section-home">
-              <div className="section-header-with-button">
+            <div className="section-header-with-button">
                 <h2 className="section-title">Student Requests</h2>
                 <button className="view-all-btn-arrow" onClick={() => setShowStudentRequests(true)} aria-label="View All">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
-              </div>
+            </div>
               <div className="assignments-list-home">
                 <div className="assignment-card-home">
                   <div className="assignment-header-home">
@@ -727,9 +727,9 @@ function MentorHome({ onNavigate }) {
                   >
                     Review
                   </button>
-                </div>
-              </div>
-            </div>
+                    </div>
+                    </div>
+                  </div>
           )}
         </div>
 
@@ -738,7 +738,7 @@ function MentorHome({ onNavigate }) {
           {/* Calendar */}
           <div className="dashboard-section compact-calendar-new welcome-calendar calendar-inspiration">
             <div className="calendar-month-header">
-              <button
+                    <button 
                 className="calendar-nav-btn"
                 onClick={() => {
                   setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
@@ -747,11 +747,11 @@ function MentorHome({ onNavigate }) {
                   setClickedDate(null)
                   setDateEvents([])
                 }}
-              >
+                    >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </button>
+                      </svg>
+                    </button>
               <h3 className="calendar-month-name">{currentMonth}</h3>
               <button
                 className="calendar-nav-btn"
@@ -766,13 +766,13 @@ function MentorHome({ onNavigate }) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
-              </button>
-            </div>
+                </button>
+              </div>
             <div className="calendar-weekdays-new">
-              {weekDays.map((day) => (
+                {weekDays.map((day) => (
                 <div key={day} className="calendar-weekday-new">{day}</div>
-              ))}
-            </div>
+                ))}
+              </div>
             <div className="calendar-days-grid-new">
               {(() => {
                 const year = selectedDate.getFullYear()
@@ -810,7 +810,7 @@ function MentorHome({ onNavigate }) {
                                     clickedDate.getFullYear() === year
                   
                   return (
-                    <div 
+                    <div
                       key={i} 
                       className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isEventRange ? 'event-range' : ''} ${isSelected ? 'selected' : ''}`}
                       onClick={() => {
@@ -833,7 +833,7 @@ function MentorHome({ onNavigate }) {
                   )
                 })
               })()}
-            </div>
+              </div>
 
             {/* Event Details Modal - Shown when clicking a date with events */}
             {showEventDetails && clickedDate && dateEvents.length > 0 && (
@@ -844,7 +844,7 @@ function MentorHome({ onNavigate }) {
                       {clickedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </h3>
                     <span className="calendar-event-details-count">{dateEvents.length} {dateEvents.length === 1 ? 'session' : 'sessions'}</span>
-                  </div>
+            </div>
                   <button 
                     className="calendar-event-details-close"
                     onClick={() => {
@@ -858,7 +858,7 @@ function MentorHome({ onNavigate }) {
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                   </button>
-                </div>
+          </div>
                 <div className="calendar-event-details-list">
                   {dateEvents.map((event, index) => (
                     <div key={index} className="calendar-event-details-item">
@@ -876,8 +876,8 @@ function MentorHome({ onNavigate }) {
                           <span className="calendar-event-time">{event.time}</span>
                           {event.mentee && <span className="calendar-event-mentor">with {event.mentee}</span>}
                           {event.topic && <span className="calendar-event-location">{event.topic}</span>}
-                        </div>
-                      </div>
+                    </div>
+                    </div>
                       <button 
                         className="calendar-event-action-btn"
                         onClick={() => event.joinLink && handleJoinSession(event.joinLink)}
@@ -895,19 +895,19 @@ function MentorHome({ onNavigate }) {
               <div className="calendar-add-list-form">
                 <div className="add-list-header">
                   <h3 className="add-list-title">Add new session</h3>
-                  <button 
+                      <button 
                     className="add-list-menu-btn"
                     onClick={() => {
                       setShowAddListForm(false)
                       setClickedDate(null)
                       setDateEvents([])
                     }}
-                  >
+                      >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-                  </button>
+                      </button>
                 </div>
                 <div className="add-list-inputs">
                   <input type="text" placeholder="Session title" className="add-list-input" />
@@ -935,7 +935,7 @@ function MentorHome({ onNavigate }) {
                   </div>
                   <input type="text" placeholder="Student name" className="add-list-input" />
                 </div>
-                <button 
+                      <button 
                   className="add-list-submit-btn"
                   onClick={() => {
                     setShowAddListForm(false)
@@ -944,7 +944,7 @@ function MentorHome({ onNavigate }) {
                   }}
                 >
                   Submit Session
-                </button>
+                      </button>
               </div>
             )}
           </div>
@@ -975,8 +975,8 @@ function MentorHome({ onNavigate }) {
                     </div>
                   </div>
                 ))}
+              </div>
             </div>
-          </div>
 
           {/* Upcoming Sessions Below Calendar */}
           <div className="upcoming-sessions-compact-new">
@@ -992,7 +992,7 @@ function MentorHome({ onNavigate }) {
                   <div className="session-time-compact">
                     <span className="session-time-value-compact">{session.time}</span>
                     <span className="session-time-period-compact">{session.date}</span>
-                  </div>
+        </div>
                   <div className="session-info-compact">
                     <p className="session-course-compact">{session.course}</p>
                     <p className="session-mentor-compact">with {session.mentee}</p>

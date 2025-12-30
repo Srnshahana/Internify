@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import Explore from './search.jsx'
 import Resources from './Resources.jsx'
 import MentorProfile from './mentorProfile.jsx'
@@ -7,917 +8,418 @@ import Signup from './signup.jsx'
 import Dashboard from './Dashboard.jsx'
 import MentorDashboard from './pages/mentor_dashboard/MentorDashboard.jsx'
 import Payment from './payment.jsx'
+import LandingPage from './pages/LandingPage.jsx'
 import { courses, mentors } from './Data.jsx'
 import supabase from './supabaseClient'
-import { SunIcon, MoonIcon } from './components/Icons.jsx'
 import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
 import './App.css'
 
-const steps = [
-  { title: 'Explore mentors', detail: 'Filter by role, industry, and goals.' },
-  { title: 'Book a free intro', detail: 'Meet your mentor for 15 minutes to align.' },
-  { title: 'Start guided path', detail: 'Weekly sessions + projects tailored to you.' },
-  { title: 'Ship & get hired', detail: 'Build outcomes you can show recruiters.' },
-]
+// Helper function to render stars
+const renderStars = (score) => {
+  const full = Math.floor(score)
+  const half = score - full >= 0.5
+  const stars = Array(5).fill('☆').map((star, i) => {
+    if (i < full) return '★'
+    if (i === full && half) return '½'
+    return '☆'
+  }).join('')
+  return stars
+}
 
-const howItWorksSteps = [
-  {
-    number: 1,
-    title: 'Browse Courses',
-    description: 'Explore our curated selection of industry-relevant courses designed by experts',
-  },
-  {
-    number: 2,
-    title: 'Connect with Mentors',
-    description: 'Get matched with experienced professionals who guide your learning journey',
-  },
-  {
-    number: 3,
-    title: 'Learn & Grow',
-    description: 'Complete real projects and build skills that make you job-ready',
-  },
-]
-
-const highlights = [
-  'Freshers (main focus): Get job-ready with guided projects and interview prep.',
-  'Upskillers: Close gaps fast with weekly mentor feedback.',
-  'Hobby learning: Build portfolio-worthy side projects with expert guidance.',
-  'Final-year projects: Ship capstones with industry-grade rigor and reviews.',
-  'In any category above, Internify gives you real mentors, real direction.',
-]
-
-const outcomes = [
-  {
-    title: 'Course Packages',
-    text: 'Structured courses focused on real, job-ready skills like mobile app development, web development, and more.',
-    circleText: 'COURSE',
-  },
-  {
-    title: 'Project Packages',
-    text: 'Hands-on project building with mentor guidance to create real apps, case studies, and portfolio-ready work.',
-    circleText: 'PROJECT',
-  },
-  {
-    title: 'Career Guidance Sessions',
-    text: 'One-on-one mentorship sessions to get career clarity, plan your path, and gain confidence — typically 1-hour focused calls.',
-    circleText: 'CAREER',
-  },
-]
-
-// Map courses to skills format for Latest Skills section
-const latestSkills = courses.slice(0, 8).map((course) => ({
-  id: course.id,
-  name: course.name,
-  image: course.image,
-  category: course.category,
-  description: course.description,
-}))
-
-function App() {
-  const mentorTrackRef = useRef(null)
-  const skillsTrackRef = useRef(null)
-  const outcomesSectionRef = useRef(null)
-  const highlightsSectionRef = useRef(null)
-  const howItWorksSectionRef = useRef(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showExplore, setShowExplore] = useState(false)
-  const [showResources, setShowResources] = useState(false)
-  const [exploreInitialQuery, setExploreInitialQuery] = useState('')
-  const [selectedMentor, setSelectedMentor] = useState(null)
-  const [showLogin, setShowLogin] = useState(false)
-  const [showSignup, setShowSignup] = useState(false)
+// Protected Route Component
+function ProtectedRoute({ children, requiredRole = null }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userRole, setUserRole] = useState(null) // 'student' | 'mentor'
-  const [showPayment, setShowPayment] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme')
-    return savedTheme || 'dark'
-  })
-  // State for API-fetched explore data
-  const [mentorData, setMentorData] = useState(null)
-  const [courseData, setCourseData] = useState(null)
-  const [isLoadingExplore, setIsLoadingExplore] = useState(false)
+  const [userRole, setUserRole] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // console.log('--------------------------------------')
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
-  // Check authentication state on app load/refresh
-  useEffect(() => {
-    const initializeAuth = async () => {
-      // First check localStorage for quick access
+    const checkAuth = async () => {
       const storedAuth = getStoredAuthData()
       
       if (storedAuth) {
-        // Verify session is still valid
         const authUser = await getAuthenticatedUser()
         
         if (authUser) {
-          // User is authenticated, set state
           setIsLoggedIn(true)
           setUserRole(authUser.role)
         } else {
-          // Session expired, clear stored data
           clearAuthData()
           setIsLoggedIn(false)
           setUserRole(null)
         }
       }
+      setLoading(false)
     }
 
-    initializeAuth()
+    checkAuth()
   }, [])
 
-  // Fetch mentors and courses from Supabase when Explore page is shown
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />
+  }
+
+  return children
+}
+
+// Explore Page Wrapper
+function ExplorePage() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const [mentorData, setMentorData] = useState(null)
+  const [courseData, setCourseData] = useState(null)
+  const [isLoadingExplore, setIsLoadingExplore] = useState(false)
+  const initialQuery = searchParams.get('q') || ''
+
   useEffect(() => {
-    console.log('---------------showExplore----------------')
-    if (showExplore) {
-      const fetchExploreData = async () => {
-        setIsLoadingExplore(true)
-  
-        const { data: mentorsFromApi, error: mentorsError } = await supabase
-          .from('mentors_details')
-          .select('*')
-  console.log('---------------mentorsFromApi----------------', mentorsFromApi)
-        if (mentorsError) console.error('Error fetching mentors:', mentorsError)
-        else setMentorData(mentorsFromApi)
-  
-        const { data: coursesFromApi, error: coursesError } = await supabase
-          .from('courses')
-          .select('*')
-  
-        if (coursesError) console.error('Error fetching courses:', coursesError)
-        else setCourseData(coursesFromApi)
-  
-        setIsLoadingExplore(false)
-      }
-  
-      fetchExploreData()
-    }
-  }, [showExplore])
+    const fetchExploreData = async () => {
+      setIsLoadingExplore(true)
 
-  // Scroll-triggered animations
-  useEffect(() => {
-    if (showExplore || selectedMentor || showLogin) {
-      // On explore/profile pages, make sure all elements are visible
-      const animatedElements = document.querySelectorAll(
-        '.fade-in-up, .fade-in-left, .fade-in-right, .scale-in'
-      )
-      animatedElements.forEach((el) => el.classList.add('visible'))
-      return
+      const { data: mentorsFromApi, error: mentorsError } = await supabase
+        .from('mentors_details')
+        .select('*')
+
+      if (mentorsError) console.error('Error fetching mentors:', mentorsError)
+      else setMentorData(mentorsFromApi)
+
+      const { data: coursesFromApi, error: coursesError } = await supabase
+        .from('courses')
+        .select('*')
+
+      if (coursesError) console.error('Error fetching courses:', coursesError)
+      else setCourseData(coursesFromApi)
+
+      setIsLoadingExplore(false)
     }
 
-    let observer
-    let timeoutId
-
-      const initAnimations = () => {
-      // Get all animated elements, then filter out outcomes and how-it-works sections
-      const allAnimatedElements = document.querySelectorAll(
-        '.fade-in-up, .fade-in-left, .fade-in-right, .scale-in'
-      )
-      
-      // Filter out outcomes and how-it-works section elements (they use scroll-based animation)
-      const animatedElements = Array.from(allAnimatedElements).filter(
-        (el) => !el.closest('.outcomes') && !el.closest('.how-it-works')
-      )
-      
-      // Don't mark any elements as visible initially - let IntersectionObserver handle all animations
-      // This ensures all animations are scroll-triggered, not load-triggered
-      animatedElements.forEach((el) => {
-        el.classList.remove('visible')
-      })
-
-      const observerOptions = {
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
-        rootMargin: '0px 0px 200px 0px', // Trigger 200px before element enters viewport
-      }
-
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          // Skip outcomes and how-it-works section elements
-          if (entry.target.closest('.outcomes') || entry.target.closest('.how-it-works')) return
-          
-          // Trigger animation when element is approaching viewport
-          if (entry.isIntersecting || entry.intersectionRatio > 0) {
-            entry.target.classList.add('visible')
-            // Once animated, unobserve to prevent re-animation
-            observer.unobserve(entry.target)
-          }
-        })
-      }, observerOptions)
-
-      // Observe all elements (they all start without 'visible' class)
-      // All animations will trigger via IntersectionObserver when scrolling
-      animatedElements.forEach((el) => {
-        observer.observe(el)
-      })
-    }
-
-    // Small delay to ensure DOM is ready
-    timeoutId = setTimeout(initAnimations, 150)
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId)
-      if (observer) {
-        const animatedElements = document.querySelectorAll(
-          '.fade-in-up, .fade-in-left, .fade-in-right, .scale-in'
-        )
-        animatedElements.forEach((el) => observer.unobserve(el))
-      }
-    }
-  }, [showExplore, selectedMentor, showLogin])
-
-  // Intersection Observer for outcomes section animation (runs only once)
-  useEffect(() => {
-    if (showExplore || selectedMentor || showLogin || !outcomesSectionRef.current) return
-
-    const outcomesSection = outcomesSectionRef.current
-    const outcomesLeft = outcomesSection.querySelector('.outcomes-left.animate-section')
-    const outcomesRightItems = outcomesSection.querySelectorAll('.outcomes-right .fade-in-right')
-
-    if (outcomesRightItems.length === 0) {
-      console.warn('No right items found for animation')
-      return
-    }
-
-    const observerOptions = {
-      threshold: 0.1, // Trigger when 10% of section is visible
-      rootMargin: '0px 0px -50px 0px', // Trigger when section is 50px from entering viewport
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Add visible class to animate-section (outcomes-left) - slides from left
-          if (outcomesLeft) {
-            outcomesLeft.classList.add('visible')
-          }
-          
-          // Staggered animation for right items - slides from right
-          // Course Packages (index 0) - immediate
-          // Project Packages (index 1) - 200ms delay
-          // Career Guidance Sessions (index 2) - 400ms delay
-          outcomesRightItems.forEach((item, index) => {
-            setTimeout(() => {
-              item.classList.add('visible')
-            }, index * 200) // 200ms delay between each item
-          })
-          
-          // Unobserve to ensure animation runs only once per page load
-          observer.unobserve(outcomesSection)
-        }
-      })
-    }, observerOptions)
-
-    observer.observe(outcomesSection)
-
-    return () => {
-      if (outcomesSection) {
-        observer.unobserve(outcomesSection)
-      }
-    }
-  }, [showExplore, selectedMentor, showLogin])
-
-  // Intersection Observer for highlights section animation
-  useEffect(() => {
-    if (showExplore || selectedMentor || showLogin || !highlightsSectionRef.current) return
-
-    const highlightsSection = highlightsSectionRef.current
-    const highlightItems = highlightsSection.querySelectorAll('.highlight-animate')
-
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Animate each highlight item with staggered delay
-          highlightItems.forEach((item, index) => {
-            setTimeout(() => {
-              item.classList.add('visible')
-            }, index * 200) // 200ms delay between each item
-          })
-          
-          // Unobserve to ensure animation runs only once
-          observer.unobserve(highlightsSection)
-        }
-      })
-    }, observerOptions)
-
-    observer.observe(highlightsSection)
-
-    return () => {
-      if (highlightsSection) {
-        observer.unobserve(highlightsSection)
-      }
-    }
-  }, [showExplore, selectedMentor, showLogin])
-
-  // Intersection Observer for How It Works section animation
-  useEffect(() => {
-    if (showExplore || selectedMentor || showLogin || !howItWorksSectionRef.current) return
-
-    const howItWorksSection = howItWorksSectionRef.current
-    const stepItems = howItWorksSection.querySelectorAll('.step-animate')
-
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Animate each step item with staggered delay
-          stepItems.forEach((item, index) => {
-            setTimeout(() => {
-              item.classList.add('visible')
-            }, index * 200) // 200ms delay between each item
-          })
-          
-          // Unobserve to ensure animation runs only once
-          observer.unobserve(howItWorksSection)
-        }
-      })
-    }, observerOptions)
-
-    observer.observe(howItWorksSection)
-
-    return () => {
-      if (howItWorksSection) {
-        observer.unobserve(howItWorksSection)
-      }
-    }
-  }, [showExplore, selectedMentor, showLogin])
-
-  // Auto-scroll for skills slider
-  useEffect(() => {
-    const skillsTrack = skillsTrackRef.current
-    if (!skillsTrack) return
-
-    let scrollInterval
-    const startAutoScroll = () => {
-      scrollInterval = setInterval(() => {
-        if (skillsTrack) {
-          const maxScroll = skillsTrack.scrollWidth - skillsTrack.clientWidth
-          const currentScroll = skillsTrack.scrollLeft
-          
-          if (currentScroll >= maxScroll - 10) {
-            // Reset to beginning
-            skillsTrack.scrollTo({ left: 0, behavior: 'smooth' })
-          } else {
-            // Scroll forward
-            skillsTrack.scrollBy({ left: 300, behavior: 'smooth' })
-          }
-        }
-      }, 3000) // Scroll every 3 seconds
-    }
-
-    startAutoScroll()
-
-    // Pause on hover
-    const handleMouseEnter = () => clearInterval(scrollInterval)
-    const handleMouseLeave = () => startAutoScroll()
-
-    skillsTrack.addEventListener('mouseenter', handleMouseEnter)
-    skillsTrack.addEventListener('mouseleave', handleMouseLeave)
-
-    return () => {
-      clearInterval(scrollInterval)
-      skillsTrack.removeEventListener('mouseenter', handleMouseEnter)
-      skillsTrack.removeEventListener('mouseleave', handleMouseLeave)
-    }
+    fetchExploreData()
   }, [])
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
-  }
-
-  const scrollMentors = (dir) => {
-    const el = mentorTrackRef.current
-    if (!el) return
-    const distance = el.clientWidth * 0.8
-    el.scrollBy({ left: dir === 'next' ? distance : -distance, behavior: 'smooth' })
-  }
-
-  const renderStars = (score) => {
-    const full = Math.floor(score)
-    const half = score - full >= 0.5
-    // Use outlined stars (☆) for empty, filled (★) for full
-    const stars = Array(5).fill('☆').map((star, i) => {
-      if (i < full) return '★'
-      if (i === full && half) return '½'
-      return '☆'
-    }).join('')
-    return stars
-  }
-
-  const handleSearch = () => {
-    const q = searchTerm.trim().toLowerCase()
-    setExploreInitialQuery(q)
-    setShowExplore(true)
-  }
-
-  const handleNavSearch = (term) => {
-    const q = term.toLowerCase()
-    setSearchTerm(term)
-    setExploreInitialQuery(q)
-    setShowExplore(true)
-  }
+  const mentorsToUse = mentorData || mentors
+  const coursesToUse = courseData || courses
 
   const handleMentorClick = (mentor) => {
-    setSelectedMentor(mentor)
+    const mentorId = mentor.mentor_id || mentor.id || mentor.name
+    navigate(`/mentor/${mentorId}`)
   }
 
-  const handleBookSessionClick = () => {
-    setShowLogin(true)
+  const handleBookSession = () => {
+    navigate('/login')
   }
 
-  const handleBackFromProfile = () => {
-    setSelectedMentor(null)
+  return (
+    <Explore
+      mentors={mentorsToUse}
+      courses={coursesToUse}
+      onBack={() => navigate('/')}
+      renderStars={renderStars}
+      initialQuery={initialQuery}
+      onMentorClick={handleMentorClick}
+      onBookSession={handleBookSession}
+      isLoading={isLoadingExplore}
+    />
+  )
+}
+
+// Resources Page Wrapper
+function ResourcesPage() {
+  const navigate = useNavigate()
+
+  const handleMentorClick = (mentor) => {
+    const mentorId = mentor.mentor_id || mentor.id || mentor.name
+    navigate(`/mentor/${mentorId}`)
   }
+
+  const handleBookSession = () => {
+    navigate('/login')
+  }
+
+  return (
+    <Resources
+      onBack={() => navigate('/')}
+      mentors={mentors}
+      onBookSession={handleBookSession}
+      onMentorClick={handleMentorClick}
+    />
+  )
+}
+
+// Mentor Profile Page Wrapper
+function MentorProfilePage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  
+  // Find mentor by ID
+  const mentor = mentors.find(m => 
+    (m.id && String(m.id) === id) || 
+    (m.mentor_id && String(m.mentor_id) === id) ||
+    (m.name && m.name === id)
+  )
+
+  if (!mentor) {
+    return (
+      <div className="page">
+        <button className="back-button" onClick={() => navigate('/')}>← Back</button>
+        <h1>Mentor not found</h1>
+      </div>
+    )
+  }
+
+  const handleBookSession = () => {
+    navigate('/login')
+  }
+
+  return (
+    <MentorProfile
+      mentor={mentor}
+      courses={courses}
+      onBack={() => navigate(-1)}
+      renderStars={renderStars}
+      onBookSession={handleBookSession}
+    />
+  )
+}
+
+// Login Page Wrapper
+function LoginPage() {
+  const navigate = useNavigate()
+  const [userRole, setUserRole] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const storedAuth = getStoredAuthData()
+      if (storedAuth) {
+        const authUser = await getAuthenticatedUser()
+        if (authUser) {
+          setIsLoggedIn(true)
+          setUserRole(authUser.role)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
   const handleLogin = async (user) => {
     console.log('Login success:', user)
-    setShowLogin(false)
-    setShowSignup(false)
-
-    // Role is already fetched and stored in login.jsx
     const role = user?.role || 'student'
     setUserRole(role)
-
-    // After successful auth, go to payment screen
-    // (You can modify this to skip payment if already paid)
-    setShowPayment(true)
+    setIsLoggedIn(true)
+    navigate('/payment')
   }
 
   const handleSignup = (user) => {
     console.log('Signup success:', user)
-    // New signups are inserted as students in Supabase
     setUserRole('student')
-    setShowSignup(false)
-    setShowLogin(false)
-    setShowPayment(true)
-  }
-
-  const handlePaymentSuccess = () => {
-    setShowPayment(false)
     setIsLoggedIn(true)
-  }
-
-  const handleLogout = async () => {
-    // Sign out from Supabase
-    await supabase.auth.signOut()
-    
-    // Clear stored auth data
-    clearAuthData()
-    
-    // Reset state
-    setIsLoggedIn(false)
-    setUserRole(null)
-    setShowLogin(false)
-    setShowSignup(false)
-    
-    // Restore the saved theme from localStorage or default to dark
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    document.documentElement.setAttribute('data-theme', savedTheme)
-  }
-
-  if (showSignup) {
-    return (
-      <Signup
-        onBack={() => {
-          setShowSignup(false)
-          setShowLogin(true)
-        }}
-        onSignup={handleSignup}
-      />
-    )
-  }
-
-  if (showLogin) {
-    return (
-      <Login
-        onBack={() => setShowLogin(false)}
-        onLogin={handleLogin}
-        onShowSignup={() => {
-          setShowLogin(false)
-          setShowSignup(true)
-        }}
-      />
-    )
-  }
-
-  if (showPayment) {
-    return (
-      <Payment
-        onBack={() => setShowPayment(false)}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
-    )
-  }
-
-  // Global Explore (search) page should work even when logged in
-  if (showResources) {
-    return (
-      <Resources
-        onBack={() => setShowResources(false)}
-        mentors={mentors}
-        onBookSession={handleBookSessionClick}
-        onMentorClick={handleMentorClick}
-      />
-    )
-  }
-
-  if (showExplore) {
-    // Use API data if available, otherwise fallback to static data
-    const mentorsToUse = mentorData || mentors
-    const coursesToUse = courseData || courses
-
-    return (
-      <Explore
-        mentors={mentorsToUse}
-        courses={coursesToUse}
-        onBack={() => setShowExplore(false)}
-        renderStars={renderStars}
-        initialQuery={exploreInitialQuery}
-        onMentorClick={handleMentorClick}
-        onBookSession={handleBookSessionClick}
-        isLoading={isLoadingExplore}
-      />
-    )
+    navigate('/payment')
   }
 
   if (isLoggedIn) {
     if (userRole === 'mentor') {
-      return <MentorDashboard onLogout={handleLogout} />
+      return <Navigate to="/mentor-dashboard" replace />
     }
-    // Default to student dashboard
-    return (
-      <Dashboard
-        onLogout={handleLogout}
-        onOpenExplore={() => setShowExplore(true)}
-      />
-    )
-  }
-
-  if (selectedMentor) {
-    return (
-      <MentorProfile
-        mentor={selectedMentor}
-        courses={courses}
-        onBack={handleBackFromProfile}
-        renderStars={renderStars}
-        onBookSession={handleBookSessionClick}
-      />
-    )
+    return <Navigate to="/dashboard" replace />
   }
 
   return (
-    <div className="page">
-      <div className="topbar">
-        <div className="brand">
-          <span>Internify.</span>
-        </div>
-        <div className="search">
-          <input
-            placeholder="Search mentor skills or course"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSearch()
-            }}
-          />
-          <button className="mini search-go" onClick={handleSearch}>
-            Search
-          </button>
-        </div>
-        <div className="top-actions">
-          <button className="link" onClick={() => setShowResources(true)}>Resources</button>
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
-          <button className="link" onClick={() => setShowLogin(true)}>Login</button>
-          <button className="pill">Apply as mentor</button>
-        </div>
-      </div>
+    <Login
+      onBack={() => navigate('/')}
+      onLogin={handleLogin}
+      onShowSignup={() => navigate('/signup')}
+    />
+  )
+}
 
-      <div className="nav-links">
-        <button className="nav-chip" onClick={() => handleNavSearch('engineering')}>
-          Engineering mentors
-        </button>
-        <button className="nav-chip" onClick={() => handleNavSearch('design')}>
-          Design mentors
-        </button>
-        <button className="nav-chip" onClick={() => handleNavSearch('ai')}>
-          AI mentors
-        </button>
-        <button className="nav-chip" onClick={() => handleNavSearch('leadership')}>
-          Leadership mentors
-        </button>
-        <button className="nav-chip" onClick={() => handleNavSearch('career guidance')}>
-          Career guidance
-        </button>
-      </div>
+// Signup Page Wrapper
+function SignupPage() {
+  const navigate = useNavigate()
+  const [userRole, setUserRole] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-      <header className="hero">
-        <div className="badge-no-border">Internify • Career-ready mentorship</div>
-        <h1>
-          <span className="hero-line hero-line-1">Believe in</span>
-          <br />
-          <span className="hero-line hero-line-2">your journey</span>
-          <br />
-          <span className="hero-line hero-line-3 muted-line">We'll guide the rest</span>
-        </h1>
-        <p className="lead fade-in-up" style={{ animationDelay: '0.3s' }}>
-          Connect with industry mentors, learn the exact skills employers need, and ship
-          projects you can show. Start with a free session to experience the teaching style
-          before you choose your path.
-        </p>
-        <div className="hero-actions fade-in-up" style={{ animationDelay: '0.5s' }}>
-          <button className="primary">Find your career path</button>
-          <button className="ghost">Browse mentors</button>
-        </div>
-      </header>
+  useEffect(() => {
+    const checkAuth = async () => {
+      const storedAuth = getStoredAuthData()
+      if (storedAuth) {
+        const authUser = await getAuthenticatedUser()
+        if (authUser) {
+          setIsLoggedIn(true)
+          setUserRole(authUser.role)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
-      <section className="mentors fade-in-up">
-        <div className="section-head">
-          <div className="section-head-top">
-            <div>
-              <p className="eyebrow white-text">Featured mentors</p>
-              <h2 className="white-text">Pick the right guide for where you want to go.</h2>
-              <p className="white-text">
-                Book a free intro to align on goals, then join a guided mentorship path with
-                weekly sessions, async feedback, and career-ready projects.
-              </p>
-            </div>
-            <button className="tiny view-all-btn" onClick={() => setShowExplore(true)}>
-              View all
-            </button>
-          </div>
-          <div className="mentor-nav">
-            <button className="ghost tiny" onClick={() => scrollMentors('prev')}>
-              ←
-            </button>
-            <button className="ghost tiny" onClick={() => scrollMentors('next')}>
-              →
-            </button>
-          </div>
-        </div>
-        <div className="mentor-slider">
-          <div className="mentor-track" ref={mentorTrackRef}>
-            {mentors.slice(0, 5).map((mentor) => (
-              <div
-                className="mentor-card"
-                key={mentor.name}
-                onClick={() => handleMentorClick(mentor)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="mentor-card-top">
-                  <div className="avatar-img-left">
-                    <img src={mentor.image} alt={mentor.name} />
-                  </div>
-                  <h4 className="mentor-name-right">{mentor.name}</h4>
-                </div>
-                <p className="meta-role">{mentor.role}</p>
-                {mentor.assured && <span className="assured-pill">Platform assured</span>}
-                <p className="mentor-text-small">{mentor.focus}</p>
-                <div className="mentor-card-bottom">
-                  <span className="rating-outlined">
-                    {renderStars(mentor.rating)}
-                  </span>
-                  <div className="mentor-actions">
-                    <button className="tiny book-session-btn" onClick={handleBookSessionClick}>Book your free session</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div
-              className="mentor-card explore-all-card"
-              onClick={() => setShowExplore(true)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="explore-all-content">
-                <h3>Explore All Mentors</h3>
-                <p>Discover more mentors and find the perfect guide for your journey</p>
-                <button className="primary">View All →</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+  const handleSignup = (user) => {
+    console.log('Signup success:', user)
+    setUserRole('student')
+    setIsLoggedIn(true)
+    navigate('/payment')
+  }
 
-      <section ref={howItWorksSectionRef} className="how-it-works">
-        <div className="how-it-works-header">
-          <h2 className="how-it-works-title">How It Works</h2>
-          <p className="how-it-works-subtitle">Three simple steps to accelerate your career journey</p>
-        </div>
-        <div className="how-it-works-steps">
-          {howItWorksSteps.map((step) => (
-            <div className="how-it-works-step step-animate" key={step.number}>
-              <div className="step-number-circle">
-                <span className="step-number">{step.number}</span>
-              </div>
-              <h3 className="step-title">{step.title}</h3>
-              <p className="step-description">{step.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+  if (isLoggedIn) {
+    if (userRole === 'mentor') {
+      return <Navigate to="/mentor-dashboard" replace />
+    }
+    return <Navigate to="/dashboard" replace />
+  }
 
-      <section className="latest-skills fade-in-up">
-        <div className="page-content-wrapper">
-          <div className="section-head">
-            <p className="eyebrow">Latest skills in 2026</p>
-            <h2>Master the skills that matter most this year</h2>
-            <p>Learn in-demand technologies with expert guidance and real-world projects</p>
-          </div>
-        </div>
-        <div className="skills-slider">
-          <div className="skills-track" ref={skillsTrackRef}>
-            {latestSkills.map((skill) => (
-              <div className="skill-card" key={skill.id || skill.name}>
-                <div className="skill-image">
-                  <img src={skill.image} alt={skill.name} />
-                </div>
-                <div className="skill-content">
-                  <div className="skill-header">
-                    <h3 className="skill-name">{skill.name}</h3>
-                    <span className="skill-category">{skill.category}</span>
-                  </div>
-                  <p className="skill-description">{skill.description}</p>
-                  <button className="tiny ghost" onClick={() => handleNavSearch(`course:${skill.id}`)}>Learn {skill.name}</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+  return (
+    <Signup
+      onBack={() => navigate('/login')}
+      onSignup={handleSignup}
+    />
+  )
+}
 
-      <section ref={highlightsSectionRef} className="highlights fade-in-up">
-        <div className="panel">
-          <p className="eyebrow">Who can join</p>
-          <h2>Built for every student profile.</h2>
-          <p>
-            Whether you are starting out, leveling up, exploring as a hobby, or finishing
-            your final-year project, Internify pairs you with mentors who build alongside
-            you and keep you on track every week.
-          </p>
-          <ol className="highlights-list">
-            {highlights.map((item, index) => (
-              <li key={item} className="highlight-item highlight-animate">
-                {item}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+// Payment Page Wrapper
+function PaymentPage() {
+  const navigate = useNavigate()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState(null)
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const storedAuth = getStoredAuthData()
+      if (storedAuth) {
+        const authUser = await getAuthenticatedUser()
+        if (authUser) {
+          setIsLoggedIn(true)
+          setUserRole(authUser.role)
+        } else {
+          navigate('/login')
+        }
+      } else {
+        navigate('/login')
+      }
+    }
+    checkAuth()
+  }, [navigate])
 
-      <section className="career-path-cta scale-in">
-        <div className="career-path-content">
-          <h2>Not able to decide your career path?</h2>
-          <p>Find your right path for career</p>
-        </div>
-        <div className="cta-actions">
-          <button
-            className="primary"
-            onClick={() => {
-              handleNavSearch('career guidance')
-            }}
-          >
-            Find your career path
-          </button>
-        </div>
-      </section>
+  const handlePaymentSuccess = () => {
+    setIsLoggedIn(true)
+    if (userRole === 'mentor') {
+      navigate('/mentor-dashboard')
+    } else {
+      navigate('/dashboard')
+    }
+  }
 
-      <section ref={outcomesSectionRef} className="outcomes">
-        <div className="page-content-wrapper">
-            <div className="outcomes-container">
-              <div className="outcomes-left animate-section">
-                <h2 className="outcomes-title">WHAT MENTORS PROVIDE</h2>
-                <p className="outcomes-description">
-                  Mentors offer flexible learning and guidance based on your needs — whether you want to learn a skill, build real projects, or get career clarity.
-                  Each offering is designed to be practical, outcome-driven, and aligned with real industry expectations. You choose what you need, when you need it — from structured courses and hands-on projects to focused one-on-one guidance. Every session and package is built to help you move forward with confidence and direction.
-                </p>
-              </div>
-              <div className="outcomes-right">
-                {outcomes.map((item, index) => (
-                  <div key={item.title} className="fade-in-right">
-                    {index > 0 && <div className="outcome-divider">⸻</div>}
-                    <div className="outcome-module">
-                      <div className="outcome-module-content">
-                        <div className="outcome-circle">
-                          <span className="outcome-circle-text">{item.circleText}</span>
-                        </div>
-                        <div className="outcome-content">
-                          <h4 className="outcome-module-title">{item.title}</h4>
-                          <p className="outcome-module-text">{item.text}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-        </div>
-      </section>
+  if (!isLoggedIn) {
+    return null // Will redirect
+  }
 
-      {/* <section className="quote">
-        <div className="quote-card">
-          <p>
-            “The best way to prepare for the future is to learn by doing today. Real guidance
-            and hands-on experience turn potential into success.” – Unknown
-          </p>
-        </div>
-      </section> */}
+  return (
+    <Payment
+      onBack={() => navigate('/')}
+      onPaymentSuccess={handlePaymentSuccess}
+    />
+  )
+}
 
-      <section className="boost fade-in-up">
-        <h3>How This Boosts Your Chances of Getting Hired</h3>
-        <div className="boost-grid">
-          <div className="boost-item fade-in-up">
-            <div className="boost-number">80%</div>
-            <p>higher chance of getting hired through real mentor-guided, practical learning.</p>
-          </div>
-          <div className="boost-item fade-in-up">
-            <div className="boost-number">90%</div>
-            <p>skill validation with mentor-issued reference letters and Internify certification.</p>
-          </div>
-          <div className="boost-item fade-in-up">
-            <div className="boost-number">80%</div>
-            <p>stronger portfolio by completing real-world projects guided by experts.</p>
-          </div>
-        </div>
-      </section>
+// Student Dashboard Wrapper
+function StudentDashboardPage() {
+  const navigate = useNavigate()
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    clearAuthData()
+    const savedTheme = localStorage.getItem('theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', savedTheme)
+    navigate('/')
+  }
 
-      <footer className="footer-rich">
-        <div className="page-content-wrapper">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <div className="brand">
-                <span>Internify.</span>
-              </div>
-              <p className="footer-tagline">Your trusted source to find highly-vetted mentors & industry professionals to move your career ahead.</p>
-              <a href="#" className="footer-contact-link">Contact</a>
-              <div className="footer-social">
-                <a href="#" className="social-icon" aria-label="Facebook">FB</a>
-                <a href="#" className="social-icon" aria-label="Instagram">IG</a>
-                <a href="#" className="social-icon" aria-label="Twitter">TW</a>
-                <a href="#" className="social-icon" aria-label="LinkedIn">IN</a>
-                <a href="#" className="social-icon" aria-label="YouTube">YT</a>
-              </div>
-            </div>
-            <div className="footer-column">
-              <h4>Platform</h4>
-              <a href="#">Browse Mentors</a>
-              <a href="#">Book a Session</a>
-              <a href="#">Become a Mentor</a>
-              <a href="#">Mentorship for Teams</a>
-              <a href="#">Testimonials</a>
-            </div>
-            <div className="footer-column">
-              <h4>Resources</h4>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowResources(true); }}>Free Study Materials</a>
-              <a href="#">Newsletter</a>
-              <a href="#">Books</a>
-              <a href="#">Perks</a>
-              <a href="#">Templates</a>
-              <a href="#">Career Paths</a>
-              <a href="#">Blog</a>
-            </div>
-            <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#">Case Studies</a>
-              <a href="#">Partner Program</a>
-              <a href="#">Code of Conduct</a>
-              <a href="#">Privacy Policy</a>
-              <a href="#">DMCA</a>
-            </div>
-            <div className="footer-column">
-              <h4>Explore</h4>
-              <a href="#">Companies</a>
-              <a href="#">Fractional Executives</a>
-              <a href="#">Services & Training</a>
-              <a href="#">Part-Time Experts</a>
-            </div>
-            <div className="footer-column">
-              <h4>Support</h4>
-              <a href="#">FAQ</a>
-              <a href="#">Contact</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+  return (
+    <Dashboard
+      onLogout={handleLogout}
+      onOpenExplore={() => navigate('/explore')}
+    />
+  )
+}
+
+// Mentor Dashboard Wrapper
+function MentorDashboardPage() {
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    clearAuthData()
+    const savedTheme = localStorage.getItem('theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', savedTheme)
+    navigate('/')
+  }
+
+  return <MentorDashboard onLogout={handleLogout} />
+}
+
+// Main App Component
+function App() {
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme')
+    return savedTheme || 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <LandingPage
+              onOpenExplore={() => {}}
+              onOpenResources={() => {}}
+              onOpenLogin={() => {}}
+              onMentorClick={() => {}}
+              onBookSession={() => {}}
+              renderStars={renderStars}
+            />
+          } 
+        />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route 
+          path="/payment" 
+          element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="/mentor/:id" element={<MentorProfilePage />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <StudentDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/mentor-dashboard" 
+          element={
+            <ProtectedRoute requiredRole="mentor">
+              <MentorDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

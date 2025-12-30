@@ -105,7 +105,7 @@ function Calendar() {
               </svg>
             </button>
           </div>
-        </div>
+          </div>
 
         <div className="timeline-grid">
           {/* Row Headers (Time Slots) */}
@@ -113,9 +113,9 @@ function Calendar() {
             {timeSlots.map((hour) => (
               <div key={hour} className="timeline-time-slot">
                 {hour}
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
 
           {/* Grid Content */}
           <div className="timeline-grid-content">
@@ -127,7 +127,7 @@ function Calendar() {
                     const session = getSessionForSlot(dayIndex, hour)
                     const isCurrentTime = dayIndex === 0 && hour === 14 // Example: Monday 2 PM
                     
-                    return (
+                return (
                       <div 
                         key={`${day}-${hour}`} 
                         className={`timeline-cell ${isCurrentTime ? 'current-time' : ''}`}
@@ -145,11 +145,11 @@ function Calendar() {
                             </div>
                           </div>
                         )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
             ))}
           </div>
         </div>
@@ -342,8 +342,8 @@ function Calendar() {
                   {session.type !== 'deadline' && (
                     <>
                       <button className="session-action-btn session-btn-secondary" onClick={() => handleReschedule(session.id)}>
-                        Reschedule
-                      </button>
+                    Reschedule
+                  </button>
                       <button className="session-action-btn session-btn-danger" onClick={() => handleCancel(session.id)}>
                         Cancel
                       </button>
@@ -355,7 +355,7 @@ function Calendar() {
                   {session.type === 'deadline' && (
                     <button className="session-action-btn session-btn-primary">
                       View
-                    </button>
+                  </button>
                   )}
                 </div>
               </div>

@@ -116,7 +116,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
                     key={item.id}
                     className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                     onClick={() => {
-                      setActivePage(item.id)
+                        setActivePage(item.id)
                     }}
                     title={item.id}
                   >
