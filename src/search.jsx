@@ -276,7 +276,7 @@ export default function Explore({
                  mentorCourses.some(courseId => (courseId.course_id || courseId) === selectedCourseId)
         })
       } else {
-        result = getMentorsByCourse(selectedCourseId)
+      result = getMentorsByCourse(selectedCourseId)
       }
     }
 
@@ -305,9 +305,9 @@ export default function Explore({
         })
       } else {
         // Use static search function
-        result = searchMentors(query).filter((mentor) =>
-          result.some((m) => m.id === mentor.id)
-        )
+      result = searchMentors(query).filter((mentor) =>
+        result.some((m) => m.id === mentor.id)
+      )
       }
     }
 
@@ -478,12 +478,12 @@ export default function Explore({
               const totalSkillsCount = skillsAsStrings.length
               
               return (
-                <div
+              <div
                   className="mentor-card-new"
                   key={`explore-${mentorId || mentorData.name}`}
                   onClick={() => onMentorClick && onMentorClick(mentorData)}
-                  style={{ cursor: 'pointer' }}
-                >
+                style={{ cursor: 'pointer' }}
+              >
                   <div className="mentor-card-image-wrapper">
                     <img 
                       src={mentorData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'} 
@@ -493,7 +493,7 @@ export default function Explore({
                         e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'
                       }}
                     />
-                    <button 
+                    <button
                       className="mentor-card-favorite"
                       onClick={(e) => {
                         e.stopPropagation()

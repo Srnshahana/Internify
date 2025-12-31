@@ -126,7 +126,7 @@ function ExplorePage() {
       isLoading={isLoadingExplore}
     />
   )
-}
+  }
 
 // Resources Page Wrapper
 function ResourcesPage() {
@@ -201,7 +201,7 @@ function LoginPage() {
         if (authUser) {
           setIsLoggedIn(true)
           setUserRole(authUser.role)
-        }
+  }
       }
     }
     checkAuth()
@@ -272,13 +272,13 @@ function SignupPage() {
     return <Navigate to="/dashboard" replace />
   }
 
-  return (
-    <Signup
+    return (
+      <Signup
       onBack={() => navigate('/login')}
-      onSignup={handleSignup}
-    />
-  )
-}
+        onSignup={handleSignup}
+      />
+    )
+  }
 
 // Payment Page Wrapper
 function PaymentPage() {
@@ -317,13 +317,13 @@ function PaymentPage() {
     return null // Will redirect
   }
 
-  return (
-    <Payment
+    return (
+      <Payment
       onBack={() => navigate('/')}
-      onPaymentSuccess={handlePaymentSuccess}
-    />
-  )
-}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    )
+  }
 
 // Student Dashboard Wrapper
 function StudentDashboardPage() {
@@ -337,13 +337,13 @@ function StudentDashboardPage() {
     navigate('/')
   }
 
-  return (
-    <Dashboard
-      onLogout={handleLogout}
+    return (
+      <Dashboard
+        onLogout={handleLogout}
       onOpenExplore={() => navigate('/explore')}
-    />
-  )
-}
+      />
+    )
+  }
 
 // Mentor Dashboard Wrapper
 function MentorDashboardPage() {

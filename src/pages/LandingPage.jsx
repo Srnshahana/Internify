@@ -106,18 +106,28 @@ const getCompanyIcon = (companyName) => {
 const howItWorksSteps = [
   {
     number: 1,
-    title: 'Browse Courses',
-    description: 'Explore our curated selection of industry-relevant courses designed by experts',
+    title: 'Explore',
+    description: 'Browse our curated selection of mentors and courses tailored to your career goals.',
   },
   {
     number: 2,
-    title: 'Connect with Mentors',
-    description: 'Get matched with experienced professionals who guide your learning journey',
+    title: 'Connect',
+    description: 'Book a free introductory session with your chosen mentor to discuss your learning path.',
   },
   {
     number: 3,
-    title: 'Learn & Grow',
-    description: 'Complete real projects and build skills that make you job-ready',
+    title: 'Schedule',
+    description: 'Set up weekly mentoring sessions that fit your schedule and learning pace.',
+  },
+  {
+    number: 4,
+    title: 'Learn',
+    description: 'Work on real-world projects with personalized guidance and feedback from your mentor.',
+  },
+  {
+    number: 5,
+    title: 'Advance',
+    description: 'Build job-ready skills and advance your career with ongoing mentor support.',
   },
 ]
 
@@ -147,14 +157,14 @@ const outcomes = [
   },
 ]
 
-// Testimonials data
-const testimonials = [
+// Career Guidance Sessions data (using stacked testimonials design)
+const careerGuidanceTestimonials = [
   {
     id: 1,
     mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
     mentorName: 'Sarah Chen',
-    mentorRole: 'Software Engineer',
-    quote: 'My mentor helped me transition from a non-tech background to landing my dream job at Google. The personalized guidance and real-world projects made all the difference.',
+    mentorRole: 'Career Advisor',
+    quote: 'My career guidance sessions helped me transition from a non-tech background to landing my dream job at Google. The personalized guidance and real-world projects made all the difference.',
     studentName: 'Alex Johnson',
     studentRating: 5,
     bgColor: 'cream'
@@ -163,8 +173,8 @@ const testimonials = [
     id: 2,
     mentorImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
     mentorName: 'Michael Rodriguez',
-    mentorRole: 'Product Designer',
-    quote: 'The mentorship program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.',
+    mentorRole: 'Life Advisor',
+    quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.',
     studentName: 'Emma Williams',
     studentRating: 5,
     bgColor: 'mint'
@@ -173,8 +183,8 @@ const testimonials = [
     id: 3,
     mentorImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
     mentorName: 'David Kim',
-    mentorRole: 'Data Scientist',
-    quote: 'I was stuck in my career, but my mentor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.',
+    mentorRole: 'Career Coach',
+    quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.',
     studentName: 'James Brown',
     studentRating: 5,
     bgColor: 'blue'
@@ -183,8 +193,8 @@ const testimonials = [
     id: 4,
     mentorImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
     mentorName: 'Priya Patel',
-    mentorRole: 'Full Stack Developer',
-    quote: 'The weekly sessions kept me accountable and motivated. My mentor\'s feedback on my projects was invaluable in improving my code quality.',
+    mentorRole: 'Career Strategist',
+    quote: 'The weekly sessions kept me accountable and motivated. My advisor\'s feedback on my career path was invaluable in improving my approach.',
     studentName: 'Sophia Martinez',
     studentRating: 5,
     bgColor: 'cream'
@@ -193,8 +203,8 @@ const testimonials = [
     id: 5,
     mentorImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
     mentorName: 'Robert Taylor',
-    mentorRole: 'DevOps Engineer',
-    quote: 'I learned more in 3 months with my mentor than I did in a year of self-study. The hands-on approach and industry insights were game-changing.',
+    mentorRole: 'Life Coach',
+    quote: 'I learned more in 3 months with my advisor than I did in a year of self-study. The hands-on approach and industry insights were game-changing.',
     studentName: 'Daniel Lee',
     studentRating: 5,
     bgColor: 'mint'
@@ -203,11 +213,41 @@ const testimonials = [
     id: 6,
     mentorImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop',
     mentorName: 'Lisa Anderson',
-    mentorRole: 'UX Designer',
-    quote: 'My mentor helped me build a portfolio that showcased my skills perfectly. I landed my first design role at a top tech company thanks to their guidance.',
+    mentorRole: 'Career Mentor',
+    quote: 'My advisor helped me build a portfolio that showcased my skills perfectly. I landed my first design role at a top tech company thanks to their guidance.',
     studentName: 'Olivia Davis',
     studentRating: 5,
     bgColor: 'blue'
+  },
+]
+
+// Student Testimonials data (for new layout)
+const studentTestimonials = [
+  {
+    id: 1,
+    type: 'featured',
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop',
+    title: 'How Students Land Their Dream Jobs Through Mentorship',
+    description: 'Discover how personalized mentorship helps students transition from learning to landing roles at top tech companies.',
+    category: 'Success Stories'
+  },
+  {
+    id: 2,
+    type: 'story',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop',
+    name: 'Emma Williams',
+    role: 'Software Engineer at Microsoft',
+    title: 'From Self-Taught to Software Engineer',
+    description: 'Emma shares her journey from learning to code independently to landing her dream role with mentor guidance.',
+    category: 'Student Journey'
+  },
+  {
+    id: 3,
+    type: 'insight',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=500&fit=crop',
+    title: 'Building a Portfolio That Gets You Hired',
+    description: 'Learn the key strategies for creating a portfolio that stands out to employers and showcases your real-world skills.',
+    category: 'Career Tips'
   },
 ]
 
@@ -316,6 +356,8 @@ export default function LandingPage({
   const howItWorksSectionRef = useRef(null)
   const testimonialsTrackRef = useRef(null)
   const testimonialsRightRef = useRef(null)
+  const careerGuidanceTrackRef = useRef(null)
+  const careerGuidanceRightRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme')
@@ -326,6 +368,7 @@ export default function LandingPage({
   const [apiMentors, setApiMentors] = useState([])
   const [isLoadingMentors, setIsLoadingMentors] = useState(true)
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
+  const [currentCareerGuidanceIndex, setCurrentCareerGuidanceIndex] = useState(0)
 
   // Fetch mentors from API
   useEffect(() => {
@@ -362,14 +405,14 @@ export default function LandingPage({
     ? apiMentors.map(mentor => getMentorData(mentor))
     : mentors.slice(0, 5)
 
-  // Testimonials depth stack navigation
-  const scrollTestimonials = (direction) => {
+  // Career Guidance depth stack navigation
+  const scrollCareerGuidance = (direction) => {
     if (direction === 'right') {
-      setCurrentTestimonialIndex((prev) => 
-        prev < testimonials.length - 1 ? prev + 1 : prev
+      setCurrentCareerGuidanceIndex((prev) => 
+        prev < careerGuidanceTestimonials.length - 1 ? prev + 1 : prev
       )
     } else {
-      setCurrentTestimonialIndex((prev) => 
+      setCurrentCareerGuidanceIndex((prev) => 
         prev > 0 ? prev - 1 : prev
       )
     }
@@ -710,6 +753,30 @@ export default function LandingPage({
             <span>Internify.</span>
           </div>
           <div className="top-actions">
+            <button 
+              className="theme-toggle" 
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5"/>
+                  <line x1="12" y1="1" x2="12" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/>
+                  <line x1="21" y1="12" x2="23" y2="12"/>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+              )}
+            </button>
             <button className="link" onClick={() => navigate('/login')}>Login</button>
             <button className="pill">Apply as mentor</button>
           </div>
@@ -916,7 +983,6 @@ export default function LandingPage({
       <section ref={howItWorksSectionRef} className="how-it-works">
         <div className="how-it-works-header">
           <h2 className="how-it-works-title">How It Works</h2>
-          <p className="how-it-works-subtitle">Three simple steps to accelerate your career journey</p>
         </div>
         <div className="how-it-works-steps">
           {howItWorksSteps.map((step) => (
@@ -925,6 +991,7 @@ export default function LandingPage({
                 <span className="step-number">{step.number}</span>
               </div>
               <h3 className="step-title">{step.title}</h3>
+              <div className="step-underline"></div>
               <p className="step-description">{step.description}</p>
             </div>
           ))}
@@ -975,7 +1042,7 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="testimonials-section">
+      <section className="career-guidance-section">
         <div className="testimonials-container">
           <div className="testimonials-left">
             <div className="testimonials-rating-icon">
@@ -995,12 +1062,12 @@ export default function LandingPage({
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
             </div>
-            <h2 className="testimonials-title">Student Testimonials</h2>
-            <p className="testimonials-subtext">Real reviews from students who found success with their mentors.</p>
+            <h2 className="testimonials-title">Not Sure What to Do Next?</h2>
+            <p className="testimonials-subtext">Get personalized career advice from experienced career guiders and life advisors.</p>
             <div className="testimonials-navigation">
               <button 
                 className="testimonials-nav-btn"
-                onClick={() => scrollTestimonials('left')}
+                onClick={() => scrollCareerGuidance('left')}
                 aria-label="Scroll left"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1009,7 +1076,7 @@ export default function LandingPage({
               </button>
               <button 
                 className="testimonials-nav-btn"
-                onClick={() => scrollTestimonials('right')}
+                onClick={() => scrollCareerGuidance('right')}
                 aria-label="Scroll right"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1018,13 +1085,12 @@ export default function LandingPage({
               </button>
             </div>
           </div>
-          <div className="testimonials-right" ref={testimonialsRightRef}>
-            <div className="testimonials-stack-container" ref={testimonialsTrackRef}>
-              {testimonials.map((testimonial, index) => {
-                const isActive = index === currentTestimonialIndex
-                const isPrevious = index < currentTestimonialIndex
-                const distance = index - currentTestimonialIndex
-                const absDistance = Math.abs(distance)
+          <div className="testimonials-right" ref={careerGuidanceRightRef}>
+            <div className="testimonials-stack-container" ref={careerGuidanceTrackRef}>
+              {careerGuidanceTestimonials.map((testimonial, index) => {
+                const isActive = index === currentCareerGuidanceIndex
+                const isPrevious = index < currentCareerGuidanceIndex
+                const distance = index - currentCareerGuidanceIndex
                 
                 return (
                   <div 
@@ -1063,71 +1129,48 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section ref={highlightsSectionRef} className="highlights fade-in-up">
-        <div className="panel">
-          <p className="eyebrow">Who can join</p>
-          <h2>Built for every student profile.</h2>
-          <p>
-            Whether you are starting out, leveling up, exploring as a hobby, or finishing
-            your final-year project, Internify pairs you with mentors who build alongside
-            you and keep you on track every week.
-          </p>
-          <ol className="highlights-list">
-            {highlights.map((item, index) => (
-              <li key={item} className="highlight-item highlight-animate">
-                {item}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section className="career-path-cta scale-in">
-        <div className="career-path-content">
-          <h2>Not able to decide your career path?</h2>
-          <p>Find your right path for career</p>
-        </div>
-        <div className="cta-actions">
-          <button
-            className="primary"
-            onClick={() => {
-              handleNavSearch('career guidance')
-            }}
-          >
-            Find your career path
-          </button>
-        </div>
-      </section>
-
-      <section ref={outcomesSectionRef} className="outcomes">
+      <section className="student-testimonials-section fade-in-up">
         <div className="page-content-wrapper">
-            <div className="outcomes-container">
-              <div className="outcomes-left animate-section">
-                <h2 className="outcomes-title">WHAT MENTORS PROVIDE</h2>
-                <p className="outcomes-description">
-                  Mentors offer flexible learning and guidance based on your needs — whether you want to learn a skill, build real projects, or get career clarity.
-                  Each offering is designed to be practical, outcome-driven, and aligned with real industry expectations. You choose what you need, when you need it — from structured courses and hands-on projects to focused one-on-one guidance. Every session and package is built to help you move forward with confidence and direction.
-                </p>
-              </div>
-              <div className="outcomes-right">
-                {outcomes.map((item, index) => (
-                  <div key={item.title} className="fade-in-right">
-                    {index > 0 && <div className="outcome-divider">⸻</div>}
-                    <div className="outcome-module">
-                      <div className="outcome-module-content">
-                        <div className="outcome-circle">
-                          <span className="outcome-circle-text">{item.circleText}</span>
-                        </div>
-                        <div className="outcome-content">
-                          <h4 className="outcome-module-title">{item.title}</h4>
-                          <p className="outcome-module-text">{item.text}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          <div className="student-testimonials-grid">
+            <div className="student-testimonial-featured">
+              <div className="student-testimonial-image-wrapper">
+                <img 
+                  src={studentTestimonials[0].image} 
+                  alt={studentTestimonials[0].title}
+                  className="student-testimonial-featured-image"
+                />
+                <div className="student-testimonial-overlay">
+                  <span className="student-testimonial-category">{studentTestimonials[0].category}</span>
+                  <h3 className="student-testimonial-featured-title">{studentTestimonials[0].title}</h3>
+                  <p className="student-testimonial-featured-description">{studentTestimonials[0].description}</p>
+                </div>
               </div>
             </div>
+            <div className="student-testimonials-right">
+              {studentTestimonials.slice(1).map((testimonial) => (
+                <div key={testimonial.id} className="student-testimonial-card">
+                  <div className="student-testimonial-card-image-wrapper">
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.title}
+                      className="student-testimonial-card-image"
+                    />
+                    <div className="student-testimonial-card-overlay">
+                      <span className="student-testimonial-card-category">{testimonial.category}</span>
+                      {testimonial.name && (
+                        <div className="student-testimonial-card-header">
+                          <h4 className="student-testimonial-card-name">{testimonial.name}</h4>
+                          <p className="student-testimonial-card-role">{testimonial.role}</p>
+                        </div>
+                      )}
+                      <h3 className="student-testimonial-card-title">{testimonial.title}</h3>
+                      <p className="student-testimonial-card-description">{testimonial.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
