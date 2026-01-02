@@ -4,6 +4,7 @@ import { mentors, courses } from '../Data.jsx'
 import { SunIcon, MoonIcon, ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon } from '../components/Icons.jsx'
 import backgroundImage from '../assets/background.png'
 import supabase from '../supabaseClient'
+import LightThemeLandingPage from './LightThemeLandingPage.jsx'
 import '../App.css'
 
 // Company Icon Helper
@@ -251,6 +252,130 @@ const studentTestimonials = [
   },
 ]
 
+// Simple Testimonials for new card layout
+const simpleTestimonials = [
+  {
+    id: 1,
+    name: 'Alex Johnson',
+    role: 'Software Engineer',
+    company: 'Google',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    quote: 'Internify helped me transition from a non-tech background to landing my dream job at Google. The personalized mentorship was exactly what I needed.'
+  },
+  {
+    id: 2,
+    name: 'Sarah Chen',
+    role: 'Product Designer',
+    company: 'Microsoft',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+    quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.'
+  },
+  {
+    id: 3,
+    name: 'Michael Rodriguez',
+    role: 'Data Scientist',
+    company: 'Amazon',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
+    quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.'
+  },
+  {
+    id: 4,
+    name: 'Emma Williams',
+    role: 'Full Stack Developer',
+    company: 'Netflix',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
+    quote: 'The weekly sessions kept me accountable and motivated. My mentor\'s feedback was invaluable in improving my approach and landing my role.'
+  },
+  {
+    id: 5,
+    name: 'James Brown',
+    role: 'DevOps Engineer',
+    company: 'Meta',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
+    quote: 'I learned more in 3 months with my mentor than I did in a year of self-study. The hands-on approach and industry insights were game-changing.'
+  },
+  {
+    id: 6,
+    name: 'Sophia Martinez',
+    role: 'UX Designer',
+    company: 'Apple',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop',
+    quote: 'My mentor helped me build a portfolio that showcased my skills perfectly. I landed my first design role at a top tech company thanks to their guidance.'
+  },
+  {
+    id: 7,
+    name: 'Daniel Lee',
+    role: 'Cloud Architect',
+    company: 'AWS',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    quote: 'The structured learning path and real-world projects made all the difference. I now have the confidence and skills to tackle complex cloud challenges.'
+  },
+  {
+    id: 8,
+    name: 'Olivia Davis',
+    role: 'Security Engineer',
+    company: 'Cisco',
+    avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop',
+    quote: 'Internify gave me the mentorship I needed to break into cybersecurity. My mentor\'s industry expertise was instrumental in my success.'
+  },
+  {
+    id: 9,
+    name: 'David Kim',
+    role: 'Machine Learning Engineer',
+    company: 'Tesla',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
+    quote: 'The personalized mentorship helped me understand ML concepts deeply. I\'m now working on autonomous vehicle systems at Tesla.'
+  },
+  {
+    id: 10,
+    name: 'Priya Patel',
+    role: 'Mobile Developer',
+    company: 'Uber',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop',
+    quote: 'Switching careers seemed daunting, but my mentor made the transition smooth. I\'m now building mobile apps that millions of people use daily.'
+  },
+  {
+    id: 11,
+    name: 'Robert Taylor',
+    role: 'Frontend Engineer',
+    company: 'Shopify',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop',
+    quote: 'The project-based learning approach was exactly what I needed. I built real applications during my mentorship that became part of my portfolio.'
+  },
+  {
+    id: 12,
+    name: 'Lisa Anderson',
+    role: 'Backend Developer',
+    company: 'Stripe',
+    avatar: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=150&h=150&fit=crop',
+    quote: 'My mentor helped me understand backend systems architecture. I now work on payment infrastructure that processes billions of dollars.'
+  },
+  {
+    id: 13,
+    name: 'Chris Wilson',
+    role: 'AI Researcher',
+    company: 'OpenAI',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
+    quote: 'The mentorship program gave me the foundation I needed to pursue AI research. I\'m now working on cutting-edge language models.'
+  },
+  {
+    id: 14,
+    name: 'Maria Garcia',
+    role: 'Systems Engineer',
+    company: 'IBM',
+    avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop',
+    quote: 'I gained both technical skills and confidence through Internify. My mentor\'s guidance helped me excel in systems engineering interviews.'
+  },
+  {
+    id: 15,
+    name: 'Kevin Zhang',
+    role: 'Platform Engineer',
+    company: 'Salesforce',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    quote: 'The mentorship experience was transformative. I learned platform engineering best practices and landed a role at a top SaaS company.'
+  },
+]
+
 // Map courses to skills format for Latest Skills section
 const latestSkills = courses.slice(0, 8).map((course) => ({
   id: course.id,
@@ -369,6 +494,8 @@ export default function LandingPage({
   const [isLoadingMentors, setIsLoadingMentors] = useState(true)
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
   const [currentCareerGuidanceIndex, setCurrentCareerGuidanceIndex] = useState(0)
+  const [currentSimpleTestimonialPage, setCurrentSimpleTestimonialPage] = useState(1)
+  const [contactEmail, setContactEmail] = useState('')
 
   // Fetch mentors from API
   useEffect(() => {
@@ -716,6 +843,22 @@ export default function LandingPage({
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
+  // If light theme, render the light theme landing page
+  if (theme === 'light') {
+    return (
+      <LightThemeLandingPage
+        onOpenExplore={onOpenExplore}
+        onOpenResources={onOpenResources}
+        onOpenLogin={onOpenLogin}
+        onMentorClick={onMentorClick}
+        onBookSession={onBookSession}
+        renderStars={renderStarsFunc}
+        toggleTheme={toggleTheme}
+        theme={theme}
+      />
+    )
+  }
+
   const scrollMentors = (dir) => {
     const el = mentorTrackRef.current
     if (!el) return
@@ -998,46 +1141,74 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="mentors fade-in-up">
-        <div className="section-head">
-          <div className="section-head-top">
-            <div>
-              <h2 className="section-title white-text">Latest skills in 2026</h2>
+      <section className="top-rated-programs-section fade-in-up">
+        <div className="page-content-wrapper">
+          <div className="top-rated-programs-header">
+            <div className="top-rated-programs-label">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+              <span>TOP-RATED PROGRAMS</span>
             </div>
-            <button className="tiny view-all-btn" onClick={() => navigate('/explore')}>
-              View all
-            </button>
+            <div className="top-rated-programs-title-row">
+              <h2 className="top-rated-programs-title">Master the skills that matter most</h2>
+              <button className="top-rated-programs-browse-btn" onClick={() => navigate('/explore')}>
+                Browse Programs
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="mentor-slider">
-          <div className="mentor-track" ref={skillsTrackRef}>
-            {latestSkills.map((skill) => (
-              <div
-                className="mentor-card-new"
-                key={skill.id || skill.name}
-                onClick={() => handleNavSearch(`course:${skill.id || skill.name}`)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="mentor-card-image-wrapper">
-                  <img src={skill.image} alt={skill.name} className="mentor-card-image" />
-                  <div className="mentor-card-overlay">
-                    <h3 className="mentor-card-name">{skill.name}</h3>
-                    <p className="mentor-card-location">
-                      <span>{skill.category}</span>
-                    </p>
+          <div className="programs-slider">
+            <div className="programs-track" ref={skillsTrackRef}>
+              {latestSkills.map((skill) => {
+                const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
+                const rating = courseData?.rating || 4.5
+                const level = courseData?.level || 'Intermediate'
+                const duration = courseData?.duration || 12
+                const durationHours = duration * 5 // Approximate hours (assuming 5 hours per week)
+                
+                return (
+                  <div
+                    className="program-card"
+                    key={skill.id || skill.name}
+                    onClick={() => handleNavSearch(`course:${skill.id || skill.name}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="program-card-image-wrapper">
+                      <img src={skill.image} alt={skill.name} className="program-card-image" />
+                      <div className="program-card-icon-overlay">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                          <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="program-card-content">
+                      <h3 className="program-card-title">{skill.name}</h3>
+                      <p className="program-card-description">{skill.description?.substring(0, 100)}...</p>
+                      <div className="program-card-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                          <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        <span>NANODEGREE PROGRAM</span>
+                      </div>
+                      {rating && (
+                        <div className="program-card-rating">
+                          <span className="program-rating-star">★</span>
+                          <span className="program-rating-value">{rating}</span>
+                        </div>
+                      )}
+                      <div className="program-card-meta">
+                        <span className="program-card-level">{level}</span>
+                        <span className="program-card-separator">•</span>
+                        <span className="program-card-duration">{durationHours} hours</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="mentor-card-content">
-                  <p className="mentor-card-description">{skill.description}</p>
-                  <div className="mentor-card-footer">
-                    <button className="tiny ghost" onClick={(e) => {
-                      e.stopPropagation()
-                      handleNavSearch(`course:${skill.id || skill.name}`)
-                    }}>Learn {skill.name}</button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -1188,6 +1359,77 @@ export default function LandingPage({
           <div className="boost-item fade-in-up">
             <div className="boost-number">80%</div>
             <p>stronger portfolio by completing real-world projects guided by experts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="simple-testimonials-section fade-in-up">
+        <div className="page-content-wrapper">
+          <h2 className="simple-testimonials-title">Students Testimonials</h2>
+          <div className="simple-testimonials-grid">
+            {simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3).map((testimonial) => (
+              <div key={testimonial.id} className="simple-testimonial-card">
+                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
+                <div className="simple-testimonial-content">
+                  <h4 className="simple-testimonial-name">{testimonial.name}</h4>
+                  <p className="simple-testimonial-role">{testimonial.role} • {testimonial.company}</p>
+                  <p className="simple-testimonial-quote">{testimonial.quote}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="simple-testimonials-pagination">
+            <button 
+              className="simple-testimonials-prev"
+              onClick={() => setCurrentSimpleTestimonialPage(prev => Math.max(1, prev - 1))}
+              disabled={currentSimpleTestimonialPage === 1}
+              aria-label="Previous page"
+            >
+              ←
+            </button>
+            <span className="simple-testimonials-page-indicator">
+              {String(currentSimpleTestimonialPage).padStart(2, '0')}/{String(Math.ceil(simpleTestimonials.length / 3)).padStart(2, '0')}
+            </span>
+            <button 
+              className="simple-testimonials-next"
+              onClick={() => setCurrentSimpleTestimonialPage(prev => Math.min(Math.ceil(simpleTestimonials.length / 3), prev + 1))}
+              disabled={currentSimpleTestimonialPage === Math.ceil(simpleTestimonials.length / 3)}
+              aria-label="Next page"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="get-in-touch-section fade-in-up">
+        <div className="page-content-wrapper">
+          <div className="get-in-touch-container">
+            <h2 className="get-in-touch-title">Get In Touch</h2>
+            <p className="get-in-touch-description">
+              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </p>
+            <form className="get-in-touch-form" onSubmit={(e) => {
+              e.preventDefault()
+              // Handle form submission
+              console.log('Email submitted:', contactEmail)
+              setContactEmail('')
+              alert('Thank you for your message! We\'ll get back to you soon.')
+            }}>
+              <div className="get-in-touch-input-wrapper">
+                <input
+                  type="email"
+                  className="get-in-touch-input"
+                  placeholder="Email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="get-in-touch-submit">
+                  Send
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
