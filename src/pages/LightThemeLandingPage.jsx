@@ -341,6 +341,8 @@ export default function LightThemeLandingPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [currentSkillsPage, setCurrentSkillsPage] = useState(0)
   const [skillsTotalPages, setSkillsTotalPages] = useState(1)
+  const [currentMentorPage, setCurrentMentorPage] = useState(0)
+  const [mentorTotalPages, setMentorTotalPages] = useState(1)
   const categoryScrollRef = useRef(null)
   const heroSectionRef = useRef(null)
   const [apiMentors, setApiMentors] = useState([])
@@ -460,6 +462,44 @@ export default function LightThemeLandingPage({
       window.removeEventListener('resize', handleResize)
     }
   }, [])
+
+  // Handle mentor slider scroll to update dot indicators
+  useEffect(() => {
+    const track = mentorTrackRef.current
+    if (!track) return
+
+    const calculatePages = () => {
+      const cardWidth = 350 // minmax(320px, 380px) average
+      const gap = 24
+      const cardsPerPage = Math.floor(track.clientWidth / (cardWidth + gap)) || 1
+      const totalPages = Math.ceil(mentorsToDisplay.length / cardsPerPage)
+      setMentorTotalPages(totalPages)
+      return { cardsPerPage, totalPages, cardWidth, gap }
+    }
+
+    const handleScroll = () => {
+      const { cardsPerPage, totalPages, cardWidth, gap } = calculatePages()
+      const scrollLeft = track.scrollLeft
+      const scrollDistance = (cardWidth + gap) * cardsPerPage
+      const page = Math.round(scrollLeft / scrollDistance)
+      setCurrentMentorPage(Math.min(page, Math.max(0, totalPages - 1)))
+    }
+
+    calculatePages() // Initial calculation
+    track.addEventListener('scroll', handleScroll)
+    
+    // Also handle window resize to recalculate
+    const handleResize = () => {
+      calculatePages()
+      handleScroll()
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      track.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [mentorsToDisplay.length])
 
   const scrollCareerGuidance = (direction) => {
     if (direction === 'right') {
@@ -627,14 +667,17 @@ export default function LightThemeLandingPage({
       </section>
 
       <section className="light-theme-mentors-section">
-        <div className="light-theme-section-header">
-          <h2 className="light-theme-section-title">Our top mentors</h2>
-          <button className="light-theme-view-all-btn" onClick={() => navigate('/explore')}>
-            View all
-          </button>
-        </div>
-        <div className="light-theme-mentor-slider">
-          <div className="light-theme-mentor-track" ref={mentorTrackRef}>
+        <div className="page-content-wrapper">
+          <div className="light-theme-mentors-header">
+            <div className="light-theme-mentors-title-row">
+              <h2 className="light-theme-mentors-title">Our top mentors</h2>
+              <button className="light-theme-mentors-view-all-btn" onClick={() => navigate('/explore')}>
+                View all
+              </button>
+            </div>
+          </div>
+          <div className="light-theme-mentor-slider">
+            <div className="light-theme-mentor-track" ref={mentorTrackRef}>
             {isLoadingMentors ? (
               <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
                 Loading mentors...
@@ -666,6 +709,58 @@ export default function LightThemeLandingPage({
                 No mentors available
               </div>
             )}
+            </div>
+            {mentorTotalPages > 1 && (
+              <div className="light-theme-mentor-dots">
+                {Array.from({ length: mentorTotalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    className={`light-theme-mentor-dot ${index === currentMentorPage ? 'active' : ''}`}
+                    onClick={() => {
+                      const track = mentorTrackRef.current
+                      if (!track) return
+                      const cardWidth = 350
+                      const gap = 24
+                      const cardsPerPage = Math.floor(track.clientWidth / (cardWidth + gap)) || 1
+                      const scrollLeft = index * (cardWidth + gap) * cardsPerPage
+                      track.scrollTo({ left: scrollLeft, behavior: 'smooth' })
+                    }}
+                    aria-label={`Go to mentor page ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Card Section */}
+      <section className="light-theme-cta-card-section">
+        <div className="page-content-wrapper">
+          <div className="light-theme-cta-card">
+            <div className="light-theme-cta-card-content">
+              <h2 className="light-theme-cta-card-title">Ready to Get Started?</h2>
+              <p className="light-theme-cta-card-description">
+                Request a demo to see how our platform works, or find the perfect mentor for your career goals.
+              </p>
+              <div className="light-theme-cta-card-buttons">
+                <button 
+                  className="light-theme-cta-btn light-theme-cta-btn-primary"
+                  onClick={() => {
+                    // Handle demo request - you can add a modal or navigate to a demo page
+                    alert('Demo request feature coming soon!')
+                  }}
+                >
+                  Request a Demo
+                </button>
+                <button 
+                  className="light-theme-cta-btn light-theme-cta-btn-secondary"
+                  onClick={() => navigate('/explore')}
+                >
+                  Find a Mentor
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -695,7 +790,7 @@ export default function LightThemeLandingPage({
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
+              </svg> 
               <span>TOP-RATED PROGRAMS</span>
             </div>
             <div className="top-rated-programs-title-row">
@@ -767,7 +862,8 @@ export default function LightThemeLandingPage({
         </div>
       </section>
 
-      <section className="light-theme-career-guidance-section">
+      {/* Not Sure What to Do Next? section - commented out for now */}
+      {/* <section className="light-theme-career-guidance-section">
         <div className="light-theme-testimonials-container">
           <div className="light-theme-testimonials-left">
             <div className="light-theme-testimonials-rating-icon">
@@ -852,7 +948,7 @@ export default function LightThemeLandingPage({
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="light-theme-student-testimonials-section">
         <div className="page-content-wrapper">
@@ -899,20 +995,44 @@ export default function LightThemeLandingPage({
         </div>
       </section>
 
-      <section className="light-theme-boost-section">
-        <h3 className="light-theme-boost-title">How This Boosts Your Chances of Getting Hired</h3>
-        <div className="light-theme-boost-grid">
-          <div className="light-theme-boost-item">
-            <div className="light-theme-boost-number">80%</div>
-            <p>higher chance of getting hired through real mentor-guided, practical learning.</p>
-          </div>
-          <div className="light-theme-boost-item">
-            <div className="light-theme-boost-number">90%</div>
-            <p>skill validation with mentor-issued reference letters and Internify certification.</p>
-          </div>
-          <div className="light-theme-boost-item">
-            <div className="light-theme-boost-number">80%</div>
-            <p>stronger portfolio by completing real-world projects guided by experts.</p>
+      <section className="stats-section">
+        <div className="page-content-wrapper">
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-number">425k+</div>
+              <div className="stat-label">MEMBERS</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">30k+</div>
+              <div className="stat-label">CLASSES</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">9k+</div>
+              <div className="stat-label">TEACHERS</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-rating">
+                <span className="stat-number">4.8</span>
+                <div className="stat-stars">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="stat-label">APP STORE RATING</div>
+            </div>
           </div>
         </div>
       </section>
