@@ -609,9 +609,10 @@ export default function LandingPage({
         <div className="light-theme-coaching-solutions-container">
           <div className="light-theme-coaching-solutions-content">
             <p className="light-theme-coaching-solutions-eyebrow">FROM LEARNING TO CAREER SUCCESS</p>
-            <h2 className="light-theme-coaching-solutions-title">Mentorship Solutions for Every Ambition</h2>
+            <h2 className="light-theme-coaching-solutions-title">From Confusion to Career Clarity — And Your First Job</h2>
             <p className="light-theme-coaching-solutions-description">
-              Whether you're building skills, launching a career, advancing professionally, or guiding others as a mentor, Internify gives you the tools, programs, and support to reach your next level.
+              You don’t need more courses — you need the right guidance.
+              Internify connects freshers with mentors who’ve been there before. Get clarity, build the right skills, work on real direction, and move step-by-step toward your first job with confidence.
             </p>
             <ul className="light-theme-coaching-solutions-list">
               <li className="light-theme-coaching-solutions-item">
@@ -619,7 +620,7 @@ export default function LandingPage({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <div>
-                  <strong>Students:</strong> One-on-one mentorship for skills, projects, and career guidance.
+                  <strong>Freshers & Students:</strong>  Personal mentorship to choose the right path and prepare for jobs.
                 </div>
               </li>
               <li className="light-theme-coaching-solutions-item">
@@ -627,7 +628,7 @@ export default function LandingPage({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <div>
-                  <strong>Professionals:</strong> Build expertise to scale your career and stay ahead.
+                  <strong>	Job Seekers:</strong> Real-world guidance, not generic advice.
                 </div>
               </li>
               <li className="light-theme-coaching-solutions-item">
@@ -635,7 +636,7 @@ export default function LandingPage({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <div>
-                  <strong>Mentors:</strong> Grow your impact with certification, programs, and resources.
+                  <strong>Mentors:</strong>  Help someone take their first real step into a career.
                 </div>
               </li>
               <li className="light-theme-coaching-solutions-item">
@@ -643,7 +644,7 @@ export default function LandingPage({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <div>
-                  <strong>Teams & Organizations:</strong> Help your team thrive with proven mentorship programs.
+                  <strong>Teams & Organizations:</strong> Hire freshers with real-world skills, guided by industry mentors.
                 </div>
               </li>
             </ul>
