@@ -332,8 +332,6 @@ function StudentDashboardPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     clearAuthData()
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    document.documentElement.setAttribute('data-theme', savedTheme)
     navigate('/')
   }
 
@@ -352,8 +350,6 @@ function MentorDashboardPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     clearAuthData()
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    document.documentElement.setAttribute('data-theme', savedTheme)
     navigate('/')
   }
 
@@ -362,15 +358,6 @@ function MentorDashboardPage() {
 
 // Main App Component
 function App() {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme')
-    return savedTheme || 'dark'
-  })
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
 
   return (
     <BrowserRouter>
