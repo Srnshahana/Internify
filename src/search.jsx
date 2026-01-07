@@ -5,6 +5,14 @@ import { searchCourses, searchMentors, getMentorsByCourse } from './Data.jsx'
 import './App.css'
 
 import heroSectionImage from './assets/herosection.jpg'
+import { HomeIcon } from './components/Icons.jsx' // Assuming HomeIcon or similar can be used, or I'll use inline SVG for Arrow
+
+const ArrowLeftIcon = ({ className = "" }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5" />
+    <path d="M12 19l-7-7 7-7" />
+  </svg>
+)
 
 // Company Icon Helper
 const getCompanyIcon = (companyName) => {
@@ -342,29 +350,31 @@ export default function Explore({
 
   return (
     <div className="explore-page-new">
-      <div
-        className="light-theme-hero-section explore-hero"
-        style={{
-          backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%), url(${heroSectionImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
+      <div className="light-theme-hero-section explore-hero-light">
+        <div className="explore-hero-bg-container">
+          <img src={heroSectionImage} alt="Hero" className="explore-hero-bg-image" />
+          <div className="explore-hero-overlay"></div>
+        </div>
+
         <div className="light-theme-topbar">
-          <div className="brand">
-            <button className="back-button-brand" onClick={onBack}>Internify.</button>
+          <div className="brand" onClick={onBack} style={{ cursor: 'pointer' }}>
+            <span>Internify.</span>
           </div>
           <div className="top-actions">
-            <button className="link" onClick={onBack}>Back to Home</button>
+            <button className="link" onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ArrowLeftIcon /> Back to Home
+            </button>
           </div>
         </div>
 
-        <div className="light-theme-hero-content explore-hero-content">
-          <p className="light-theme-hero-eyebrow">BROWSE CATALOG</p>
-          <h1 className="light-theme-hero-title">Explore Courses & Mentors</h1>
-          <p className="light-theme-hero-description">
-            Discover expert-led courses and connect with industry mentors to accelerate your career growth.
-          </p>
+        <div className="light-theme-hero-content explore-hero-content-light">
+          <div className="explore-hero-text-container">
+            <p className="light-theme-hero-eyebrow">BROWSE CATALOG</p>
+            <h1 className="light-theme-hero-title">Explore Courses & Mentors</h1>
+            <p className="light-theme-hero-description">
+              Discover expert-led courses and connect with industry mentors to accelerate your career growth.
+            </p>
+          </div>
         </div>
       </div>
 

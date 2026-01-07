@@ -1,9 +1,18 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { mentors, courses } from '../Data.jsx'
-import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon } from '../components/Icons.jsx'
-import backgroundImage from '../assets/background.png'
-import heroSectionImage from '../assets/herosection.jpg'
+import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
+import backgroundImage from '../assets/4583.jpg'
+import heroSectionImage1 from '../assets/20945183.jpg'
+import heroSectionImage from '../assets/hero.png'
+import OneToOneIcon from '../assets/1-to-1.svg'
+import ProjectIcon from '../assets/project.svg'
+import CertificateIconImg from '../assets/certicate.svg'
+import ReferralIcon from '../assets/referal.svg'
+import RecruitmentIcon from '../assets/recruitment.svg'
+import SuccessStory1 from '../assets/1.png'
+import SuccessStory2 from '../assets/2.png'
+import SuccessStory3 from '../assets/3.png'
 import supabase from '../supabaseClient'
 import '../App.css'
 
@@ -19,28 +28,33 @@ const latestSkills = courses.slice(0, 8).map((course) => ({
 const howItWorksSteps = [
   {
     number: 1,
-    title: 'Explore',
-    description: 'Browse our curated selection of mentors and courses tailored to your career goals.',
+    title: '1-on-1 Mentorship Sessions',
+    description: 'Personalized guidance from industry mentors focused on real hiring needs.',
+    icon: OneToOneIcon,
   },
   {
     number: 2,
-    title: 'Connect',
-    description: 'Book a free introductory session with your chosen mentor to discuss your learning path.',
+    title: 'Job-Ready Real-World Projects',
+    description: 'Work on practical projects that demonstrate actual workplace skills.',
+    icon: ProjectIcon,
   },
   {
     number: 3,
-    title: 'Schedule',
-    description: 'Set up weekly mentoring sessions that fit your schedule and learning pace.',
+    title: 'Internify Certificate of Completion',
+    description: 'Skill-verified certification to strengthen resumes and profiles.',
+    icon: CertificateIconImg,
   },
   {
     number: 4,
-    title: 'Learn',
-    description: 'Work on real-world projects with personalized guidance and feedback from your mentor.',
+    title: 'Referral Letter from Mentors',
+    description: 'Mentor-issued referral letters to support internship and job applications.',
+    icon: ReferralIcon,
   },
   {
     number: 5,
-    title: 'Advance',
-    description: 'Build job-ready skills and advance your career with ongoing mentor support.',
+    title: 'Interview Preparation & Hiring Support',
+    description: 'Mock interviews, resume reviews, and guidance aligned with recruiter expectations.',
+    icon: RecruitmentIcon,
   },
 ]
 
@@ -111,7 +125,7 @@ const studentTestimonials = [
   {
     id: 1,
     type: 'featured',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop',
+    image: SuccessStory1,
     title: 'How Students Land Their Dream Jobs Through Mentorship',
     description: 'Discover how personalized mentorship helps students transition from learning to landing roles at top tech companies.',
     category: 'Success Stories'
@@ -119,7 +133,7 @@ const studentTestimonials = [
   {
     id: 2,
     type: 'story',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop',
+    image: SuccessStory2,
     name: 'Emma Williams',
     role: 'Software Engineer at Microsoft',
     title: 'From Self-Taught to Software Engineer',
@@ -129,7 +143,7 @@ const studentTestimonials = [
   {
     id: 3,
     type: 'insight',
-    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=500&fit=crop',
+    image: SuccessStory3,
     title: 'Building a Portfolio That Gets You Hired',
     description: 'Learn the key strategies for creating a portfolio that stands out to employers and showcases your real-world skills.',
     category: 'Career Tips'
@@ -142,7 +156,7 @@ const simpleTestimonials = [
     name: 'Alex Johnson',
     role: 'Software Engineer',
     company: 'Google',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    avatar: 'src/assets/testimonial1.png',
     quote: 'Internify helped me transition from a non-tech background to landing my dream job at Google. The personalized mentorship was exactly what I needed.'
   },
   {
@@ -150,7 +164,7 @@ const simpleTestimonials = [
     name: 'Sarah Chen',
     role: 'Product Designer',
     company: 'Microsoft',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+    avatar: 'src/assets/testimonial2.png',
     quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.'
   },
   {
@@ -158,7 +172,7 @@ const simpleTestimonials = [
     name: 'Michael Rodriguez',
     role: 'Data Scientist',
     company: 'Amazon',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
+    avatar: 'src/assets/testimonial3.png',
     quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.'
   },
   {
@@ -537,7 +551,7 @@ export default function LandingPage({
               <div
                 className="vertical-slice-bg"
                 style={{
-                  backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.6) 100%), url(${heroSectionImage})`
+                  backgroundImage: `url(${heroSectionImage})`
                 }}
               />
             </div>
@@ -549,7 +563,7 @@ export default function LandingPage({
           </div>
           <div className="top-actions">
             <button className="link" onClick={() => navigate('/login')}>Login</button>
-            <button className="pill">Apply as mentor</button>
+            <button className="pill" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
           </div>
         </div>
 
@@ -747,15 +761,16 @@ export default function LandingPage({
         </div>
       </section>
 
+
       <section ref={howItWorksSectionRef} className="light-theme-how-it-works">
         <div className="light-theme-how-it-works-header">
-          <h2 className="light-theme-how-it-works-title">How It Works</h2>
+          <h2 className="light-theme-how-it-works-title">Our Product Features</h2>
         </div>
         <div className="light-theme-how-it-works-steps">
           {howItWorksSteps.map((step) => (
             <div className="light-theme-how-it-works-step" key={step.number}>
-              <div className="light-theme-step-number-circle">
-                <span className="light-theme-step-number">{step.number}</span>
+              <div className="light-theme-step-icon-wrapper">
+                <img src={step.icon} alt={step.title} className="light-theme-step-icon" />
               </div>
               <h3 className="light-theme-step-title">{step.title}</h3>
               <div className="light-theme-step-underline"></div>
@@ -764,6 +779,65 @@ export default function LandingPage({
           ))}
         </div>
       </section>
+
+      {/* New Stats Section - Sky Blue */}
+
+
+      {/* CTA Section - Moved Here */}
+      <section className="light-theme-ready-started-section">
+        <div className="light-theme-ready-started-container">
+          <div className="light-theme-ready-started-image-wrapper">
+            <img src={heroSectionImage1} alt="Start your journey" className="light-theme-ready-started-image" />
+            <div className="light-theme-ready-started-overlay"></div>
+          </div>
+          <div className="light-theme-ready-started-content">
+            <h2 className="light-theme-ready-started-title">Ready to Get Started?</h2>
+            <p className="light-theme-ready-started-description">
+              Request a demo to see how our platform works, or find the perfect mentor for your career goals.
+              Join thousands of students who are already learning.
+            </p>
+            <div className="light-theme-ready-started-buttons">
+              <button
+                className="light-theme-cta-btn light-theme-cta-btn-primary"
+                onClick={() => {
+                  alert('Demo request feature coming soon!')
+                }}
+              >
+                Request a Demo
+              </button>
+              <button
+                className="light-theme-cta-btn light-theme-cta-btn-secondary"
+                onClick={() => navigate('/explore')}
+              >
+                Find a Mentor
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section - Placed Below Top Rated Programs and Above How It Works/Features */}
+      <section className="light-theme-stats-section-transparent">
+        <div className="stats-transparent-container">
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">425k+</span>
+            <span className="stat-transparent-label">MEMBERS</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">30k+</span>
+            <span className="stat-transparent-label">CLASSES</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">9k+</span>
+            <span className="stat-transparent-label">TEACHERS</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">4.8</span>
+            <span className="stat-transparent-label">APP STORE RATING</span>
+          </div>
+        </div>
+      </section>
+
 
       <section className="light-theme-mentors-section">
         <div className="page-content-wrapper">
@@ -833,36 +907,11 @@ export default function LandingPage({
         </div>
       </section>
 
+
+
+
       {/* CTA Card Section */}
-      <section className="light-theme-cta-card-section">
-        <div className="page-content-wrapper">
-          <div className="light-theme-cta-card">
-            <div className="light-theme-cta-card-content">
-              <h2 className="light-theme-cta-card-title">Ready to Get Started?</h2>
-              <p className="light-theme-cta-card-description">
-                Request a demo to see how our platform works, or find the perfect mentor for your career goals.
-              </p>
-              <div className="light-theme-cta-card-buttons">
-                <button
-                  className="light-theme-cta-btn light-theme-cta-btn-primary"
-                  onClick={() => {
-                    // Handle demo request - you can add a modal or navigate to a demo page
-                    alert('Demo request feature coming soon!')
-                  }}
-                >
-                  Request a Demo
-                </button>
-                <button
-                  className="light-theme-cta-btn light-theme-cta-btn-secondary"
-                  onClick={() => navigate('/explore')}
-                >
-                  Find a Mentor
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       <section className="light-theme-student-testimonials-section">
         <div className="page-content-wrapper">
@@ -909,47 +958,7 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="stats-section">
-        <div className="page-content-wrapper">
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-number">425k+</div>
-              <div className="stat-label">MEMBERS</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">30k+</div>
-              <div className="stat-label">CLASSES</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">9k+</div>
-              <div className="stat-label">TEACHERS</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-rating">
-                <span className="stat-number">4.8</span>
-                <div className="stat-stars">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="stat-label">APP STORE RATING</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       <section className="simple-testimonials-section">
         <div className="page-content-wrapper">
@@ -957,12 +966,12 @@ export default function LandingPage({
           <div className="simple-testimonials-grid">
             {simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3).map((testimonial) => (
               <div key={testimonial.id} className="simple-testimonial-card">
-                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
                 <div className="simple-testimonial-content">
                   <h4 className="simple-testimonial-name">{testimonial.name}</h4>
                   <p className="simple-testimonial-role">{testimonial.role} • {testimonial.company}</p>
                   <p className="simple-testimonial-quote">{testimonial.quote}</p>
                 </div>
+                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
               </div>
             ))}
           </div>
@@ -992,11 +1001,13 @@ export default function LandingPage({
 
       <section className="get-in-touch-section">
         <div className="page-content-wrapper">
-          <div className="get-in-touch-container">
-            <h2 className="get-in-touch-title">Get In Touch</h2>
-            <p className="get-in-touch-description">
-              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-            </p>
+          <div className="get-in-touch-card">
+            <div className="get-in-touch-content">
+              <h2 className="get-in-touch-title">Get In Touch</h2>
+              <p className="get-in-touch-description">
+                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              </p>
+            </div>
             <form className="get-in-touch-form" onSubmit={(e) => {
               e.preventDefault()
               console.log('Email submitted:', contactEmail)
@@ -1007,13 +1018,13 @@ export default function LandingPage({
                 <input
                   type="email"
                   className="get-in-touch-input"
-                  placeholder="Email"
+                  placeholder="Enter your email address"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   required
                 />
                 <button type="submit" className="get-in-touch-submit">
-                  Send
+                  Send Message
                 </button>
               </div>
             </form>
@@ -1031,11 +1042,36 @@ export default function LandingPage({
               <p className="footer-tagline">Your trusted source to find highly-vetted mentors & industry professionals to move your career ahead.</p>
               <a href="#" className="footer-contact-link">Contact</a>
               <div className="footer-social">
-                <a href="#" className="social-icon" aria-label="Facebook">FB</a>
-                <a href="#" className="social-icon" aria-label="Instagram">IG</a>
-                <a href="#" className="social-icon" aria-label="Twitter">TW</a>
-                <a href="#" className="social-icon" aria-label="LinkedIn">IN</a>
-                <a href="#" className="social-icon" aria-label="YouTube">YT</a>
+                <a href="#" className="social-icon" aria-label="Facebook">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                  </svg>
+                </a>
+                <a href="#" className="social-icon" aria-label="Instagram">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                </a>
+                <a href="#" className="social-icon" aria-label="Twitter">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                  </svg>
+                </a>
+                <a href="#" className="social-icon" aria-label="LinkedIn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                  </svg>
+                </a>
+                <a href="#" className="social-icon" aria-label="YouTube">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                  </svg>
+                </a>
               </div>
             </div>
             <div className="footer-column">

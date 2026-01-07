@@ -9,6 +9,7 @@ import Dashboard from './Dashboard.jsx'
 import MentorDashboard from './pages/mentor_dashboard/MentorDashboard.jsx'
 import Payment from './payment.jsx'
 import LandingPage from './pages/LandingPage.jsx'
+import ApplyMentor from './pages/ApplyMentor.jsx'
 import { courses, mentors } from './Data.jsx'
 import supabase from './supabaseClient'
 import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
@@ -35,10 +36,10 @@ function ProtectedRoute({ children, requiredRole = null }) {
   useEffect(() => {
     const checkAuth = async () => {
       const storedAuth = getStoredAuthData()
-      
+
       if (storedAuth) {
         const authUser = await getAuthenticatedUser()
-        
+
         if (authUser) {
           setIsLoggedIn(true)
           setUserRole(authUser.role)
@@ -126,7 +127,7 @@ function ExplorePage() {
       isLoading={isLoadingExplore}
     />
   )
-  }
+}
 
 // Resources Page Wrapper
 function ResourcesPage() {
@@ -155,10 +156,10 @@ function ResourcesPage() {
 function MentorProfilePage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   // Find mentor by ID
-  const mentor = mentors.find(m => 
-    (m.id && String(m.id) === id) || 
+  const mentor = mentors.find(m =>
+    (m.id && String(m.id) === id) ||
     (m.mentor_id && String(m.mentor_id) === id) ||
     (m.name && m.name === id)
   )
@@ -201,7 +202,7 @@ function LoginPage() {
         if (authUser) {
           setIsLoggedIn(true)
           setUserRole(authUser.role)
-  }
+        }
       }
     }
     checkAuth()
@@ -272,13 +273,13 @@ function SignupPage() {
     return <Navigate to="/dashboard" replace />
   }
 
-    return (
-      <Signup
+  return (
+    <Signup
       onBack={() => navigate('/login')}
-        onSignup={handleSignup}
-      />
-    )
-  }
+      onSignup={handleSignup}
+    />
+  )
+}
 
 // Payment Page Wrapper
 function PaymentPage() {
@@ -317,13 +318,13 @@ function PaymentPage() {
     return null // Will redirect
   }
 
-    return (
-      <Payment
+  return (
+    <Payment
       onBack={() => navigate('/')}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
-    )
-  }
+      onPaymentSuccess={handlePaymentSuccess}
+    />
+  )
+}
 
 // Student Dashboard Wrapper
 function StudentDashboardPage() {
@@ -335,13 +336,13 @@ function StudentDashboardPage() {
     navigate('/')
   }
 
-    return (
-      <Dashboard
-        onLogout={handleLogout}
+  return (
+    <Dashboard
+      onLogout={handleLogout}
       onOpenExplore={() => navigate('/explore')}
-      />
-    )
-  }
+    />
+  )
+}
 
 // Mentor Dashboard Wrapper
 function MentorDashboardPage() {
@@ -362,47 +363,48 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <LandingPage
-              onOpenExplore={() => {}}
-              onOpenResources={() => {}}
-              onOpenLogin={() => {}}
-              onMentorClick={() => {}}
-              onBookSession={() => {}}
+              onOpenExplore={() => { }}
+              onOpenResources={() => { }}
+              onOpenLogin={() => { }}
+              onMentorClick={() => { }}
+              onBookSession={() => { }}
               renderStars={renderStars}
             />
-          } 
+          }
         />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route 
-          path="/payment" 
+        <Route path="/apply-mentor" element={<ApplyMentor />} />
+        <Route
+          path="/payment"
           element={
             <ProtectedRoute>
               <PaymentPage />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route path="/mentor/:id" element={<MentorProfilePage />} />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <StudentDashboardPage />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/mentor-dashboard" 
+        <Route
+          path="/mentor-dashboard"
           element={
             <ProtectedRoute requiredRole="mentor">
               <MentorDashboardPage />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

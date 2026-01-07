@@ -11,7 +11,7 @@ export const courses = [
     mentorCount: 15,
     studentCount: 450,
     rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    image: 'src/assets/4380747.jpg',
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const courses = [
     mentorCount: 12,
     studentCount: 380,
     rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
+    image: 'src/assets/5775839.jpg',
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ export const courses = [
     mentorCount: 18,
     studentCount: 520,
     rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
+    image: 'src/assets/business-data-analysis.jpg',
   },
   {
     id: 4,
@@ -53,7 +53,7 @@ export const courses = [
     mentorCount: 10,
     studentCount: 320,
     rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80',
+    image: 'src/assets/9812.jpg',
   },
   {
     id: 5,
@@ -67,7 +67,7 @@ export const courses = [
     mentorCount: 14,
     studentCount: 280,
     rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80',
+    image: 'src/assets/877.jpg',
   },
   {
     id: 6,
