@@ -40,120 +40,117 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
   ]
 
   return (
-    <div className="dashboard-page profile-page-linkedin">
-      <div className="profile-cover-section">
-        <button className="back-button-floating-simple" onClick={onBack}>
-          ← Back
-        </button>
-        <div className="profile-cover-photo"></div>
-        <div className="profile-header-content">
-          <div className="profile-avatar-container">
-            <div className="profile-avatar-large">
-              <img src={mentor.image || 'https://via.placeholder.com/150'} alt={mentor.name} className="mentor-profile-img" />
+    <div className="dashboard-page profile-page-premium">
+      <div className="profile-container-inner">
+        {/* Cover & Header Section */}
+        <div className="profile-header-card">
+          <button className="back-button-floating-premium" onClick={onBack}>
+            ← Back to Explore
+          </button>
+          <div className="profile-cover-gradient"></div>
+          <div className="profile-header-main">
+            <div className="profile-avatar-wrapper">
+              <img src={mentor.image || 'https://via.placeholder.com/150'} alt={mentor.name} className="mentor-avatar-img" />
             </div>
-          </div>
-          <div className="profile-header-info">
-            <div className="profile-header-top">
-              <div>
-                <h1>{mentor.name} {mentor.assured && <span className="verified-check">✓</span>}</h1>
-                <p className="profile-role">{mentor.role} {mentor.company && `at ${mentor.company}`}</p>
-                <p className="profile-location">{mentor.location || 'Online'} • {mentor.hourlyRate ? `$${mentor.hourlyRate}/hr` : '$50/hr'}</p>
+            <div className="profile-header-text">
+              <div className="profile-name-row">
+                <h1>{mentor.name}</h1>
+                {mentor.assured && <span className="verified-badge">✓</span>}
               </div>
-              <div className="profile-actions">
-                <button className="edit-profile-btn primary-btn" onClick={() => onBookSession && onBookSession()}>
-                  Book Session
-                </button>
-                <button className="edit-profile-btn">Message</button>
+              <p className="profile-headline">{mentor.role} {mentor.company && `at ${mentor.company}`}</p>
+              <div className="profile-meta-tags">
+                <span className="meta-tag">{mentor.location || 'Remote'}</span>
+                <span className="meta-tag">{mentor.hourlyRate ? `$${mentor.hourlyRate}/hr` : '$50/hr'}</span>
               </div>
             </div>
+            <div className="profile-main-actions">
+              <button className="btn-action-primary" onClick={() => onBookSession && onBookSession()}>Book Private Session</button>
+              <button className="btn-action-secondary">Send Message</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="profile-stats-grid">
-        {stats.map((stat) => (
-          <div key={stat.label} className="profile-stat-card">
-            <div className="stat-value">{stat.value}</div>
-            <div className="stat-label">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* About Section */}
-      <div className="profile-section-card">
-        <div className="profile-section-header">
-          <h2>About</h2>
-        </div>
-        <p className="profile-bio-text">
-          {mentor.bio || mentor.focus || `Experienced ${mentor.role} passionate about mentoring via Internify.`}
-        </p>
-        <div className="mentor-skills-list-profile">
-          {mentor.skills?.map((skill, idx) => (
-            <span key={idx} className="skill-tag">{skill}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Work Experience */}
-      <div className="profile-section-card">
-        <div className="profile-section-header">
-          <h2>Work Experience</h2>
-        </div>
-        <div className="experience-timeline">
-          <div className="experience-timeline-item">
-            <div className="timeline-icon"></div>
-            <div className="timeline-content">
-              <h3>{mentor.role}</h3>
-              <p className="experience-company-name">{mentor.company}</p>
-              <p className="experience-meta">
-                <span className="experience-period">Present</span>
+        {/* Multi-column Grid */}
+        <div className="profile-grid-layout">
+          {/* Main Column */}
+          <div className="profile-main-column">
+            {/* About Section */}
+            <section className="profile-section-premium">
+              <h2 className="section-title-premium">About</h2>
+              <p className="profile-bio-text">
+                {mentor.bio || mentor.focus || `Experienced ${mentor.role} passionate about mentoring the next generation of talent through Internify.`}
               </p>
-              <p className="experience-description">
-                Leading teams and mentoring junior developers. Specialized in {mentor.focus}.
-              </p>
+              <div className="skills-grid-premium">
+                {mentor.skills?.map((skill, idx) => (
+                  <span key={idx} className="skill-pill-premium">{skill}</span>
+                ))}
+              </div>
+            </section>
+
+            {/* Experience Section */}
+            <section className="profile-section-premium">
+              <h2 className="section-title-premium">Experience</h2>
+              <div className="experience-list-premium">
+                <div className="exp-item-premium">
+                  <div className="exp-dot"></div>
+                  <div className="exp-content">
+                    <h3>{mentor.role}</h3>
+                    <p className="exp-company">{mentor.company}</p>
+                    <p className="exp-period">Present</p>
+                    <p className="exp-desc">Driving innovation and excellence in {mentor.focus || 'modern tech stacks'}.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Testimonials Section */}
+            <section className="profile-section-premium">
+              <h2 className="section-title-premium">Testimonials</h2>
+              <div className="testimonials-scroll-premium">
+                {testimonials.map((t, i) => (
+                  <div key={i} className="testimonial-card-premium">
+                    <div className="testimonial-rating">{'★'.repeat(Math.round(t.rating))}</div>
+                    <p className="testimonial-quote">"{t.quote}"</p>
+                    <div className="testimonial-author">— {t.name}, <span>{t.title}</span></div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* Sidebar Column */}
+          <div className="profile-sidebar-column">
+            {/* Quick Stats Card */}
+            <div className="sidebar-card-premium stats-sidebar">
+              <h3>Professional Stats</h3>
+              <div className="sidebar-stats-list">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="sidebar-stat-item">
+                    <span className="sidebar-stat-value">{stat.value}</span>
+                    <span className="sidebar-stat-label">{stat.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mentorship Programs Card */}
+            <div className="sidebar-card-premium programs-sidebar">
+              <h3>Programs</h3>
+              <div className="sidebar-programs-list">
+                {mentorCourses.map((course) => (
+                  <div key={course.id} className="sidebar-program-item">
+                    <img src={course.image} alt={course.name} />
+                    <div className="program-item-info">
+                      <h4>{course.name}</h4>
+                      <p>{course.level} • {course.duration}w</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Mentorship Programs (Courses) */}
-      <div className="profile-section-card">
-        <div className="profile-section-header">
-          <h2>Mentorship Programs</h2>
-        </div>
-        <div className="courses-enrolled-scroll">
-          {mentorCourses.map((course) => (
-            <div key={course.id} className="course-card-home">
-              <div className="course-image-home">
-                <img src={course.image} alt={course.name} />
-              </div>
-              <h3 className="course-name-home">{course.name}</h3>
-              <p className="course-category-home">{course.category}</p>
-              <div className="course-progress-info-home" style={{ marginTop: 'auto' }}>
-                <span className="course-progress-text-home">{course.level} • {course.duration} Weeks</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="profile-section-card">
-        <div className="profile-section-header">
-          <h2>Testimonials</h2>
-        </div>
-        <div className="testimonials-grid-profile">
-          {testimonials.map((t, i) => (
-            <div key={i} className="profile-testimonial-item">
-              <div className="testimonial-rating-stars">{'★'.repeat(Math.round(t.rating))}</div>
-              <p>"{t.quote}"</p>
-              <div className="testimonial-user">— {t.name}, <span>{t.title}</span></div>
-            </div>
-          ))}
-        </div>
-      </div>
-
     </div>
   )
 }

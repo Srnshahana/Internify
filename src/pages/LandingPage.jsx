@@ -4,7 +4,9 @@ import { mentors, courses } from '../Data.jsx'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
 import backgroundImage from '../assets/4583.jpg'
 import heroSectionImage1 from '../assets/20945183.jpg'
-import heroSectionImage from '../assets/hero.png'
+import heroSectionImage from '../assets/a.png'
+import Lottie from 'lottie-react'
+import HeroLottieAnim from '../assets/herosection.json'
 import OneToOneIcon from '../assets/1-to-1.svg'
 import ProjectIcon from '../assets/project.svg'
 import CertificateIconImg from '../assets/certicate.svg'
@@ -538,43 +540,34 @@ export default function LandingPage({
   return (
     <div className="page light-theme-landing-page">
       <div
-        className="light-theme-hero-section"
+        className="light-theme-hero-section split-hero-layout"
         ref={heroSectionRef}
+        style={{ backgroundImage: `url(${heroSectionImage})`, backgroundSize: 'cover', backgroundPosition: 'center', }}
       >
-        <div className="vertical-slices-container">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="vertical-slice"
-              style={{ '--i': i }}
-            >
-              <div
-                className="vertical-slice-bg"
-                style={{
-                  backgroundImage: `url(${heroSectionImage})`
-                }}
-              />
-            </div>
-          ))}
+        {/* Left Side: Lottie Animation */}
+        <div className="hero-lottie-container">
+          <Lottie animationData={HeroLottieAnim} loop={true} style={{ width: '100%', maxWidth: '600px' }} />
         </div>
-        <div className="light-theme-topbar">
+        <div className="light-theme-topbar" style={{ position: 'absolute', top: '24px', left: '48px', right: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
           <div className="brand">
-            <span>Internify.</span>
+            <span style={{ color: '#ffffff', fontSize: '24px', fontWeight: '800' }}>Internify.</span>
           </div>
           <div className="top-actions">
-            <button className="link" onClick={() => navigate('/login')}>Login</button>
-            <button className="pill" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
+            <button className="link" onClick={() => navigate('/login')} style={{ color: '#ffffff', fontWeight: '600', marginRight: '24px' }}>Login</button>
+            <button className="pill" onClick={() => navigate('/apply-mentor')} style={{ background: '#83a9cf', color: '#ffffff', border: 'none' }}>Apply as mentor</button>
           </div>
         </div>
+        {/* Right Side: Text Content */}
+        <div className="hero-text-content-right">
 
-        <header className="light-theme-hero">
-          <div className="light-theme-hero-content">
-            <h1 className="light-theme-hero-title">Find your mentor</h1>
-            <p className="light-theme-hero-description">
+
+          <div>
+            <h1 className="light-theme-hero-title" style={{ textAlign: 'left', color: '#ffffff', fontSize: '56px', fontWeight: '800', lineHeight: '1.1', marginBottom: '20px', textShadow: 'none' }}>Find your mentor</h1>
+            <p className="light-theme-hero-description" style={{ textAlign: 'left', color: '#ffffff', fontSize: '20px', maxWidth: '600px', lineHeight: '1.6', opacity: '0.9', textShadow: 'none' }}>
               Internify: connect with industry mentors for your career journey and skill development.
             </p>
-            <div className="light-theme-hero-search-container">
-              <div className="light-theme-hero-search-box">
+            <div className="light-theme-hero-search-container" style={{ margin: '32px 0 0 0', width: '100%', maxWidth: '500px' }}>
+              <div className="light-theme-hero-search-box" style={{ background: 'white', border: '1px solid #cbd5e1' }}>
                 <div className="search-icon-wrapper">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 2H16V18H4V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -590,14 +583,15 @@ export default function LandingPage({
                     if (e.key === 'Enter') handleSearch()
                   }}
                   className="light-theme-hero-search-input"
+                  style={{ color: '#0f172a' }}
                 />
-                <button className="light-theme-hero-search-btn" onClick={handleSearch}>
+                <button className="light-theme-hero-search-btn" onClick={handleSearch} style={{ background: '#83a9cf' }}>
                   Search
                 </button>
               </div>
             </div>
-            <div className="light-theme-category-scroll-container">
-              <div className="light-theme-category-scroll" ref={categoryScrollRef}>
+            <div className="light-theme-category-scroll-container" style={{ marginTop: '24px', justifyContent: 'flex-start' }}>
+              <div className="light-theme-category-scroll" ref={categoryScrollRef} style={{ justifyContent: 'flex-start' }}>
                 {categories.map((category) => {
                   const IconComponent = category.icon
                   return (
@@ -616,7 +610,7 @@ export default function LandingPage({
               </div>
             </div>
           </div>
-        </header>
+        </div>
       </div>
 
       <section className="light-theme-coaching-solutions-section">
@@ -816,27 +810,6 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* Stats Section - Placed Below Top Rated Programs and Above How It Works/Features */}
-      <section className="light-theme-stats-section-transparent">
-        <div className="stats-transparent-container">
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">425k+</span>
-            <span className="stat-transparent-label">MEMBERS</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">30k+</span>
-            <span className="stat-transparent-label">CLASSES</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">9k+</span>
-            <span className="stat-transparent-label">TEACHERS</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">4.8</span>
-            <span className="stat-transparent-label">APP STORE RATING</span>
-          </div>
-        </div>
-      </section>
 
 
       <section className="light-theme-mentors-section">
@@ -908,6 +881,27 @@ export default function LandingPage({
       </section>
 
 
+      {/* Stats Section - Placed Below Top Rated Programs and Above How It Works/Features */}
+      <section className="light-theme-stats-section-transparent">
+        <div className="stats-transparent-container">
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">425k+</span>
+            <span className="stat-transparent-label">MEMBERS</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">30k+</span>
+            <span className="stat-transparent-label">CLASSES</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">9k+</span>
+            <span className="stat-transparent-label">TEACHERS</span>
+          </div>
+          <div className="stat-transparent-item">
+            <span className="stat-transparent-number">4.8</span>
+            <span className="stat-transparent-label">APP STORE RATING</span>
+          </div>
+        </div>
+      </section>
 
 
       {/* CTA Card Section */}
@@ -918,11 +912,11 @@ export default function LandingPage({
           <div className="light-theme-student-testimonials-grid">
             <div className="light-theme-student-testimonial-featured">
               <div className="light-theme-student-testimonial-image-wrapper">
-                <img
+                {/* <img
                   src={studentTestimonials[0].image}
                   alt={studentTestimonials[0].title}
                   className="light-theme-student-testimonial-featured-image"
-                />
+                /> */}
                 <div className="light-theme-student-testimonial-overlay">
                   <span className="light-theme-student-testimonial-category">{studentTestimonials[0].category}</span>
                   <h3 className="light-theme-student-testimonial-featured-title">{studentTestimonials[0].title}</h3>
@@ -934,11 +928,11 @@ export default function LandingPage({
               {studentTestimonials.slice(1).map((testimonial) => (
                 <div key={testimonial.id} className="light-theme-student-testimonial-card">
                   <div className="light-theme-student-testimonial-card-image-wrapper">
-                    <img
+                    {/* <img
                       src={testimonial.image}
                       alt={testimonial.title}
                       className="light-theme-student-testimonial-card-image"
-                    />
+                    /> */}
                     <div className="light-theme-student-testimonial-card-overlay">
                       <span className="light-theme-student-testimonial-card-category">{testimonial.category}</span>
                       {testimonial.name && (

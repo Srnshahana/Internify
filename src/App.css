@@ -184,16 +184,16 @@
 }
 
 [data-theme='light'] .pill {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(71, 85, 105, 0.25);
+  background: #83a9cf !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(131, 169, 207, 0.25);
   border: none;
 }
 
 [data-theme='light'] .pill:hover {
-  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  background: #6a91b8;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(71, 85, 105, 0.35);
+  box-shadow: 0 6px 20px rgba(131, 169, 207, 0.35);
 }
 
 .nav-links {
@@ -603,14 +603,14 @@
 }
 
 [data-theme='light'] .hero-search-btn {
-  background: linear-gradient(135deg, #0ca5e9 0%, #0ea5e9 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(12, 165, 233, 0.3);
+  background: #83a9cf !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(131, 169, 207, 0.3);
 }
 
 [data-theme='light'] .hero-search-btn:hover {
-  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-  box-shadow: 0 6px 20px rgba(12, 165, 233, 0.4);
+  background: #6a91b8;
+  box-shadow: 0 6px 20px rgba(131, 169, 207, 0.4);
   transform: translateY(-1px);
 }
 
@@ -4935,12 +4935,10 @@ h1 span {
 
 .light-theme-hero-section {
   height: auto;
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: clamp(20px, 3vw, 40px) 0 clamp(40px, 6vw, 80px) 0;
-  border-bottom: 1px solid #e2e8f0;
   position: relative;
 }
 
@@ -5824,7 +5822,8 @@ h1 span {
 .light-theme-career-guidance-section {
   padding: clamp(60px, 8vw, 100px) clamp(16px, 3vw, 40px);
   padding-bottom: clamp(20px, 3vw, 30px);
-  background: #ffffff;
+  background: #f1f5f9;
+  /* Grey background */
   margin-bottom: 0;
 }
 
@@ -6045,8 +6044,8 @@ h1 span {
 
 /* Light Theme Student Testimonials */
 .light-theme-student-testimonials-section {
-  padding: clamp(12px, 2vw, 20px) clamp(16px, 3vw, 40px);
-  /* background: #f0f9ff; */
+  padding: clamp(60px, 8vw, 100px) clamp(16px, 3vw, 40px);
+  background: #f1f5f9 !important;
   margin-top: 0;
 }
 
@@ -6057,141 +6056,86 @@ h1 span {
 }
 
 .light-theme-student-testimonial-featured {
-  position: relative;
+  background: #ffffff;
   border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-}
-
-.light-theme-student-testimonial-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 500px;
-}
-
-.light-theme-student-testimonial-featured-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.light-theme-student-testimonial-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  border: 1px solid #edf2f7;
   padding: 40px;
-  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .light-theme-student-testimonial-category {
-  font-size: 12px;
+  color: #83a9cf !important;
   font-weight: 700;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 12px;
   display: block;
 }
 
 .light-theme-student-testimonial-featured-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 12px;
-  line-height: 1.3;
-}
-
-.light-theme-student-testimonial-featured-description {
-  font-size: 16px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-}
-
-.light-theme-student-testimonials-right {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  color: #0f172a !important;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
 }
 
 .light-theme-student-testimonial-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  padding: 30px;
   transition: all 0.3s ease;
 }
 
 .light-theme-student-testimonial-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 12px 24px rgba(131, 169, 207, 0.1);
 }
 
 .light-theme-student-testimonial-card-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 300px;
-}
-
-.light-theme-student-testimonial-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: none !important;
 }
 
 .light-theme-student-testimonial-card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  padding: 24px;
-  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .light-theme-student-testimonial-card-category {
-  font-size: 11px;
+  color: #83a9cf !important;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 8px;
-  display: block;
-}
-
-.light-theme-student-testimonial-card-header {
   margin-bottom: 8px;
 }
 
 .light-theme-student-testimonial-card-name {
+  color: #1e293b !important;
   font-size: 18px;
   font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 4px;
 }
 
 .light-theme-student-testimonial-card-role {
+  color: #64748b !important;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
 }
 
 .light-theme-student-testimonial-card-title {
+  color: #0f172a !important;
   font-size: 20px;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 8px;
-  line-height: 1.3;
+  font-weight: 700;
+  margin: 8px 0;
 }
 
 .light-theme-student-testimonial-card-description {
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
+  color: #475569 !important;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 /* Light Theme Boost Section */
@@ -25741,4 +25685,473 @@ h1 span {
 
 .light-theme-topbar .pill:hover {
   background: #0284c7 !important;
+}
+
+/* Landing Page Hero Border Radius */
+.light-theme-hero-section {
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  overflow: hidden;
+  /* Ensure content clips */
+}
+
+/* Mentor Profile Redesign - Match Landing Aesthetic */
+.profile-page-linkedin {
+  background-color: #f8fafc !important;
+  /* Light slate bg */
+}
+
+.profile-cover-section {
+  background: white;
+  border-radius: 20px;
+  margin: 20px auto;
+  max-width: 1000px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding-bottom: 20px;
+  overflow: hidden;
+}
+
+.profile-cover-photo {
+  height: 200px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+  /* Sky blue gradient */
+}
+
+.profile-header-content {
+  padding: 0 40px;
+  display: flex;
+  gap: 24px;
+  margin-top: -60px;
+  /* Overlap cover */
+}
+
+.profile-avatar-large {
+  border: 4px solid white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.profile-header-top {
+  margin-top: 70px;
+  /* Push text down */
+}
+
+.profile-section-card,
+.profile-stats-grid {
+  max-width: 1000px;
+  margin: 20px auto;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.profile-stat-card {
+  background: #f0f9ff;
+  /* Sky blue tint */
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-value {
+  color: #0ea5e9;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.stat-label {
+  color: #64748b;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.edit-profile-btn.primary-btn {
+  background: #0ea5e9;
+  border: none;
+  color: white;
+}
+
+.edit-profile-btn.primary-btn:hover {
+  background: #0284c7;
+}
+
+.skill-tag {
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+}
+
+/* Back Button on Mentor Profile */
+.back-button-floating-simple {
+  top: 24px;
+  left: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  backdrop-filter: blur(4px);
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Landing Hero Height Increase */
+.light-theme-hero-section {
+  min-height: 700px;
+}
+
+/* =========================================
+   PREMIUM MENTOR PROFILE REDESIGN
+   ========================================= */
+
+/* =========================================
+   PREMIUM MENTOR PROFILE OVERHAUL (MATCHING LANDING PAGE)
+   ========================================= */
+
+.profile-page-premium {
+  background: #f8fafc !important;
+  color: #0f172a;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+.profile-container-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* 1. Profile Header Card */
+.profile-header-card {
+  background: white;
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid #edf2f7;
+  position: relative;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.profile-cover-gradient {
+  height: 240px;
+  background: linear-gradient(135deg, #83a9cf 0%, #6366f1 100%);
+  position: relative;
+}
+
+.profile-header-main {
+  display: flex;
+  padding: 0 48px 48px;
+  align-items: flex-end;
+  gap: 32px;
+  margin-top: -80px;
+}
+
+.profile-avatar-wrapper {
+  width: 180px;
+  height: 180px;
+  background: white;
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+}
+
+.mentor-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-header-text {
+  flex: 1;
+  padding-bottom: 10px;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.profile-name-row h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.verified-badge {
+  background: #83a9cf;
+  color: white;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.profile-headline {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.profile-meta-tags {
+  display: flex;
+  gap: 12px;
+}
+
+.meta-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-main-actions {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+/* 2. Grid Layout */
+.profile-grid-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Section Common Styling */
+.profile-section-premium {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid #edf2f7;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+}
+
+.section-title-premium {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+
+/* Sidebar Styling */
+.sidebar-card-premium {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid #edf2f7;
+  margin-bottom: 32px;
+}
+
+.sidebar-card-premium h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.sidebar-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sidebar-stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #83a9cf;
+}
+
+.sidebar-stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.sidebar-program-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.sidebar-program-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.program-item-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.program-item-info p {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Premium Buttons */
+.btn-action-primary {
+  background: #83a9cf;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-primary:hover {
+  background: #6a91b8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(131, 169, 207, 0.3);
+}
+
+.btn-action-secondary {
+  background: white;
+  color: #0f172a;
+  border: 1px solid #edf2f7;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.back-button-floating-premium {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 100;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .profile-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* Lottie Hero Redesign */
+.split-hero-layout {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 80px 5%;
+  background: transparent;
+  /* Changed from white to allow image */
+  min-height: 800px;
+  gap: 40px;
+  /* Reset previous styles */
+  border-radius: 0 !important;
+  border: none !important;
+  /* Ensure no border */
+  overflow: visible !important;
+}
+
+.hero-lottie-container {
+  flex: 1;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-text-content-right {
+  flex: 1;
+  max-width: 50%;
+  text-align: left;
+  /* background-color: rgba(255, 255, 255, 0.15); */
+  padding: 40px;
+  border-radius: 30px;
+  transform: translateY(-100px);
+  /* Move significantly higher */
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  backdrop-filter: blur(10px) !important;
+  /* Adding back for premium feel, user can revert if explicitly disliked */
+}
+
+/* Ensure text is dark since bg is white */
+.hero-text-content-right h1 {
+  color: #ffffff !important;
+  /* White text as requested */
+  font-size: 56px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.hero-text-content-right p {
+  color: #ffffff !important;
+  /* White text as requested */
+  font-size: 20px;
+  margin-bottom: 32px;
+}
+
+/* Adjust search bar for light bg */
+.hero-text-content-right .hero-search-container {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hero-text-content-right .search-input {
+  color: #0f172a;
+}
+
+@media (max-width: 1024px) {
+  .split-hero-layout {
+    flex-direction: column-reverse;
+    /* Text top, image bottom on mobile? Or standard stack */
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  .hero-lottie-container,
+  .hero-text-content-right {
+    max-width: 100%;
+  }
+
+  .hero-text-content-right {
+    text-align: center;
+  }
 }
