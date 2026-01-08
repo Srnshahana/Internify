@@ -5242,7 +5242,7 @@ h1 span {
 }
 
 .light-theme-mentors-section {
-  padding: clamp(60px, 8vw, 100px) clamp(40px, 5vw, 80px) !important;
+  padding: clamp(30px, 4vw, 50px) clamp(20px, 2vw, 40px) !important;
   width: 100%;
   background: #ffffff;
   border-radius: 0;
@@ -25030,7 +25030,7 @@ h1 span {
 .light-theme-stats-section-transparent {
   background: transparent;
   padding: 40px 20px;
-  margin: 10;
+  margin: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -25038,7 +25038,7 @@ h1 span {
 .stats-transparent-container {
   display: flex;
   gap: 24px;
-  padding: 0px 20px;
+  padding: 0px 30px;
   /* keep spacing */
 }
 
@@ -25553,6 +25553,7 @@ h1 span {
   border-bottom: none !important;
   padding: 40px 0;
   margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 /* Testimonials Buttons Sky Blue Fix */
