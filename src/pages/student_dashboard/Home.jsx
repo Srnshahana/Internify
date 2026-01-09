@@ -3,7 +3,7 @@ import '../../App.css'
 import LiveClassroom from '../../liveClassroom.jsx'
 import CourseDetail from './CourseDetail.jsx'
 import MyCourses from './MyCourses.jsx'
-import { 
+import {
   homeProgressData,
   homeUpcomingSessions
 } from '../../Data.jsx'
@@ -11,10 +11,10 @@ import {
 function Home({ onNavigate, onMentorClick }) {
   // Upcoming sessions data
   const upcomingSessions = homeUpcomingSessions
-  
+
   // Progress data - create data for 3 lines: All, Classroom 1, Classroom 2
   const allProgressData = homeProgressData.map(d => ({ week: d.week, value: d.completion }))
-  
+
   // Generate progress data for Classroom 1 (React Advanced Patterns - currently at 65%)
   const classroom1ProgressData = [
     { week: 'W1', value: 15 },
@@ -26,7 +26,7 @@ function Home({ onNavigate, onMentorClick }) {
     { week: 'W7', value: 62 },
     { week: 'W8', value: 65 },
   ]
-  
+
   // Generate progress data for Classroom 2 (UI/UX Design Principles - currently at 40%)
   const classroom2ProgressData = [
     { week: 'W1', value: 8 },
@@ -38,13 +38,13 @@ function Home({ onNavigate, onMentorClick }) {
     { week: 'W7', value: 38 },
     { week: 'W8', value: 40 },
   ]
-  
+
   const progressLines = [
     { name: 'All', data: allProgressData, color: '#6b7280', gradientId: 'progressGradient' },
     { name: 'Classroom 1', data: classroom1ProgressData, color: '#3b82f6', gradientId: 'progressGradient1' },
     { name: 'Classroom 2', data: classroom2ProgressData, color: '#8b5cf6', gradientId: 'progressGradient2' },
   ]
-  
+
   const maxValue = 100
   const chartHeight = 180
   const chartWidth = 600
@@ -367,8 +367,8 @@ function Home({ onNavigate, onMentorClick }) {
   // If course detail is shown
   if (showCourseDetail && selectedCourse) {
     return (
-      <CourseDetail 
-        course={selectedCourse} 
+      <CourseDetail
+        course={selectedCourse}
         onBack={() => {
           setShowCourseDetail(false)
           setSelectedCourse(null)
@@ -395,49 +395,49 @@ function Home({ onNavigate, onMentorClick }) {
         {/* Left Column: Welcome Card + Progress Cards */}
         <div className="welcome-left-column">
           {/* Welcome Card with Illustration */}
-        <div className="welcome-card-new">
-          <div className="welcome-card-content">
-            <h1 className="welcome-title-new">Welcome back, Sherin</h1>
-            <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
-            <div className="welcome-card-actions">
-              <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-                Explore more courses
-              </button>
-              <button className="welcome-card-btn" onClick={handleBookSession}>
-                Book Session
-              </button>
-              <button className="welcome-card-btn" onClick={handleContinueLearning}>
-                Continue Learning
-              </button>
-              <button className="welcome-card-btn" onClick={handleGiveFeedback}>
-                Give Feedback
-              </button>
+          <div className="welcome-card-new">
+            <div className="welcome-card-content">
+              <h1 className="welcome-title-new">Welcome back, Sherin</h1>
+              <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
+              <div className="welcome-card-actions">
+                <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
+                  Explore more courses
+                </button>
+                <button className="welcome-card-btn" onClick={handleBookSession}>
+                  Book Session
+                </button>
+                <button className="welcome-card-btn" onClick={handleContinueLearning}>
+                  Continue Learning
+                </button>
+                <button className="welcome-card-btn" onClick={handleGiveFeedback}>
+                  Give Feedback
+                </button>
+              </div>
+            </div>
+            <div className="welcome-card-illustration">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Person on laptop */}
+                <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
+                <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
+                <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
+                {/* Books stack */}
+                <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
+                <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
+                <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
+                {/* Abstract shapes */}
+                <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
+                <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
+                <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
+              </svg>
             </div>
           </div>
-          <div className="welcome-card-illustration">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Person on laptop */}
-              <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
-              <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
-              <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
-              {/* Books stack */}
-              <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
-              <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
-              <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
-              {/* Abstract shapes */}
-              <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
-              <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
-              <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
-            </svg>
-          </div>
-        </div>
 
           {/* Progress Overview Cards */}
           <div className="dashboard-section progress-overview-section-new">
             <div className="progress-overview-cards-new">
               {/* Learning Hours Card */}
-              <div 
-                className="progress-overview-card" 
+              <div
+                className="progress-overview-card"
                 onClick={() => {
                   setSelectedProgressCard('learning-hours')
                   setShowProgressModal(true)
@@ -460,7 +460,7 @@ function Home({ onNavigate, onMentorClick }) {
               </div>
 
               {/* Assessment Status Card */}
-              <div 
+              <div
                 className="progress-overview-card"
                 onClick={() => {
                   setSelectedProgressCard('assessment-status')
@@ -485,7 +485,7 @@ function Home({ onNavigate, onMentorClick }) {
               </div>
 
               {/* Registered Courses Card */}
-              <div 
+              <div
                 className="progress-overview-card"
                 onClick={() => {
                   setSelectedProgressCard('registered-courses')
@@ -613,7 +613,7 @@ function Home({ onNavigate, onMentorClick }) {
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
-          </div>
+                </div>
                 <div className="assignments-list-home">
                   {pendingAssignments.map((assignment) => (
                     <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
@@ -648,7 +648,7 @@ function Home({ onNavigate, onMentorClick }) {
                 </div>
               </div>
             )}
-      </div>
+          </div>
 
         </div>
 
@@ -659,29 +659,29 @@ function Home({ onNavigate, onMentorClick }) {
             <div className="calendar-month-header">
               <h3 className="calendar-month-name">{currentMonth}</h3>
               <div className="calendar-nav-buttons">
-                <button 
-                  className="calendar-nav-btn" 
-                    onClick={() => {
-                      setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
-                      setShowAddListForm(false)
-                      setShowEventDetails(false)
-                      setClickedDate(null)
-                      setDateEvents([])
-                    }}
+                <button
+                  className="calendar-nav-btn"
+                  onClick={() => {
+                    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
+                    setShowAddListForm(false)
+                    setShowEventDetails(false)
+                    setClickedDate(null)
+                    setDateEvents([])
+                  }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                   </svg>
                 </button>
-                <button 
-                  className="calendar-nav-btn" 
-                    onClick={() => {
-                      setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
-                      setShowAddListForm(false)
-                      setShowEventDetails(false)
-                      setClickedDate(null)
-                      setDateEvents([])
-                    }}
+                <button
+                  className="calendar-nav-btn"
+                  onClick={() => {
+                    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
+                    setShowAddListForm(false)
+                    setShowEventDetails(false)
+                    setClickedDate(null)
+                    setDateEvents([])
+                  }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
@@ -701,39 +701,39 @@ function Home({ onNavigate, onMentorClick }) {
                 const firstDay = new Date(year, month, 1).getDay()
                 const daysInMonth = new Date(year, month + 1, 0).getDate()
                 const days = []
-                
+
                 // Add empty cells for days before the first day of the month
                 for (let i = 0; i < firstDay; i++) {
                   days.push(null)
                 }
-                
+
                 // Add all days of the month
                 for (let date = 1; date <= daysInMonth; date++) {
                   days.push(date)
                 }
-                
+
                 // Fill remaining cells to make 35 total (5 rows x 7 days)
                 while (days.length < 35) {
                   days.push(null)
                 }
-                
+
                 return days.map((date, i) => {
                   if (date === null) {
                     return <div key={i} className="calendar-day-new empty"></div>
                   }
-                  
-                  const isToday = date === new Date().getDate() && 
-                                 month === new Date().getMonth() && 
-                                 year === new Date().getFullYear()
+
+                  const isToday = date === new Date().getDate() &&
+                    month === new Date().getMonth() &&
+                    year === new Date().getFullYear()
                   const hasEvent = [14, 19, 22, 23, 24].includes(date) // Sample event dates
                   const isEventRange = date >= 22 && date <= 24
-                  const isSelected = clickedDate && clickedDate.getDate() === date && 
-                                    clickedDate.getMonth() === month && 
-                                    clickedDate.getFullYear() === year
-                  
+                  const isSelected = clickedDate && clickedDate.getDate() === date &&
+                    clickedDate.getMonth() === month &&
+                    clickedDate.getFullYear() === year
+
                   return (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isEventRange ? 'event-range' : ''} ${isSelected ? 'selected' : ''}`}
                       onClick={() => {
                         const clickedDateObj = new Date(year, month, date)
@@ -767,7 +767,7 @@ function Home({ onNavigate, onMentorClick }) {
                     </h3>
                     <span className="calendar-event-details-count">{dateEvents.length} {dateEvents.length === 1 ? 'event' : 'events'}</span>
                   </div>
-                  <button 
+                  <button
                     className="calendar-event-details-close"
                     onClick={() => {
                       setShowEventDetails(false)
@@ -788,12 +788,12 @@ function Home({ onNavigate, onMentorClick }) {
                         <>
                           <div className="calendar-event-icon session-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
-                          </svg>
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
+                            </svg>
                           </div>
                           <div className="calendar-event-content">
                             <h4 className="calendar-event-item-title">{event.title}</h4>
@@ -810,12 +810,12 @@ function Home({ onNavigate, onMentorClick }) {
                         <>
                           <div className="calendar-event-icon assignment-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                          </svg>
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                              <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
                           </div>
                           <div className="calendar-event-content">
                             <h4 className="calendar-event-item-title">{event.title}</h4>
@@ -841,7 +841,7 @@ function Home({ onNavigate, onMentorClick }) {
               <div className="calendar-add-list-form">
                 <div className="add-list-header">
                   <h3 className="add-list-title">Add new list</h3>
-                  <button 
+                  <button
                     className="add-list-menu-btn"
                     onClick={() => setShowAddListForm(false)}
                   >
@@ -860,10 +860,10 @@ function Home({ onNavigate, onMentorClick }) {
                       <line x1="8" y1="2" x2="8" y2="6"></line>
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    <input 
-                      type="text" 
-                      placeholder="Date" 
-                      className="add-list-input" 
+                    <input
+                      type="text"
+                      placeholder="Date"
+                      className="add-list-input"
                       value={clickedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       readOnly
                     />
@@ -877,7 +877,7 @@ function Home({ onNavigate, onMentorClick }) {
                   </div>
                   <input type="text" placeholder="Invite people" className="add-list-input" />
                 </div>
-                <button 
+                <button
                   className="add-list-submit-btn"
                   onClick={() => {
                     // Handle form submission here
@@ -966,8 +966,8 @@ function Home({ onNavigate, onMentorClick }) {
                   // Only highlight the button if it exactly matches the active line
                   const isActive = activeProgressLine === line.name
                   return (
-                    <button 
-                      key={line.name} 
+                    <button
+                      key={line.name}
                       className={`progress-legend-button ${isActive ? 'active' : ''}`}
                       onClick={() => {
                         if (line.name === 'All') {
@@ -984,13 +984,13 @@ function Home({ onNavigate, onMentorClick }) {
                         }
                       }}
                     >
-                    <div className="progress-legend-color" style={{ background: line.color }}></div>
-                    <span className="progress-legend-label">{line.name}</span>
-                  </button>
+                      <div className="progress-legend-color" style={{ background: line.color }}></div>
+                      <span className="progress-legend-label">{line.name}</span>
+                    </button>
                   )
                 })}
               </div>
-              
+
               <div className="progress-chart-container">
                 <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
                   <defs>
@@ -1001,7 +1001,7 @@ function Home({ onNavigate, onMentorClick }) {
                       </linearGradient>
                     ))}
                   </defs>
-                  
+
                   {/* Grid lines */}
                   {[0, 25, 50, 75, 100].map((value) => {
                     const y = padding.top + graphHeight - (value / maxValue) * graphHeight
@@ -1019,7 +1019,7 @@ function Home({ onNavigate, onMentorClick }) {
                       />
                     )
                   })}
-                  
+
                   {/* Y-axis labels */}
                   {[0, 25, 50, 75, 100].map((value) => {
                     const y = padding.top + graphHeight - (value / maxValue) * graphHeight
@@ -1038,48 +1038,48 @@ function Home({ onNavigate, onMentorClick }) {
                       </text>
                     )
                   })}
-                  
+
                   {/* Progress lines - render each line based on active state */}
                   {progressLines
                     .filter((line) => activeProgressLine === 'All' || activeProgressLine === line.name)
                     .map((line) => {
-                    const points = line.data.map((d, i) => {
-                      const x = padding.left + (i / (line.data.length - 1)) * graphWidth
-                      const y = padding.top + graphHeight - (d.value / maxValue) * graphHeight
-                      return { x, y, value: d.value }
-                    })
-                    
-                    const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
-                    const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
-                    
-                    return (
-                      <g key={line.name}>
-                        <path d={areaPath} fill={`url(#${line.gradientId})`} className="progress-area" />
-                        <path 
-                          d={linePath} 
-                          fill="none" 
-                          stroke={line.color} 
-                          strokeWidth="2.5" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          className="progress-line"
-                          opacity="0.9"
-                        />
-                        {points.map((point, i) => (
-                          <circle 
-                            key={`point-${line.name}-${i}`} 
-                            cx={point.x} 
-                            cy={point.y} 
-                            r="3.5" 
-                            fill={line.color}
-                            className="progress-point"
-                            opacity="1"
+                      const points = line.data.map((d, i) => {
+                        const x = padding.left + (i / (line.data.length - 1)) * graphWidth
+                        const y = padding.top + graphHeight - (d.value / maxValue) * graphHeight
+                        return { x, y, value: d.value }
+                      })
+
+                      const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
+                      const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
+
+                      return (
+                        <g key={line.name}>
+                          <path d={areaPath} fill={`url(#${line.gradientId})`} className="progress-area" />
+                          <path
+                            d={linePath}
+                            fill="none"
+                            stroke={line.color}
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="progress-line"
+                            opacity="0.9"
                           />
-                        ))}
-                      </g>
-                    )
-                  })}
-                  
+                          {points.map((point, i) => (
+                            <circle
+                              key={`point-${line.name}-${i}`}
+                              cx={point.x}
+                              cy={point.y}
+                              r="3.5"
+                              fill={line.color}
+                              className="progress-point"
+                              opacity="1"
+                            />
+                          ))}
+                        </g>
+                      )
+                    })}
+
                   {/* X-axis labels */}
                   {allProgressData.map((d, i) => {
                     const x = padding.left + (i / (allProgressData.length - 1)) * graphWidth
@@ -1294,8 +1294,8 @@ function Home({ onNavigate, onMentorClick }) {
                     <h3 className="progress-modal-details-title">Your Courses</h3>
                     <div className="progress-modal-list">
                       {enrolledCourses.map((course) => (
-                        <div 
-                          key={course.id} 
+                        <div
+                          key={course.id}
                           className="progress-modal-list-item progress-modal-course-item"
                           onClick={() => {
                             setSelectedCourse(course)

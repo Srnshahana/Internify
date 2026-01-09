@@ -19,7 +19,7 @@ function Calendar() {
     const dayOfWeek = today.getDay()
     const startOfWeek = new Date(today)
     startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    
+
     const weekDates = []
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek)
@@ -110,10 +110,10 @@ function Calendar() {
                   {timeSlots.map((hour) => {
                     const session = getSessionForSlot(dayIndex, hour)
                     const isCurrentTime = dayIndex === 0 && hour === 14 // Example: Monday 2 PM
-                    
+
                     return (
-                      <div 
-                        key={`${day}-${hour}`} 
+                      <div
+                        key={`${day}-${hour}`}
                         className={`timeline-cell ${isCurrentTime ? 'current-time' : ''}`}
                       >
                         {session && (
@@ -159,8 +159,8 @@ function Calendar() {
         <div className="calendar-month-header">
           <h3 className="calendar-month-name">{currentMonth}</h3>
           <div className="calendar-nav-buttons">
-            <button 
-              className="calendar-nav-btn" 
+            <button
+              className="calendar-nav-btn"
               onClick={() => {
                 setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
                 setShowAddListForm(false)
@@ -171,8 +171,8 @@ function Calendar() {
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
-            <button 
-              className="calendar-nav-btn" 
+            <button
+              className="calendar-nav-btn"
               onClick={() => {
                 setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
                 setShowAddListForm(false)
@@ -199,35 +199,35 @@ function Calendar() {
             const firstDay = new Date(year, month, 1).getDay()
             const daysInMonth = new Date(year, month + 1, 0).getDate()
             const days = []
-            
+
             for (let i = 0; i < firstDay; i++) {
               days.push(null)
             }
-            
+
             for (let date = 1; date <= daysInMonth; date++) {
               days.push(date)
             }
-            
+
             while (days.length < 35) {
               days.push(null)
             }
-            
+
             return days.map((date, i) => {
               if (date === null) {
                 return <div key={i} className="calendar-day-new empty"></div>
               }
-              
-              const isToday = date === new Date().getDate() && 
-                             month === new Date().getMonth() && 
-                             year === new Date().getFullYear()
+
+              const isToday = date === new Date().getDate() &&
+                month === new Date().getMonth() &&
+                year === new Date().getFullYear()
               const hasEvent = [14, 19, 22, 23, 24].includes(date)
-              const isSelected = clickedDate && clickedDate.getDate() === date && 
-                                clickedDate.getMonth() === month && 
-                                clickedDate.getFullYear() === year
-              
+              const isSelected = clickedDate && clickedDate.getDate() === date &&
+                clickedDate.getMonth() === month &&
+                clickedDate.getFullYear() === year
+
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
                   onClick={() => {
                     const clickedDateObj = new Date(year, month, date)
@@ -248,7 +248,7 @@ function Calendar() {
           <div className="calendar-add-list-form">
             <div className="add-list-header">
               <h3 className="add-list-title">Add new list</h3>
-              <button 
+              <button
                 className="add-list-menu-btn"
                 onClick={() => setShowAddListForm(false)}
               >
@@ -267,10 +267,10 @@ function Calendar() {
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <input 
-                  type="text" 
-                  placeholder="Date" 
-                  className="add-list-input" 
+                <input
+                  type="text"
+                  placeholder="Date"
+                  className="add-list-input"
                   value={clickedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   readOnly
                 />
@@ -284,7 +284,7 @@ function Calendar() {
               </div>
               <input type="text" placeholder="Invite people" className="add-list-input" />
             </div>
-            <button 
+            <button
               className="add-list-submit-btn"
               onClick={() => {
                 setShowAddListForm(false)

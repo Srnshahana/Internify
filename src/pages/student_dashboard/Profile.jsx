@@ -185,8 +185,8 @@ function Profile() {
                 <p className="course-category-home">{course.category}</p>
                 <div className="course-progress-section-home">
                   <div className="course-progress-bar-home">
-                    <div 
-                      className="course-progress-fill-home" 
+                    <div
+                      className="course-progress-fill-home"
                       style={{ width: `${course.progress}%` }}
                     />
                   </div>

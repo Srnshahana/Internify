@@ -17,7 +17,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
     const savedTheme = localStorage.getItem('dashboard-theme')
     return savedTheme || 'light'
   })
-  
+
   // Set theme for dashboard
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -116,7 +116,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
                     key={item.id}
                     className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                     onClick={() => {
-                        setActivePage(item.id)
+                      setActivePage(item.id)
                     }}
                     title={item.id}
                   >
@@ -155,8 +155,8 @@ function Dashboard({ onLogout, onOpenExplore }) {
               >
                 {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
               </button>
-              <button 
-                className="header-icon-btn" 
+              <button
+                className="header-icon-btn"
                 onClick={() => setActivePage('Notification')}
                 title="Notifications"
               >

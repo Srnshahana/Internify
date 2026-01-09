@@ -377,7 +377,7 @@ export default function LandingPage({
           .from('mentors_details')
           .select('*')
           .limit(5)
-
+        console.log('mentorsFromApi', mentorsFromApi)
         if (mentorsError) {
           console.error('Error fetching mentors:', mentorsError)
           setApiMentors([])
@@ -554,7 +554,7 @@ export default function LandingPage({
           </div>
           <div className="top-actions">
             <button className="link" onClick={() => navigate('/login')} style={{ color: '#ffffff', fontWeight: '600', marginRight: '24px' }}>Login</button>
-            <button className="pill" onClick={() => navigate('/apply-mentor')} style={{ background: '#83a9cf', color: '#ffffff', border: 'none' }}>Apply as mentor</button>
+            <button className="pill" onClick={() => navigate('/apply-mentor')} style={{ background: '#6586a6', color: '#ffffff', border: 'none' }}>Apply as mentor</button>
           </div>
         </div>
         {/* Right Side: Text Content */}
@@ -562,7 +562,7 @@ export default function LandingPage({
 
 
           <div>
-            <h1 className="light-theme-hero-title" style={{ textAlign: 'left', color: '#ffffff', fontSize: '56px', fontWeight: '800', lineHeight: '1.1', marginBottom: '20px', textShadow: 'none' }}>Find your mentor</h1>
+            <h1 className="light-theme-hero-title" style={{ textAlign: 'left', fontSize: '56px', fontWeight: '800', lineHeight: '1.1', marginBottom: '20px', textShadow: 'none' }}>Find your mentor</h1>
             <p className="light-theme-hero-description" style={{ textAlign: 'left', color: '#ffffff', fontSize: '20px', maxWidth: '600px', lineHeight: '1.6', opacity: '0.9', textShadow: 'none' }}>
               Internify: connect with industry mentors for your career journey and skill development.
             </p>
@@ -585,7 +585,7 @@ export default function LandingPage({
                   className="light-theme-hero-search-input"
                   style={{ color: '#0f172a' }}
                 />
-                <button className="light-theme-hero-search-btn" onClick={handleSearch} style={{ background: '#83a9cf' }}>
+                <button className="light-theme-hero-search-btn" onClick={handleSearch} style={{ background: '#6586a6' }}>
                   Search
                 </button>
               </div>

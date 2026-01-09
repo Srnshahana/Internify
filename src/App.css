@@ -184,16 +184,16 @@
 }
 
 [data-theme='light'] .pill {
-  background: #83a9cf !important;
+  background: #6586a6 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(131, 169, 207, 0.25);
+  box-shadow: 0 4px 12px rgba(101, 134, 166, 0.25);
   border: none;
 }
 
 [data-theme='light'] .pill:hover {
-  background: #6a91b8;
+  background: #54708a;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(131, 169, 207, 0.35);
+  box-shadow: 0 6px 20px rgba(101, 134, 166, 0.35);
 }
 
 .nav-links {
@@ -603,14 +603,14 @@
 }
 
 [data-theme='light'] .hero-search-btn {
-  background: #83a9cf !important;
+  background: #6586a6 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(131, 169, 207, 0.3);
+  box-shadow: 0 4px 12px rgba(101, 134, 166, 0.3);
 }
 
 [data-theme='light'] .hero-search-btn:hover {
-  background: #6a91b8;
-  box-shadow: 0 6px 20px rgba(131, 169, 207, 0.4);
+  background: #54708a;
+  box-shadow: 0 6px 20px rgba(101, 134, 166, 0.4);
   transform: translateY(-1px);
 }
 
@@ -4870,7 +4870,7 @@ h1 span {
 }
 
 .get-in-touch-submit {
-  background: linear-gradient(135deg, #0ca5e9 0%, #0ea5e9 100%);
+  background: #6586a6;
   color: #ffffff;
   border: none;
   padding: 16px 32px;
@@ -4880,12 +4880,12 @@ h1 span {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(12, 165, 233, 0.3);
+  box-shadow: 0 4px 12px rgba(101, 134, 166, 0.3);
 }
 
 .get-in-touch-submit:hover {
-  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-  box-shadow: 0 6px 20px rgba(12, 165, 233, 0.4);
+  background: #54708a;
+  box-shadow: 0 6px 20px rgba(101, 134, 166, 0.4);
   transform: translateY(-1px);
 }
 
@@ -4987,6 +4987,9 @@ h1 span {
   align-items: center;
   background: rgba(0, 0, 0, 0.5);
   padding: 40px 32px;
+  /* margin-left: 130px;
+  margin-right: 130px; */
+  margin: 50px 150px;
   border-radius: 20px;
   backdrop-filter: blur(10px);
 }
@@ -6066,7 +6069,7 @@ h1 span {
 }
 
 .light-theme-student-testimonial-category {
-  color: #83a9cf !important;
+  color: #6586a6 !important;
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
@@ -6093,7 +6096,7 @@ h1 span {
 
 .light-theme-student-testimonial-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(131, 169, 207, 0.1);
+  box-shadow: 0 12px 24px rgba(101, 134, 166, 0.1);
 }
 
 .light-theme-student-testimonial-card-image-wrapper {
@@ -6107,7 +6110,7 @@ h1 span {
 }
 
 .light-theme-student-testimonial-card-category {
-  color: #83a9cf !important;
+  color: #6586a6 !important;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -24015,7 +24018,7 @@ h1 span {
 }
 
 .get-in-touch-submit {
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  background: #6586a6;
   color: #ffffff;
   border: none;
   padding: 12px 32px;
@@ -24028,9 +24031,9 @@ h1 span {
 }
 
 .get-in-touch-submit:hover {
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  background: #54708a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 4px 12px rgba(101, 134, 166, 0.2);
 }
 
 /* 5. Success Stories resizing (make smaller) */
@@ -25679,13 +25682,13 @@ h1 span {
 
 /* Landing Page "Apply as mentor" button Sky Blue */
 .light-theme-topbar .pill {
-  background: #0ea5e9 !important;
-  border-color: #0ea5e9 !important;
+  background: #6586a6 !important;
+  border-color: #6586a6 !important;
   color: #ffffff !important;
 }
 
 .light-theme-topbar .pill:hover {
-  background: #0284c7 !important;
+  background: #54708a !important;
 }
 
 /* Landing Page Hero Border Radius */
@@ -25846,7 +25849,7 @@ h1 span {
 
 .profile-cover-gradient {
   height: 240px;
-  background: linear-gradient(135deg, #83a9cf 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #6586a6 0%, #6366f1 100%);
   position: relative;
 }
 
@@ -25895,7 +25898,7 @@ h1 span {
 }
 
 .verified-badge {
-  background: #83a9cf;
+  background: #6586a6;
   color: white;
   width: 24px;
   height: 24px;
@@ -25986,7 +25989,7 @@ h1 span {
 .sidebar-stat-value {
   font-size: 20px;
   font-weight: 800;
-  color: #83a9cf;
+  color: #6586a6;
 }
 
 .sidebar-stat-label {
@@ -26023,7 +26026,7 @@ h1 span {
 
 /* Premium Buttons */
 .btn-action-primary {
-  background: #83a9cf;
+  background: #6586a6;
   color: white;
   border: none;
   padding: 14px 28px;
@@ -26034,9 +26037,9 @@ h1 span {
 }
 
 .btn-action-primary:hover {
-  background: #6a91b8;
+  background: #54708a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(131, 169, 207, 0.3);
+  box-shadow: 0 8px 20px rgba(101, 134, 166, 0.3);
 }
 
 .btn-action-secondary {
