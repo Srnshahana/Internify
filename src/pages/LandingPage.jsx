@@ -4,7 +4,7 @@ import { mentors, courses } from '../Data.jsx'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
 import backgroundImage from '../assets/4583.jpg'
 import heroSectionImage1 from '../assets/20945183.jpg'
-import heroSectionImage from '../assets/a.png'
+import heroSectionImage from '../assets/a.jpg'
 import Lottie from 'lottie-react'
 import HeroLottieAnim from '../assets/herosection.json'
 import OneToOneIcon from '../assets/1-to-1.svg'
@@ -367,6 +367,32 @@ export default function LandingPage({
   const howItWorksSectionRef = useRef(null)
   const careerGuidanceRightRef = useRef(null)
   const careerGuidanceTrackRef = useRef(null)
+  const [currentAdIndex, setCurrentAdIndex] = useState(0)
+
+  const ads = [
+    { id: 1, title: 'Unlock Your Potential', subtitle: 'Premium Mentorship with Leaders' },
+    { id: 2, title: 'Master Data Science', subtitle: '1-on-1 sessions with industry experts' },
+    { id: 3, title: 'Switch to Product Management', subtitle: 'The easiest way to transition' },
+    { id: 4, title: 'Ace Your Next Interview', subtitle: 'Mock interviews & feedback' },
+    { id: 5, title: 'Build Your Startup', subtitle: 'Expert guidance for founders' },
+    { id: 6, title: 'Career Guidance for Freshers', subtitle: 'Navigate your first career steps' },
+  ]
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Ad Banner Carousel logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % ads.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [ads.length])
 
   // Fetch mentors from API
   useEffect(() => {
@@ -538,274 +564,117 @@ export default function LandingPage({
   }
 
   return (
-    <div className="page light-theme-landing-page">
-      <div
-        className="light-theme-hero-section split-hero-layout"
-        ref={heroSectionRef}
-        style={{ backgroundImage: `url(${heroSectionImage})`, backgroundSize: 'cover', backgroundPosition: 'center', }}
-      >
-        {/* Left Side: Lottie Animation */}
-        <div className="hero-lottie-container">
-          <Lottie animationData={HeroLottieAnim} loop={true} style={{ width: '100%', maxWidth: '600px' }} />
+    <div className="page landing-page-new">
+      <nav className="elegant-navbar">
+        <div className="user-profile-left">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User Profile" />
         </div>
-        <div className="light-theme-topbar" style={{ position: 'absolute', top: '24px', left: '48px', right: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
-          <div className="brand">
-            <span style={{ color: '#ffffff', fontSize: '24px', fontWeight: '800' }}>Internify.</span>
-          </div>
-          <div className="top-actions">
-            <button className="link" onClick={() => navigate('/login')} style={{ color: '#ffffff', fontWeight: '600', marginRight: '24px' }}>Login</button>
-            <button className="pill" onClick={() => navigate('/apply-mentor')} style={{ background: '#6586a6', color: '#ffffff', border: 'none' }}>Apply as mentor</button>
-          </div>
+        <div className="nav-actions-right">
+          <button className="apply-mentor-btn" onClick={() => navigate('/apply-mentor')}>Apply as a mentor</button>
+          <button className="login-btn-elegant" onClick={() => navigate('/login')}>Login</button>
         </div>
-        {/* Right Side: Text Content */}
-        <div className="hero-text-content-right">
+      </nav>
 
+      <section className="elegant-hero">
+        <h1 className="hero-heading-elegant">Find your mentor</h1>
 
-          <div>
-            <h1 className="light-theme-hero-title" style={{ textAlign: 'left', fontSize: '56px', fontWeight: '800', lineHeight: '1.1', marginBottom: '20px', textShadow: 'none' }}>Find your mentor</h1>
-            <p className="light-theme-hero-description" style={{ textAlign: 'left', color: '#ffffff', fontSize: '20px', maxWidth: '600px', lineHeight: '1.6', opacity: '0.9', textShadow: 'none' }}>
-              Internify: connect with industry mentors for your career journey and skill development.
-            </p>
-            <div className="light-theme-hero-search-container" style={{ margin: '32px 0 0 0', width: '100%', maxWidth: '500px' }}>
-              <div className="light-theme-hero-search-box" style={{ background: 'white', border: '1px solid #cbd5e1' }}>
-                <div className="search-icon-wrapper">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 2H16V18H4V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M8 6L12 10L8 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder='Try "Video Production"'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSearch()
-                  }}
-                  className="light-theme-hero-search-input"
-                  style={{ color: '#0f172a' }}
-                />
-                <button className="light-theme-hero-search-btn" onClick={handleSearch} style={{ background: '#6586a6' }}>
-                  Search
-                </button>
-              </div>
-            </div>
-            <div className="light-theme-category-scroll-container" style={{ marginTop: '24px', justifyContent: 'flex-start' }}>
-              <div className="light-theme-category-scroll" ref={categoryScrollRef} style={{ justifyContent: 'flex-start' }}>
-                {categories.map((category) => {
-                  const IconComponent = category.icon
-                  return (
-                    <button
-                      key={category.id}
-                      className="light-theme-category-tag"
-                      onClick={() => handleNavSearch(category.searchTerm)}
-                    >
-                      <div className="light-theme-category-icon">
-                        <IconComponent className="light-theme-category-icon-svg" />
-                      </div>
-                      <div className="light-theme-category-name">{category.name}</div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+        <div className="elegant-search-container">
+          <div className="elegant-search-box">
+            <input
+              type="text"
+              className="elegant-search-input"
+              placeholder="Search by role, skill, or company..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
           </div>
-        </div>
-      </div>
 
-      <section className="light-theme-coaching-solutions-section">
-        <div className="light-theme-coaching-solutions-container">
-          <div className="light-theme-coaching-solutions-content">
-            <p className="light-theme-coaching-solutions-eyebrow">FROM LEARNING TO CAREER SUCCESS</p>
-            <h2 className="light-theme-coaching-solutions-title">From Confusion to Career Clarity — And Your First Job</h2>
-            <p className="light-theme-coaching-solutions-description">
-              You don’t need more courses — you need the right guidance.
-              Internify connects freshers with mentors who’ve been there before. Get clarity, build the right skills, work on real direction, and move step-by-step toward your first job with confidence.
-            </p>
-            <ul className="light-theme-coaching-solutions-list">
-              <li className="light-theme-coaching-solutions-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <div>
-                  <strong>Freshers & Students:</strong>  Personal mentorship to choose the right path and prepare for jobs.
-                </div>
-              </li>
-              <li className="light-theme-coaching-solutions-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <div>
-                  <strong>	Job Seekers:</strong> Real-world guidance, not generic advice.
-                </div>
-              </li>
-              <li className="light-theme-coaching-solutions-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <div>
-                  <strong>Mentors:</strong>  Help someone take their first real step into a career.
-                </div>
-              </li>
-              <li className="light-theme-coaching-solutions-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <div>
-                  <strong>Teams & Organizations:</strong> Hire freshers with real-world skills, guided by industry mentors.
-                </div>
-              </li>
-            </ul>
-            <button className="light-theme-coaching-solutions-cta" onClick={() => navigate('/explore')}>
-              Explore Our Mentorship Options
-            </button>
-          </div>
-          <div className="light-theme-coaching-solutions-image-wrapper">
-            <img src={backgroundImage} alt="Mentorship" className="light-theme-coaching-solutions-image" />
-            <div className="light-theme-coaching-solutions-stats">
-              <div className="light-theme-coaching-stat-box light-theme-stat-box-primary">
-                <p className="light-theme-coaching-stat-label">Active Mentors</p>
-                <p className="light-theme-coaching-stat-value">1,245+</p>
-              </div>
-              <div className="light-theme-coaching-stat-box light-theme-stat-box-secondary">
-                <p className="light-theme-coaching-stat-label">Mentorship Categories</p>
-                <p className="light-theme-coaching-stat-value">50+</p>
-              </div>
-            </div>
+          <div className="suggestion-tags">
+            {['Product Manager', 'Software Engineer', 'UX Designer', 'Data Scientist'].map(tag => (
+              <button
+                key={tag}
+                className="suggestion-tag"
+                onClick={() => handleNavSearch(tag)}
+              >
+                {tag}
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="light-theme-top-rated-programs-section">
-        <div className="page-content-wrapper">
-          <div className="top-rated-programs-header">
-            <div className="top-rated-programs-label">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-              <span>TOP-RATED PROGRAMS</span>
-            </div>
-            <div className="top-rated-programs-title-row">
-              <h2 className="top-rated-programs-title">Master the skills that matter most</h2>
-              <button className="top-rated-programs-browse-btn" onClick={() => navigate('/explore')}>
-                Browse Programs
-              </button>
-            </div>
-          </div>
-          <div className="programs-slider">
-            <div className="programs-track" ref={skillsTrackRef}>
-              {latestSkills.map((skill) => {
-                const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
-                const rating = courseData?.rating || 4.5
-                const level = courseData?.level || 'Intermediate'
-                const duration = courseData?.duration || 12
-                const durationHours = duration * 5
 
-                return (
-                  <div
-                    className="program-card"
-                    key={skill.id || skill.name}
-                    onClick={() => handleNavSearch(`course:${skill.id || skill.name}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="program-card-image-wrapper">
-                      <img src={skill.image} alt={skill.name} className="program-card-image" />
-                      <div className="program-card-gradient-overlay"></div>
-                      <div className="program-card-content">
-                        <h3 className="program-card-title">{skill.name}</h3>
-                        <div className="program-card-details">
-                          {rating && (
-                            <div className="program-card-rating">
-                              <span className="program-rating-star">★</span>
-                              <span className="program-rating-value">{rating}</span>
-                            </div>
-                          )}
-                          <div className="program-card-meta">
-                            <span className="program-card-level">{level}</span>
-                            <span className="program-card-separator">•</span>
-                            <span className="program-card-duration">{durationHours}h</span>
-                          </div>
+      <section className="elegant-programs-section">
+        <h2 className="programs-heading-small">TOP-RATED PROGRAMS</h2>
+        <div className="programs-grid-elegant">
+          {latestSkills.slice(0, 4).map((skill) => {
+            const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
+            const rating = courseData?.rating || 4.5
+            const level = courseData?.level || 'Intermediate'
+            const duration = courseData?.duration || 12
+            const durationHours = duration * 5
+
+            return (
+              <div
+                className="program-card"
+                key={skill.id || skill.name}
+                onClick={() => handleNavSearch(`course:${skill.id || skill.name}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="program-card-image-wrapper">
+                  <img src={skill.image} alt={skill.name} className="program-card-image" />
+                  <div className="program-card-gradient-overlay"></div>
+                  <div className="program-card-content">
+                    <h3 className="program-card-title">{skill.name}</h3>
+                    <div className="program-card-details">
+                      {rating && (
+                        <div className="program-card-rating">
+                          <span className="program-rating-star">★</span>
+                          <span className="program-rating-value">{rating}</span>
                         </div>
+                      )}
+                      <div className="program-card-meta">
+                        <span className="program-card-level">{level}</span>
+                        <span className="program-card-separator">•</span>
+                        <span className="program-card-duration">{durationHours}h</span>
                       </div>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-            <div className="programs-dots">
-              {Array.from({ length: skillsTotalPages }, (_, index) => (
-                <button
-                  key={index}
-                  className={`program-dot ${currentSkillsPage === index ? 'active' : ''}`}
-                  onClick={() => {
-                    const track = skillsTrackRef.current
-                    if (!track) return
-                    const cardWidth = 352
-                    const gap = 24
-                    const cardsPerPage = Math.floor(track.clientWidth / (cardWidth + gap)) || 1
-                    const scrollLeft = index * (cardWidth + gap) * cardsPerPage
-                    track.scrollTo({ left: scrollLeft, behavior: 'smooth' })
-                  }}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      <section ref={howItWorksSectionRef} className="light-theme-how-it-works">
-        <div className="light-theme-how-it-works-header">
-          <h2 className="light-theme-how-it-works-title">Our Product Features</h2>
-        </div>
-        <div className="light-theme-how-it-works-steps">
-          {howItWorksSteps.map((step) => (
-            <div className="light-theme-how-it-works-step" key={step.number}>
-              <div className="light-theme-step-icon-wrapper">
-                <img src={step.icon} alt={step.title} className="light-theme-step-icon" />
+                </div>
               </div>
-              <h3 className="light-theme-step-title">{step.title}</h3>
-              <div className="light-theme-step-underline"></div>
-              <p className="light-theme-step-description">{step.description}</p>
-            </div>
-          ))}
+            )
+          })}
+        </div>
+
+        <div className="view-more-container" onClick={() => navigate('/explore')}>
+          <span>View more</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
         </div>
       </section>
 
-      {/* New Stats Section - Sky Blue */}
 
-
-      {/* CTA Section - Moved Here */}
-      <section className="light-theme-ready-started-section">
-        <div className="light-theme-ready-started-container">
-          <div className="light-theme-ready-started-image-wrapper">
-            <img src={heroSectionImage1} alt="Start your journey" className="light-theme-ready-started-image" />
-            <div className="light-theme-ready-started-overlay"></div>
-          </div>
-          <div className="light-theme-ready-started-content">
-            <h2 className="light-theme-ready-started-title">Ready to Get Started?</h2>
-            <p className="light-theme-ready-started-description">
-              Request a demo to see how our platform works, or find the perfect mentor for your career goals.
-              Join thousands of students who are already learning.
-            </p>
-            <div className="light-theme-ready-started-buttons">
-              <button
-                className="light-theme-cta-btn light-theme-cta-btn-primary"
-                onClick={() => {
-                  alert('Demo request feature coming soon!')
-                }}
+      <section className="ad-banner-section">
+        <div className="ad-carousel-container">
+          <div
+            className="ad-track"
+            style={{
+              transform: `translateX(-${currentAdIndex * 80}%)`
+            }}
+          >
+            {ads.map((ad, index) => (
+              <div
+                key={ad.id}
+                className={`ad-slide ${index !== currentAdIndex ? 'inactive' : ''}`}
               >
-                Request a Demo
-              </button>
-              <button
-                className="light-theme-cta-btn light-theme-cta-btn-secondary"
-                onClick={() => navigate('/explore')}
-              >
-                Find a Mentor
-              </button>
-            </div>
+                <h2>{ad.title}</h2>
+                <p>{ad.subtitle}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -818,7 +687,11 @@ export default function LandingPage({
             <div className="light-theme-mentors-title-row">
               <h2 className="light-theme-mentors-title">Our top mentors</h2>
               <button className="light-theme-mentors-view-all-btn" onClick={() => navigate('/explore')}>
-                View all
+                <span>View all</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             </div>
           </div>
@@ -881,76 +754,6 @@ export default function LandingPage({
       </section>
 
 
-      {/* Stats Section - Placed Below Top Rated Programs and Above How It Works/Features */}
-      <section className="light-theme-stats-section-transparent">
-        <div className="stats-transparent-container">
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">425k+</span>
-            <span className="stat-transparent-label">MEMBERS</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">30k+</span>
-            <span className="stat-transparent-label">CLASSES</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">9k+</span>
-            <span className="stat-transparent-label">TEACHERS</span>
-          </div>
-          <div className="stat-transparent-item">
-            <span className="stat-transparent-number">4.8</span>
-            <span className="stat-transparent-label">APP STORE RATING</span>
-          </div>
-        </div>
-      </section>
-
-
-      {/* CTA Card Section */}
-
-
-      <section className="light-theme-student-testimonials-section">
-        <div className="page-content-wrapper">
-          <div className="light-theme-student-testimonials-grid">
-            <div className="light-theme-student-testimonial-featured">
-              <div className="light-theme-student-testimonial-image-wrapper">
-                {/* <img
-                  src={studentTestimonials[0].image}
-                  alt={studentTestimonials[0].title}
-                  className="light-theme-student-testimonial-featured-image"
-                /> */}
-                <div className="light-theme-student-testimonial-overlay">
-                  <span className="light-theme-student-testimonial-category">{studentTestimonials[0].category}</span>
-                  <h3 className="light-theme-student-testimonial-featured-title">{studentTestimonials[0].title}</h3>
-                  <p className="light-theme-student-testimonial-featured-description">{studentTestimonials[0].description}</p>
-                </div>
-              </div>
-            </div>
-            <div className="light-theme-student-testimonials-right">
-              {studentTestimonials.slice(1).map((testimonial) => (
-                <div key={testimonial.id} className="light-theme-student-testimonial-card">
-                  <div className="light-theme-student-testimonial-card-image-wrapper">
-                    {/* <img
-                      src={testimonial.image}
-                      alt={testimonial.title}
-                      className="light-theme-student-testimonial-card-image"
-                    /> */}
-                    <div className="light-theme-student-testimonial-card-overlay">
-                      <span className="light-theme-student-testimonial-card-category">{testimonial.category}</span>
-                      {testimonial.name && (
-                        <div className="light-theme-student-testimonial-card-header">
-                          <h4 className="light-theme-student-testimonial-card-name">{testimonial.name}</h4>
-                          <p className="light-theme-student-testimonial-card-role">{testimonial.role}</p>
-                        </div>
-                      )}
-                      <h3 className="light-theme-student-testimonial-card-title">{testimonial.title}</h3>
-                      <p className="light-theme-student-testimonial-card-description">{testimonial.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
 
 
@@ -958,7 +761,7 @@ export default function LandingPage({
         <div className="page-content-wrapper">
           <h2 className="simple-testimonials-title">Students Testimonials</h2>
           <div className="simple-testimonials-grid">
-            {simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3).map((testimonial) => (
+            {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial) => (
               <div key={testimonial.id} className="simple-testimonial-card">
                 <div className="simple-testimonial-content">
                   <h4 className="simple-testimonial-name">{testimonial.name}</h4>
@@ -969,27 +772,29 @@ export default function LandingPage({
               </div>
             ))}
           </div>
-          <div className="simple-testimonials-pagination">
-            <button
-              className="simple-testimonials-prev"
-              onClick={() => setCurrentSimpleTestimonialPage(prev => Math.max(1, prev - 1))}
-              disabled={currentSimpleTestimonialPage === 1}
-              aria-label="Previous page"
-            >
-              ←
-            </button>
-            <span className="simple-testimonials-page-indicator">
-              {String(currentSimpleTestimonialPage).padStart(2, '0')}/{String(Math.ceil(simpleTestimonials.length / 3)).padStart(2, '0')}
-            </span>
-            <button
-              className="simple-testimonials-next"
-              onClick={() => setCurrentSimpleTestimonialPage(prev => Math.min(Math.ceil(simpleTestimonials.length / 3), prev + 1))}
-              disabled={currentSimpleTestimonialPage === Math.ceil(simpleTestimonials.length / 3)}
-              aria-label="Next page"
-            >
-              →
-            </button>
-          </div>
+          {!isMobile && (
+            <div className="simple-testimonials-pagination">
+              <button
+                className="simple-testimonials-prev"
+                onClick={() => setCurrentSimpleTestimonialPage(prev => Math.max(1, prev - 1))}
+                disabled={currentSimpleTestimonialPage === 1}
+                aria-label="Previous page"
+              >
+                ←
+              </button>
+              <span className="simple-testimonials-page-indicator">
+                {String(currentSimpleTestimonialPage).padStart(2, '0')}/{String(Math.ceil(simpleTestimonials.length / 3)).padStart(2, '0')}
+              </span>
+              <button
+                className="simple-testimonials-next"
+                onClick={() => setCurrentSimpleTestimonialPage(prev => Math.min(Math.ceil(simpleTestimonials.length / 3), prev + 1))}
+                disabled={currentSimpleTestimonialPage === Math.ceil(simpleTestimonials.length / 3)}
+                aria-label="Next page"
+              >
+                →
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -997,7 +802,7 @@ export default function LandingPage({
         <div className="page-content-wrapper">
           <div className="get-in-touch-card">
             <div className="get-in-touch-content">
-              <h2 className="get-in-touch-title">Get In Touch</h2>
+              <h2 className="get-in-touch-title">Make an Enquiry</h2>
               <p className="get-in-touch-description">
                 Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
               </p>
@@ -1026,89 +831,6 @@ export default function LandingPage({
         </div>
       </section>
 
-      <footer className="footer-rich">
-        <div className="page-content-wrapper">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <div className="brand">
-                <span>Internify.</span>
-              </div>
-              <p className="footer-tagline">Your trusted source to find highly-vetted mentors & industry professionals to move your career ahead.</p>
-              <a href="#" className="footer-contact-link">Contact</a>
-              <div className="footer-social">
-                <a href="#" className="social-icon" aria-label="Facebook">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                  </svg>
-                </a>
-                <a href="#" className="social-icon" aria-label="Instagram">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </a>
-                <a href="#" className="social-icon" aria-label="Twitter">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                  </svg>
-                </a>
-                <a href="#" className="social-icon" aria-label="LinkedIn">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                    <rect x="2" y="9" width="4" height="12"></rect>
-                    <circle cx="4" cy="4" r="2"></circle>
-                  </svg>
-                </a>
-                <a href="#" className="social-icon" aria-label="YouTube">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
-                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div className="footer-column">
-              <h4>Platform</h4>
-              <a href="#" onClick={(e) => { e.preventDefault(); navigate('/explore') }}>Browse Mentors</a>
-              <a href="#">Book a Session</a>
-              <a href="#">Become a Mentor</a>
-              <a href="#">Mentorship for Teams</a>
-              <a href="#">Testimonials</a>
-            </div>
-            <div className="footer-column">
-              <h4>Resources</h4>
-              <a href="#" onClick={(e) => { e.preventDefault(); navigate('/resources') }}>Free Study Materials</a>
-              <a href="#">Newsletter</a>
-              <a href="#">Books</a>
-              <a href="#">Perks</a>
-              <a href="#">Templates</a>
-              <a href="#">Career Paths</a>
-              <a href="#">Blog</a>
-            </div>
-            <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#">Case Studies</a>
-              <a href="#">Partner Program</a>
-              <a href="#">Code of Conduct</a>
-              <a href="#">Privacy Policy</a>
-              <a href="#">DMCA</a>
-            </div>
-            <div className="footer-column">
-              <h4>Explore</h4>
-              <a href="#">Companies</a>
-              <a href="#">Fractional Executives</a>
-              <a href="#">Services & Training</a>
-              <a href="#">Part-Time Experts</a>
-            </div>
-            <div className="footer-column">
-              <h4>Support</h4>
-              <a href="#">FAQ</a>
-              <a href="#">Contact</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </div >
   )
 }
