@@ -367,8 +367,6 @@ export default function LandingPage({
   const howItWorksSectionRef = useRef(null)
   const careerGuidanceRightRef = useRef(null)
   const careerGuidanceTrackRef = useRef(null)
-  const [currentAdIndex, setCurrentAdIndex] = useState(0)
-
   const ads = [
     { id: 1, title: 'Unlock Your Potential', subtitle: 'Premium Mentorship with Leaders' },
     { id: 2, title: 'Master Data Science', subtitle: '1-on-1 sessions with industry experts' },
@@ -378,6 +376,10 @@ export default function LandingPage({
     { id: 6, title: 'Career Guidance for Freshers', subtitle: 'Navigate your first career steps' },
   ]
 
+  // For infinite loop, we clone the first and last few items
+  const displayAds = [ads[ads.length - 1], ...ads, ads[0]]
+  const [currentAdIndex, setCurrentAdIndex] = useState(1) // Start at the real first item
+  const [isTransitioning, setIsTransitioning] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
@@ -386,13 +388,28 @@ export default function LandingPage({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Ad Banner Carousel logic
+  // Infinite Ad Banner Loop
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentAdIndex((prev) => (prev + 1) % ads.length)
+      handleNextAd()
     }, 5000)
     return () => clearInterval(timer)
-  }, [ads.length])
+  }, [currentAdIndex])
+
+  const handleNextAd = () => {
+    setIsTransitioning(true)
+    setCurrentAdIndex((prev) => prev + 1)
+  }
+
+  const handleTransitionEnd = () => {
+    if (currentAdIndex >= displayAds.length - 1) {
+      setIsTransitioning(false)
+      setCurrentAdIndex(1)
+    } else if (currentAdIndex <= 0) {
+      setIsTransitioning(false)
+      setCurrentAdIndex(displayAds.length - 2)
+    }
+  }
 
   // Fetch mentors from API
   useEffect(() => {
@@ -564,50 +581,57 @@ export default function LandingPage({
   }
 
   return (
-    <div className="page landing-page-new">
+    <div className="landing-page-new">
       <nav className="elegant-navbar">
         <div className="user-profile-left">
           <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User Profile" />
         </div>
         <div className="nav-actions-right">
-          <button className="apply-mentor-btn" onClick={() => navigate('/apply-mentor')}>Apply as a mentor</button>
-          <button className="login-btn-elegant" onClick={() => navigate('/login')}>Login</button>
+          <button className="apply-mentor-btn" onClick={() => navigate('/login')}>Login</button>
+          <button className="login-btn-elegant" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
         </div>
       </nav>
 
       <section className="elegant-hero">
-        <h1 className="hero-heading-elegant">Find your mentor</h1>
+        <div className="hero-blur-bg"></div>
+        <div className="elegant-hero-inner">
+          <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
+          {/* <p className="hero-subheading-elegant">
+            Internify connects you with industry leaders for personalized 1-on-1 guidance,
+            real-world projects, and career-defining certificates.
+          </p> */}
 
-        <div className="elegant-search-container">
-          <div className="elegant-search-box">
-            <input
-              type="text"
-              className="elegant-search-input"
-              placeholder="Search by role, skill, or company..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
-          </div>
+          <div className="elegant-search-container">
+            <div className="elegant-search-box">
+              <input
+                type="text"
+                className="elegant-search-input"
+                placeholder="Ex: Software Engineer, Product Manager..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
+            </div>
 
-          <div className="suggestion-tags">
-            {['Product Manager', 'Software Engineer', 'UX Designer', 'Data Scientist'].map(tag => (
-              <button
-                key={tag}
-                className="suggestion-tag"
-                onClick={() => handleNavSearch(tag)}
-              >
-                {tag}
-              </button>
-            ))}
+            <div className="suggestion-tags">
+              {['Engineering', 'Design', 'AI', 'Business'].map(tag => (
+                <button
+                  key={tag}
+                  className="suggestion-tag"
+                  onClick={() => handleNavSearch(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
 
       <section className="elegant-programs-section">
-        <h2 className="programs-heading-small">TOP-RATED PROGRAMS</h2>
+        <h2 className="programs-heading-small">Top rated programs</h2>
         <div className="programs-grid-elegant">
           {latestSkills.slice(0, 4).map((skill) => {
             const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
@@ -662,19 +686,26 @@ export default function LandingPage({
         <div className="ad-carousel-container">
           <div
             className="ad-track"
+            onTransitionEnd={handleTransitionEnd}
             style={{
-              transform: `translateX(-${currentAdIndex * 80}%)`
+              transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)' : 'none',
+              transform: `translateX(calc(-${currentAdIndex * 70}% - ${currentAdIndex * 20}px + 15%))`
+              /* 70% is slide width, 20px is gap, 15% is (100%-70%)/2 to center */
             }}
           >
-            {ads.map((ad, index) => (
-              <div
-                key={ad.id}
-                className={`ad-slide ${index !== currentAdIndex ? 'inactive' : ''}`}
-              >
-                <h2>{ad.title}</h2>
-                <p>{ad.subtitle}</p>
-              </div>
-            ))}
+            {displayAds.map((ad, index) => {
+              const realIndex = (index - 1 + ads.length) % ads.length
+              const isActive = index === currentAdIndex
+              return (
+                <div
+                  key={`${ad.id}-${index}`}
+                  className={`ad-slide ${isActive ? 'active' : ''}`}
+                >
+                  <h2>{ad.title}</h2>
+                  <p>{ad.subtitle}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -823,7 +854,7 @@ export default function LandingPage({
                   required
                 />
                 <button type="submit" className="get-in-touch-submit">
-                  Send Message
+                  Send
                 </button>
               </div>
             </form>
