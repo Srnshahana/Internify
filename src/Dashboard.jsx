@@ -1,11 +1,15 @@
+
+import StudentAppBar from './components/StudentAppBar.jsx'
 import { useState, useEffect } from 'react'
-import Home from './pages/student_dashboard/Home.jsx'
+import LandingPage from './pages/LandingPage.jsx'
+import MyCourses from './pages/student_dashboard/MyCourses.jsx'
 import Calendar from './pages/student_dashboard/Calendar.jsx'
+import Explore from './search.jsx'
 import Profile from './pages/student_dashboard/Profile.jsx'
 import Notification from './pages/student_dashboard/Notification.jsx'
 import Assessments from './pages/student_dashboard/Assessments.jsx'
 import MentorProfile from './mentorProfile.jsx'
-import { HomeIcon, CalendarIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, GridIcon, FolderIcon, SettingsIcon, SearchIcon } from './components/Icons.jsx'
+import { HomeIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, GridIcon, FolderIcon, SettingsIcon, SearchIcon, CalendarIcon, ClassroomIcon } from './components/Icons.jsx'
 import { courses } from './Data.jsx'
 import './App.css'
 
@@ -28,10 +32,11 @@ function Dashboard({ onLogout, onOpenExplore }) {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
-  const sidebarMenuItems = [
-    { id: 'Home', icon: HomeIcon },
-    { id: 'Calendar', icon: CalendarIcon },
-    { id: 'Profile', icon: SettingsIcon },
+  const navItems = [
+    { id: 'Home', label: 'Home', icon: HomeIcon },
+    { id: 'Classrooms', label: 'Classrooms', icon: ClassroomIcon },
+    { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
+    { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
   const renderStars = (rating) => {
@@ -56,27 +61,43 @@ function Dashboard({ onLogout, onOpenExplore }) {
     switch (page) {
       case 'Home':
         return (
-          <Home
-            onNavigate={(pageName) => {
-              if (pageName === 'Explore' && onOpenExplore) {
-                onOpenExplore()
-              } else {
-                setPage(pageName)
-              }
-            }}
+          <LandingPage
+            onOpenExplore={() => setPage('Mentors')}
+            onOpenResources={() => { }}
+            onOpenLogin={() => { }}
+            onMentorClick={handleMentorClick}
+            onBookSession={() => setPage('Calendar')}
+            renderStars={renderStars}
+            showNavbar={false}
+          />
+        )
+      case 'Classrooms':
+        return (
+          <MyCourses
+            courses={courses}
+            onBack={() => setPage('Home')}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            onMentorClick={handleMentorClick}
+          />
+        )
+      case 'Mentors':
+        return (
+          <Explore
+            mentors={[]}
+            courses={courses}
+            onBack={() => setPage('Home')}
+            renderStars={renderStars}
             onMentorClick={handleMentorClick}
           />
         )
       case 'Calendar':
         return <Calendar />
-      case 'Assessments':
-        return <Assessments onBack={() => setActivePage('Home')} />
       case 'Profile':
         return <Profile />
       case 'Notification':
         return <Notification />
       default:
-        return <Home onNavigate={(pageName) => setPage(pageName)} onMentorClick={handleMentorClick} />
+        return <LandingPage onMentorClick={handleMentorClick} renderStars={renderStars} />
     }
   }
 
@@ -99,74 +120,31 @@ function Dashboard({ onLogout, onOpenExplore }) {
       {!isLiveClassroomActive && (
         <>
           {/* Left Sidebar Navigation */}
-          <aside className="dashboard-sidebar-nav">
-            <div className="sidebar-nav-top">
-              <button className="sidebar-nav-logo-btn">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-              </button>
-            </div>
-            <nav className="sidebar-nav-menu">
-              {sidebarMenuItems.map((item) => {
+          {/* Bottom Navigation Bar */}
+          <nav className="premium-bottom-nav">
+            <div className="bottom-nav-container">
+              {navItems.map((item) => {
                 const IconComponent = item.icon
                 const isActive = activePage === item.id
                 return (
                   <button
                     key={item.id}
-                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      setActivePage(item.id)
-                    }}
-                    title={item.id}
+                    className={`bottom-nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => setActivePage(item.id)}
                   >
-                    <IconComponent />
+                    <div className="nav-icon-wrapper">
+                      <IconComponent />
+                    </div>
+                    <span className="nav-label">{item.label}</span>
+                    {isActive && <div className="active-indicator" />}
                   </button>
                 )
               })}
-            </nav>
-            <div className="sidebar-nav-bottom">
-              <button className="sidebar-nav-item" onClick={onLogout} title="Logout">
-                <LogoutIcon />
-              </button>
             </div>
-          </aside>
+          </nav>
 
-          {/* Top Header */}
-          <header className="dashboard-header-new">
-            <div className="header-left">
-              <div className="brand-new">
-                <span>Internify.</span>
-              </div>
-            </div>
-
-            <div className="header-center">
-              <div className="header-search">
-                <SearchIcon />
-                <input type="text" placeholder="Search" className="search-input" />
-              </div>
-            </div>
-
-            <div className="header-right">
-              <button
-                className="header-icon-btn"
-                onClick={toggleTheme}
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-              </button>
-              <button
-                className="header-icon-btn"
-                onClick={() => setActivePage('Notification')}
-                title="Notifications"
-              >
-                <NotificationIcon />
-              </button>
-              <button className="header-avatar-btn" title="Profile">
-                <div className="avatar-circle">A</div>
-              </button>
-            </div>
-          </header>
+          {/* Top Header - Reused from Landing Page */}
+          {activePage !== 'Profile' && <StudentAppBar onLogout={onLogout} />}
         </>
       )}
 

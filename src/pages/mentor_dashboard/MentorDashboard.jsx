@@ -61,7 +61,7 @@ function MentorDashboard({ onLogout }) {
       {!isLiveClassroomActive && (
         <>
           {/* Left Sidebar Navigation */}
-          <aside className="dashboard-sidebar-nav">
+          <aside className="dashboard-sidebar-premium">
             <div className="sidebar-nav-top">
               <button className="sidebar-nav-logo-btn">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -115,15 +115,15 @@ function MentorDashboard({ onLogout }) {
               >
                 {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
               </button>
-              <button 
-                className="header-icon-btn" 
+              <button
+                className="header-icon-btn"
                 onClick={() => setActivePage('Notification')}
                 title="Notifications"
               >
                 <NotificationIcon />
               </button>
-              <button 
-                className="header-avatar-btn" 
+              <button
+                className="header-avatar-btn"
                 title="Profile"
                 onClick={() => setActivePage('Profile')}
               >

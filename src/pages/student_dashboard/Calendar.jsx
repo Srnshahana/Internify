@@ -4,50 +4,49 @@ import { calendarSessions } from '../../Data.jsx'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [showAddListForm, setShowAddListForm] = useState(false)
   const [clickedDate, setClickedDate] = useState(null)
 
-  const sessions = calendarSessions
+  const sessions = calendarSessions || []
 
+  // Clean data-driven arrays
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const weekDaysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
-  // Get current week dates
-  const getCurrentWeekDates = () => {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  // Calendar Grid Logic
+  const getDaysInMonth = () => {
+    const year = selectedDate.getFullYear()
+    const month = selectedDate.getMonth()
+    const firstDay = new Date(year, month, 1).getDay()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
 
-    const weekDates = []
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek)
-      date.setDate(startOfWeek.getDate() + i)
-      weekDates.push(date)
+    const days = []
+
+    // Empty slots for previous month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null)
     }
-    return weekDates
+
+    // Days of current month
+    for (let date = 1; date <= daysInMonth; date++) {
+      days.push(date)
+    }
+
+    return days
   }
 
-  const weekDates = getCurrentWeekDates()
-  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 8) // 8 AM to 7 PM
+  const days = getDaysInMonth()
 
-  // Map sessions to timeline grid
-  const getSessionForSlot = (dayIndex, timeSlot) => {
-    // This is a simplified mapping - you can enhance this with actual date/time matching
-    const dayName = weekDaysFull[dayIndex]
-    if (dayIndex === 0 && timeSlot === 14) return sessions[0] // Monday 2 PM
-    if (dayIndex === 1 && timeSlot === 10) return sessions[1] // Tuesday 10 AM
-    if (dayIndex === 2 && timeSlot === 13) return sessions[2] // Wednesday 1 PM
-    return null
+  const handleMonthChange = (direction) => {
+    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + direction))
   }
 
+  // Session action handlers
   const handleReschedule = (sessionId) => {
     console.log('Reschedule session:', sessionId)
   }
 
   const handleCancel = (sessionId) => {
-    if (window.confirm('Are you sure you want to cancel this class?')) {
+    if (window.confirm('Are you sure you want to cancel this session?')) {
       console.log('Cancel session:', sessionId)
     }
   }
@@ -57,282 +56,138 @@ function Calendar() {
   }
 
   return (
-    <div className="calendar-page-inspiration">
-      {/* Left Panel - Timeline Grid */}
-      <div className="calendar-timeline-panel">
-        <div className="timeline-header">
-          <h1 className="timeline-title">Calendar</h1>
-          <div className="timeline-header-icons">
-            <button className="timeline-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-              </svg>
-            </button>
-            <button className="timeline-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </button>
-            <button className="timeline-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-              </svg>
-            </button>
-            <button className="timeline-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
+    <div className="calendar-dashboard-wrapper" style={{ background: '#ffffff' }}>
+      <div className="calendar-glass-card">
 
-        <div className="timeline-grid">
-          {/* Row Headers (Time Slots) */}
-          <div className="timeline-row-headers">
-            {timeSlots.map((hour) => (
-              <div key={hour} className="timeline-time-slot">
-                {hour}
-              </div>
-            ))}
-          </div>
 
-          {/* Grid Content */}
-          <div className="timeline-grid-content">
-            {weekDaysFull.slice(0, 4).map((day, dayIndex) => (
-              <div key={day} className="timeline-column">
-                <div className="timeline-column-header">{day}</div>
-                <div className="timeline-column-cells">
-                  {timeSlots.map((hour) => {
-                    const session = getSessionForSlot(dayIndex, hour)
-                    const isCurrentTime = dayIndex === 0 && hour === 14 // Example: Monday 2 PM
-
-                    return (
-                      <div
-                        key={`${day}-${hour}`}
-                        className={`timeline-cell ${isCurrentTime ? 'current-time' : ''}`}
-                      >
-                        {session && (
-                          <div className={`timeline-task-card task-${session.type}`}>
-                            <div className="task-color-bar"></div>
-                            <div className="task-content">
-                              <h4 className="task-title">{session.title}</h4>
-                              {session.mentor && (
-                                <div className="task-avatars">
-                                  <div className="task-avatar"></div>
-                                  <div className="task-avatar"></div>
-                                  <div className="task-avatar"></div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Current Time Indicator */}
-        <div className="timeline-current-indicator"></div>
-      </div>
-
-      {/* Right Panel - Calendar & Add List */}
-      <div className="calendar-panel-inspiration">
-        {/* Search Bar */}
-        <div className="calendar-search-bar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
-          <input type="text" placeholder="Search" className="calendar-search-input" />
-        </div>
-
-        {/* Monthly Calendar */}
-        <div className="calendar-month-header">
-          <h3 className="calendar-month-name">{currentMonth}</h3>
-          <div className="calendar-nav-buttons">
-            <button
-              className="calendar-nav-btn"
-              onClick={() => {
-                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
-                setShowAddListForm(false)
-                setClickedDate(null)
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="calendar-header-elegant">
+          <h2 className="calendar-month-title">{currentMonth}</h2>
+          <div className="calendar-nav-actions">
+            <button className="calendar-nav-btn-elegant" onClick={() => handleMonthChange(-1)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
-            <button
-              className="calendar-nav-btn"
-              onClick={() => {
-                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
-                setShowAddListForm(false)
-                setClickedDate(null)
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button className="calendar-nav-btn-elegant" onClick={() => handleMonthChange(1)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
           </div>
         </div>
 
-        <div className="calendar-weekdays-new">
-          {weekDays.map((day) => (
-            <div key={day} className="calendar-weekday-new">{day}</div>
-          ))}
-        </div>
+        {/* Section 2: Calendar Grid */}
+        <div className="calendar-grid-section">
+          <div className="calendar-weekdays-elegant">
+            {weekDays.map(day => (
+              <div key={day} className="calendar-weekday-label">{day}</div>
+            ))}
+          </div>
 
-        <div className="calendar-days-grid-new">
-          {(() => {
-            const year = selectedDate.getFullYear()
-            const month = selectedDate.getMonth()
-            const firstDay = new Date(year, month, 1).getDay()
-            const daysInMonth = new Date(year, month + 1, 0).getDate()
-            const days = []
-
-            for (let i = 0; i < firstDay; i++) {
-              days.push(null)
-            }
-
-            for (let date = 1; date <= daysInMonth; date++) {
-              days.push(date)
-            }
-
-            while (days.length < 35) {
-              days.push(null)
-            }
-
-            return days.map((date, i) => {
-              if (date === null) {
-                return <div key={i} className="calendar-day-new empty"></div>
-              }
+          <div className="calendar-grid-elegant">
+            {days.map((date, index) => {
+              if (date === null) return <div key={`empty-${index}`} className="calendar-day-elegant empty"></div>
 
               const isToday = date === new Date().getDate() &&
-                month === new Date().getMonth() &&
-                year === new Date().getFullYear()
-              const hasEvent = [14, 19, 22, 23, 24].includes(date)
-              const isSelected = clickedDate && clickedDate.getDate() === date &&
-                clickedDate.getMonth() === month &&
-                clickedDate.getFullYear() === year
+                selectedDate.getMonth() === new Date().getMonth() &&
+                selectedDate.getFullYear() === new Date().getFullYear()
+
+              // Mock Events logic for demo
+              const hasEvent = [14, 19, 22].includes(date)
+              const isSelected = clickedDate === date
 
               return (
                 <div
-                  key={i}
-                  className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
-                  onClick={() => {
-                    const clickedDateObj = new Date(year, month, date)
-                    setClickedDate(clickedDateObj)
-                    setShowAddListForm(true)
-                  }}
+                  key={date}
+                  className={`calendar-day-elegant ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
+                  onClick={() => setClickedDate(date)}
                 >
-                  <span className="calendar-day-number">{date}</span>
-                  {hasEvent && !isToday && <span className="event-dot"></span>}
+                  {date}
                 </div>
               )
-            })
-          })()}
+            })}
+          </div>
         </div>
 
-        {/* Add New List Form */}
-        {showAddListForm && clickedDate && (
-          <div className="calendar-add-list-form">
-            <div className="add-list-header">
-              <h3 className="add-list-title">Add new list</h3>
-              <button
-                className="add-list-menu-btn"
-                onClick={() => setShowAddListForm(false)}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            <div className="add-list-inputs">
-              <input type="text" placeholder="Title" className="add-list-input" />
-              <div className="add-list-input-wrapper">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Date"
-                  className="add-list-input"
-                  value={clickedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  readOnly
-                />
-              </div>
-              <div className="add-list-input-wrapper">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <input type="text" placeholder="Time" className="add-list-input" />
-              </div>
-              <input type="text" placeholder="Invite people" className="add-list-input" />
-            </div>
-            <button
-              className="add-list-submit-btn"
-              onClick={() => {
-                setShowAddListForm(false)
-                setClickedDate(null)
-              }}
-            >
-              Submit List
-            </button>
-          </div>
-        )}
+        {/* Section 3: Upcoming Sessions List */}
+        <div className="sessions-section-elegant">
+          <h3 className="sessions-title-elegant">
+            Upcoming Sessions
+          </h3>
 
-        {/* Sessions List */}
-        <div className="calendar-sessions-list">
-          <h2 className="sessions-list-title">Upcoming Sessions</h2>
-          <div className="sessions-list-content">
+          <div className="sessions-list-elegant">
             {sessions.map((session) => (
-              <div key={session.id} className={`session-card-inspiration ${session.type}`}>
-                <div className="session-time-inspiration">
-                  <div className="session-time-main">{session.time.split(' - ')[0]}</div>
-                  <div className="session-time-end">{session.time.split(' - ')[1]}</div>
-                </div>
-                <div className="session-content-inspiration">
-                  <div className="session-header-inspiration">
-                    <h4>{session.title}</h4>
-                    <span className="session-date-badge">{session.date}</span>
+              <div key={session.id} className="session-card-elegant">
+                <div className="session-main-content">
+                  <div className="session-time-box">
+                    <span className="time-main">
+                      {session.time && session.time.includes(' - ') ? session.time.split(' - ')[0] : session.time}
+                    </span>
+                    <span className="time-sub">
+                      {session.time && session.time.includes(' - ') ? session.time.split(' - ')[1] : ''}
+                    </span>
                   </div>
-                  {session.mentor && (
-                    <p className="session-mentor">with {session.mentor}</p>
-                  )}
-                  <div className="session-type-badge">{session.type}</div>
+
+                  <div className="session-info-elegant">
+                    <h4>{session.title}</h4>
+                    <div className="session-meta-elegant">
+                      <span>{session.date}</span>
+                      {session.mentor && <span>• with {session.mentor}</span>}
+                    </div>
+                  </div>
+
+                  <div className="session-badge-wrapper">
+                    <span className={`session-badge-elegant badge-${session.type}`}>
+                      {session.type}
+                    </span>
+                  </div>
                 </div>
-                <div className="session-actions-inspiration">
+
+                {/* Action Buttons */}
+                <div className="session-actions-buttons">
                   {session.type !== 'deadline' && (
                     <>
-                      <button className="session-action-btn session-btn-secondary" onClick={() => handleReschedule(session.id)}>
+                      <button
+                        className="session-btn session-btn-secondary"
+                        onClick={() => handleReschedule(session.id)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="23 4 23 10 17 10"></polyline>
+                          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
                         Reschedule
                       </button>
-                      <button className="session-action-btn session-btn-danger" onClick={() => handleCancel(session.id)}>
+                      <button
+                        className="session-btn session-btn-danger"
+                        onClick={() => handleCancel(session.id)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="15" y1="9" x2="9" y2="15"></line>
+                          <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
                         Cancel
                       </button>
-                      <button className="session-action-btn session-btn-primary" onClick={() => handleJoin(session.id)}>
+                      <button
+                        className="session-btn session-btn-primary"
+                        onClick={() => handleJoin(session.id)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                          <polyline points="10 17 15 12 10 7"></polyline>
+                          <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
                         Join
                       </button>
                     </>
                   )}
                   {session.type === 'deadline' && (
-                    <button className="session-action-btn session-btn-primary">
-                      View
+                    <button className="session-btn session-btn-primary">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      View Details
                     </button>
                   )}
                 </div>
@@ -340,6 +195,7 @@ function Calendar() {
             ))}
           </div>
         </div>
+
       </div>
     </div>
   )

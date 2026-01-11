@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { mentors, courses } from '../Data.jsx'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
+import { checkAuthSession, clearAuthData } from '../utils/auth.js'
 import backgroundImage from '../assets/4583.jpg'
 import heroSectionImage1 from '../assets/20945183.jpg'
 import heroSectionImage from '../assets/a.jpg'
@@ -347,9 +348,26 @@ export default function LandingPage({
   onOpenLogin,
   onMentorClick,
   onBookSession,
-  renderStars
+  renderStars,
+  showNavbar = true
 }) {
   const navigate = useNavigate()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const user = await checkAuthSession()
+      setIsLoggedIn(!!user)
+    }
+    checkUser()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    clearAuthData()
+    setIsLoggedIn(false)
+    navigate('/')
+  }
   const mentorTrackRef = useRef(null)
   const skillsTrackRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -582,24 +600,28 @@ export default function LandingPage({
 
   return (
     <div className="landing-page-new">
-      <nav className="elegant-navbar">
-        <div className="user-profile-left">
-          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User Profile" />
-        </div>
-        <div className="nav-actions-right">
-          <button className="apply-mentor-btn" onClick={() => navigate('/login')}>Login</button>
-          <button className="login-btn-elegant" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
-        </div>
-      </nav>
+      {showNavbar && (
+        <nav className="elegant-navbar">
+          <div className="user-profile-left">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User Profile" />
+          </div>
+          <div className="nav-actions-right">
+            {isLoggedIn ? (
+              <button className="login-btn-elegant" onClick={handleLogout}>Logout</button>
+            ) : (
+              <>
+                <button className="apply-mentor-btn" onClick={() => navigate('/login')}>Login</button>
+                <button className="login-btn-elegant" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
+              </>
+            )}
+          </div>
+        </nav>
+      )}
 
       <section className="elegant-hero">
         <div className="hero-blur-bg"></div>
-        <div className="elegant-hero-inner">
+        <div className="hero-glass-card">
           <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
-          {/* <p className="hero-subheading-elegant">
-            Internify connects you with industry leaders for personalized 1-on-1 guidance,
-            real-world projects, and career-defining certificates.
-          </p> */}
 
           <div className="elegant-search-container">
             <div className="elegant-search-box">
@@ -615,7 +637,7 @@ export default function LandingPage({
             </div>
 
             <div className="suggestion-tags">
-              {['Engineering', 'Design', 'AI', 'Business'].map(tag => (
+              {['Engineering', 'Design', 'AI', 'Business', 'Marketing', 'Data Science', 'Product', 'Frontend', 'Backend'].map(tag => (
                 <button
                   key={tag}
                   className="suggestion-tag"

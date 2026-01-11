@@ -64,12 +64,12 @@ function Students() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredStudents = enrolledStudents.filter((student) => {
-    const matchesFilter = 
-      filter === 'all' || 
+    const matchesFilter =
+      filter === 'all' ||
       (filter === 'active' && student.status === 'Active') ||
       (filter === 'completed' && student.status === 'Completed')
-    
-    const matchesSearch = 
+
+    const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.courses.some(course => course.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -96,123 +96,106 @@ function Students() {
             <h2 className="section-title">My Students</h2>
             <p className="section-subtitle" style={{ marginTop: '8px', opacity: 0.7 }}>View all enrolled students and their progress</p>
           </div>
-      </div>
+        </div>
 
-      {/* Filters and Search */}
+        {/* Filters and Search */}
         <div className="students-filters" style={{ marginTop: '24px', marginBottom: '24px' }}>
-        <div className="search-box">
+          <div className="search-box">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
             </svg>
-          <input
-            type="text"
-            placeholder="Search students by name, email, or course..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            <input
+              type="text"
+              placeholder="Search students by name, email, or course..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{ paddingLeft: '44px' }}
-          />
-        </div>
-        <div className="filter-buttons">
-          <button
-            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All ({enrolledStudents.length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
-            onClick={() => setFilter('active')}
-          >
-            Active ({enrolledStudents.filter(s => s.status === 'Active').length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
-            onClick={() => setFilter('completed')}
-          >
-            Completed ({enrolledStudents.filter(s => s.status === 'Completed').length})
-          </button>
-        </div>
-      </div>
-
-      {/* Students List */}
-      <div className="students-list">
-        {filteredStudents.length === 0 ? (
-          <div className="empty-state">
-            <p>No students found matching your criteria.</p>
+            />
           </div>
-        ) : (
-          filteredStudents.map((student) => {
-            const statusColor = getStatusColor(student.status)
-            
-            return (
-              <div key={student.id} className="student-card">
-                <div className="student-card-header">
-                  <div className="student-info">
-                    <div className="student-avatar-large">
-                      <span>{student.name.charAt(0)}</span>
-                    </div>
-                    <div className="student-details">
-                      <h3 className="student-name">{student.name}</h3>
-                      <p className="student-email">{student.email}</p>
-                      <p className="student-last-active">Last active: {student.lastActive}</p>
-                    </div>
-                  </div>
-                  <div className="student-status-badge" style={{
-                    backgroundColor: `${statusColor}20`,
-                    color: statusColor,
-                    borderColor: statusColor
-                  }}>
-                    {student.status}
-                  </div>
-                </div>
+          <div className="filter-buttons">
+            <button
+              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All ({enrolledStudents.length})
+            </button>
+            <button
+              className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
+              onClick={() => setFilter('active')}
+            >
+              Active ({enrolledStudents.filter(s => s.status === 'Active').length})
+            </button>
+            <button
+              className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
+              onClick={() => setFilter('completed')}
+            >
+              Completed ({enrolledStudents.filter(s => s.status === 'Completed').length})
+            </button>
+          </div>
+        </div>
 
-                <div className="student-courses">
-                  <h4 className="courses-label">Enrolled Courses:</h4>
-                  <div className="courses-tags">
-                    {student.courses.map((course, idx) => (
-                      <span key={idx} className="course-tag">{course}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="student-stats">
-                  <div className="student-stat-item">
-                    <span className="stat-label">Total Progress</span>
-                    <span className="stat-value">{student.totalProgress}%</span>
-                  </div>
-                  <div className="student-stat-item">
-                    <span className="stat-label">Active Courses</span>
-                    <span className="stat-value">{student.activeCourses}</span>
-                  </div>
-                  <div className="student-stat-item">
-                    <span className="stat-label">Completed</span>
-                    <span className="stat-value">{student.completedCourses}</span>
-                  </div>
-                </div>
-
-                <div className="student-progress-section">
-                  <div className="progress-header">
-                    <span className="progress-label">Overall Progress</span>
-                    <span className="progress-percentage">{student.totalProgress}%</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${student.totalProgress}%`, backgroundColor: statusColor }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="student-actions">
-                  <button className="btn-secondary">View Details</button>
-                  <button className="btn-secondary">Message</button>
-                  <button className="btn-primary">View Progress</button>
-                </div>
+        {/* Students Grid */}
+        <div className="classroom-container">
+          <div className="classroom-grid">
+            {filteredStudents.length === 0 ? (
+              <div className="empty-state">
+                <p>No students found matching your criteria.</p>
               </div>
-            )
-          })
-        )}
+            ) : (
+              filteredStudents.map((student) => {
+                const statusColor = getStatusColor(student.status)
+
+                return (
+                  <div key={student.id} className="classroom-card">
+                    <div className="classroom-card-image-wrapper" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="student-avatar-large" style={{ width: '80px', height: '80px', fontSize: '2rem', background: 'white', color: '#0ca5e9', boxShadow: '0 8px 16px rgba(12, 165, 233, 0.15)' }}>
+                        {student.name.charAt(0)}
+                      </div>
+                      <div className="classroom-status-pill" style={{ backgroundColor: statusColor }}>
+                        {student.status}
+                      </div>
+                    </div>
+
+                    <div className="classroom-card-content">
+                      <div className="classroom-card-header">
+                        <span className="classroom-category">Student</span>
+                        <div className="classroom-rating">
+                          <span className="star-icon" style={{ color: '#64748b', fontSize: '12px' }}>Last active: {student.lastActive}</span>
+                        </div>
+                      </div>
+
+                      <h3 className="classroom-title">{student.name}</h3>
+                      <p className="classroom-mentor">{student.email}</p>
+
+                      <div className="classroom-progress-section">
+                        <div className="classroom-progress-info">
+                          <span className="progress-label">Overall Progress</span>
+                          <span className="progress-value">{student.totalProgress}%</span>
+                        </div>
+                        <div className="classroom-progress-track">
+                          <div
+                            className="classroom-progress-fill"
+                            style={{ width: `${student.totalProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div className="classroom-footer">
+                        <button className="classroom-btn">
+                          View Profile
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="M12 5l7 7-7 7"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

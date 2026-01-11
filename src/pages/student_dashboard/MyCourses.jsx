@@ -24,13 +24,13 @@ function MyCourses({ courses, onBack, onEnterClassroom, onMentorClick }) {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Completed':
-        return '#22c55e'
+        return '#0ca5e9' // Sky Blue
       case 'In Progress':
-        return '#3b82f6'
+        return '#38bdf8' // Lighter Sky Blue
       case 'Not Started':
-        return '#6b7280'
+        return '#94a3b8' // Slate 400
       default:
-        return '#6b7280'
+        return '#94a3b8'
     }
   }
 
@@ -46,92 +46,73 @@ function MyCourses({ courses, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   return (
-    <div className="dashboard-page">
+    <div className="classroom-page-wrapper">
       <div className="course-detail-header">
-        <button className="back-button" onClick={onBack}>
+        {/* <button className="back-button" onClick={onBack}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </button>
+        </button> */}
         <h1 className="page-title">My Courses</h1>
       </div>
 
-      <div className="my-courses-container">
-        <div className="my-courses-list">
+      <div className="classroom-container">
+        <div className="classroom-grid">
           {courses.map((course) => {
             const status = getCourseStatus(course)
             const statusColor = getStatusColor(status)
-            
+
             return (
               <div
                 key={course.id}
-                className="my-course-card"
+                className="classroom-card"
                 onClick={() => setSelectedCourse(course)}
               >
-                <div className="my-course-card-content">
-                  <div className="my-course-header">
-                    <div className="my-course-info">
-                      <div className="my-course-mentor-section">
-                        <div className="my-course-mentor-avatar">
-                          <img src={course.mentorImage} alt={course.mentor} />
-                        </div>
-                        <div className="my-course-mentor-details">
-                          <h3 className="my-course-title">{course.title}</h3>
-                          <p className="my-course-mentor-name">{course.mentor}</p>
-                        </div>
-                      </div>
-                      <div className="my-course-status-badge" style={{ backgroundColor: `${statusColor}20`, color: statusColor, borderColor: statusColor }}>
-                        {status}
-                      </div>
+                <div className="classroom-card-image-wrapper">
+                  <img
+                    src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'}
+                    alt={course.title}
+                    className="classroom-card-image"
+                  />
+                  <div className="classroom-status-pill" style={{ backgroundColor: statusColor }}>
+                    {status}
+                  </div>
+                </div>
+
+                <div className="classroom-card-content">
+                  <div className="classroom-card-header">
+                    <span className="classroom-category">{course.category}</span>
+                    <div className="classroom-rating">
+                      <span className="star-icon">★</span>
+                      <span>{course.rating || 4.8}</span>
                     </div>
                   </div>
 
-                  <div className="my-course-details">
-                    <div className="my-course-meta">
-                      <span className="my-course-category">{course.category}</span>
-                      <span className="my-course-level">{course.level}</span>
-                      <span className="my-course-type">{course.type}</span>
-                    </div>
-                    <div className="my-course-rating">
-                      <span className="rating-stars">{renderStars(course.rating || 4.0)}</span>
-                      <span className="rating-value">{course.rating || 4.0}</span>
-                    </div>
-                  </div>
+                  <h3 className="classroom-title">{course.title}</h3>
+                  <p className="classroom-mentor">by {course.mentor}</p>
 
-                  <div className="my-course-progress-section">
-                    <div className="my-course-progress-header">
+                  <div className="classroom-progress-section">
+                    <div className="classroom-progress-info">
                       <span className="progress-label">Progress</span>
-                      <span className="progress-percentage">{course.progress}%</span>
+                      <span className="progress-value">{course.progress}%</span>
                     </div>
-                    <div className="my-course-progress-bar">
+                    <div className="classroom-progress-track">
                       <div
-                        className="my-course-progress-fill"
-                        style={{ width: `${course.progress}%`, backgroundColor: statusColor }}
+                        className="classroom-progress-fill"
+                        style={{ width: `${course.progress}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  <div className="my-course-footer">
-                    <div className="my-course-stats">
-                      <div className="my-course-stat-item">
-                        <span className="stat-label">Sessions</span>
-                        <span className="stat-value">{course.classes?.length || 0}</span>
-                      </div>
-                      <div className="my-course-stat-item">
-                        <span className="stat-label">Assignments</span>
-                        <span className="stat-value">{course.assignmentsCount || course.assignments?.length || 0}</span>
-                      </div>
-                      <div className="my-course-stat-item">
-                        <span className="stat-label">Next Session</span>
-                        <span className="stat-value">{course.nextSession || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="my-course-arrow">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+                  <div className="classroom-footer">
+                    <button className="classroom-btn">
+                      Continue Learning
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5l7 7-7 7"></path>
                       </svg>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
