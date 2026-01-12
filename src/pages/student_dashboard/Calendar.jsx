@@ -56,7 +56,7 @@ function Calendar() {
   }
 
   return (
-    <div className="calendar-dashboard-wrapper" style={{ background: '#ffffff' }}>
+    <div className="calendar-dashboard-wrapper" >
       <div className="calendar-glass-card">
 
 
@@ -108,95 +108,94 @@ function Calendar() {
             })}
           </div>
         </div>
+      </div>
+      {/* Section 3: Upcoming Sessions List */}
+      <div className="sessions-section-elegant">
+        <h3 className="sessions-title-elegant">
+          Upcoming Sessions
+        </h3>
 
-        {/* Section 3: Upcoming Sessions List */}
-        <div className="sessions-section-elegant">
-          <h3 className="sessions-title-elegant">
-            Upcoming Sessions
-          </h3>
+        <div className="sessions-list-elegant">
+          {sessions.map((session) => (
+            <div key={session.id} className="session-card-elegant">
+              <div className="session-main-content">
+                <div className="session-time-box">
+                  <span className="time-main">
+                    {session.time && session.time.includes(' - ') ? session.time.split(' - ')[0] : session.time}
+                  </span>
+                  <span className="time-sub">
+                    {session.time && session.time.includes(' - ') ? session.time.split(' - ')[1] : ''}
+                  </span>
+                </div>
 
-          <div className="sessions-list-elegant">
-            {sessions.map((session) => (
-              <div key={session.id} className="session-card-elegant">
-                <div className="session-main-content">
-                  <div className="session-time-box">
-                    <span className="time-main">
-                      {session.time && session.time.includes(' - ') ? session.time.split(' - ')[0] : session.time}
-                    </span>
-                    <span className="time-sub">
-                      {session.time && session.time.includes(' - ') ? session.time.split(' - ')[1] : ''}
-                    </span>
-                  </div>
-
-                  <div className="session-info-elegant">
-                    <h4>{session.title}</h4>
-                    <div className="session-meta-elegant">
-                      <span>{session.date}</span>
-                      {session.mentor && <span>• with {session.mentor}</span>}
-                    </div>
-                  </div>
-
-                  <div className="session-badge-wrapper">
-                    <span className={`session-badge-elegant badge-${session.type}`}>
-                      {session.type}
-                    </span>
+                <div className="session-info-elegant">
+                  <h4>{session.title}</h4>
+                  <div className="session-meta-elegant">
+                    <span>{session.date}</span>
+                    {session.mentor && <span>• with {session.mentor}</span>}
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="session-actions-buttons">
-                  {session.type !== 'deadline' && (
-                    <>
-                      <button
-                        className="session-btn session-btn-secondary"
-                        onClick={() => handleReschedule(session.id)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="23 4 23 10 17 10"></polyline>
-                          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                        </svg>
-                        Reschedule
-                      </button>
-                      <button
-                        className="session-btn session-btn-danger"
-                        onClick={() => handleCancel(session.id)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="15" y1="9" x2="9" y2="15"></line>
-                          <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                        Cancel
-                      </button>
-                      <button
-                        className="session-btn session-btn-primary"
-                        onClick={() => handleJoin(session.id)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                          <polyline points="10 17 15 12 10 7"></polyline>
-                          <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
-                        Join
-                      </button>
-                    </>
-                  )}
-                  {session.type === 'deadline' && (
-                    <button className="session-btn session-btn-primary">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                      View Details
-                    </button>
-                  )}
+                <div className="session-badge-wrapper">
+                  <span className={`session-badge-elegant badge-${session.type}`}>
+                    {session.type}
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
+              {/* Action Buttons */}
+              <div className="session-actions-buttons">
+                {session.type !== 'deadline' && (
+                  <>
+                    <button
+                      className="session-btn session-btn-secondary"
+                      onClick={() => handleReschedule(session.id)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                      </svg>
+                      Reschedule
+                    </button>
+                    <button
+                      className="session-btn session-btn-danger"
+                      onClick={() => handleCancel(session.id)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                      </svg>
+                      Cancel
+                    </button>
+                    <button
+                      className="session-btn session-btn-primary"
+                      onClick={() => handleJoin(session.id)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                      </svg>
+                      Join
+                    </button>
+                  </>
+                )}
+                {session.type === 'deadline' && (
+                  <button className="session-btn session-btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    View Details
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
     </div>
   )
 }

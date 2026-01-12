@@ -58,61 +58,45 @@ function MyCourses({ courses, onBack, onEnterClassroom, onMentorClick }) {
       </div>
 
       <div className="classroom-container">
-        <div className="classroom-grid">
-          {courses.map((course) => {
+        <div className="courses-grid-elegant">
+          {courses.slice(0, 2).map((course) => {
             const status = getCourseStatus(course)
             const statusColor = getStatusColor(status)
 
             return (
               <div
                 key={course.id}
-                className="classroom-card"
+                className="course-card-elegant"
                 onClick={() => setSelectedCourse(course)}
               >
-                <div className="classroom-card-image-wrapper">
+                <div className="course-image-wrapper-elegant">
                   <img
                     src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'}
                     alt={course.title}
-                    className="classroom-card-image"
+                    className="course-image-elegant"
                   />
-                  <div className="classroom-status-pill" style={{ backgroundColor: statusColor }}>
-                    {status}
+                  <div className="course-status-pill-elegant" style={{ backgroundColor: statusColor }}>
+                    {course.progress || 40}%
                   </div>
                 </div>
 
-                <div className="classroom-card-content">
-                  <div className="classroom-card-header">
-                    <span className="classroom-category">{course.category}</span>
-                    <div className="classroom-rating">
+                <div className="course-content-elegant">
+                  <div className="course-header-elegant">
+                    <span className="course-category-elegant">{course.category}</span>
+                    <div className="course-rating-box">
                       <span className="star-icon">★</span>
                       <span>{course.rating || 4.8}</span>
                     </div>
                   </div>
 
-                  <h3 className="classroom-title">{course.title}</h3>
-                  <p className="classroom-mentor">by {course.mentor}</p>
+                  <h3 className="course-title-elegant">{course.title}</h3>
+                  <p className="course-mentor-elegant">by {course.mentor}</p>
 
-                  <div className="classroom-progress-section">
-                    <div className="classroom-progress-info">
-                      <span className="progress-label">Progress</span>
-                      <span className="progress-value">{course.progress}%</span>
-                    </div>
-                    <div className="classroom-progress-track">
-                      <div
-                        className="classroom-progress-fill"
-                        style={{ width: `${course.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="classroom-footer">
-                    <button className="classroom-btn">
-                      Continue Learning
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14"></path>
-                        <path d="M12 5l7 7-7 7"></path>
-                      </svg>
-                    </button>
+                  {/* Current Session Info */}
+                  <div className="course-current-session-box">
+                    <span className="session-label">Up Next</span>
+                    <h4 className="session-name">Session 3: Component State & Props</h4>
+                    <span className="session-time">Today, 4:00 PM</span>
                   </div>
                 </div>
               </div>
