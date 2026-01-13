@@ -123,6 +123,14 @@ function Dashboard({ onLogout, onOpenExplore }) {
           {/* Bottom Navigation Bar */}
           <nav className="premium-bottom-nav">
             <div className="bottom-nav-container">
+              {/* Sliding Glass Highlight */}
+              <div
+                className="nav-glass-highlight"
+                style={{
+                  transform: `translateX(${navItems.findIndex(item => item.id === activePage) * 100}%)`
+                }}
+              />
+
               {navItems.map((item) => {
                 const IconComponent = item.icon
                 const isActive = activePage === item.id
@@ -136,7 +144,6 @@ function Dashboard({ onLogout, onOpenExplore }) {
                       <IconComponent />
                     </div>
                     <span className="nav-label">{item.label}</span>
-                    {isActive && <div className="active-indicator" />}
                   </button>
                 )
               })}

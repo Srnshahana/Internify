@@ -3,19 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { mentors, courses } from '../Data.jsx'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../utils/auth.js'
-import backgroundImage from '../assets/4583.jpg'
-import heroSectionImage1 from '../assets/20945183.jpg'
-import heroSectionImage from '../assets/a.jpg'
-import Lottie from 'lottie-react'
-import HeroLottieAnim from '../assets/herosection.json'
-import OneToOneIcon from '../assets/1-to-1.svg'
-import ProjectIcon from '../assets/project.svg'
-import CertificateIconImg from '../assets/certicate.svg'
-import ReferralIcon from '../assets/referal.svg'
-import RecruitmentIcon from '../assets/recruitment.svg'
-import SuccessStory1 from '../assets/1.png'
-import SuccessStory2 from '../assets/2.png'
-import SuccessStory3 from '../assets/3.png'
+// Hero section images removed as assets - using inline styles or URLs if needed
+const SuccessStory1 = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80'
+const SuccessStory2 = 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80'
+const SuccessStory3 = 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80'
+import adds1 from '../assets/adds1.png'
+import adds2 from '../assets/adds2.png'
+import adds3 from '../assets/adds3.png'
 import supabase from '../supabaseClient'
 import '../App.css'
 
@@ -33,31 +27,31 @@ const howItWorksSteps = [
     number: 1,
     title: '1-on-1 Mentorship Sessions',
     description: 'Personalized guidance from industry mentors focused on real hiring needs.',
-    icon: OneToOneIcon,
+    icon: ProfileIcon,
   },
   {
     number: 2,
     title: 'Job-Ready Real-World Projects',
     description: 'Work on practical projects that demonstrate actual workplace skills.',
-    icon: ProjectIcon,
+    icon: FolderIcon,
   },
   {
     number: 3,
     title: 'Internify Certificate of Completion',
     description: 'Skill-verified certification to strengthen resumes and profiles.',
-    icon: CertificateIconImg,
+    icon: CertificateIcon,
   },
   {
     number: 4,
     title: 'Referral Letter from Mentors',
     description: 'Mentor-issued referral letters to support internship and job applications.',
-    icon: ReferralIcon,
+    icon: WritingIcon,
   },
   {
     number: 5,
     title: 'Interview Preparation & Hiring Support',
     description: 'Mock interviews, resume reviews, and guidance aligned with recruiter expectations.',
-    icon: RecruitmentIcon,
+    icon: BusinessIcon,
   },
 ]
 
@@ -159,7 +153,7 @@ const simpleTestimonials = [
     name: 'Alex Johnson',
     role: 'Software Engineer',
     company: 'Google',
-    avatar: 'src/assets/testimonial1.png',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
     quote: 'Internify helped me transition from a non-tech background to landing my dream job at Google. The personalized mentorship was exactly what I needed.'
   },
   {
@@ -167,7 +161,7 @@ const simpleTestimonials = [
     name: 'Sarah Chen',
     role: 'Product Designer',
     company: 'Microsoft',
-    avatar: 'src/assets/testimonial2.png',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
     quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.'
   },
   {
@@ -175,7 +169,7 @@ const simpleTestimonials = [
     name: 'Michael Rodriguez',
     role: 'Data Scientist',
     company: 'Amazon',
-    avatar: 'src/assets/testimonial3.png',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
     quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.'
   },
   {
@@ -382,17 +376,19 @@ export default function LandingPage({
   const [currentCareerGuidanceIndex, setCurrentCareerGuidanceIndex] = useState(0)
   const [currentSimpleTestimonialPage, setCurrentSimpleTestimonialPage] = useState(1)
   const [contactEmail, setContactEmail] = useState('')
+  const [selectedTestimonial, setSelectedTestimonial] = useState(null)
   const howItWorksSectionRef = useRef(null)
   const careerGuidanceRightRef = useRef(null)
   const careerGuidanceTrackRef = useRef(null)
   const ads = [
-    { id: 1, title: 'Unlock Your Potential', subtitle: 'Premium Mentorship with Leaders' },
-    { id: 2, title: 'Master Data Science', subtitle: '1-on-1 sessions with industry experts' },
-    { id: 3, title: 'Switch to Product Management', subtitle: 'The easiest way to transition' },
-    { id: 4, title: 'Ace Your Next Interview', subtitle: 'Mock interviews & feedback' },
-    { id: 5, title: 'Build Your Startup', subtitle: 'Expert guidance for founders' },
-    { id: 6, title: 'Career Guidance for Freshers', subtitle: 'Navigate your first career steps' },
+    { id: 1, image: adds1, title: 'Internify Ad 1' },
+    { id: 2, image: adds2, title: 'Internify Ad 2' },
+    { id: 3, image: adds3, title: 'Internify Ad 3' },
   ]
+
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  const minSwipeDistance = 50
 
   // For infinite loop, we clone the first and last few items
   const displayAds = [ads[ads.length - 1], ...ads, ads[0]]
@@ -410,13 +406,57 @@ export default function LandingPage({
   useEffect(() => {
     const timer = setInterval(() => {
       handleNextAd()
-    }, 5000)
+    }, 4000)
     return () => clearInterval(timer)
   }, [currentAdIndex])
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX)
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    if (isLeftSwipe) handleNextAd()
+    if (isRightSwipe) handlePrevAd()
+  }
+
+  // Mouse handlers for desktop swipe
+  const onMouseDown = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.clientX)
+  }
+
+  const onMouseMove = (e) => {
+    if (touchStart) setTouchEnd(e.clientX)
+  }
+
+  const onMouseUp = () => {
+    if (!touchStart || !touchEnd) {
+      setTouchStart(null)
+      return
+    }
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    if (isLeftSwipe) handleNextAd()
+    if (isRightSwipe) handlePrevAd()
+    setTouchStart(null)
+  }
 
   const handleNextAd = () => {
     setIsTransitioning(true)
     setCurrentAdIndex((prev) => prev + 1)
+  }
+
+  const handlePrevAd = () => {
+    setIsTransitioning(true)
+    setCurrentAdIndex((prev) => prev - 1)
   }
 
   const handleTransitionEnd = () => {
@@ -666,7 +706,7 @@ export default function LandingPage({
               <div
                 className="program-card"
                 key={skill.id || skill.name}
-                onClick={() => handleNavSearch(`course:${skill.id || skill.name}`)}
+                onClick={() => handleNavSearch(skill.name)}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="program-card-image-wrapper">
@@ -705,32 +745,78 @@ export default function LandingPage({
 
 
       <section className="ad-banner-section">
-        <div className="ad-carousel-container">
+        <div className="ad-carousel-container" style={{ borderRadius: 0 }}>
           <div
             className="ad-track"
             onTransitionEnd={handleTransitionEnd}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={() => setTouchStart(null)}
             style={{
               transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)' : 'none',
-              transform: `translateX(calc(-${currentAdIndex * 70}% - ${currentAdIndex * 20}px + 15%))`
-              /* 70% is slide width, 20px is gap, 15% is (100%-70%)/2 to center */
+              transform: `translateX(-${currentAdIndex * 100}%)`,
+              display: 'flex',
+              width: '100%'
             }}
           >
             {displayAds.map((ad, index) => {
-              const realIndex = (index - 1 + ads.length) % ads.length
               const isActive = index === currentAdIndex
               return (
                 <div
                   key={`${ad.id}-${index}`}
                   className={`ad-slide ${isActive ? 'active' : ''}`}
+                  style={{ flex: '0 0 100%', cursor: 'grab' }}
                 >
-                  <h2>{ad.title}</h2>
-                  <p>{ad.subtitle}</p>
+                  <img
+                    src={ad.image}
+                    alt={ad.title}
+                    draggable="false"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0', pointerEvents: 'none' }}
+                  />
                 </div>
               )
             })}
           </div>
         </div>
       </section>
+
+
+      {/* <section className="get-in-touch-section">
+        <div className="page-content-wrapper">
+          <div className="get-in-touch-card">
+            <div className="get-in-touch-content">
+              <h2 className="get-in-touch-title">Make an Enquiry</h2>
+              <p className="get-in-touch-description">
+                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              </p>
+            </div>
+            <form className="get-in-touch-form" onSubmit={(e) => {
+              e.preventDefault()
+              console.log('Email submitted:', contactEmail)
+              setContactEmail('')
+              alert('Thank you for your message! We\'ll get back to you soon.')
+            }}>
+              <div className="get-in-touch-input-wrapper">
+                <input
+                  type="email"
+                  className="get-in-touch-input"
+                  placeholder="Enter your email address"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="get-in-touch-submit">
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
+        </div> */}
+      {/* </section> */}
 
 
 
@@ -815,7 +901,12 @@ export default function LandingPage({
           <h2 className="simple-testimonials-title">Students Testimonials</h2>
           <div className="simple-testimonials-grid">
             {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial) => (
-              <div key={testimonial.id} className="simple-testimonial-card">
+              <div
+                key={testimonial.id}
+                className="simple-testimonial-card"
+                onClick={() => setSelectedTestimonial(testimonial)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="simple-testimonial-content">
                   <h4 className="simple-testimonial-name">{testimonial.name}</h4>
                   <p className="simple-testimonial-role">{testimonial.role} • {testimonial.company}</p>

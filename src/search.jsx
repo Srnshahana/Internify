@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { searchCourses, searchMentors, getMentorsByCourse } from './Data.jsx'
 import './App.css'
 
-import heroSectionImage from './assets/herosection.jpg'
-import { HomeIcon } from './components/Icons.jsx' // Assuming HomeIcon or similar can be used, or I'll use inline SVG for Arrow
+const heroSectionImage = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80'
 
 const ArrowLeftIcon = ({ className = "" }) => (
   <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -145,6 +144,9 @@ const renderStarsFunc = (rating) => {
 }
 
 
+// Helper to normalize mentor data
+
+
 export default function Explore({
   mentors,
   courses = [],
@@ -169,7 +171,7 @@ export default function Explore({
   }, [initialQuery])
 
   const fetchCourses = async () => {
-    console.log('--------------------------------------')
+    console.log('--------------------------------------');
     setLoading(true)
     const { data, error } = await supabase
       .from('courses')          // your table name
@@ -239,9 +241,15 @@ export default function Explore({
       const company = currentExp?.company || currentExp?.organization || currentExp?.employer || mentor.company || ''
 
       // Get category (might be array or string)
-      const categoryDisplay = Array.isArray(mentor.category)
-        ? mentor.category.join(', ')
-        : mentor.category || ''
+      let categoryDisplay = ''
+      if (Array.isArray(mentor.category)) {
+        categoryDisplay = mentor.category.join(', ')
+      } else if (typeof mentor.category === 'string') {
+        categoryDisplay = mentor.category
+      } else if (mentor.category && typeof mentor.category === 'object') {
+        // detailed object?
+        categoryDisplay = mentor.category.name || mentor.category.title || ''
+      }
 
       return {
         id: mentor.mentor_id || mentor.id,
@@ -296,14 +304,17 @@ export default function Explore({
       if (isUsingApiMentors) {
         // Search API mentors
         result = result.filter((mentor) => {
+          if (!mentor) return false
           const mentorData = getMentorData(mentor)
-          const name = (mentorData.name || '').toLowerCase()
-          const role = (mentorData.role || '').toLowerCase()
-          const company = (mentorData.company || '').toLowerCase()
-          const bio = (mentorData.bio || '').toLowerCase()
-          const expertise = (mentorData.expertise || []).join(' ').toLowerCase()
-          const skills = (mentorData.skills || []).join(' ').toLowerCase()
-          const category = (mentorData.category || '').toLowerCase()
+          if (!mentorData) return false
+
+          const name = String(mentorData.name || '').toLowerCase()
+          const role = String(mentorData.role || '').toLowerCase()
+          const company = String(mentorData.company || '').toLowerCase()
+          const bio = String(mentorData.bio || '').toLowerCase()
+          const expertise = (Array.isArray(mentorData.expertise) ? mentorData.expertise : []).join(' ').toLowerCase()
+          const skills = (Array.isArray(mentorData.skills) ? mentorData.skills : []).join(' ').toLowerCase()
+          const category = String(mentorData.category || '').toLowerCase()
 
           return name.includes(lowerQuery) ||
             role.includes(lowerQuery) ||
@@ -314,10 +325,14 @@ export default function Explore({
             category.includes(lowerQuery)
         })
       } else {
-        // Use static search function
-        result = searchMentors(query).filter((mentor) =>
-          result.some((m) => m.id === mentor.id)
-        )
+        try {
+          // Use static search function
+          result = searchMentors(query).filter((mentor) =>
+            result.some((m) => m.id === mentor.id)
+          )
+        } catch (e) {
+          console.error("Search error fallback:", e)
+        }
       }
     }
 
@@ -333,6 +348,7 @@ export default function Explore({
     if (apiCourses.length > 0) {
       const lowerQuery = query.toLowerCase()
       return coursesToUse.filter((course) => {
+        if (!course) return false
         const title = (course.title || course.name || '').toLowerCase()
         const category = (course.category || course.career_field || '').toLowerCase()
         const description = (course.description || '').toLowerCase()
@@ -345,78 +361,79 @@ export default function Explore({
           skillLevel.includes(lowerQuery)
       })
     }
-    return searchCourses(query)
+    try {
+      return searchCourses(query)
+    } catch (e) {
+      return []
+    }
   }, [coursesToUse, query, apiCourses])
 
   return (
     <div className="explore-page-new">
-      <div className="light-theme-hero-section explore-hero-light">
-        <div className="explore-hero-bg-container">
-          <img src={heroSectionImage} alt="Hero" className="explore-hero-bg-image" />
-          <div className="explore-hero-overlay"></div>
-        </div>
-
-        <div className="light-theme-topbar">
-          <div className="brand" onClick={onBack} style={{ cursor: 'pointer' }}>
-            <span>Internify.</span>
-          </div>
-          <div className="top-actions">
-            <button className="link" onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ArrowLeftIcon /> Back to Home
-            </button>
-          </div>
-        </div>
-
-        <div className="light-theme-hero-content explore-hero-content-light">
-          <div className="explore-hero-text-container">
-            <p className="light-theme-hero-eyebrow">BROWSE CATALOG</p>
-            <h1 className="light-theme-hero-title">Explore Courses & Mentors</h1>
-            <p className="light-theme-hero-description">
-              Discover expert-led courses and connect with industry mentors to accelerate your career growth.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="explore-content-container">
-        <div className="explore-controls">
-          <div className="explore-tabs-pill">
-            <button
-              className={`tab-pill ${activeTab === 'mentors' ? 'active' : ''}`}
-              onClick={() => handleTabChange('mentors')}
-            >
-              Mentors
-            </button>
-            <button
-              className={`tab-pill ${activeTab === 'courses' ? 'active' : ''}`}
-              onClick={() => handleTabChange('courses')}
-            >
-              Courses
-            </button>
-          </div>
-
-          <div className="light-theme-hero-search-box explore-search-new">
-            <div className="search-icon-wrapper">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 2H16V18H4V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M8 6L12 10L8 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+      <div className="explore-soft-container">
+        {/* Soft Header Section */}
+        <div className="explore-soft-container" style={{ paddingTop: '80px' }}>
+          {/* Sticky App Bar */}
+          <div className="explore-app-bar">
+            <div className="app-bar-content">
+              <button className="back-btn-icon" onClick={onBack} aria-label="Back">
+                <ArrowLeftIcon />
+              </button>
+              <h1 className="app-bar-title">Explore</h1>
             </div>
-            <input
-              type="text"
-              className="light-theme-hero-search-input"
-              placeholder={activeTab === 'courses' ? 'Search courses by name, category, or skills' : 'Search mentors by name, role, or focus'}
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setQuery(term.trim())
-              }}
-            />
-            <button className="light-theme-hero-search-btn" onClick={() => setQuery(term.trim())}>
+          </div>
+
+          {/* Floating Control Bar */}
+          <div className="floating-control-bar">
+            {/* Tabs */}
+            <div className="soft-tabs">
+              <button
+                className={`soft-tab ${activeTab === 'mentors' ? 'active' : ''}`}
+                onClick={() => handleTabChange('mentors')}
+              >
+                Mentors
+              </button>
+              <button
+                className={`soft-tab ${activeTab === 'courses' ? 'active' : ''}`}
+                onClick={() => handleTabChange('courses')}
+              >
+                Courses
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className="control-divider"></div>
+
+            {/* Search Input */}
+            <div className="soft-search-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="search-icon-soft">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                className="soft-search-input"
+                placeholder={activeTab === 'courses' ? 'Search courses...' : 'Search mentors, roles...'}
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setQuery(term.trim())
+                }}
+              />
+            </div>
+
+            <button className="soft-search-btn" onClick={() => setQuery(term.trim())}>
               Search
             </button>
           </div>
         </div>
+
+        {selectedCourseId && (
+          <div className="active-filter-chip">
+            <span>Filter: {coursesToUse.find((c) => c.id === selectedCourseId)?.title || 'Selected Course'}</span>
+            <button onClick={() => setSelectedCourseId(null)}>✕</button>
+          </div>
+        )}
 
         {selectedCourseId && (
           <div className="course-filter-badge">
@@ -515,56 +532,62 @@ export default function Explore({
 
                 return (
                   <div
-                    className="mentor-card-new"
+                    className="soft-mentor-card"
                     key={`explore-${mentorId || mentorData.name}`}
                     onClick={() => onMentorClick && onMentorClick(mentorData)}
-                    style={{ cursor: 'pointer' }}
                   >
-                    <div className="mentor-card-image-wrapper">
-                      <img
-                        src={mentorData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'}
-                        alt={mentorData.name}
-                        className="mentor-card-image"
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'
-                        }}
-                      />
-                      <button
-                        className="mentor-card-favorite"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          // Handle favorite action
-                        }}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                        </svg>
-                      </button>
-                      <div className="mentor-card-overlay">
-                        <h3 className="mentor-card-name">{mentorData.name}</h3>
-                        <p className="mentor-card-location">
-                          {mentorData.company && (
-                            <span className="mentor-card-company">
-                              <span className="mentor-card-company-icon">{getCompanyIcon(mentorData.company)}</span>
-                              <span>{mentorData.company}</span>
-                            </span>
-                          )}
-                          {mentorData.company && mentorData.location && ' • '}
-                          {mentorData.location || (mentorData.company ? '' : 'Online')}
+                    <div className="soft-card-header">
+                      <div className="soft-avatar-wrapper">
+                        <img
+                          src={mentorData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'}
+                          alt={mentorData.name}
+                          className="soft-avatar"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'
+                          }}
+                        />
+                        {mentorData.assured && (
+                          <div className="verified-badge-soft" title="Verified Mentor">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="soft-header-info">
+                        <h3 className="soft-name">{mentorData.name}</h3>
+                        <p className="soft-role">
+                          {mentorData.role}
+                          {mentorData.company && <span className="soft-at"> @ {mentorData.company}</span>}
                         </p>
+                        <div className="soft-rating">
+                          <span className="star-icon">★</span>
+                          <span className="rating-val">{mentorData.rating?.toFixed(1) || 4.8}</span>
+                          <span className="review-count">({mentorData.reviews || 12} reviews)</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="mentor-card-content">
-                      <div className="mentor-card-rating">
-                        <span className="rating-stars">{renderStarsFunc(mentorData.rating || 4.5)}</span>
-                        <span className="rating-text">{mentorData.rating?.toFixed(1) || 4.5} ({mentorData.reviews || 0} reviews)</span>
+
+                    <div className="soft-card-body">
+                      {/* Tags/Skills Pill List */}
+                      <div className="soft-skills-list">
+                        {topSkills.map((skill, idx) => (
+                          <span key={idx} className="soft-skill-pill">{skill}</span>
+                        ))}
+                        {totalSkillsCount > 3 && <span className="soft-more-pill">+{totalSkillsCount - 3}</span>}
                       </div>
-                      {mentorData.assured && <span className="mentor-badge">Platform assured</span>}
-                      <p className="mentor-card-description">{mentorData.focus || mentorData.role || mentorData.bio?.substring(0, 100) || 'Experienced mentor'}</p>
-                      <div className="mentor-card-footer">
-                        <span className="mentor-card-price">${mentorData.hourlyRate || '50'}/h</span>
-                        <span className="mentor-card-free-lesson">• 1st lesson free</span>
+
+                      <p className="soft-bio">
+                        {mentorData.bio?.substring(0, 80) || 'Experienced mentor ready to help you grow.'}...
+                      </p>
+                    </div>
+
+                    <div className="soft-card-footer">
+                      <div className="soft-price">
+                        <span className="curr">$</span>
+                        <span className="val">{mentorData.hourlyRate || 50}</span>
+                        <span className="unit">/hr</span>
                       </div>
+                      <button className="soft-book-btn">Book Session</button>
                     </div>
                   </div>
                 )

@@ -400,6 +400,13 @@ function Home({ onNavigate, onMentorClick }) {
               <h1 className="welcome-title-new">Welcome back, Sherin</h1>
               <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
               <div className="welcome-card-actions">
+                <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Search')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  Quick Search
+                </button>
                 <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
                   Explore more courses
                 </button>
@@ -1149,191 +1156,193 @@ function Home({ onNavigate, onMentorClick }) {
       </div>
 
       {/* Progress Overview Modal */}
-      {showProgressModal && (
-        <div className="progress-modal-overlay" onClick={() => setShowProgressModal(false)}>
-          <div className="progress-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="progress-modal-header">
-              <div className="progress-modal-title-section">
-                <div className="progress-modal-icon">
-                  {selectedProgressCard === 'learning-hours' && (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                  )}
-                  {selectedProgressCard === 'assessment-status' && (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <polyline points="9 11 12 14 22 4"></polyline>
-                    </svg>
-                  )}
-                  {selectedProgressCard === 'registered-courses' && (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
-                      <path d="M12 11l-2 2 2 2"></path>
-                    </svg>
-                  )}
-                </div>
-                <h2 className="progress-modal-title">
-                  {selectedProgressCard === 'learning-hours' && 'Learning Hours'}
-                  {selectedProgressCard === 'assessment-status' && 'Assessment Status'}
-                  {selectedProgressCard === 'registered-courses' && 'Registered Courses'}
-                </h2>
-              </div>
-              <button className="progress-modal-close" onClick={() => setShowProgressModal(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            <div className="progress-modal-body">
-              {selectedProgressCard === 'learning-hours' && (
-                <>
-                  <div className="progress-modal-stat">
-                    <div className="progress-modal-stat-value">{Math.round(learningHours)}/{totalLearningHours}</div>
-                    <div className="progress-modal-stat-label">Hours Completed</div>
-                    <div className="progress-modal-progress-bar">
-                      <div className="progress-modal-progress-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
-                    </div>
-                    <div className="progress-modal-stat-percentage">{learningHoursProgress}% Complete</div>
+      {
+        showProgressModal && (
+          <div className="progress-modal-overlay" onClick={() => setShowProgressModal(false)}>
+            <div className="progress-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="progress-modal-header">
+                <div className="progress-modal-title-section">
+                  <div className="progress-modal-icon">
+                    {selectedProgressCard === 'learning-hours' && (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                    )}
+                    {selectedProgressCard === 'assessment-status' && (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                      </svg>
+                    )}
+                    {selectedProgressCard === 'registered-courses' && (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                        <path d="M12 11l-2 2 2 2"></path>
+                      </svg>
+                    )}
                   </div>
-                  <div className="progress-modal-details">
-                    <h3 className="progress-modal-details-title">Breakdown by Course</h3>
-                    <div className="progress-modal-list">
-                      {enrolledCourses.map((course) => {
-                        const courseHours = course.classes
-                          .filter(c => c.completed)
-                          .reduce((sum, cls) => {
-                            const match = cls.duration.match(/(\d+)/)
-                            const minutes = match ? parseInt(match[1]) : 0
-                            return sum + (minutes / 60)
-                          }, 0)
-                        return (
+                  <h2 className="progress-modal-title">
+                    {selectedProgressCard === 'learning-hours' && 'Learning Hours'}
+                    {selectedProgressCard === 'assessment-status' && 'Assessment Status'}
+                    {selectedProgressCard === 'registered-courses' && 'Registered Courses'}
+                  </h2>
+                </div>
+                <button className="progress-modal-close" onClick={() => setShowProgressModal(false)}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="progress-modal-body">
+                {selectedProgressCard === 'learning-hours' && (
+                  <>
+                    <div className="progress-modal-stat">
+                      <div className="progress-modal-stat-value">{Math.round(learningHours)}/{totalLearningHours}</div>
+                      <div className="progress-modal-stat-label">Hours Completed</div>
+                      <div className="progress-modal-progress-bar">
+                        <div className="progress-modal-progress-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+                      </div>
+                      <div className="progress-modal-stat-percentage">{learningHoursProgress}% Complete</div>
+                    </div>
+                    <div className="progress-modal-details">
+                      <h3 className="progress-modal-details-title">Breakdown by Course</h3>
+                      <div className="progress-modal-list">
+                        {enrolledCourses.map((course) => {
+                          const courseHours = course.classes
+                            .filter(c => c.completed)
+                            .reduce((sum, cls) => {
+                              const match = cls.duration.match(/(\d+)/)
+                              const minutes = match ? parseInt(match[1]) : 0
+                              return sum + (minutes / 60)
+                            }, 0)
+                          return (
+                            <div key={course.id} className="progress-modal-list-item">
+                              <div className="progress-modal-list-item-header">
+                                <span className="progress-modal-list-item-title">{course.title}</span>
+                                <span className="progress-modal-list-item-value">{courseHours.toFixed(1)}h</span>
+                              </div>
+                              <div className="progress-modal-list-item-progress">
+                                <div className="progress-modal-list-item-progress-fill" style={{ width: `${Math.min((courseHours / 50) * 100, 100)}%` }}></div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div className="progress-modal-actions">
+                      <button className="progress-modal-btn-primary" onClick={() => {
+                        setShowProgressModal(false)
+                        setShowMyCourses(true)
+                      }}>
+                        View All Courses
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {selectedProgressCard === 'assessment-status' && (
+                  <>
+                    <div className="progress-modal-stat">
+                      <div className="progress-modal-stat-value">{completedAssessments}/{totalAssessments}</div>
+                      <div className="progress-modal-stat-label">Assessments Completed</div>
+                      <div className="progress-modal-progress-bar">
+                        <div className="progress-modal-progress-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
+                      </div>
+                      <div className="progress-modal-stat-percentage">{assessmentProgress}% Complete</div>
+                    </div>
+                    <div className="progress-modal-details">
+                      <h3 className="progress-modal-details-title">Assessment Details</h3>
+                      <div className="progress-modal-list">
+                        {enrolledCourses.map((course) => (
                           <div key={course.id} className="progress-modal-list-item">
                             <div className="progress-modal-list-item-header">
                               <span className="progress-modal-list-item-title">{course.title}</span>
-                              <span className="progress-modal-list-item-value">{courseHours.toFixed(1)}h</span>
+                              <span className="progress-modal-list-item-value">{course.assignments.length} assessments</span>
                             </div>
-                            <div className="progress-modal-list-item-progress">
-                              <div className="progress-modal-list-item-progress-fill" style={{ width: `${Math.min((courseHours / 50) * 100, 100)}%` }}></div>
+                            <div className="progress-modal-assessments-list">
+                              {course.assignments.map((assignment) => (
+                                <div key={assignment.id} className="progress-modal-assessment-item">
+                                  <span className="progress-modal-assessment-title">{assignment.title}</span>
+                                  <span className={`progress-modal-assessment-status ${assignment.status.toLowerCase().replace(' ', '-')}`}>
+                                    {assignment.status}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        )
-                      })}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="progress-modal-actions">
-                    <button className="progress-modal-btn-primary" onClick={() => {
-                      setShowProgressModal(false)
-                      setShowMyCourses(true)
-                    }}>
-                      View All Courses
-                    </button>
-                  </div>
-                </>
-              )}
+                    <div className="progress-modal-actions">
+                      <button className="progress-modal-btn-primary" onClick={() => {
+                        setShowProgressModal(false)
+                        if (onNavigate) onNavigate('Assessments')
+                      }}>
+                        View All Assessments
+                      </button>
+                    </div>
+                  </>
+                )}
 
-              {selectedProgressCard === 'assessment-status' && (
-                <>
-                  <div className="progress-modal-stat">
-                    <div className="progress-modal-stat-value">{completedAssessments}/{totalAssessments}</div>
-                    <div className="progress-modal-stat-label">Assessments Completed</div>
-                    <div className="progress-modal-progress-bar">
-                      <div className="progress-modal-progress-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
+                {selectedProgressCard === 'registered-courses' && (
+                  <>
+                    <div className="progress-modal-stat">
+                      <div className="progress-modal-stat-value">{String(registeredCoursesCount).padStart(2, '0')}</div>
+                      <div className="progress-modal-stat-label">Total Courses</div>
                     </div>
-                    <div className="progress-modal-stat-percentage">{assessmentProgress}% Complete</div>
-                  </div>
-                  <div className="progress-modal-details">
-                    <h3 className="progress-modal-details-title">Assessment Details</h3>
-                    <div className="progress-modal-list">
-                      {enrolledCourses.map((course) => (
-                        <div key={course.id} className="progress-modal-list-item">
-                          <div className="progress-modal-list-item-header">
-                            <span className="progress-modal-list-item-title">{course.title}</span>
-                            <span className="progress-modal-list-item-value">{course.assignments.length} assessments</span>
-                          </div>
-                          <div className="progress-modal-assessments-list">
-                            {course.assignments.map((assignment) => (
-                              <div key={assignment.id} className="progress-modal-assessment-item">
-                                <span className="progress-modal-assessment-title">{assignment.title}</span>
-                                <span className={`progress-modal-assessment-status ${assignment.status.toLowerCase().replace(' ', '-')}`}>
-                                  {assignment.status}
-                                </span>
+                    <div className="progress-modal-details">
+                      <h3 className="progress-modal-details-title">Your Courses</h3>
+                      <div className="progress-modal-list">
+                        {enrolledCourses.map((course) => (
+                          <div
+                            key={course.id}
+                            className="progress-modal-list-item progress-modal-course-item"
+                            onClick={() => {
+                              setSelectedCourse(course)
+                              setShowProgressModal(false)
+                              setShowCourseDetail(true)
+                            }}
+                          >
+                            <div className="progress-modal-course-header">
+                              <div className="progress-modal-course-info">
+                                <h4 className="progress-modal-course-title">{course.title}</h4>
+                                <p className="progress-modal-course-mentor">by {course.mentor}</p>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="progress-modal-actions">
-                    <button className="progress-modal-btn-primary" onClick={() => {
-                      setShowProgressModal(false)
-                      if (onNavigate) onNavigate('Assessments')
-                    }}>
-                      View All Assessments
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {selectedProgressCard === 'registered-courses' && (
-                <>
-                  <div className="progress-modal-stat">
-                    <div className="progress-modal-stat-value">{String(registeredCoursesCount).padStart(2, '0')}</div>
-                    <div className="progress-modal-stat-label">Total Courses</div>
-                  </div>
-                  <div className="progress-modal-details">
-                    <h3 className="progress-modal-details-title">Your Courses</h3>
-                    <div className="progress-modal-list">
-                      {enrolledCourses.map((course) => (
-                        <div
-                          key={course.id}
-                          className="progress-modal-list-item progress-modal-course-item"
-                          onClick={() => {
-                            setSelectedCourse(course)
-                            setShowProgressModal(false)
-                            setShowCourseDetail(true)
-                          }}
-                        >
-                          <div className="progress-modal-course-header">
-                            <div className="progress-modal-course-info">
-                              <h4 className="progress-modal-course-title">{course.title}</h4>
-                              <p className="progress-modal-course-mentor">by {course.mentor}</p>
+                              <div className="progress-modal-course-progress">
+                                <span className="progress-modal-course-progress-value">{course.progress}%</span>
+                              </div>
                             </div>
-                            <div className="progress-modal-course-progress">
-                              <span className="progress-modal-course-progress-value">{course.progress}%</span>
+                            <div className="progress-modal-course-progress-bar">
+                              <div className="progress-modal-course-progress-fill" style={{ width: `${course.progress}%` }}></div>
                             </div>
                           </div>
-                          <div className="progress-modal-course-progress-bar">
-                            <div className="progress-modal-course-progress-fill" style={{ width: `${course.progress}%` }}></div>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="progress-modal-actions">
-                    <button className="progress-modal-btn-primary" onClick={() => {
-                      setShowProgressModal(false)
-                      setShowMyCourses(true)
-                    }}>
-                      View All Courses
-                    </button>
-                  </div>
-                </>
-              )}
+                    <div className="progress-modal-actions">
+                      <button className="progress-modal-btn-primary" onClick={() => {
+                        setShowProgressModal(false)
+                        setShowMyCourses(true)
+                      }}>
+                        View All Courses
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   )
 }
 

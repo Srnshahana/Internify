@@ -18,83 +18,123 @@ function Profile() {
 
   return (
     <div className="profile-page-elegant">
-      {/* Profile Cover & Header */}
+      {/* Profile Cover - Rectangular, no border radius */}
       <div className="profile-cover-elegant"></div>
 
-      <div className="profile-header-wrapper">
-        <div className="profile-avatar-elegant">
-          {studentProfileData.avatar}
-        </div>
-
-        <div className="profile-info-section">
-          <h1 className="profile-name-elegant">{studentProfileData.name}</h1>
-          <p className="profile-role-elegant">{studentProfileData.role}</p>
-          <p className="profile-location-elegant">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            {studentProfileData.location}
-          </p>
-          <button className="profile-btn-elegant" onClick={() => setIsEditing(!isEditing)}>
-            {isEditing ? 'Save Profile' : 'Edit Profile'}
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="profile-stats-elegant">
-        {stats.map((stat) => (
-          <div key={stat.label} className="profile-stat-card-elegant">
-            <div className="stat-value-elegant">{stat.value}</div>
-            <div className="stat-label-elegant">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Content Sections */}
       <div className="profile-content-wrapper">
 
-        {/* About Section */}
-        <div className="profile-section-elegant">
-          <div className="profile-section-header-elegant">
-            <h2 className="profile-section-title-elegant">About</h2>
-            {isEditing && <button className="section-edit-btn-elegant">Edit</button>}
+        {/* LinkedIn-style Intro Card */}
+        <div className="profile-intro-card">
+          <div className="profile-intro-header">
+            <div className="profile-avatar-linkedin">
+              {studentProfileData.avatar}
+            </div>
+            <button className="profile-edit-btn-icon" onClick={() => setIsEditing(!isEditing)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
           </div>
-          <p className="profile-bio-elegant">{studentProfileData.bio}</p>
+
+          <div className="profile-intro-info">
+            <div className="profile-main-details">
+              <h1 className="profile-name-linkedin">{studentProfileData.name}</h1>
+              <p className="profile-headline-tech">
+                Flutter Developer <span>|</span> React Native Enthusiast <span>|</span> UI/UX Designer
+              </p>
+
+              <div className="profile-location-linkedin">
+                <span className="location-text">
+                  {studentProfileData.location}
+                </span>
+                <span className="bullet-separator">•</span>
+                <span className="contact-info-link">Contact info</span>
+              </div>
+
+              <div className="profile-connections-linkedin">
+                <span className="connection-count">500+ connections</span>
+              </div>
+            </div>
+
+            <div className="profile-actions-linkedin">
+              <button className="btn-linkedin-primary">Open to work</button>
+              <button className="btn-linkedin-secondary">Add profile section</button>
+              <button className="btn-linkedin-tertiary">More</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics/Stats Section */}
+        <div className="profile-section-card">
+          <div className="profile-section-header-linkedin">
+            <h2 className="section-title-linkedin">Analytics</h2>
+            <span className="private-eye-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              Private to you
+            </span>
+          </div>
+          <div className="profile-stats-linkedin">
+            {stats.map((stat) => (
+              <div key={stat.label} className="stat-item-linkedin">
+                <div className="stat-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 20V10"></path>
+                    <path d="M18 20V4"></path>
+                    <path d="M6 20v-4"></path>
+                  </svg>
+                </div>
+                <div className="stat-text-content">
+                  <span className="stat-value-linkedin">{stat.value}</span>
+                  <span className="stat-label-linkedin">{stat.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* About Section */}
+        <div className="profile-section-card">
+          <div className="profile-section-header-linkedin">
+            <h2 className="section-title-linkedin">About</h2>
+            {isEditing && <button className="section-edit-btn-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>}
+          </div>
+          <p className="profile-bio-linkedin">{studentProfileData.bio}</p>
         </div>
 
         {/* Internships Section */}
-        <div className="profile-section-elegant">
-          <div className="profile-section-header-elegant">
-            <h2 className="profile-section-title-elegant">Internships</h2>
-            {isEditing && <button className="section-edit-btn-elegant">Add internship</button>}
+        <div className="profile-section-card">
+          <div className="profile-section-header-linkedin">
+            <h2 className="section-title-linkedin">Internships</h2>
+            {isEditing && <button className="section-add-btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>}
           </div>
-          <div className="timeline-elegant">
+          <div className="timeline-linkedin">
             {studentProfileData.internships && studentProfileData.internships.length > 0 ? (
               studentProfileData.internships.map((internship) => (
-                <div key={internship.id} className="timeline-item-elegant">
-                  <div className="timeline-icon-elegant">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
-                  </div>
-                  <div className="timeline-content-elegant">
-                    <h3 className="timeline-title-elegant">{internship.title}</h3>
-                    <p className="timeline-subtitle-elegant">{internship.company}</p>
-                    <div className="timeline-meta-elegant">
-                      <span className="timeline-badge-elegant badge-internship">Internship</span>
-                      <span className="timeline-period-elegant">
-                        {internship.startDate} - {internship.endDate}
-                      </span>
-                      <span className="timeline-location-elegant">{internship.location}</span>
+                <div key={internship.id} className="timeline-item-linkedin">
+                  <div className="timeline-logo-linkedin">
+                    {/* Placeholder Company Logo */}
+                    <div className="company-logo-placeholder">
+                      {internship.company.charAt(0)}
                     </div>
-                    <p className="timeline-description-elegant">{internship.description}</p>
+                  </div>
+                  <div className="timeline-content-linkedin">
+                    <h3 className="timeline-role-linkedin">{internship.title}</h3>
+                    <p className="timeline-company-linkedin">{internship.company}</p>
+                    <p className="timeline-date-linkedin">
+                      {internship.startDate} - {internship.endDate}
+                    </p>
+                    <p className="timeline-location-linkedin">{internship.location}</p>
+                    <p className="timeline-desc-linkedin">{internship.description}</p>
                     {internship.skills && internship.skills.length > 0 && (
-                      <div className="timeline-skills-elegant">
+                      <div className="timeline-skills-linkedin">
+                        <span className="skills-label">Skills: </span>
                         {internship.skills.map((skill, idx) => (
-                          <span key={idx} className="skill-tag-elegant">{skill}</span>
+                          <span key={idx} className="skill-text-linkedin">{skill}{idx < internship.skills.length - 1 ? ' · ' : ''}</span>
                         ))}
                       </div>
                     )}

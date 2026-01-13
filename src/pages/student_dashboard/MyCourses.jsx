@@ -59,7 +59,7 @@ function MyCourses({ courses, onBack, onEnterClassroom, onMentorClick }) {
 
       <div className="classroom-container">
         <div className="courses-grid-elegant">
-          {courses.slice(0, 2).map((course) => {
+          {courses.slice(5, 7).map((course) => {
             const status = getCourseStatus(course)
             const statusColor = getStatusColor(status)
 
@@ -90,7 +90,7 @@ function MyCourses({ courses, onBack, onEnterClassroom, onMentorClick }) {
                   </div>
 
                   <h3 className="course-title-elegant">{course.title}</h3>
-                  <p className="course-mentor-elegant">by {course.mentor}</p>
+                  <p className="course-mentor-elegant">by {course.mentor || 'James'}</p>
 
                   {/* Current Session Info */}
                   <div className="course-current-session-box">
