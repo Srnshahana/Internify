@@ -156,18 +156,75 @@ function ResourcesPage() {
 function MentorProfilePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [mentor, setMentor] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Find mentor by ID
-  const mentor = mentors.find(m =>
-    (m.id && String(m.id) === id) ||
-    (m.mentor_id && String(m.mentor_id) === id) ||
-    (m.name && m.name === id)
-  )
+  useEffect(() => {
+    const fetchMentor = async () => {
+      setLoading(true)
+      // First check static data
+      const staticMentor = mentors.find(m =>
+        (m.id && String(m.id) === id) ||
+        (m.mentor_id && String(m.mentor_id) === id) ||
+        (m.name && m.name === id)
+      )
+
+      if (staticMentor) {
+        setMentor(staticMentor)
+        setLoading(false)
+        return
+      }
+
+      // If not in static, fetch from Supabase
+      try {
+        const { data, error } = await supabase
+          .from('mentors_details')
+          .select('*')
+          .or(`mentor_id.eq.${id}, id.eq.${id}`)
+          .single()
+
+        if (error) throw error
+
+        if (data) {
+          // Normalize the data using a similar logic as getMentorData
+          const normalized = {
+            id: data.mentor_id || data.id,
+            name: data.name || data.full_name || 'Mentor',
+            bio: data.about || data.bio || '',
+            location: data.address || data.location || '',
+            profileImage: data.profile_image || data.image || '',
+            category: Array.isArray(data.category) ? data.category.join(', ') : data.category || '',
+            coursesOffered: data.coursesOffered || data.courses || [],
+            expertise: data.experties_in || [],
+            skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || '')).filter(Boolean),
+            education: data.education || [],
+            experience: data.experience || [],
+            testimonials: data.testimonial || data.testimonials || [],
+            isVerified: data.is_verified || data.assured || false,
+            platformAssured: data.is_platformAssured || false,
+            role: data.role || (data.experience?.[0]?.role || ''),
+            company: data.company || (data.experience?.[0]?.company || ''),
+            experienceYears: data.experience?.[0]?.years || 5,
+            rating: data.rating || data.avg_rating || 5.0,
+          }
+          setMentor(normalized)
+        }
+      } catch (err) {
+        console.error('Error fetching mentor details:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMentor()
+  }, [id])
+
+  if (loading) return <div className="loading-container">Loading mentor profile...</div>
 
   if (!mentor) {
     return (
-      <div className="page">
-        <button className="back-button" onClick={() => navigate('/')}>← Back</button>
+      <div className="page" style={{ padding: '40px', textAlign: 'center' }}>
+        <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
         <h1>Mentor not found</h1>
       </div>
     )

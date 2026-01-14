@@ -251,25 +251,28 @@ export default function Explore({
         categoryDisplay = mentor.category.name || mentor.category.title || ''
       }
 
+      // Final mapping matching the user's requested structure
       return {
         id: mentor.mentor_id || mentor.id,
-        mentor_id: mentor.mentor_id || mentor.id,
-        name,
-        role,
-        company,
-        image: mentor.profile_image || mentor.image,
-        bio: mentor.bio ? mentor.bio.replace(/[""]/g, '').trim() : '',
-        focus: expertise.length > 0 ? expertise.join(', ') : mentor.focus || '',
-        expertise: expertise,
-        skills: skillNames.length > 0 ? skillNames : expertise, // Use expertise if skills array is empty
+        name: name,
+        bio: mentor.about || mentor.bio || '',
+        location: mentor.address || mentor.location || '',
+        profileImage: mentor.profile_image || mentor.image || '',
         category: categoryDisplay,
-        assured: mentor.is_verified || mentor.assured || false,
-        experience: experienceYears,
-        rating: mentor.rating || mentor.avg_rating || 0,
+        coursesOffered: mentor.coursesOffered || mentor.courses || [],
+        expertise: expertise,
+        skills: skillNames,
         education: mentor.education || [],
+        experience: mentor.experience || [],
         testimonials: mentor.testimonial || mentor.testimonials || [],
-        // Keep original for backward compatibility
-        ...mentor
+        isVerified: mentor.is_verified || mentor.assured || false,
+        platformAssured: mentor.is_platformAssured || false,
+        // Helper derived fields
+        role: role,
+        company: company,
+        experienceYears: experienceYears,
+        rating: mentor.rating || mentor.avg_rating || 5.0,
+        hourlyRate: mentor.hourlyRate || 50
       }
     }
 
