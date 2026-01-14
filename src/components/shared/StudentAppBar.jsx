@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../App.css'
+import '../../App.css'
 
 const StudentAppBar = ({ onLogout, userImage }) => {
     return (

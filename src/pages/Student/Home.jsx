@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
-import LiveClassroom from '../../liveClassroom.jsx'
+import LiveClassroom from '../Learning/LiveClassroom.jsx'
 import CourseDetail from './CourseDetail.jsx'
 import MyCourses from './MyCourses.jsx'
 import {
   homeProgressData,
   homeUpcomingSessions
-} from '../../Data.jsx'
+} from '../../data/staticData.js'
 
 function Home({ onNavigate, onMentorClick }) {
   // Upcoming sessions data

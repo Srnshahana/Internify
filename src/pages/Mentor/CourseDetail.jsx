@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '../../App.css'
-import LiveClassroom from '../../liveClassroom.jsx'
+import LiveClassroom from '../Learning/LiveClassroom.jsx'
 import Assessments from './Assessments.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
@@ -72,8 +72,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
                 <span className="progress-percentage">{course.progress}%</span>
               </div>
               <div className="progress-bar-large">
-                <div 
-                  className="progress-bar-fill-large" 
+                <div
+                  className="progress-bar-fill-large"
                   style={{ width: `${course.progress}%` }}
                 ></div>
               </div>
@@ -186,7 +186,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
           </div>
           <p className="section-subtitle">Create and manage assessments for students in this course.</p>
           <div className="course-detail-actions">
-            <button 
+            <button
               className="btn-primary"
               onClick={() => {
                 if (onNavigate) {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import '../../App.css'
-import { studentProfileData } from '../../Data.jsx'
-import { getCourseById } from '../../Data.jsx'
+import { studentProfileData } from '../../data/staticData.js'
+import { courses } from '../../data/staticData.js'
 import { CertificateIcon } from '../../components/Icons.jsx'
 
 function Profile() {
@@ -256,7 +256,7 @@ function Profile() {
                         <div className="course-progress-bar-elegant">
                           <div
                             className="course-progress-fill-elegant"
-                            style={{ width: `${course.progress}%` }}
+                            style={{ width: `${course.progress}% ` }}
                           />
                         </div>
                         <span className="course-progress-text-elegant">{course.progress}% Complete</span>

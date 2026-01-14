@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '../../App.css'
-import { calendarSessions } from '../../Data.jsx'
+import { mentors, calendarSessions } from '../../data/staticData.js'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())

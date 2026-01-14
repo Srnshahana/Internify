@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import './App.css'
-import supabase from './supabaseClient'
-import { fetchUserRole, storeAuthData } from './utils/auth.js'
+import '../../App.css'
+import supabase from '../../supabaseClient.js'
+import { fetchUserRole, storeAuthData } from '../../utils/auth.js'
 
 function Login({ onBack, onLogin, onShowSignup }) {
   const [email, setEmail] = useState('')

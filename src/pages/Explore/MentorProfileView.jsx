@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { getCourseById } from './Data.jsx'
-import './App.css'
-import { CertificateIcon, ProfileIcon, CalendarIcon } from './components/Icons.jsx'
+import { getCourseById } from '../../data/staticData.js'
+import '../../App.css'
+import { CertificateIcon, ProfileIcon, CalendarIcon } from '../../components/Icons.jsx'
 
 export default function MentorProfile({ mentor, onBack, renderStars, courses = [], onBookSession }) {
   useEffect(() => {

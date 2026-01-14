@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '../../App.css'
-import LiveClassroom from '../../liveClassroom.jsx'
+import LiveClassroom from '../Learning/LiveClassroom.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   const [showLiveClassroom, setShowLiveClassroom] = useState(false)

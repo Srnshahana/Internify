@@ -4319,9 +4319,9 @@ h1 span {
 
 .simple-testimonial-avatar {
   width: 100px;
-  height: 100px;
+  height: 130px;
   /* Specific height again */
-  align-self: flex-start;
+  align-self: center;
   /* Removed stretch */
   border-radius: 12px;
   /* Restored radius */
@@ -21597,7 +21597,7 @@ h1 span {
   width: 90%;
   max-width: 500px;
   height: 72px;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
   /* More transparent */
   backdrop-filter: blur(20px);
   /* Heavy blur for glass effect */
@@ -21702,12 +21702,12 @@ h1 span {
 }
 
 [data-theme='dark'] .premium-bottom-nav {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.4);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme='dark'] .bottom-nav-item {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Hide Dashboard Header when on Home (since LandingPage already has one) */
@@ -23979,7 +23979,7 @@ h1 span {
   border: none;
   font-size: 15px;
   font-weight: 600;
-  color: #64748b;
+  color: #94a3b8;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -24229,6 +24229,16 @@ h1 span {
 
   .login-premium-form-container {
     padding: 40px 24px;
+  }
+
+  /* Fix Back Button overlap on mobile */
+  .back-button-simple {
+    position: relative;
+    top: auto;
+    left: auto;
+    align-self: flex-start;
+    margin-bottom: 24px;
+    padding-left: 0;
   }
 }
 

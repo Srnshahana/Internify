@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import './App.css'
-import supabase from './supabaseClient'
-import { storeAuthData } from './utils/auth.js'
+import '../../App.css'
+import supabase from '../../supabaseClient.js'
+import { storeAuthData } from '../../utils/auth.js'
 
 function Signup({ onBack, onSignup }) {
     const [fullName, setFullName] = useState('')

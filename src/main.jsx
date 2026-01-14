@@ -2,7 +2,7 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import SplashScreen from './splashscreen.jsx'
+import SplashScreen from './pages/Auth/SplashScreen.jsx'
 
 function Root() {
   const [showSplash, setShowSplash] = useState(true)

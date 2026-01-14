@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './App.css'
+import '../../App.css'
 
 const renderStars = (rating) => {
   const stars = []
@@ -165,7 +165,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
   // Get mentors relevant to the course based on category
   const getMentorsForCourse = (course, categoryId) => {
     if (!mentors.length) return []
-    
+
     // Map category to relevant skills
     const categorySkillMap = {
       programming: ['React', 'Node.js', 'JavaScript', 'TypeScript', 'Python', 'Full-stack', 'Backend', 'Frontend'],
@@ -177,12 +177,12 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
     }
 
     const relevantSkills = categorySkillMap[categoryId] || []
-    
+
     // Filter mentors whose skills match the category
-    const relevantMentors = mentors.filter(mentor => 
-      mentor.skills?.some(skill => 
-        relevantSkills.some(catSkill => 
-          skill.toLowerCase().includes(catSkill.toLowerCase()) || 
+    const relevantMentors = mentors.filter(mentor =>
+      mentor.skills?.some(skill =>
+        relevantSkills.some(catSkill =>
+          skill.toLowerCase().includes(catSkill.toLowerCase()) ||
           catSkill.toLowerCase().includes(skill.toLowerCase())
         )
       )
@@ -231,7 +231,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
           <div className="materials-section">
             <h2 className="section-title">Study Materials</h2>
             <p className="section-subtitle">Download free PDF study materials for this course</p>
-            
+
             <div className="materials-list">
               {course.materials.map((material) => (
                 <div key={material.id} className="material-card">
@@ -250,7 +250,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                       <span className="material-size">{material.size}</span>
                     </div>
                   </div>
-                  <button 
+                  <button
                     className="download-btn"
                     onClick={() => handleDownload(material)}
                   >

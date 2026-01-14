@@ -1,4 +1,4 @@
-import './App.css'
+import '../../App.css'
 
 function Payment({ onBack, onPaymentSuccess }) {
   return (

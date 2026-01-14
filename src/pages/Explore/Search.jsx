@@ -1,8 +1,8 @@
 
-import supabase from './supabaseClient'
+import supabase from '../../supabaseClient'
 import { useEffect, useMemo, useState } from 'react'
-import { searchCourses, searchMentors, getMentorsByCourse } from './Data.jsx'
-import './App.css'
+import { searchCourses, searchMentors, getMentorsByCourse } from '../../data/staticData.js'
+import '../../App.css'
 
 const heroSectionImage = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80'
 

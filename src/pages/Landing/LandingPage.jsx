@@ -1,26 +1,70 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { mentors, courses } from '../Data.jsx'
-import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../components/Icons.jsx'
-import { checkAuthSession, clearAuthData } from '../utils/auth.js'
+import { mentors, courses } from '../../data/staticData.js'
+import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../../components/Icons.jsx'
+import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 const SuccessStory1 = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80'
 const SuccessStory2 = 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80'
 const SuccessStory3 = 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80'
-import adds1 from '../assets/adds1.png'
-import adds2 from '../assets/adds2.png'
-import adds3 from '../assets/adds3.png'
-import supabase from '../supabaseClient'
-import '../App.css'
+import adds1 from '../../assets/adds1.png'
+import adds2 from '../../assets/adds2.png'
+import adds3 from '../../assets/adds3.png'
+import topprogram4 from '../../assets/topprogram1.jpeg'
+import topprogram3 from '../../assets/topprogram2.jpeg'
+import topprogram2 from '../../assets/topprogram3.jpg'
+import topprogram1 from '../../assets/topprogram4.jpg'
+import testimonial1 from '../../assets/testimonial1.png'
+import testimonial2 from '../../assets/testimonial2.png'
+import testimonial3 from '../../assets/testimonial3.png'
+import testimonial4 from '../../assets/testimonial4.png'
+import supabase from '../../supabaseClient'
+import '../../App.css'
 
 // Map courses to skills format
-const latestSkills = courses.slice(0, 8).map((course) => ({
-  id: course.id,
-  name: course.name,
-  image: course.image,
-  category: course.category,
-  description: course.description,
-}))
+// Top Rated Programs Data
+const latestSkills = [
+  {
+    id: 'top-1',
+    name: 'Coding / Software Engineering',
+    image: topprogram1,
+    category: 'Development',
+    description: 'Master full-stack development and engineering principles.',
+    rating: 4.9,
+    level: 'All Levels',
+    duration: 12
+  },
+  {
+    id: 'top-2',
+    name: 'Content Creation & Digital Media',
+    image: topprogram2,
+    category: 'Creative',
+    description: 'Build your brand and master digital storytelling.',
+    rating: 4.8,
+    level: 'Beginner',
+    duration: 8
+  },
+  {
+    id: 'top-3',
+    name: 'Soft Skills & Career Growth',
+    image: topprogram3,
+    category: 'Personal Growth',
+    description: 'Enhance communication, leadership, and interview skills.',
+    rating: 4.9,
+    level: 'All Levels',
+    duration: 4
+  },
+  {
+    id: 'top-4',
+    name: 'Entrepreneurship & Business',
+    image: topprogram4,
+    category: 'Business',
+    description: 'Learn to launch, manage, and scale your business ideas.',
+    rating: 4.7,
+    level: 'Intermediate',
+    duration: 16
+  }
+]
 
 const howItWorksSteps = [
   {
@@ -58,9 +102,9 @@ const howItWorksSteps = [
 const careerGuidanceTestimonials = [
   {
     id: 1,
-    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
-    mentorName: 'Sarah Chen',
-    mentorRole: 'Career Advisor',
+    mentorImage: testimonial1,
+    mentorName: 'Sarah Anderson',
+    mentorRole: 'UX Designer @ Google',
     quote: 'My career guidance sessions helped me transition from a non-tech background to landing my dream job at Google. The personalized guidance and real-world projects made all the difference.',
     studentName: 'Alex Johnson',
     studentRating: 5,
@@ -68,9 +112,9 @@ const careerGuidanceTestimonials = [
   },
   {
     id: 2,
-    mentorImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
-    mentorName: 'Michael Rodriguez',
-    mentorRole: 'Life Advisor',
+    mentorImage: testimonial2,
+    mentorName: 'David Chen',
+    mentorRole: 'Backend Lead @ Amazon',
     quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.',
     studentName: 'Emma Williams',
     studentRating: 5,
@@ -78,9 +122,9 @@ const careerGuidanceTestimonials = [
   },
   {
     id: 3,
-    mentorImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
-    mentorName: 'David Kim',
-    mentorRole: 'Career Coach',
+    mentorImage: testimonial3,
+    mentorName: 'Emily Davis',
+    mentorRole: 'Product Manager @ Netflix',
     quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.',
     studentName: 'James Brown',
     studentRating: 5,
@@ -88,34 +132,14 @@ const careerGuidanceTestimonials = [
   },
   {
     id: 4,
-    mentorImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
-    mentorName: 'Priya Patel',
-    mentorRole: 'Career Strategist',
+    mentorImage: testimonial4,
+    mentorName: 'Jessica Martinez',
+    mentorRole: 'Marketing Strategist @ Spotify',
     quote: 'The weekly sessions kept me accountable and motivated. My advisor\'s feedback on my career path was invaluable in improving my approach.',
     studentName: 'Sophia Martinez',
     studentRating: 5,
     bgColor: 'blue'
-  },
-  {
-    id: 5,
-    mentorImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
-    mentorName: 'Robert Taylor',
-    mentorRole: 'Life Coach',
-    quote: 'I learned more in 3 months with my advisor than I did in a year of self-study. The hands-on approach and industry insights were game-changing.',
-    studentName: 'Daniel Lee',
-    studentRating: 5,
-    bgColor: 'blue'
-  },
-  {
-    id: 6,
-    mentorImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop',
-    mentorName: 'Lisa Anderson',
-    mentorRole: 'Career Mentor',
-    quote: 'My advisor helped me build a portfolio that showcased my skills perfectly. I landed my first design role at a top tech company thanks to their guidance.',
-    studentName: 'Olivia Davis',
-    studentRating: 5,
-    bgColor: 'blue'
-  },
+  }
 ]
 
 const studentTestimonials = [
@@ -150,124 +174,36 @@ const studentTestimonials = [
 const simpleTestimonials = [
   {
     id: 1,
-    name: 'Alex Johnson',
-    role: 'Software Engineer',
+    name: 'Sarah Anderson',
+    role: 'Product Designer',
     company: 'Google',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    avatar: testimonial1,
     quote: 'Internify helped me transition from a non-tech background to landing my dream job at Google. The personalized mentorship was exactly what I needed.'
   },
   {
     id: 2,
-    name: 'Sarah Chen',
-    role: 'Product Designer',
-    company: 'Microsoft',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
-    quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.'
+    name: 'David Chen',
+    role: 'Senior Mentor',
+    company: 'Amazon',
+    avatar: testimonial2,
+    quote: 'Guiding students through real-world projects and seeing them succeed is incredibly rewarding. The curriculum here is top-notch.'
   },
   {
     id: 3,
-    name: 'Michael Rodriguez',
+    name: 'Emily Davis',
     role: 'Data Scientist',
-    company: 'Amazon',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
+    company: 'Spotify',
+    avatar: testimonial3,
     quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.'
   },
   {
     id: 4,
-    name: 'Emma Williams',
-    role: 'Full Stack Developer',
+    name: 'Jessica Martinez',
+    role: 'UX Researcher',
     company: 'Netflix',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
+    avatar: testimonial4,
     quote: 'The weekly sessions kept me accountable and motivated. My mentor\'s feedback was invaluable in improving my approach and landing my role.'
-  },
-  {
-    id: 5,
-    name: 'James Brown',
-    role: 'DevOps Engineer',
-    company: 'Meta',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
-    quote: 'I learned more in 3 months with my mentor than I did in a year of self-study. The hands-on approach and industry insights were game-changing.'
-  },
-  {
-    id: 6,
-    name: 'Sophia Martinez',
-    role: 'UX Designer',
-    company: 'Apple',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop',
-    quote: 'My mentor helped me build a portfolio that showcased my skills perfectly. I landed my first design role at a top tech company thanks to their guidance.'
-  },
-  {
-    id: 7,
-    name: 'Daniel Lee',
-    role: 'Cloud Architect',
-    company: 'AWS',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
-    quote: 'The structured learning path and real-world projects made all the difference. I now have the confidence and skills to tackle complex cloud challenges.'
-  },
-  {
-    id: 8,
-    name: 'Olivia Davis',
-    role: 'Security Engineer',
-    company: 'Cisco',
-    avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop',
-    quote: 'Internify gave me the mentorship I needed to break into cybersecurity. My mentor\'s industry expertise was instrumental in my success.'
-  },
-  {
-    id: 9,
-    name: 'David Kim',
-    role: 'Machine Learning Engineer',
-    company: 'Tesla',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
-    quote: 'The personalized mentorship helped me understand ML concepts deeply. I\'m now working on autonomous vehicle systems at Tesla.'
-  },
-  {
-    id: 10,
-    name: 'Priya Patel',
-    role: 'Mobile Developer',
-    company: 'Uber',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop',
-    quote: 'Switching careers seemed daunting, but my mentor made the transition smooth. I\'m now building mobile apps that millions of people use daily.'
-  },
-  {
-    id: 11,
-    name: 'Robert Taylor',
-    role: 'Frontend Engineer',
-    company: 'Shopify',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop',
-    quote: 'The project-based learning approach was exactly what I needed. I built real applications during my mentorship that became part of my portfolio.'
-  },
-  {
-    id: 12,
-    name: 'Lisa Anderson',
-    role: 'Backend Developer',
-    company: 'Stripe',
-    avatar: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=150&h=150&fit=crop',
-    quote: 'My mentor helped me understand backend systems architecture. I now work on payment infrastructure that processes billions of dollars.'
-  },
-  {
-    id: 13,
-    name: 'Chris Wilson',
-    role: 'AI Researcher',
-    company: 'OpenAI',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
-    quote: 'The mentorship program gave me the foundation I needed to pursue AI research. I\'m now working on cutting-edge language models.'
-  },
-  {
-    id: 14,
-    name: 'Maria Garcia',
-    role: 'Systems Engineer',
-    company: 'IBM',
-    avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop',
-    quote: 'I gained both technical skills and confidence through Internify. My mentor\'s guidance helped me excel in systems engineering interviews.'
-  },
-  {
-    id: 15,
-    name: 'Kevin Zhang',
-    role: 'Platform Engineer',
-    company: 'Salesforce',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
-    quote: 'The mentorship experience was transformative. I learned platform engineering best practices and landed a role at a top SaaS company.'
-  },
+  }
 ]
 
 // Additional icon components
@@ -668,7 +604,7 @@ export default function LandingPage({
               <input
                 type="text"
                 className="elegant-search-input"
-                placeholder="Ex: Software Engineer, Product Manager..."
+                placeholder="Search for mentors, skills, or career paths..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -677,15 +613,20 @@ export default function LandingPage({
             </div>
 
             <div className="suggestion-tags">
-              {['Engineering', 'Design', 'AI', 'Business', 'Marketing', 'Data Science', 'Product', 'Frontend', 'Backend'].map(tag => (
-                <button
-                  key={tag}
-                  className="suggestion-tag"
-                  onClick={() => handleNavSearch(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
+              {['Career Guidance',
+                'Tech & Digital',
+                'Content Creation',
+                'Entrepreneurship',
+                'Marketing & Growth',
+                'Soft Skills'].map(tag => (
+                  <button
+                    key={tag}
+                    className="suggestion-tag"
+                    onClick={() => handleNavSearch(tag)}
+                  >
+                    {tag}
+                  </button>
+                ))}
             </div>
           </div>
         </div>

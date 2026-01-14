@@ -122,7 +122,7 @@ function MyCourses({ onBack }) {
               const studentId = i + 1
               const progress = Math.floor(Math.random() * 100)
               const status = progress === 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Not Started'
-              
+
               return (
                 <div key={studentId} className="enrollment-card">
                   <div className="enrollment-student-info">
@@ -140,8 +140,8 @@ function MyCourses({ onBack }) {
                       <span className="progress-percentage">{progress}%</span>
                     </div>
                     <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
+                      <div
+                        className="progress-fill"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
@@ -163,97 +163,73 @@ function MyCourses({ onBack }) {
   }
 
   return (
-    <div className="dashboard-page">
+    <div className="classroom-page-wrapper">
       <div className="course-detail-header">
-        <button className="back-button" onClick={onBack}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Back
-        </button>
         <h1 className="page-title">My Courses</h1>
       </div>
 
-      <div className="my-courses-container">
-        <div className="my-courses-list">
+      <div className="classroom-container">
+        <div className="courses-grid-elegant">
           {mentorCourses.map((course) => {
             const completionRate = Math.round((course.completedSessions / course.totalSessions) * 100)
-            
+
             return (
-              <div key={course.id} className="my-course-card">
-                <div className="my-course-card-content">
-                  <div className="my-course-header">
-                    <div className="my-course-info">
-                      <div>
-                        <h3 className="my-course-title">{course.title}</h3>
-                        <p className="my-course-description">{course.description}</p>
-                      </div>
-                      <div className="my-course-status-badge" style={{ 
-                        backgroundColor: course.status === 'Active' ? '#22c55e20' : '#6b728020',
-                        color: course.status === 'Active' ? '#22c55e' : '#6b7280',
-                        borderColor: course.status === 'Active' ? '#22c55e' : '#6b7280'
-                      }}>
-                        {course.status}
-                      </div>
+              <div
+                key={course.id}
+                className="course-card-elegant"
+                onClick={() => handleViewEnrollments(course)}
+              >
+                <div className="course-image-wrapper-elegant">
+                  <img
+                    src={`https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80`} // Placeholder for now
+                    alt={course.title}
+                    className="course-image-elegant"
+                  />
+                  <div className="course-status-pill-elegant" style={{
+                    backgroundColor: course.status === 'Active' ? '#0ca5e9' : '#94a3b8'
+                  }}>
+                    {completionRate}%
+                  </div>
+                </div>
+
+                <div className="course-content-elegant">
+                  <div className="course-header-elegant">
+                    <span className="course-category-elegant">{course.category}</span>
+                    <div className="course-rating-box">
+                      <span className="star-icon">★</span>
+                      <span>{course.rating}</span>
                     </div>
                   </div>
 
-                  <div className="my-course-details">
-                    <div className="my-course-meta">
-                      <span className="my-course-category">{course.category}</span>
-                      <span className="my-course-level">{course.level}</span>
-                      <span className="my-course-type">{course.type}</span>
-                    </div>
-                    <div className="my-course-rating">
-                      <span className="rating-stars">★★★★★</span>
-                      <span className="rating-value">{course.rating}</span>
-                    </div>
+                  <h3 className="course-title-elegant">{course.title}</h3>
+                  <p className="course-mentor-elegant">{course.totalStudents} Students Enrolled</p>
+
+                  <div className="course-current-session-box" style={{ borderLeft: `4px solid ${course.status === 'Active' ? '#0ca5e9' : '#94a3b8'}` }}>
+                    <span className="session-label">Mentorship Status</span>
+                    <h4 className="session-name">{course.completedSessions}/{course.totalSessions} Sessions Completed</h4>
+                    <span className="session-time">{course.status} • {course.level}</span>
                   </div>
 
-                  <div className="my-course-stats-grid">
-                    <div className="course-stat-item">
-                      <span className="stat-label">Total Students</span>
-                      <span className="stat-value">{course.totalStudents}</span>
-                    </div>
-                    <div className="course-stat-item">
-                      <span className="stat-label">Active Students</span>
-                      <span className="stat-value">{course.activeStudents}</span>
-                    </div>
-                    <div className="course-stat-item">
-                      <span className="stat-label">Sessions</span>
-                      <span className="stat-value">{course.completedSessions}/{course.totalSessions}</span>
-                    </div>
-                    <div className="course-stat-item">
-                      <span className="stat-label">Completion Rate</span>
-                      <span className="stat-value">{completionRate}%</span>
-                    </div>
-                  </div>
-
-                  <div className="my-course-progress-section">
-                    <div className="my-course-progress-header">
-                      <span className="progress-label">Overall Progress</span>
-                      <span className="progress-percentage">{completionRate}%</span>
-                    </div>
-                    <div className="my-course-progress-bar">
-                      <div
-                        className="my-course-progress-fill"
-                        style={{ width: `${completionRate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="my-course-footer">
-                    <button 
-                      className="btn-secondary"
-                      onClick={() => handleEditCourse(course.id)}
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                    <button
+                      className="light-theme-btn-primary"
+                      style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '14px' }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleViewEnrollments(course)
+                      }}
                     >
-                      Edit Course
+                      Enrollments
                     </button>
-                    <button 
-                      className="btn-primary"
-                      onClick={() => handleViewEnrollments(course)}
+                    <button
+                      className="light-theme-btn-outline"
+                      style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '14px' }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditCourse(course.id)
+                      }}
                     >
-                      View Enrollments ({course.enrollments})
+                      Edit
                     </button>
                   </div>
                 </div>

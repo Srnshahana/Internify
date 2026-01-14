@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import './App.css'
+import '../../App.css'
 
 function LiveClassroom({ course, onBack, userRole = 'student' }) {
   const [activeSessionId, setActiveSessionId] = useState(2)
@@ -15,7 +15,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
       id: 1,
       from: 'mentor',
       type: 'text',
-      content: "Welcome to today's session. We will focus on building reusable components.", 
+      content: "Welcome to today's session. We will focus on building reusable components.",
       time: '10:00 AM',
       sectionId: 2,
       highlightColor: null,
@@ -137,13 +137,13 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
       selfNote: '',
       replyTo: replyTo
         ? {
-            id: replyTo.id,
-            preview:
-              replyTo.content ||
-              replyTo.fileName ||
-              replyTo.linkLabel ||
-              replyTo.type.toUpperCase(),
-          }
+          id: replyTo.id,
+          preview:
+            replyTo.content ||
+            replyTo.fileName ||
+            replyTo.linkLabel ||
+            replyTo.type.toUpperCase(),
+        }
         : null,
     }
 
@@ -339,10 +339,10 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     }
 
     setMessages((prev) => [...prev, submissionMessage])
-    
+
     // Mark assessment as submitted (you could add a submitted flag to the assessment)
     alert('Assessment submitted successfully!')
-    
+
     setSelectedAssessment(null)
     setAssessmentSubmission({ textSubmission: '', attachments: [] })
   }
@@ -420,9 +420,8 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                 className={`live-message ${message.from === 'mentor' ? 'from-mentor' : 'from-learner'}`}
               >
                 <div
-                  className={`live-message-bubble ${
-                    message.highlightColor ? `highlight-${message.highlightColor}` : ''
-                  }`}
+                  className={`live-message-bubble ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
+                    }`}
                 >
                   {message.type === 'text' && <p>{message.content}</p>}
                   {message.type === 'file' && (
@@ -452,7 +451,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                     </div>
                   )}
                   {message.type === 'assessment' && (
-                    <div 
+                    <div
                       className="live-assessment-card"
                       onClick={() => userRole === 'student' && handleViewAssessment(message)}
                       style={{ cursor: userRole === 'student' ? 'pointer' : 'default' }}
@@ -635,7 +634,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="assessment-modal-header">
                   <h2>Create Assessment</h2>
-                  <button 
+                  <button
                     className="modal-close-btn"
                     onClick={() => setShowAssessmentForm(false)}
                   >
@@ -674,13 +673,13 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                   </div>
                 </div>
                 <div className="assessment-modal-actions">
-                  <button 
+                  <button
                     className="btn-primary"
                     onClick={handleSendAssessment}
                   >
                     Send Assessment
                   </button>
-                  <button 
+                  <button
                     className="btn-secondary"
                     onClick={() => {
                       setShowAssessmentForm(false)
@@ -700,7 +699,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="assessment-modal-header">
                   <h2>Assessment</h2>
-                  <button 
+                  <button
                     className="modal-close-btn"
                     onClick={() => setSelectedAssessment(null)}
                   >
@@ -728,7 +727,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                   {/* Submission Form */}
                   <div className="assessment-submission-form">
                     <h4>Your Submission</h4>
-                    
+
                     <div className="form-group">
                       <label className="form-label">Write your response / description</label>
                       <textarea
@@ -778,7 +777,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                                 <span className="attachment-name">{attachment.name}</span>
                                 <span className="attachment-size">{attachment.size}</span>
                               </div>
-                              <button 
+                              <button
                                 className="btn-danger btn-small"
                                 onClick={() => handleRemoveAssessmentAttachment(idx)}
                               >
@@ -791,7 +790,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                     </div>
 
                     <div className="assessment-view-actions">
-                      <button 
+                      <button
                         className="btn-primary btn-full"
                         onClick={handleSubmitAssessment}
                       >
@@ -801,7 +800,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                         </svg>
                         Submit Assessment
                       </button>
-                      <button 
+                      <button
                         className="btn-secondary btn-full"
                         onClick={() => {
                           setSelectedAssessment(null)
@@ -839,9 +838,8 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
             <button
               key={session.id}
               type="button"
-              className={`live-session-chip ${session.status} ${
-                session.id === activeSessionId ? 'current' : ''
-              }`}
+              className={`live-session-chip ${session.status} ${session.id === activeSessionId ? 'current' : ''
+                }`}
               onClick={() => setActiveSessionId(session.id)}
             >
               <span className="live-session-title">{session.title}</span>
@@ -849,8 +847,8 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                 {session.status === 'current'
                   ? 'Now'
                   : session.status === 'completed'
-                  ? 'Completed'
-                  : 'Upcoming'}
+                    ? 'Completed'
+                    : 'Upcoming'}
               </span>
             </button>
           ))}
@@ -862,7 +860,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
             <span className="live-session-title">Course Complete</span>
           </button>
         </div>
-        
+
         {/* Course Completion Modal */}
         {showCompletionModal && (
           <div className="live-completion-modal-overlay" onClick={() => setShowCompletionModal(false)}>
