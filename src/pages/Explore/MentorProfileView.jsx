@@ -1,40 +1,311 @@
 import { useEffect, useState } from 'react'
 import '../../App.css'
 import { getCourseById } from '../../data/staticData.js'
+import supabase from '../../supabaseClient.js'
+// Hardcoded sample data for development/preview
+const MOCK_MENTOR_DATA = {
+  name: "Alex Johnson",
+  about: "Passionate software architect with 10+ years of experience in building scalable web and mobile applications. I specialize in React, Node.js, and Cloud Infrastructure. My mission is to empower the next generation of developers through hands-on mentorship and real-world project guidance.",
+  expertise: ["Web Development", "Mobile UX", "Cloud Scaling", "System Design"],
+  category: "Software Engineering",
+  education: [
+    {
+      degree: "Master of Computer Science",
+      institution: "Stanford University",
+      year: "2015 - 2017",
+      description: "Focused on Distributed Systems and Machine Learning."
+    },
+    {
+      degree: "Bachelor of Technology",
+      institution: "MIT",
+      year: "2011 - 2015",
+      description: "Graduated with honors in Computer Science."
+    }
+  ],
+  skills: ["React", "TypeScript", "Node.js", "AWS", "Docker", "Figma", "GraphQL", "PostgreSQL"],
+  experience: [
+    {
+      title: "Senior Lead Engineer",
+      company: "Google",
+      duration: "2020 - Present",
+      location: "Mountain View, CA",
+      description: "Leading the UI infrastructure team for Google Cloud Console."
+    },
+    {
+      title: "Software Engineer",
+      company: "Netflix",
+      duration: "2017 - 2020",
+      location: "Los Gatos, CA",
+      description: "Developed edge-rendering layers for the streaming platform."
+    }
+  ],
+  testimonials: [
+    {
+      name: "Sherin",
+      title: "Frontend Developer",
+      rating: 5,
+      date: "Jan 2024",
+      quote: "Alex is an incredible mentor. The way he explains complex system design concepts is mind-blowing. Highly recommended!"
+    },
+    {
+      name: "Rahul",
+      title: "Backend Engineer",
+      rating: 5,
+      date: "Dec 2023",
+      quote: "Helped me transition from a junior to a mid-level role in just 4 months. The mentorship sessions are extremely structured."
+    }
+  ],
+  is_verified: true,
+  platform_verified: true,
+  address: "San Francisco, CA (Remote)",
+  profile_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80",
+  courses_offered: [
+    {
+      id: 101,
+      title: "Advanced React Patterns",
+      category: "Development",
+      rating: 4.9,
+      students: 250,
+      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&q=80",
+      level: "Advanced"
+    },
+    {
+      id: 102,
+      title: "Full Stack MERN Mastery",
+      category: "Development",
+      rating: 4.8,
+      students: 450,
+      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80",
+      level: "Intermediate"
+    },
+    {
+      id: 103,
+      title: "System Design Essentials",
+      category: "Architecture",
+      rating: 5.0,
+      students: 180,
+      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80",
+      level: "Advanced"
+    },
+    {
+      id: 104,
+      title: "UI/UX for Developers",
+      category: "Design",
+      rating: 4.7,
+      students: 310,
+      image: "https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?w=400&q=80",
+      level: "Beginner"
+    },
+    {
+      id: 105,
+      title: "Cloud Native Scalability",
+      category: "Cloud",
+      rating: 4.9,
+      students: 125,
+      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80",
+      level: "Intermediate"
+    }
+  ]
+}
 
-export default function MentorProfile({ mentor, onBack, renderStars, courses = [], onBookSession }) {
-  const [activeTab, setActiveTab] = useState('about')
+export default function MentorProfile({ mentor: propMentor, onBack, renderStars, courses = [], onBookSession }) {
+  const [mentorData, setMentorData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [coursesIndex, setCoursesIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
 
   useEffect(() => {
     window.scrollTo(0, 0)
-  }, [])
 
-  if (!mentor) return null
+    // Check if we have complete data from props (e.g. from Search navigation state)
+    const hasFullData = propMentor && propMentor.bio &&
+      Array.isArray(propMentor.coursesOffered) &&
+      propMentor.coursesOffered.length > 0 &&
+      typeof propMentor.coursesOffered[0] === 'object';
 
-  // Support both image and profileImage for backward compatibility
-  const profileImg = mentor.profileImage || mentor.image || 'https://via.placeholder.com/150'
-  const isVerified = mentor.isVerified || mentor.assured || false
-  const isPlatformAssured = mentor.platformAssured || false
+    if (hasFullData) {
+      // If it's already a full mentor object (from Search), use it
+      const finalMentor = {
+        ...propMentor,
+        courses_offered: propMentor.coursesOffered.map(c => ({
+          id: c.course_id || c.id,
+          title: c.title || c.name || "",
+          category: c.category || "",
+          rating: c.rating || 4.8,
+          students: c.students || 50,
+          image: c.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+          level: c.skill_level || c.level || ""
+        }))
+      }
+      setMentorData(finalMentor)
+      setLoading(false)
+    } else {
+      // Otherwise fetch (fallback for direct/deep links)
+      fetchMentorDetails()
+    }
+  }, [propMentor])
+
+  async function fetchMentorDetails() {
+    try {
+      if (!mentorData) setLoading(true);
+      console.log(propMentor, 'lll');
+      const targetId = propMentor?.id || '1'
+
+      const { data, error } = await supabase
+        .from('mentors_details')
+        .select(`
+          mentor_id,
+          about,
+          profile_image,
+          is_verified,
+          experties_in,
+          category,
+          education,
+          skills,
+          experience,
+          testimonial,
+          id,
+          is_platformAssured,
+          adress,
+          coursesOffered
+        `)
+        .eq('mentor_id', targetId)
+        .single();
+
+      if (error) {
+        console.error('Supabase mentor fetch error:', error);
+        setLoading(false)
+        return;
+      }
+
+      console.log('Mentor Data:', data);
+
+      // Fetch course details if coursesOffered has values
+      let coursesData = [];
+      if (data.coursesOffered && data.coursesOffered.length > 0) {
+        const courseIds = data.coursesOffered.map((id) => Number(id));
+        const { data: courses, error: coursesError } = await supabase
+          .from('courses')
+          .select('*')
+          .in('course_id', courseIds);
+
+        if (coursesError) {
+          console.error('Supabase courses fetch error:', coursesError);
+        } else {
+          coursesData = courses;
+        }
+      }
+
+      // Normalize data for UI
+      const normalized = {
+        name: propMentor?.name || "Expert Mentor",
+        about: data.about || "",
+        expertise: data.experties_in || [],
+        category: Array.isArray(data.category) ? data.category[0] : (data.category || ""),
+        skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || s.skill_name || "")),
+        location: data.adress || "Remote",
+        profileImage: data.profile_image || "https://via.placeholder.com/150",
+        isVerified: data.is_verified || false,
+        platformVerified: data.is_platformAssured || false,
+        education: (data.education || []).map(edu => ({
+          degree: edu.degree || "",
+          institution: edu.institution || "",
+          year: edu.year || (edu.start_year ? `${edu.start_year} - ${edu.end_year || 'Present'}` : ""),
+          description: edu.description || ""
+        })),
+        experience: (data.experience || []).map(exp => ({
+          title: exp.role || exp.title || "",
+          company: exp.company || "",
+          duration: exp.duration || (exp.start_date ? `${exp.start_date} - ${exp.end_date || 'Present'}` : ""),
+          location: exp.location || "",
+          description: exp.description || ""
+        })),
+        testimonials: (data.testimonial || []).map(t => ({
+          name: t.from || t.name || "Student",
+          quote: t.text || t.comment || t.quote || "",
+          rating: t.rating || 5,
+          title: t.title || "Student",
+          date: t.date || "Recent"
+        })),
+        courses_offered: coursesData.map(c => ({
+          id: c.course_id || c.id,
+          title: c.title || c.name || "",
+          category: c.category || "",
+          rating: c.rating || 4.8,
+          students: c.students || 50,
+          image: c.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+          level: c.skill_level || c.level || ""
+        }))
+      }
+
+      setMentorData(normalized)
+      setLoading(false)
+    } catch (err) {
+      console.error('Unexpected error fetching mentor details:', err);
+      setLoading(false)
+    }
+  }
+
+  if (loading) return <div className="loading-container" style={{ padding: '100px', textAlign: 'center' }}>Loading mentor profile...</div>
+  if (!mentorData) return <div className="error-container" style={{ padding: '100px', textAlign: 'center' }}>Mentor not found</div>
+
+  const mentor = mentorData
 
   const stats = [
-    { label: 'Experience', value: `${mentor.experienceYears || mentor.experience || 5}y+` },
-    { label: 'Rating', value: mentor.rating || '5.0' },
-    { label: 'Mentees', value: '120+' },
-    { label: 'Reviews', value: `${mentor.testimonials?.length || 24}` },
+    { label: 'Experience', value: mentor.experience?.length > 0 ? `${mentor.experience.length * 3}+y` : "5y+" },
+    { label: 'Rating', value: "4.9" },
+    { label: 'Mentees', value: '1,200+' },
+    { label: 'Reviews', value: `${mentor.testimonials?.length || 0}` },
   ]
 
-  const mentorCourses = mentor.coursesOffered || mentor.courses || []
-  const skills = mentor.skills || []
-  const expertise = mentor.expertise || []
-  const education = mentor.education || []
-  const experience = mentor.experience || []
-  const testimonials = mentor.testimonials || []
+  const handleNextCourse = () => {
+    if (coursesIndex < mentor.courses_offered.length - 2) {
+      setCoursesIndex(coursesIndex + 1)
+    }
+  }
+
+  const handlePrevCourse = () => {
+    if (coursesIndex > 0) {
+      setCoursesIndex(coursesIndex - 1)
+    }
+  }
+
+  // Touch Handlers
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      handleNextCourse()
+    }
+    if (isRightSwipe) {
+      handlePrevCourse()
+    }
+
+    setTouchStart(0)
+    setTouchEnd(0)
+  }
 
   return (
     <div className="profile-page-elegant">
-      {/* Profile Cover */}
+      {/* Profile Cover - Rectangular to match Student Profile */}
       <div className="profile-cover-elegant">
-        <button className="back-button-floating-premium" onClick={onBack} style={{ top: '20px', left: '20px', position: 'absolute', zIndex: 10 }}>
+        <button
+          className="back-button-floating-premium"
+          onClick={onBack}
+          style={{ top: '20px', left: '20px', position: 'absolute', zIndex: 10 }}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
@@ -47,7 +318,7 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
           <div className="profile-intro-header">
             <div className="profile-avatar-linkedin" style={{ background: '#f1f5f9', overflow: 'hidden' }}>
               <img
-                src={profileImg}
+                src={mentor.profileImage}
                 alt={mentor.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80' }}
@@ -58,53 +329,54 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
           <div className="profile-intro-info">
             <div className="profile-main-details">
               <div className="profile-name-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h1 className="profile-name-linkedin">{mentor.name || 'Mentor'}</h1>
-                {isVerified && (
-                  <span className="verified-badge-soft" title="Verified Mentor" style={{ width: '20px', height: '20px', position: 'static' }}>
+                <h1 className="profile-name-linkedin">{mentor.name}</h1>
+                {mentor.isVerified && (
+                  <span className="verified-badge-soft" title="Verified Mentor" style={{ width: '20px', height: '20px', position: 'static', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                   </span>
                 )}
-                {isPlatformAssured && (
-                  <span className="assured-badge-premium" title="Platform Assured" style={{ background: '#0ea5e9', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>
+                {mentor.platformVerified && (
+                  <span className="assured-badge-premium" title="Platform Verified" style={{ background: '#0ea5e9', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>
                     ASSURED
                   </span>
                 )}
               </div>
+
               <p className="profile-headline-tech">
-                {mentor.role || 'Expert Mentor'} {mentor.company && <span>|</span>} {mentor.company}
+                {mentor.experience?.[0]?.title}
+                {mentor.experience?.[0]?.company && <span> | {mentor.experience[0].company}</span>}
+                {mentor.expertise?.length > 0 && <span> | Specialist in {mentor.expertise.slice(0, 2).join(' & ')}</span>}
               </p>
 
               <div className="profile-location-linkedin">
-                <span className="location-text">
-                  {mentor.location || 'Remote'}
-                </span>
+                <span className="location-text">{mentor.location}</span>
                 <span className="bullet-separator">•</span>
-                <span className="category-text" style={{ color: '#0ea5e9' }}>{mentor.category}</span>
+                <span className="category-text" style={{ color: '#0ea5e9', fontWeight: '500' }}>{mentor.category}</span>
               </div>
 
               <div className="profile-connections-linkedin">
-                <span className="connection-count" style={{ color: '#0ea5e9', fontWeight: '600' }}>
-                  {mentor.rating || '5.0'} Rating • {testimonials.length} reviews • 500+ pupils
+                <span className="connection-count" style={{ color: '#64748b' }}>
+                  {stats[1].value} Rating • {mentor.testimonials?.length} Reviews • {stats[2].value} Pupils
                 </span>
               </div>
             </div>
 
             <div className="profile-actions-linkedin">
-              <button className="btn-linkedin-primary" style={{ background: '#0ea5e9' }} onClick={() => onBookSession && onBookSession()}>Book Session</button>
+              <button className="btn-linkedin-primary" onClick={() => onBookSession && onBookSession()}>Book Session</button>
               <button className="btn-linkedin-secondary">Send Message</button>
               <button className="btn-linkedin-tertiary">More</button>
             </div>
           </div>
         </div>
 
-        {/* Professional Stats Section */}
+        {/* Analytics Section - Matches Student Profile Style */}
         <div className="profile-section-card">
           <div className="profile-section-header-linkedin">
             <h2 className="section-title-linkedin">Professional Snapshot</h2>
           </div>
           <div className="profile-stats-linkedin">
-            {stats.map((stat) => (
-              <div key={stat.label} className="stat-item-linkedin">
+            {stats.map((stat, idx) => (
+              <div key={idx} className="stat-item-linkedin">
                 <div className="stat-icon-wrapper" style={{ color: '#0ea5e9' }}>
                   {stat.label === 'Experience' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>}
                   {stat.label === 'Rating' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>}
@@ -125,137 +397,177 @@ export default function MentorProfile({ mentor, onBack, renderStars, courses = [
           <div className="profile-section-header-linkedin">
             <h2 className="section-title-linkedin">About</h2>
           </div>
-          <p className="profile-bio-linkedin" style={{ lineHeight: '1.6', color: '#475569' }}>
-            {mentor.bio || `Experienced ${mentor.role} dedicated to helping students bridge the gap between learning and career success.`}
+          <p className="profile-bio-linkedin" style={{ color: '#475569', lineHeight: '1.6' }}>
+            {mentor.about}
           </p>
-          {(skills.length > 0 || expertise.length > 0) && (
-            <div className="skills-grid-premium" style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {[...new Set([...skills, ...expertise])].map((skill, idx) => (
-                <span key={idx} className="skill-pill-premium" style={{ background: '#f1f5f9', color: '#1e293b', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '16px', fontSize: '13px' }}>
-                  {typeof skill === 'string' ? skill : skill.name}
-                </span>
-              ))}
+          {mentor.skills?.length > 0 && (
+            <div style={{ marginTop: '20px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '10px' }}>Top Skills</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {mentor.skills.map((skill, idx) => (
+                  <span key={idx} className="skill-pill-premium" style={{ background: '#f1f5f9', color: '#1e293b', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Experience Section */}
-        {experience.length > 0 && (
-          <div className="profile-section-card">
-            <div className="profile-section-header-linkedin">
-              <h2 className="section-title-linkedin">Experience</h2>
-            </div>
-            <div className="timeline-linkedin">
-              {experience.map((exp, idx) => (
-                <div key={idx} className="timeline-item-linkedin">
-                  <div className="timeline-logo-linkedin">
-                    <div className="company-logo-placeholder" style={{ background: '#0ea5e9', color: 'white' }}>
-                      {(exp.company || exp.organization || 'E').charAt(0)}
-                    </div>
-                  </div>
-                  <div className="timeline-content-linkedin">
-                    <h3 className="timeline-role-linkedin">{exp.title || exp.role || exp.job_title}</h3>
-                    <p className="timeline-company-linkedin">{exp.company || exp.organization || exp.employer}</p>
-                    <p className="timeline-date-linkedin">
-                      {exp.duration || `${exp.startDate} - ${exp.endDate || 'Present'}`}
-                    </p>
-                    <p className="timeline-location-linkedin">{exp.location}</p>
-                    <p className="timeline-desc-linkedin">{exp.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Experience Section - Elegant Style */}
+        <div className="profile-section-elegant">
+          <div className="profile-section-header-elegant">
+            <h2 className="profile-section-title-elegant">Experience</h2>
           </div>
-        )}
+          <div className="timeline-elegant">
+            {mentor.experience?.length > 0 ? mentor.experience.map((exp, idx) => (
+              <div key={idx} className="timeline-item-elegant">
+                <div className="timeline-icon-elegant" style={{ background: '#0ea5e9' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div className="timeline-content-elegant">
+                  <h3 className="timeline-title-elegant">{exp.title}</h3>
+                  <p className="timeline-subtitle-elegant">{exp.company}</p>
+                  <div className="timeline-meta-elegant">
+                    <span className="timeline-period-elegant">{exp.duration}</span>
+                    {exp.location && <span className="timeline-period-elegant"> • {exp.location}</span>}
+                  </div>
+                  {exp.description && <p className="timeline-description-elegant" style={{ marginTop: '8px' }}>{exp.description}</p>}
+                </div>
+              </div>
+            )) : <p className="empty-state-elegant">No experience details available</p>}
+          </div>
+        </div>
 
         {/* Education Section */}
-        {education.length > 0 && (
-          <div className="profile-section-card">
-            <div className="profile-section-header-linkedin">
-              <h2 className="section-title-linkedin">Education</h2>
-            </div>
-            <div className="timeline-linkedin">
-              {education.map((edu, idx) => (
-                <div key={idx} className="timeline-item-linkedin">
-                  <div className="timeline-logo-linkedin">
-                    <div className="company-logo-placeholder" style={{ background: '#64748b', color: 'white' }}>
-                      {(edu.institution || 'U').charAt(0)}
-                    </div>
-                  </div>
-                  <div className="timeline-content-linkedin">
-                    <h3 className="timeline-role-linkedin">{edu.degree}</h3>
-                    <p className="timeline-company-linkedin">{edu.institution}</p>
-                    <p className="timeline-date-linkedin">{edu.year || `${edu.startYear} - ${edu.endYear}`}</p>
-                    {edu.gpa && <p className="timeline-location-linkedin">GPA: {edu.gpa}</p>}
-                    <p className="timeline-desc-linkedin">{edu.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="profile-section-elegant">
+          <div className="profile-section-header-elegant">
+            <h2 className="profile-section-title-elegant">Education</h2>
           </div>
-        )}
+          <div className="timeline-elegant">
+            {mentor.education?.length > 0 ? mentor.education.map((edu, idx) => (
+              <div key={idx} className="timeline-item-elegant">
+                <div className="timeline-icon-elegant" style={{ background: '#64748b' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                </div>
+                <div className="timeline-content-elegant">
+                  <h3 className="timeline-title-elegant">{edu.degree}</h3>
+                  <p className="timeline-subtitle-elegant">{edu.institution}</p>
+                  <div className="timeline-meta-elegant">
+                    <span className="timeline-period-elegant">{edu.year}</span>
+                  </div>
+                  {edu.description && <p className="timeline-description-elegant" style={{ marginTop: '8px' }}>{edu.description}</p>}
+                </div>
+              </div>
+            )) : <p className="empty-state-elegant">No education details available</p>}
+          </div>
+        </div>
 
-        {/* Courses Offered Section */}
-        {mentorCourses.length > 0 && (
+        {/* Courses Offered Section - Carousel Fix */}
+        {mentor.courses_offered?.length > 0 && (
           <div className="profile-section-elegant">
-            <div className="profile-section-header-elegant" style={{ marginBottom: '20px' }}>
+            <div className="profile-section-header-elegant">
               <h2 className="profile-section-title-elegant">Courses Offered</h2>
             </div>
-            <div className="courses-grid-elegant" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {mentorCourses.map((courseIdOrObj) => {
-                const course = typeof courseIdOrObj === 'number' ? getCourseById(courseIdOrObj) : courseIdOrObj
-                if (!course) return null
-                return (
-                  <div key={course.id} className="course-card-elegant">
-                    <div className="course-image-wrapper-elegant">
-                      <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'} alt={course.title || course.name} className="course-image-elegant" />
-                      <div className="course-status-pill-elegant" style={{ backgroundColor: '#0ea5e9' }}>
-                        {course.students || '45+'} Students
+
+            <div
+              className="carousel-container"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{ position: 'relative', touchAction: 'pan-y' }}
+            >
+              {mentor.courses_offered.length > 2 && (
+                <>
+                  <button
+                    className="carousel-nav-btn prev"
+                    onClick={handlePrevCourse}
+                    disabled={coursesIndex === 0}
+                    style={{ zIndex: 20 }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+
+                  <button
+                    className="carousel-nav-btn next"
+                    onClick={handleNextCourse}
+                    disabled={coursesIndex >= mentor.courses_offered.length - 2}
+                    style={{ zIndex: 20 }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </>
+              )}
+
+              <div className="carousel-wrapper" style={{
+                transform: `translateX(-${coursesIndex * 51}%)`,
+                transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'flex',
+                gap: '20px'
+              }}>
+                {mentor.courses_offered.map((course) => (
+                  <div key={course.id} className="carousel-slide" style={{ minWidth: mentor.courses_offered.length > 1 ? 'calc(50% - 10px)' : '100%' }}>
+                    <div className="course-card-elegant" style={{ margin: 0, height: '100%' }}>
+                      <div className="course-image-elegant" style={{ height: '180px' }}>
+                        <img
+                          src={course.image}
+                          alt={course.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
                       </div>
-                    </div>
-                    <div className="course-content-elegant">
-                      <div className="course-header-elegant">
-                        <span className="course-category-elegant">{course.category || course.career_field}</span>
-                        <div className="course-rating-box">
-                          <span className="star-icon">★</span>
-                          <span>{course.rating || '4.8'}</span>
+                      <div className="course-body-elegant" style={{ padding: '16px' }}>
+                        <div className="course-header-elegant" style={{ marginBottom: '8px' }}>
+                          <span className="course-category-elegant">{course.category}</span>
+                          <div className="course-rating-box">
+                            <span className="star-icon">★</span>
+                            <span>{course.rating}</span>
+                          </div>
+                        </div>
+                        <h3 className="course-name-elegant" style={{ fontSize: '16px' }}>{course.title}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                          <span className="course-status-badge-elegant" data-status="enrolled" style={{ fontSize: '12px' }}>
+                            {course.students} Mentees
+                          </span>
+                          <span style={{ fontSize: '13px', color: '#64748b' }}>{course.level}</span>
                         </div>
                       </div>
-                      <h3 className="course-title-elegant">{course.title || course.name}</h3>
-                      <p className="course-mentor-elegant">{course.level || course.skill_level}</p>
                     </div>
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Reviews Section */}
-        {testimonials.length > 0 && (
-          <div className="profile-section-card">
-            <div className="profile-section-header-linkedin">
-              <h2 className="section-title-linkedin">Reviews & Feedback</h2>
+        {mentor.testimonials?.length > 0 && (
+          <div className="profile-section-elegant">
+            <div className="profile-section-header-elegant">
+              <h2 className="profile-section-title-elegant">Reviews & Feedback</h2>
             </div>
-            <div className="reviews-list" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {testimonials.map((review, idx) => (
-                <div key={idx} className="review-card" style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px' }}>
+            <div className="reviews-list" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {mentor.testimonials.map((review, idx) => (
+                <div key={idx} className="review-card" style={{ padding: '20px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ width: '40px', height: '40px', background: '#e0f2fe', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#0ea5e9' }}>
-                        {(review.studentName || review.name || 'S').charAt(0)}
+                      <div style={{ width: '44px', height: '44px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#0ea5e9', border: '1px solid #e2e8f0' }}>
+                        {review.name.charAt(0)}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>{review.studentName || review.name}</h4>
-                        <p style={{ fontSize: '13px', color: '#64748b' }}>{review.studentRole || review.title}</p>
+                        <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>{review.name}</h4>
+                        <p style={{ fontSize: '13px', color: '#64748b' }}>{review.title}</p>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ color: '#fbbf24' }}>{renderStars ? renderStars(review.rating || 5) : '★★★★★'}</div>
-                      <p style={{ fontSize: '12px', color: '#94a3b8' }}>{review.date || 'Recent'}</p>
+                      <div style={{ color: '#fbbf24', fontSize: '12px' }}>{renderStars ? renderStars(review.rating) : '★★★★★'}</div>
+                      <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{review.date}</p>
                     </div>
                   </div>
-                  <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.5' }}>{review.comment || review.quote}</p>
+                  <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', fontStyle: 'italic' }}>"{review.quote}"</p>
                 </div>
               ))}
             </div>

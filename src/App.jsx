@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams, useLocation } from 'react-router-dom'
 import Explore from './pages/Explore/Search.jsx'
 import Resources from './pages/Learning/Resources.jsx'
 import MentorProfile from './pages/Explore/MentorProfileView.jsx'
@@ -83,19 +83,38 @@ function ExplorePage() {
     const fetchExploreData = async () => {
       setIsLoadingExplore(true)
 
-      const { data: mentorsFromApi, error: mentorsError } = await supabase
-        .from('mentors_details')
-        .select('*')
+      // Fetch both in parallel
+      const [mentorsRes, coursesRes] = await Promise.all([
+        supabase.from('mentors_details').select('*'),
+        supabase.from('courses').select('*')
+      ])
+
+      const { data: mentorsFromApi, error: mentorsError } = mentorsRes
+      const { data: coursesFromApi, error: coursesError } = coursesRes
 
       if (mentorsError) console.error('Error fetching mentors:', mentorsError)
-      else setMentorData(mentorsFromApi)
-
-      const { data: coursesFromApi, error: coursesError } = await supabase
-        .from('courses')
-        .select('*')
-
       if (coursesError) console.error('Error fetching courses:', coursesError)
-      else setCourseData(coursesFromApi)
+
+      if (mentorsFromApi && coursesFromApi) {
+        // Link mentors with their full course objects
+        const linkedMentors = mentorsFromApi.map(mentor => {
+          const mentorCourseIds = mentor.coursesOffered || mentor.courses || []
+          const fullCourses = coursesFromApi.filter(c =>
+            mentorCourseIds.includes(c.id) ||
+            mentorCourseIds.includes(String(c.id))
+          )
+          return {
+            ...mentor,
+            fullCoursesOffered: fullCourses
+          }
+        })
+        setMentorData(linkedMentors)
+        setCourseData(coursesFromApi)
+      } else if (mentorsFromApi) {
+        setMentorData(mentorsFromApi)
+      } else if (coursesFromApi) {
+        setCourseData(coursesFromApi)
+      }
 
       setIsLoadingExplore(false)
     }
@@ -108,7 +127,7 @@ function ExplorePage() {
 
   const handleMentorClick = (mentor) => {
     const mentorId = mentor.mentor_id || mentor.id || mentor.name
-    navigate(`/mentor/${mentorId}`)
+    navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
   const handleBookSession = () => {
@@ -135,7 +154,7 @@ function ResourcesPage() {
 
   const handleMentorClick = (mentor) => {
     const mentorId = mentor.mentor_id || mentor.id || mentor.name
-    navigate(`/mentor/${mentorId}`)
+    navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
   const handleBookSession = () => {
@@ -155,12 +174,18 @@ function ResourcesPage() {
 // Mentor Profile Page Wrapper
 function MentorProfilePage() {
   const { id } = useParams()
+  const location = useLocation()
   const navigate = useNavigate()
-  const [mentor, setMentor] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [mentor, setMentor] = useState(location.state?.mentor || null)
+  const [loading, setLoading] = useState(!location.state?.mentor)
 
   useEffect(() => {
     const fetchMentor = async () => {
+      if (mentor) {
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
       // First check static data
       const staticMentor = mentors.find(m =>

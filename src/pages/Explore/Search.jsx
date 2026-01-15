@@ -168,7 +168,11 @@ export default function Explore({
     fetchCourses()
     setTerm(initialQuery || '')
     setQuery(initialQuery || '')
+
   }, [initialQuery])
+
+
+
 
   const fetchCourses = async () => {
     console.log('--------------------------------------');
@@ -183,10 +187,13 @@ export default function Explore({
       setApiCourses([])
     } else {
       setApiCourses(data || [])
-      console.log('Fetched courses:', data)
+      // console.log('Fetched courses:', data)
     }
     setLoading(false)
   }
+
+
+
 
   const handleCourseClick = (courseId) => {
     setSelectedCourseId(courseId)
@@ -205,6 +212,7 @@ export default function Explore({
   // Helper function to extract mentor data (handles both API and static structures)
   const getMentorData = (mentor) => {
     // Check if it's API structure (has mentor_id or profile_image)
+    if (!mentor) return null;
     const isApiStructure = mentor.mentor_id !== undefined || mentor.profile_image !== undefined
 
     if (isApiStructure) {
@@ -213,13 +221,12 @@ export default function Explore({
       if (mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0) {
         const firstExp = mentor.experience[0]
         experienceYears = firstExp?.years || firstExp?.years_of_experience || firstExp?.duration || 0
-        // If experience is an object with years property
         if (typeof firstExp === 'object' && firstExp.years) {
           experienceYears = firstExp.years
         }
       }
 
-      // Extract skill names from skills array (skills might be objects with name property)
+      // Extract skill names
       const skillNames = mentor.skills && Array.isArray(mentor.skills)
         ? mentor.skills.map(skill => {
           if (typeof skill === 'string') return skill
@@ -227,31 +234,26 @@ export default function Explore({
         }).filter(Boolean)
         : []
 
-      // Get expertise areas (experties_in is an array of strings)
       const expertise = mentor.experties_in || []
-
-      // Get name - check multiple possible fields
       const name = mentor.name || mentor.full_name || mentor.first_name || mentor.username || 'Mentor'
 
-      // Get role/company from experience array
+      // Get role/company
       const currentExp = mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0
         ? mentor.experience[0]
         : null
       const role = currentExp?.role || currentExp?.job_title || currentExp?.position || mentor.role || ''
       const company = currentExp?.company || currentExp?.organization || currentExp?.employer || mentor.company || ''
 
-      // Get category (might be array or string)
+      // Get category
       let categoryDisplay = ''
       if (Array.isArray(mentor.category)) {
         categoryDisplay = mentor.category.join(', ')
       } else if (typeof mentor.category === 'string') {
         categoryDisplay = mentor.category
       } else if (mentor.category && typeof mentor.category === 'object') {
-        // detailed object?
         categoryDisplay = mentor.category.name || mentor.category.title || ''
       }
 
-      // Final mapping matching the user's requested structure
       return {
         id: mentor.mentor_id || mentor.id,
         name: name,
@@ -259,7 +261,7 @@ export default function Explore({
         location: mentor.address || mentor.location || '',
         profileImage: mentor.profile_image || mentor.image || '',
         category: categoryDisplay,
-        coursesOffered: mentor.coursesOffered || mentor.courses || [],
+        coursesOffered: mentor.fullCoursesOffered || mentor.coursesOffered || mentor.courses || [],
         expertise: expertise,
         skills: skillNames,
         education: mentor.education || [],
@@ -267,18 +269,21 @@ export default function Explore({
         testimonials: mentor.testimonial || mentor.testimonials || [],
         isVerified: mentor.is_verified || mentor.assured || false,
         platformAssured: mentor.is_platformAssured || false,
-        // Helper derived fields
         role: role,
         company: company,
         experienceYears: experienceYears,
         rating: mentor.rating || mentor.avg_rating || 5.0,
-        hourlyRate: mentor.hourlyRate || 50
+        hourlyRate: mentor.hourlyRate || 50,
+        image: mentor.profile_image || mentor.image || '',
+        assured: mentor.is_verified || mentor.assured || false,
+        reviews: (mentor.testimonial || mentor.testimonials || []).length
       }
     }
 
-    // Static structure - return as is
     return mentor
   }
+
+
 
   const filteredMentors = useMemo(() => {
     let result = mentors
@@ -557,12 +562,30 @@ export default function Explore({
                       </div>
 
                       <div className="soft-header-info">
-                        <h3 className="soft-name">{mentorData.name}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <h3 className="soft-name">{mentorData.name}</h3>
+                          {mentorData.experienceYears && (
+                            <span style={{ fontSize: '12px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', color: '#64748b' }}>
+                              {mentorData.experienceYears}y+ exp
+                            </span>
+                          )}
+                        </div>
                         <p className="soft-role">
                           {mentorData.role}
                           {mentorData.company && <span className="soft-at"> @ {mentorData.company}</span>}
                         </p>
-                        <div className="soft-rating">
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                          {mentorData.location && (
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                              {mentorData.location}
+                            </span>
+                          )}
+                          {mentorData.category && (
+                            <span style={{ fontSize: '11px', color: '#0ea5e9', fontWeight: '500' }}>• {mentorData.category}</span>
+                          )}
+                        </div>
+                        <div className="soft-rating" style={{ marginTop: '8px' }}>
                           <span className="star-icon">★</span>
                           <span className="rating-val">{mentorData.rating?.toFixed(1) || 4.8}</span>
                           <span className="review-count">({mentorData.reviews || 12} reviews)</span>
@@ -571,16 +594,19 @@ export default function Explore({
                     </div>
 
                     <div className="soft-card-body">
-                      {/* Tags/Skills Pill List */}
+                      {/* Expertise/Skills Pills */}
                       <div className="soft-skills-list">
+                        {(mentorData.expertise || []).slice(0, 2).map((exp, idx) => (
+                          <span key={`exp-${idx}`} className="soft-skill-pill" style={{ background: '#e0f2fe', color: '#0369a1' }}>{exp}</span>
+                        ))}
                         {topSkills.map((skill, idx) => (
                           <span key={idx} className="soft-skill-pill">{skill}</span>
                         ))}
-                        {totalSkillsCount > 3 && <span className="soft-more-pill">+{totalSkillsCount - 3}</span>}
+                        {skillsAsStrings.length > 5 && <span className="soft-more-pill">+{skillsAsStrings.length - 5}</span>}
                       </div>
 
                       <p className="soft-bio">
-                        {mentorData.bio?.substring(0, 80) || 'Experienced mentor ready to help you grow.'}...
+                        {mentorData.bio?.substring(0, 100) || 'Experienced mentor ready to help you grow.'}{mentorData.bio?.length > 100 ? '...' : ''}
                       </p>
                     </div>
 

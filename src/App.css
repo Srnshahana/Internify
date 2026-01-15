@@ -30203,18 +30203,15 @@ html {
   border-radius: 24px;
   /* Soft large radius */
   padding: 8px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
     0 10px 30px -3px rgba(0, 0, 0, 0.08);
   /* Deep soft shadow */
   max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 95%;
+  margin: 0 auto 32px auto;
   border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
@@ -30526,10 +30523,15 @@ html {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .floating-control-bar {
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
-    border-radius: 20px;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    padding: 12px !important;
+    gap: 12px 8px !important;
+    border-radius: 20px !important;
+    width: 95% !important;
+    max-width: none !important;
+    margin: 0 auto 20px auto !important;
+    display: flex !important;
   }
 
   .control-divider {
@@ -30537,19 +30539,25 @@ html {
   }
 
   .soft-tabs {
-    width: 100%;
-    justify-content: center;
+    width: 100% !important;
+    justify-content: center !important;
+    order: 1 !important;
   }
 
   .soft-search-box {
-    width: 100%;
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 12px;
+    flex: 1 !important;
+    min-width: 140px !important;
+    background: #f8fafc !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    order: 2 !important;
   }
 
   .soft-search-btn {
-    width: 100%;
+    width: auto !important;
+    padding: 10px 16px !important;
+    order: 3 !important;
   }
 
   .explore-grid {

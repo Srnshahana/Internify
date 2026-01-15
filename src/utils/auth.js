@@ -43,7 +43,7 @@ export function storeAuthData(userData) {
 export function getStoredAuthData() {
   const userId = localStorage.getItem('auth_user_id')
   const role = localStorage.getItem('auth_user_role')
-  
+
   if (userId && role) {
     return { userId, role }
   }
@@ -65,7 +65,7 @@ export function clearAuthData() {
 export async function checkAuthSession() {
   try {
     const { data: { session }, error } = await supabase.auth.getSession()
-    
+
     if (error) {
       console.error('Error checking auth session:', error)
       return null
@@ -88,7 +88,7 @@ export async function checkAuthSession() {
  */
 export async function getAuthenticatedUser() {
   const user = await checkAuthSession()
-  
+
   if (!user) {
     clearAuthData()
     return null
@@ -96,10 +96,10 @@ export async function getAuthenticatedUser() {
 
   // Fetch role from database
   const role = await fetchUserRole(user.id)
-  
+
   // Store in localStorage for persistence
   storeAuthData({ id: user.id, role })
-  
+
   return {
     user,
     role

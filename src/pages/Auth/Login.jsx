@@ -52,12 +52,10 @@ function Login({ onBack, onLogin, onShowSignup }) {
       return;
     }
 
-    console.log('User role:', role); // student or mentor
+    console.log('User role:', role);
 
-    // 3️⃣ Store auth data in localStorage for persistence
     storeAuthData({ id: authData.user.id, role });
 
-    // 4️⃣ Call your onLogin callback with user info + role
     if (onLogin) {
       onLogin({
         ...authData.user,
