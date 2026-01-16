@@ -2,160 +2,33 @@ import { useEffect, useState } from 'react'
 import '../../App.css'
 import { getCourseById } from '../../data/staticData.js'
 import supabase from '../../supabaseClient.js'
-// Hardcoded sample data for development/preview
-const MOCK_MENTOR_DATA = {
-  name: "Alex Johnson",
-  about: "Passionate software architect with 10+ years of experience in building scalable web and mobile applications. I specialize in React, Node.js, and Cloud Infrastructure. My mission is to empower the next generation of developers through hands-on mentorship and real-world project guidance.",
-  expertise: ["Web Development", "Mobile UX", "Cloud Scaling", "System Design"],
-  category: "Software Engineering",
-  education: [
-    {
-      degree: "Master of Computer Science",
-      institution: "Stanford University",
-      year: "2015 - 2017",
-      description: "Focused on Distributed Systems and Machine Learning."
-    },
-    {
-      degree: "Bachelor of Technology",
-      institution: "MIT",
-      year: "2011 - 2015",
-      description: "Graduated with honors in Computer Science."
-    }
-  ],
-  skills: ["React", "TypeScript", "Node.js", "AWS", "Docker", "Figma", "GraphQL", "PostgreSQL"],
-  experience: [
-    {
-      title: "Senior Lead Engineer",
-      company: "Google",
-      duration: "2020 - Present",
-      location: "Mountain View, CA",
-      description: "Leading the UI infrastructure team for Google Cloud Console."
-    },
-    {
-      title: "Software Engineer",
-      company: "Netflix",
-      duration: "2017 - 2020",
-      location: "Los Gatos, CA",
-      description: "Developed edge-rendering layers for the streaming platform."
-    }
-  ],
-  testimonials: [
-    {
-      name: "Sherin",
-      title: "Frontend Developer",
-      rating: 5,
-      date: "Jan 2024",
-      quote: "Alex is an incredible mentor. The way he explains complex system design concepts is mind-blowing. Highly recommended!"
-    },
-    {
-      name: "Rahul",
-      title: "Backend Engineer",
-      rating: 5,
-      date: "Dec 2023",
-      quote: "Helped me transition from a junior to a mid-level role in just 4 months. The mentorship sessions are extremely structured."
-    }
-  ],
-  is_verified: true,
-  platform_verified: true,
-  address: "San Francisco, CA (Remote)",
-  profile_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80",
-  courses_offered: [
-    {
-      id: 101,
-      title: "Advanced React Patterns",
-      category: "Development",
-      rating: 4.9,
-      students: 250,
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&q=80",
-      level: "Advanced"
-    },
-    {
-      id: 102,
-      title: "Full Stack MERN Mastery",
-      category: "Development",
-      rating: 4.8,
-      students: 450,
-      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80",
-      level: "Intermediate"
-    },
-    {
-      id: 103,
-      title: "System Design Essentials",
-      category: "Architecture",
-      rating: 5.0,
-      students: 180,
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80",
-      level: "Advanced"
-    },
-    {
-      id: 104,
-      title: "UI/UX for Developers",
-      category: "Design",
-      rating: 4.7,
-      students: 310,
-      image: "https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?w=400&q=80",
-      level: "Beginner"
-    },
-    {
-      id: 105,
-      title: "Cloud Native Scalability",
-      category: "Cloud",
-      rating: 4.9,
-      students: 125,
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80",
-      level: "Intermediate"
-    }
-  ]
-}
+// Unused mock data removed for code safety
 
 export default function MentorProfile({ mentor: propMentor, onBack, renderStars, courses = [], onBookSession }) {
   const [mentorData, setMentorData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [coursesIndex, setCoursesIndex] = useState(0)
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const [showCourseModal, setShowCourseModal] = useState(false)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
 
   useEffect(() => {
     window.scrollTo(0, 0)
-
-    // Check if we have complete data from props (e.g. from Search navigation state)
-    const hasFullData = propMentor && propMentor.bio &&
-      Array.isArray(propMentor.coursesOffered) &&
-      propMentor.coursesOffered.length > 0 &&
-      typeof propMentor.coursesOffered[0] === 'object';
-
-    if (hasFullData) {
-      // If it's already a full mentor object (from Search), use it
-      const finalMentor = {
-        ...propMentor,
-        courses_offered: propMentor.coursesOffered.map(c => ({
-          id: c.course_id || c.id,
-          title: c.title || c.name || "",
-          category: c.category || "",
-          rating: c.rating || 4.8,
-          students: c.students || 50,
-          image: c.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
-          level: c.skill_level || c.level || ""
-        }))
-      }
-      setMentorData(finalMentor)
-      setLoading(false)
-    } else {
-      // Otherwise fetch (fallback for direct/deep links)
-      fetchMentorDetails()
-    }
+    // Always fetch latest full details from API to ensure all sections (Expx, Edu, etc.) are populated
+    fetchMentorDetails()
   }, [propMentor])
 
   async function fetchMentorDetails() {
     try {
-      if (!mentorData) setLoading(true);
-      console.log(propMentor, 'lll');
-      const targetId = propMentor?.id || '1'
+      setLoading(true);
+      const targetId = propMentor?.mentor_id || propMentor?.id || '1'
 
       const { data, error } = await supabase
         .from('mentors_details')
         .select(`
           mentor_id,
+          name,
           about,
           profile_image,
           is_verified,
@@ -167,8 +40,9 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           testimonial,
           id,
           is_platformAssured,
-          adress,
-          coursesOffered
+          address,
+          coursesOffered,
+          rating
         `)
         .eq('mentor_id', targetId)
         .single();
@@ -199,15 +73,16 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
       // Normalize data for UI
       const normalized = {
-        name: propMentor?.name || "Expert Mentor",
+        name: data.name || propMentor?.name || "Expert Mentor",
         about: data.about || "",
         expertise: data.experties_in || [],
         category: Array.isArray(data.category) ? data.category[0] : (data.category || ""),
         skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || s.skill_name || "")),
-        location: data.adress || "Remote",
+        location: data.address || "Remote",
         profileImage: data.profile_image || "https://via.placeholder.com/150",
         isVerified: data.is_verified || false,
         platformVerified: data.is_platformAssured || false,
+        rating: data.rating || 5.0,
         education: (data.education || []).map(edu => ({
           degree: edu.degree || "",
           institution: edu.institution || "",
@@ -254,7 +129,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
   const stats = [
     { label: 'Experience', value: mentor.experience?.length > 0 ? `${mentor.experience.length * 3}+y` : "5y+" },
-    { label: 'Rating', value: "4.9" },
+    { label: 'Rating', value: mentor.rating ? mentor.rating.toFixed(1) : "4.9" },
     { label: 'Mentees', value: '1,200+' },
     { label: 'Reviews', value: `${mentor.testimonials?.length || 0}` },
   ]
@@ -297,8 +172,68 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
     setTouchEnd(0)
   }
 
+  const handleCloseModal = () => {
+    setShowCourseModal(false)
+    setSelectedCourse(null)
+  }
+
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course)
+    setShowCourseModal(true)
+  }
+
   return (
     <div className="profile-page-elegant">
+      {/* Course Detail Modal */}
+      {showCourseModal && selectedCourse && (
+        <div className="course-modal-overlay" onClick={handleCloseModal}>
+          <div className="course-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={handleCloseModal}>×</button>
+            <div className="modal-course-image">
+              <img src={selectedCourse.image} alt={selectedCourse.title} />
+              <div className="modal-image-overlay">
+                <span className="modal-category-tag">{selectedCourse.category}</span>
+              </div>
+            </div>
+            <div className="modal-course-body">
+              <h2 className="modal-course-title">{selectedCourse.title}</h2>
+              <div className="modal-course-stats">
+                <div className="modal-stat">
+                  <span className="stat-label">Rating</span>
+                  <div className="stat-value-row">
+                    <span className="star-icon">★</span>
+                    <span className="stat-value">{selectedCourse.rating}</span>
+                  </div>
+                </div>
+                <div className="modal-stat">
+                  <span className="stat-label">Students</span>
+                  <span className="stat-value">{selectedCourse.students}+</span>
+                </div>
+                <div className="modal-stat">
+                  <span className="stat-label">Level</span>
+                  <span className="stat-value">{selectedCourse.level}</span>
+                </div>
+                {selectedCourse.duration && (
+                  <div className="modal-stat">
+                    <span className="stat-label">Duration</span>
+                    <span className="stat-value">{selectedCourse.duration} Weeks</span>
+                  </div>
+                )}
+              </div>
+              <div className="modal-description-section">
+                <h3>About this course</h3>
+                <p>Master the principles of {selectedCourse.title} with expert guidance from {mentor.name}. This course covers fundamental concepts and advanced techniques to help you excel in your career.</p>
+              </div>
+              <div className="modal-actions">
+                <button className="btn-buy-course" onClick={() => onBookSession && onBookSession(selectedCourse)}>
+                  Buy or Start Class
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Profile Cover - Rectangular to match Student Profile */}
       <div className="profile-cover-elegant">
         <button
@@ -356,7 +291,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
               <div className="profile-connections-linkedin">
                 <span className="connection-count" style={{ color: '#64748b' }}>
-                  {stats[1].value} Rating • {mentor.testimonials?.length} Reviews • {stats[2].value} Pupils
+                  {mentor.rating ? mentor.rating.toFixed(1) : "4.9"} Rating • {mentor.testimonials?.length || 0} Reviews • 1,200+ Pupils
                 </span>
               </div>
             </div>
@@ -510,7 +445,12 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                 gap: '20px'
               }}>
                 {mentor.courses_offered.map((course) => (
-                  <div key={course.id} className="carousel-slide" style={{ minWidth: mentor.courses_offered.length > 1 ? 'calc(50% - 10px)' : '100%' }}>
+                  <div
+                    key={course.id}
+                    className="carousel-slide"
+                    style={{ minWidth: mentor.courses_offered.length > 1 ? 'calc(50% - 10px)' : '100%', cursor: 'pointer' }}
+                    onClick={() => handleCourseClick(course)}
+                  >
                     <div className="course-card-elegant" style={{ margin: 0, height: '100%' }}>
                       <div className="course-image-elegant" style={{ height: '180px' }}>
                         <img

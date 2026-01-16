@@ -2,6 +2,7 @@ export class Mentor {
     constructor({
         id = '',
         mentor_id = '',
+        name = '',
         about = '',
         profile_image = '',
         is_verified = false,
@@ -12,11 +13,13 @@ export class Mentor {
         experience = [],
         testimonial = [],
         is_platformAssured = false,
-        adress = '',
+        address = '',
+        rating = 0,
         coursesOffered = [],
     } = {}) {
         this.id = id;
         this.mentor_id = mentor_id;
+        this.name = name;
         this.about = about;
         this.profile_image = profile_image;
         this.is_verified = is_verified;
@@ -27,7 +30,8 @@ export class Mentor {
         this.experience = experience;
         this.testimonial = testimonial;
         this.is_platformAssured = is_platformAssured;
-        this.adress = adress;
+        this.address = address;
+        this.rating = rating;
         this.coursesOffered = coursesOffered;
     }
 

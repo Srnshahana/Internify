@@ -1,7 +1,7 @@
-
 import supabase from '../../supabaseClient'
 import { useEffect, useMemo, useState } from 'react'
 import { searchCourses, searchMentors, getMentorsByCourse } from '../../data/staticData.js'
+import { Mentor } from '../../models/Mentor.js'
 import '../../App.css'
 
 const heroSectionImage = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80'
@@ -161,33 +161,67 @@ export default function Explore({
   const [term, setTerm] = useState(initialQuery || '')
   const [query, setQuery] = useState(initialQuery || '')
   const [selectedCourseId, setSelectedCourseId] = useState(null)
+  const [apiMentors, setApiMentors] = useState([])
   const [apiCourses, setApiCourses] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCourses()
+    fetchAllData()
     setTerm(initialQuery || '')
     setQuery(initialQuery || '')
-
   }, [initialQuery])
 
-
-
-
-  const fetchCourses = async () => {
-    console.log('--------------------------------------');
+  const fetchAllData = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('courses')          // your table name
-      .select('*')
-      .order('title', { ascending: true })
+    try {
+      // Fetch mentors and courses in parallel
+      const [mentorsRes, coursesRes] = await Promise.all([
+        supabase
+          .from('mentors_details')
+          .select('mentor_id, name, profile_image, category, about, address, is_verified, is_platformAssured, coursesOffered, rating'),
+        supabase.from('courses').select('course_id, title, image, description, estimated_time, career_field, price_range').order('title', { ascending: true })
+      ])
 
-    if (error) {
-      console.error('Error fetching courses:', error)
-      setApiCourses([])
-    } else {
-      setApiCourses(data || [])
-      // console.log('Fetched courses:', data)
+      const { data: mentorsData, error: mentorsError } = mentorsRes
+      const { data: coursesData, error: coursesError } = coursesRes
+
+      if (mentorsError) console.error('Error fetching mentors:', mentorsError)
+      if (coursesError) console.error('Error fetching courses:', coursesError)
+
+      if (mentorsData && coursesData) {
+        const resolvedMentors = mentorsData.map(mentorItem => {
+          const courseIds = Array.isArray(mentorItem.coursesOffered)
+            ? mentorItem.coursesOffered.map(String)
+            : []
+
+          // Match course_id from courses table with IDs in mentor's coursesOffered array
+          const fullCourses = coursesData.filter(c =>
+            courseIds.includes(String(c.course_id))
+          )
+
+          return new Mentor({
+            mentor_id: mentorItem.mentor_id,
+            id: mentorItem.mentor_id,
+            name: mentorItem.name,
+            profile_image: mentorItem.profile_image,
+            category: mentorItem.category,
+            about: mentorItem.about,
+            address: mentorItem.address,
+            is_verified: mentorItem.is_verified,
+            is_platformAssured: mentorItem.is_platformAssured,
+            rating: mentorItem.rating,
+            coursesOffered: fullCourses
+          })
+        })
+        setApiMentors(resolvedMentors)
+        setApiCourses(coursesData)
+
+      } else {
+        if (mentorsData) setApiMentors(mentorsData.map(m => new Mentor({ ...m, id: m.mentor_id })))
+        if (coursesData) setApiCourses(coursesData)
+      }
+    } catch (err) {
+      console.error('Unexpected error in fetchAllData:', err)
     }
     setLoading(false)
   }
@@ -211,72 +245,41 @@ export default function Explore({
 
   // Helper function to extract mentor data (handles both API and static structures)
   const getMentorData = (mentor) => {
-    // Check if it's API structure (has mentor_id or profile_image)
     if (!mentor) return null;
+
+    // If it's already a Mentor instance or has the expected normalized structure, return it
+    if (mentor instanceof Mentor || (mentor.id && mentor.name && mentor.coursesOffered)) {
+      // Add missing UI aliases if not present
+      return {
+        ...mentor,
+        image: mentor.profile_image || mentor.image || '',
+        assured: mentor.is_verified || mentor.assured || false,
+        reviews: (mentor.testimonial || mentor.testimonials || mentor.testimonialsCount || []).length || mentor.reviews || 0
+      }
+    }
+
+    // Check if it's raw API structure
     const isApiStructure = mentor.mentor_id !== undefined || mentor.profile_image !== undefined
 
     if (isApiStructure) {
-      // Extract experience years from experience array
-      let experienceYears = 0
-      if (mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0) {
-        const firstExp = mentor.experience[0]
-        experienceYears = firstExp?.years || firstExp?.years_of_experience || firstExp?.duration || 0
-        if (typeof firstExp === 'object' && firstExp.years) {
-          experienceYears = firstExp.years
-        }
-      }
-
-      // Extract skill names
-      const skillNames = mentor.skills && Array.isArray(mentor.skills)
-        ? mentor.skills.map(skill => {
-          if (typeof skill === 'string') return skill
-          return skill.name || skill.skill_name || skill.title || ''
-        }).filter(Boolean)
-        : []
-
-      const expertise = mentor.experties_in || []
-      const name = mentor.name || mentor.full_name || mentor.first_name || mentor.username || 'Mentor'
-
-      // Get role/company
-      const currentExp = mentor.experience && Array.isArray(mentor.experience) && mentor.experience.length > 0
-        ? mentor.experience[0]
-        : null
-      const role = currentExp?.role || currentExp?.job_title || currentExp?.position || mentor.role || ''
-      const company = currentExp?.company || currentExp?.organization || currentExp?.employer || mentor.company || ''
-
-      // Get category
-      let categoryDisplay = ''
-      if (Array.isArray(mentor.category)) {
-        categoryDisplay = mentor.category.join(', ')
-      } else if (typeof mentor.category === 'string') {
-        categoryDisplay = mentor.category
-      } else if (mentor.category && typeof mentor.category === 'object') {
-        categoryDisplay = mentor.category.name || mentor.category.title || ''
-      }
-
+      const name = mentor.name || mentor.full_name || 'Mentor'
+      const mentorId = mentor.mentor_id || mentor.id
       return {
-        id: mentor.mentor_id || mentor.id,
+        id: mentorId,
+        mentor_id: mentorId,
         name: name,
-        bio: mentor.about || mentor.bio || '',
-        location: mentor.address || mentor.location || '',
+        about: mentor.about || mentor.bio || '',
+        bio: mentor.about || mentor.bio || '', // Aliased for backward compatibility
+        address: mentor.address || mentor.location || '',
+        location: mentor.address || mentor.location || '', // Aliased
         profileImage: mentor.profile_image || mentor.image || '',
-        category: categoryDisplay,
-        coursesOffered: mentor.fullCoursesOffered || mentor.coursesOffered || mentor.courses || [],
-        expertise: expertise,
-        skills: skillNames,
-        education: mentor.education || [],
-        experience: mentor.experience || [],
-        testimonials: mentor.testimonial || mentor.testimonials || [],
+        category: Array.isArray(mentor.category) ? mentor.category.join(', ') : (mentor.category || ''),
+        coursesOffered: mentor.coursesOffered || [],
         isVerified: mentor.is_verified || mentor.assured || false,
         platformAssured: mentor.is_platformAssured || false,
-        role: role,
-        company: company,
-        experienceYears: experienceYears,
-        rating: mentor.rating || mentor.avg_rating || 5.0,
-        hourlyRate: mentor.hourlyRate || 50,
         image: mentor.profile_image || mentor.image || '',
         assured: mentor.is_verified || mentor.assured || false,
-        reviews: (mentor.testimonial || mentor.testimonials || []).length
+        rating: mentor.rating || 0
       }
     }
 
@@ -286,24 +289,25 @@ export default function Explore({
 
 
   const filteredMentors = useMemo(() => {
-    let result = mentors
+    // Prioritize apiMentors fetched in this component
+    let result = apiMentors.length > 0 ? apiMentors : mentors
 
-    // Check if we're using API mentors (has mentor_id or profile_image)
-    const isUsingApiMentors = mentors.length > 0 && (mentors[0]?.mentor_id !== undefined || mentors[0]?.profile_image !== undefined)
+    if (!result) return []
+
+    // Check if we're using API mentors
+    const isUsingApiMentors = result.length > 0 && (result[0] instanceof Mentor || result[0]?.mentor_id !== undefined || result[0]?.profile_image !== undefined)
 
     // Filter by selected course if a course is selected
     if (selectedCourseId) {
-      if (isUsingApiMentors) {
-        // For API mentors, filter by course association (if courses are linked)
-        result = result.filter(mentor => {
-          // Check if mentor has courses array or course_ids
-          const mentorCourses = mentor.courses || mentor.course_ids || []
-          return mentorCourses.includes(selectedCourseId) ||
-            mentorCourses.some(courseId => (courseId.course_id || courseId) === selectedCourseId)
+      result = result.filter(mentor => {
+        const mentorData = getMentorData(mentor)
+        const mentorCourses = mentorData.coursesOffered || []
+
+        return mentorCourses.some(course => {
+          const cId = typeof course === 'object' ? (course.course_id || course.id) : course
+          return String(cId) === String(selectedCourseId)
         })
-      } else {
-        result = getMentorsByCourse(selectedCourseId)
-      }
+      })
     }
 
     // Apply search query if present
@@ -437,16 +441,36 @@ export default function Explore({
         </div>
 
         {selectedCourseId && (
-          <div className="active-filter-chip">
-            <span>Filter: {coursesToUse.find((c) => c.id === selectedCourseId)?.title || 'Selected Course'}</span>
-            <button onClick={() => setSelectedCourseId(null)}>✕</button>
-          </div>
-        )}
-
-        {selectedCourseId && (
-          <div className="course-filter-badge">
-            <span>Showing mentors for: {coursesToUse.find((c) => c.id === selectedCourseId)?.title || coursesToUse.find((c) => c.id === selectedCourseId)?.name}</span>
-            <button className="clear-filter-btn" onClick={() => setSelectedCourseId(null)}>
+          <div className="course-filter-badge" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#f0f9ff',
+            color: '#0369a1',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '13px',
+            fontWeight: '600',
+            width: 'fit-content',
+            margin: '0 auto 20px auto',
+            border: '1px solid #e0f2fe'
+          }}>
+            <span>Showing mentors for: {coursesToUse.find((c) => (c.course_id || c.id) === selectedCourseId)?.title}</span>
+            <button
+              onClick={() => setSelectedCourseId(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0369a1',
+                cursor: 'pointer',
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: '700'
+              }}
+            >
               ✕
             </button>
           </div>
@@ -466,48 +490,101 @@ export default function Explore({
               filteredCourses.map((course) => (
                 <div
                   className="explore-course-card"
-                  key={course.id}
-                  onClick={() => handleCourseClick(course.id)}
-                  style={{ cursor: 'pointer' }}
+                  key={course.course_id || course.id}
+                  onClick={() => handleCourseClick(course.course_id || course.id)}
+                  style={{
+                    cursor: 'pointer',
+                    background: '#fff',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                  }}
                 >
-                  <div className="explore-course-image">
+                  <div className="explore-course-image" style={{ height: '160px', overflow: 'hidden', position: 'relative' }}>
                     <img
                       src={course.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBdt2bdOr6yNUso2UGqXJRcNpnjWeSlpumaw&s'}
                       alt={course.title || 'Course image'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
                         e.target.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBdt2bdOr6yNUso2UGqXJRcNpnjWeSlpumaw&s';
                       }}
                     />
+                    {course.career_field && (
+                      <span style={{
+                        position: 'absolute',
+                        top: '12px',
+                        left: '12px',
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        color: '#0ea5e9',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        backdropFilter: 'blur(4px)'
+                      }}>
+                        {course.career_field}
+                      </span>
+                    )}
                   </div>
-                  <div className="explore-course-content">
-                    <div className="explore-course-header">
-                      <h3>{course.title}</h3>
-                      <span className="explore-course-category">{course.category || course.career_field}</span>
-                    </div>
-                    <p className="explore-course-description">{course.description}</p>
-                    <div className="explore-course-meta">
-                      {course.estimated_time && <><span>{course.estimated_time}</span><span>|</span></>}
-                      {course.max_time && <><span>Max: {course.max_time}</span><span>|</span></>}
-                      {course.skill_level && <span>{course.skill_level}</span>}
-                    </div>
-                    {course.prerequisites && (
-                      <div className="explore-course-prerequisites">
-                        <span className="prerequisites-label">Prerequisites:</span>
-                        <span className="prerequisites-text">{course.prerequisites}</span>
+                  <div className="explore-course-content" style={{ padding: '16px', flex: '1', display: 'flex', flexDirection: 'column' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', lineHeight: '1.4' }}>
+                      {course.title}
+                    </h3>
+
+                    <p style={{
+                      fontSize: '13px',
+                      color: '#64748b',
+                      marginBottom: '16px',
+                      lineHeight: '1.6',
+                      display: '-webkit-box',
+                      WebkitLineClamp: '2',
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {course.description || 'Master professional skills with expert-led training and real-world projects.'}
+                    </p>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {course.estimated_time && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#94a3b8' }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            {course.estimated_time}
+                          </div>
+                        )}
+                        {course.price_range && (
+                          <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                            {course.price_range}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {course.career_field && course.career_field !== course.category && (
-                      <div className="explore-course-career-field">
-                        <span className="career-field-tag">{course.career_field}</span>
-                      </div>
-                    )}
-                    <div className="explore-course-footer">
-                      {course.price && (
-                        <span className="explore-course-price">
-                          ₹{typeof course.price === 'number' ? course.price.toLocaleString('en-IN') : course.price}
-                        </span>
-                      )}
-                      <button className="tiny">View Mentors</button>
+                      <button style={{
+                        background: '#0ea5e9',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}>
+                        Explore
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -526,23 +603,14 @@ export default function Explore({
                 const mentorId = mentorData.mentor_id || mentorData.id
 
                 // Ensure skills are strings, not objects
-                const allSkills = (mentorData.skills || mentorData.expertise || [])
-                const skillsAsStrings = allSkills.map(skill => {
-                  if (typeof skill === 'string') return skill
-                  if (typeof skill === 'object' && skill !== null) {
-                    return skill.name || skill.skill_name || skill.title || String(skill)
-                  }
-                  return String(skill)
-                }).filter(Boolean)
-
-                const topSkills = skillsAsStrings.slice(0, 3)
-                const totalSkillsCount = skillsAsStrings.length
-
                 return (
                   <div
                     className="soft-mentor-card"
                     key={`explore-${mentorId || mentorData.name}`}
-                    onClick={() => onMentorClick && onMentorClick(mentorData)}
+                    onClick={() => {
+                      console.log('Mentor card clicked:', mentorData);
+                      if (onMentorClick) onMentorClick(mentorData);
+                    }}
                   >
                     <div className="soft-card-header">
                       <div className="soft-avatar-wrapper">
@@ -564,60 +632,70 @@ export default function Explore({
                       <div className="soft-header-info">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                           <h3 className="soft-name">{mentorData.name}</h3>
-                          {mentorData.experienceYears && (
-                            <span style={{ fontSize: '12px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', color: '#64748b' }}>
-                              {mentorData.experienceYears}y+ exp
-                            </span>
-                          )}
                         </div>
-                        <p className="soft-role">
-                          {mentorData.role}
-                          {mentorData.company && <span className="soft-at"> @ {mentorData.company}</span>}
-                        </p>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                          {mentorData.location && (
+                          {mentorData.address && (
                             <span style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                              {mentorData.location}
+                              {mentorData.address}
                             </span>
                           )}
                           {mentorData.category && (
                             <span style={{ fontSize: '11px', color: '#0ea5e9', fontWeight: '500' }}>• {mentorData.category}</span>
                           )}
                         </div>
-                        <div className="soft-rating" style={{ marginTop: '8px' }}>
-                          <span className="star-icon">★</span>
-                          <span className="rating-val">{mentorData.rating?.toFixed(1) || 4.8}</span>
-                          <span className="review-count">({mentorData.reviews || 12} reviews)</span>
+                        {/* Star Rating Section */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
+                          <div style={{ display: 'flex', gap: '2px' }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <svg
+                                key={star}
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill={star <= (mentorData.rating || 0) ? "#facc15" : "#e2e8f0"}
+                                style={{ transition: 'fill 0.2s ease' }}
+                              >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            ))}
+                          </div>
+                          {(mentorData.rating > 0) && (
+                            <span style={{ fontSize: '12px', color: '#475569', fontWeight: '600', marginLeft: '2px' }}>
+                              {mentorData.rating}.0
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     <div className="soft-card-body">
-                      {/* Expertise/Skills Pills */}
-                      <div className="soft-skills-list">
-                        {(mentorData.expertise || []).slice(0, 2).map((exp, idx) => (
-                          <span key={`exp-${idx}`} className="soft-skill-pill" style={{ background: '#e0f2fe', color: '#0369a1' }}>{exp}</span>
-                        ))}
-                        {topSkills.map((skill, idx) => (
-                          <span key={idx} className="soft-skill-pill">{skill}</span>
-                        ))}
-                        {skillsAsStrings.length > 5 && <span className="soft-more-pill">+{skillsAsStrings.length - 5}</span>}
-                      </div>
-
-                      <p className="soft-bio">
-                        {mentorData.bio?.substring(0, 100) || 'Experienced mentor ready to help you grow.'}{mentorData.bio?.length > 100 ? '...' : ''}
+                      {/* Bio / About */}
+                      <p className="soft-bio" style={{ marginBottom: '12px' }}>
+                        {mentorData.about?.substring(0, 80) || 'Experienced mentor ready to help you grow.'}{mentorData.about?.length > 80 ? '...' : ''}
                       </p>
+
+                      {/* Courses Provided */}
+                      {mentorData.coursesOffered && mentorData.coursesOffered.length > 0 && (
+                        <div className="soft-skills-list" style={{ marginBottom: '12px' }}>
+                          <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '100%' }}>
+                            Courses Provided
+                          </p>
+                          {mentorData.coursesOffered.slice(0, 3).map((course, idx) => (
+                            <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #e0f2fe' }}>
+                              {typeof course === 'object' ? course.title : 'Course'}
+                            </span>
+                          ))}
+                          {mentorData.coursesOffered.length > 3 && (
+                            <span className="soft-more-pill">+{mentorData.coursesOffered.length - 3}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="soft-card-footer">
-                      <div className="soft-price">
-                        <span className="curr">$</span>
-                        <span className="val">{mentorData.hourlyRate || 50}</span>
-                        <span className="unit">/hr</span>
-                      </div>
+                    {/* <div className="soft-card-footer">
                       <button className="soft-book-btn">Book Session</button>
-                    </div>
+                    </div> */}
                   </div>
                 )
               })

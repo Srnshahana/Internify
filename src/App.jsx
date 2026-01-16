@@ -130,15 +130,15 @@ function ExplorePage() {
     navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
-  const handleBookSession = () => {
-    navigate('/login')
+  const handleBookSession = (course) => {
+    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
   }
 
   return (
     <Explore
       mentors={mentorsToUse}
       courses={coursesToUse}
-      onBack={() => navigate('/')}
+      onBack={() => navigate(-1)}
       renderStars={renderStars}
       initialQuery={initialQuery}
       onMentorClick={handleMentorClick}
@@ -157,13 +157,13 @@ function ResourcesPage() {
     navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
-  const handleBookSession = () => {
-    navigate('/login')
+  const handleBookSession = (course) => {
+    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
   }
 
   return (
     <Resources
-      onBack={() => navigate('/')}
+      onBack={() => navigate(-1)}
       mentors={mentors}
       onBookSession={handleBookSession}
       onMentorClick={handleMentorClick}
@@ -255,8 +255,8 @@ function MentorProfilePage() {
     )
   }
 
-  const handleBookSession = () => {
-    navigate('/login')
+  const handleBookSession = (course) => {
+    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
   }
 
   return (
@@ -366,8 +366,12 @@ function SignupPage() {
 // Payment Page Wrapper
 function PaymentPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userRole, setUserRole] = useState(null)
+
+  // Extract course from navigation state
+  const selectedCourse = location.state?.course
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -402,7 +406,8 @@ function PaymentPage() {
 
   return (
     <Payment
-      onBack={() => navigate('/')}
+      course={selectedCourse}
+      onBack={() => navigate(-1)}
       onPaymentSuccess={handlePaymentSuccess}
     />
   )

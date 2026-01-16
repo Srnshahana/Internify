@@ -1,113 +1,171 @@
 import '../../App.css'
 
-function Payment({ onBack, onPaymentSuccess }) {
+// Lucide-inspired SVG Icons
+const ShieldCheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+)
+
+const CreditCardIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="14" x="2" y="5" rx="2" />
+    <line x1="2" x2="22" y1="10" y2="10" />
+  </svg>
+)
+
+const ClockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+)
+
+const CheckCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+)
+
+const InfoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+)
+
+export default function Payment({ onBack, onPaymentSuccess, course }) {
+  const courseTitle = course?.title || "Mentorship Program";
+  const coursePrice = course?.price || "$299";
+  const courseDesc = course?.description || "Includes full course access and personalized mentorship sessions.";
+
   return (
     <div className="dashboard-page payment-page">
-      <div className="page-header">
-        <h1>Secure Payment</h1>
-        <p className="page-subtitle">
-          Complete your enrollment with platform-controlled escrow for full safety.
-        </p>
-      </div>
-
-      <div className="payment-layout">
-        {/* Left: Summary & escrow explanation */}
-        <div className="payment-card payment-summary">
-          <h2>Checkout summary</h2>
-          <div className="payment-summary-plan">
-            <div>
-              <p className="payment-plan-name">1:1 mentorship plan</p>
-              <p className="payment-plan-meta">Includes 3 free trial sessions + full course access</p>
-            </div>
-            <div className="payment-amount">
-              <span className="payment-price">$299</span>
-              <span className="payment-price-meta">one-time</span>
-            </div>
+      <div className="payment-premium-container">
+        {/* Header Section */}
+        <div className="payment-header-premium">
+          <div className="secure-badge">
+            <ShieldCheckIcon />
+            <span>Secure SSL Encrypted Transaction</span>
           </div>
-
-          <div className="payment-breakdown">
-            <div className="payment-breakdown-row">
-              <span>Free trial (3 sessions)</span>
-              <span>$0</span>
-            </div>
-            <div className="payment-breakdown-row">
-              <span>Remaining mentorship sessions</span>
-              <span>$299</span>
-            </div>
-            <div className="payment-breakdown-row total">
-              <span>Total held in escrow</span>
-              <span>$299</span>
-            </div>
-          </div>
-
-          <h3 className="payment-subtitle">How your payment works</h3>
-          <p className="payment-highlight">
-            Your idea was <strong>platform-controlled escrow payment</strong>.
+          <h1>Complete Your Enrollment</h1>
+          <p className="page-subtitle">
+            Securely enroll in <strong>{courseTitle}</strong>. Your funds are protected by our platform-controlled escrow system.
           </p>
-          <ul className="payment-points">
-            <li>
-              <strong>3 free trial sessions first</strong> – the mentee pays only after they finish
-              the free sessions and confirm they want to continue.
-            </li>
-            <li>
-              <strong>Money held by the platform</strong> – the full amount is stored safely in
-              escrow, not sent to the mentor immediately.
-            </li>
-            <li>
-              <strong>Mentor is paid on completion</strong> – funds are released to the mentor only
-              after the course or sessions are successfully completed.
-            </li>
-            <li>
-              <strong>Trust & support</strong> – this removes trust issues for both sides and the
-              platform handles any disputes or support.
-            </li>
-          </ul>
         </div>
 
-        {/* Right: Payment form UI */}
-        <div className="payment-card payment-form-card">
-          <h2>Payment details</h2>
-          <div className="payment-form">
-            <div className="payment-field">
-              <label htmlFor="card-name">Name on card</label>
-              <input id="card-name" type="text" placeholder="Sherin K" />
-            </div>
-            <div className="payment-field">
-              <label htmlFor="card-number">Card number</label>
-              <input id="card-number" type="text" placeholder="1234 5678 9012 3456" />
-            </div>
-            <div className="payment-field payment-field-row">
-              <div>
-                <label htmlFor="card-expiry">Expiry</label>
-                <input id="card-expiry" type="text" placeholder="MM / YY" />
+        <div className="payment-grid-layout">
+          {/* Left Side: Summary & Trust */}
+          <div className="payment-summary-section">
+            <div className="payment-card-premium">
+              <h2>
+                <ClockIcon />
+                <span>Order Summary</span>
+              </h2>
+
+              <div className="premium-summary-item">
+                <div className="summary-course-info">
+                  <h4>{courseTitle}</h4>
+                  <p>{courseDesc}</p>
+                </div>
+                <div className="price-display-premium">
+                  <span className="label">Total Amount</span>
+                  <span className="amount">{coursePrice}</span>
+                </div>
               </div>
-              <div>
-                <label htmlFor="card-cvv">CVV</label>
-                <input id="card-cvv" type="password" placeholder="***" />
+
+              <h2 style={{ marginTop: '40px' }}>
+                <ShieldCheckIcon />
+                <span>How Escrow Protection Works</span>
+              </h2>
+
+              <div className="escrow-trust-flow">
+                <div className="trust-step active">
+                  <div className="trust-dot">1</div>
+                  <span className="trust-label">Payment Held</span>
+                </div>
+                <div className="trust-step">
+                  <div className="trust-dot">2</div>
+                  <span className="trust-label">Course Start</span>
+                </div>
+                <div className="trust-step">
+                  <div className="trust-dot">3</div>
+                  <span className="trust-label">Completion</span>
+                </div>
+                <div className="trust-step">
+                  <div className="trust-dot">4</div>
+                  <span className="trust-label">Mentor Paid</span>
+                </div>
+              </div>
+
+              <div className="guarantee-note-premium">
+                <InfoIcon />
+                <div className="guarantee-text">
+                  <h5>100% Satisfaction Guarantee</h5>
+                  <p>If you're not satisfied after the first 2 sessions, we'll provide a full refund of your escrow balance, no questions asked.</p>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="payment-field">
-              <label htmlFor="payment-method">Payment method</label>
-              <select id="payment-method">
-                <option>Credit / Debit Card</option>
-                <option>UPI</option>
-                <option>Net Banking</option>
-              </select>
-            </div>
+          {/* Right Side: Payment Form */}
+          <div className="payment-form-section">
+            <div className="payment-card-premium">
+              <h2>
+                <CreditCardIcon />
+                <span>Payment Details</span>
+              </h2>
 
-            <div className="payment-secure-note">
-              Payments are processed securely and held in escrow by Internify until your course
-              is completed.
-            </div>
+              <div className="payment-form-soft">
+                <div className="soft-input-group">
+                  <label htmlFor="card-name">Name on Card</label>
+                  <input id="card-name" type="text" placeholder="Sherin K" />
+                </div>
 
-            <div className="payment-actions">
-              <button className="primary" onClick={onPaymentSuccess}>
-                Confirm & Pay Securely
-              </button>
-              <button className="ghost" onClick={onBack}>
-                Back
-              </button>
+                <div className="soft-input-group">
+                  <label htmlFor="card-number">Card Number</label>
+                  <input id="card-number" type="text" placeholder="0000 0000 0000 0000" />
+                </div>
+
+                <div className="input-row-premium">
+                  <div className="soft-input-group">
+                    <label htmlFor="card-expiry">Expiry Date</label>
+                    <input id="card-expiry" type="text" placeholder="MM / YY" />
+                  </div>
+                  <div className="soft-input-group">
+                    <label htmlFor="card-cvv">CVV</label>
+                    <input id="card-cvv" type="password" placeholder="***" />
+                  </div>
+                </div>
+
+                <div className="soft-input-group">
+                  <label htmlFor="payment-method">Payment Method</label>
+                  <select id="payment-method">
+                    <option>Credit / Debit Card</option>
+                    <option>UPI / PhonePe / GPay</option>
+                    <option>Net Banking</option>
+                  </select>
+                </div>
+
+                <div className="payment-actions" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button className="btn-buy-course" style={{ width: '100%' }} onClick={onPaymentSuccess}>
+                    Confirm & Pay {coursePrice}
+                  </button>
+                  <button className="soft-search-btn" style={{ width: '100%', background: 'transparent', color: '#64748b' }} onClick={onBack}>
+                    Go Back
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <ShieldCheckIcon style={{ width: '12px', height: '12px' }} />
+                  Bank-grade security by Internify Payments
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -115,7 +173,3 @@ function Payment({ onBack, onPaymentSuccess }) {
     </div>
   )
 }
-
-export default Payment
-
-
