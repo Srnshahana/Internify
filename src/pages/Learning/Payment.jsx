@@ -1,8 +1,11 @@
+import { useState } from 'react'
+import supabase from '../../supabaseClient'
+import { getAuthenticatedUser } from '../../utils/auth.js'
 import '../../App.css'
 
 // Lucide-inspired SVG Icons
-const ShieldCheckIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const ShieldCheckIcon = ({ className = "" }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <path d="m9 12 2 2 4-4" />
   </svg>
@@ -37,10 +40,69 @@ const InfoIcon = () => (
   </svg>
 )
 
-export default function Payment({ onBack, onPaymentSuccess, course }) {
+export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) {
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const courseTitle = course?.title || "Mentorship Program";
   const coursePrice = course?.price || "$299";
   const courseDesc = course?.description || "Includes full course access and personalized mentorship sessions.";
+  const courseId = course?.course_id || course?.id;
+
+  async function handlePay() {
+    if (isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+
+      // 1. Get authenticated user
+      const authData = await getAuthenticatedUser();
+      if (!authData || !authData.user) {
+        alert("Authentication required. Please log in.");
+        return;
+      }
+
+      // Get the database user_id (int8) from the user object
+      const studentId = authData.user;
+
+      console.log('Student ID for enrollment:', studentId);
+      console.log('Mentor ID:', mentorId);
+      console.log('Course ID:', courseId);
+
+      if (!studentId) {
+        alert("User ID not found. Please log out and log in again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Call API to send data to classes_enrolled table
+      const { error } = await supabase
+        .from('classes_enrolled')
+        .insert([
+          {
+            student_id: studentId,
+            mentor_id: mentorId,
+            course_id: courseId,
+            status: 'active'
+          }
+        ]);
+
+      if (error) {
+        console.error('Supabase enrollment error:', error);
+        alert(`Enrollment failed: ${error.message}`);
+        setIsProcessing(false);
+        return;
+      }
+
+      // 3. Success! Notify parent component
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
+    } catch (err) {
+      console.error('Unexpected error during enrollment:', err);
+      alert('An unexpected error occurred. Please try again.');
+      setIsProcessing(false);
+    }
+  }
 
   return (
     <div className="dashboard-page payment-page">
@@ -122,28 +184,28 @@ export default function Payment({ onBack, onPaymentSuccess, course }) {
               <div className="payment-form-soft">
                 <div className="soft-input-group">
                   <label htmlFor="card-name">Name on Card</label>
-                  <input id="card-name" type="text" placeholder="Sherin K" />
+                  <input id="card-name" type="text" placeholder="Sherin K" disabled={isProcessing} />
                 </div>
 
                 <div className="soft-input-group">
                   <label htmlFor="card-number">Card Number</label>
-                  <input id="card-number" type="text" placeholder="0000 0000 0000 0000" />
+                  <input id="card-number" type="text" placeholder="0000 0000 0000 0000" disabled={isProcessing} />
                 </div>
 
                 <div className="input-row-premium">
                   <div className="soft-input-group">
                     <label htmlFor="card-expiry">Expiry Date</label>
-                    <input id="card-expiry" type="text" placeholder="MM / YY" />
+                    <input id="card-expiry" type="text" placeholder="MM / YY" disabled={isProcessing} />
                   </div>
                   <div className="soft-input-group">
                     <label htmlFor="card-cvv">CVV</label>
-                    <input id="card-cvv" type="password" placeholder="***" />
+                    <input id="card-cvv" type="password" placeholder="***" disabled={isProcessing} />
                   </div>
                 </div>
 
                 <div className="soft-input-group">
                   <label htmlFor="payment-method">Payment Method</label>
-                  <select id="payment-method">
+                  <select id="payment-method" disabled={isProcessing}>
                     <option>Credit / Debit Card</option>
                     <option>UPI / PhonePe / GPay</option>
                     <option>Net Banking</option>
@@ -151,10 +213,20 @@ export default function Payment({ onBack, onPaymentSuccess, course }) {
                 </div>
 
                 <div className="payment-actions" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <button className="btn-buy-course" style={{ width: '100%' }} onClick={onPaymentSuccess}>
-                    Confirm & Pay {coursePrice}
+                  <button
+                    className="btn-buy-course"
+                    style={{ width: '100%', opacity: isProcessing ? 0.7 : 1 }}
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? "Processing..." : `Confirm & Pay ${coursePrice}`}
                   </button>
-                  <button className="soft-search-btn" style={{ width: '100%', background: 'transparent', color: '#64748b' }} onClick={onBack}>
+                  <button
+                    className="soft-search-btn"
+                    style={{ width: '100%', background: 'transparent', color: '#64748b' }}
+                    onClick={onBack}
+                    disabled={isProcessing}
+                  >
                     Go Back
                   </button>
                 </div>
