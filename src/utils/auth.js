@@ -5,25 +5,34 @@ import supabase from '../supabaseClient'
  * @param {string} userId - The authenticated user's ID
  * @returns {Promise<string>} - User role ('student' or 'mentor'), defaults to 'student'
  */
-export async function fetchUserRole(userId) {
+export async function fetchUserRole(email) {
   try {
     const { data, error } = await supabase
-      .from('user')
-      .select('role')
-      .eq('id', userId)
-      .maybeSingle()
+      .from('users')
+      .select('user_id, role')
+      .eq('email', email)
+      .maybeSingle();
 
     if (error) {
-      console.error('Error fetching user role:', error)
-      return 'student' // Default to student on error
+      console.error('Error fetching user role:', error);
+      return null;
     }
 
-    return data?.role || 'student'
+    if (!data) {
+      return null;
+    }
+
+    // Store user_id in localStorage
+    localStorage.setItem('auth_id', data.user_id);
+
+    // Return only the role
+    return data.role;
   } catch (err) {
-    console.error('Unexpected error fetching user role:', err)
-    return 'student'
+    console.error('Unexpected error fetching user role:', err);
+    return null;
   }
 }
+
 
 /**
  * Stores user authentication data in localStorage

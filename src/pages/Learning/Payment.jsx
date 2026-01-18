@@ -42,13 +42,16 @@ const InfoIcon = () => (
 
 export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) {
   const [isProcessing, setIsProcessing] = useState(false)
-
+  const studentId = localStorage.getItem('auth_id');
   const courseTitle = course?.title || "Mentorship Program";
   const coursePrice = course?.price || "$299";
   const courseDesc = course?.description || "Includes full course access and personalized mentorship sessions.";
   const courseId = course?.course_id || course?.id;
+  // If mentorId prop is not passed, try to get it from the course object
+  const finalMentorId = course?.mentor_id;
 
   async function handlePay() {
+    // return
     if (isProcessing) return;
 
     try {
@@ -61,26 +64,47 @@ export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) 
         return;
       }
 
+
       // Get the database user_id (int8) from the user object
-      const studentId = authData.user;
+      const userId = authData.user?.id || authData.user;
 
-      console.log('Student ID for enrollment:', studentId);
-      console.log('Mentor ID:', mentorId);
-      console.log('Course ID:', courseId);
 
-      if (!studentId) {
+      if (!userId) {
         alert("User ID not found. Please log out and log in again.");
         setIsProcessing(false);
         return;
       }
+      console.log('User ID:', studentId);
+      console.log('Mentor ID:', finalMentorId);
+      console.log('Course ID:', courseId);
+      // 🔍 Check if already enrolled
+      const { data: existingEnrollment, error: checkError } = await supabase
+        .from('classes_enrolled')
+        .select('id')
+        .eq('student_id', studentId)
+        .eq('mentor_id', finalMentorId)
+        .eq('course_id', courseId)
+        .maybeSingle();
 
+      if (checkError) {
+        console.error('Error checking enrollment:', checkError);
+        alert('Something went wrong. Please try again.');
+        setIsProcessing(false);
+        return;
+      }
+
+      if (existingEnrollment) {
+        alert('You are already enrolled in this course.');
+        setIsProcessing(false);
+        return;
+      }
       // 2. Call API to send data to classes_enrolled table
       const { error } = await supabase
         .from('classes_enrolled')
         .insert([
           {
             student_id: studentId,
-            mentor_id: mentorId,
+            mentor_id: finalMentorId,
             course_id: courseId,
             status: 'active'
           }

@@ -22,8 +22,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   async function fetchMentorDetails() {
     try {
       setLoading(true);
-      const targetId = propMentor?.mentor_id || propMentor?.id || '1'
-
+      const targetId = propMentor?.mentor_id
       const { data, error } = await supabase
         .from('mentors_details')
         .select(`
@@ -53,7 +52,6 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
         return;
       }
 
-      console.log('Mentor Data:', data);
 
       // Fetch course details if coursesOffered has values
       let coursesData = [];
@@ -73,6 +71,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
       // Normalize data for UI
       const normalized = {
+        id: data.mentor_id || data.id || propMentor?.mentor_id || propMentor?.id,
         name: data.name || propMentor?.name || "Expert Mentor",
         about: data.about || "",
         expertise: data.experties_in || [],
@@ -126,7 +125,6 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   if (!mentorData) return <div className="error-container" style={{ padding: '100px', textAlign: 'center' }}>Mentor not found</div>
 
   const mentor = mentorData
-
   const stats = [
     { label: 'Experience', value: mentor.experience?.length > 0 ? `${mentor.experience.length * 3}+y` : "5y+" },
     { label: 'Rating', value: mentor.rating ? mentor.rating.toFixed(1) : "4.9" },
@@ -225,7 +223,21 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                 <p>Master the principles of {selectedCourse.title} with expert guidance from {mentor.name}. This course covers fundamental concepts and advanced techniques to help you excel in your career.</p>
               </div>
               <div className="modal-actions">
-                <button className="btn-buy-course" onClick={() => onBookSession && onBookSession(selectedCourse)}>
+                <button
+                  className="btn-buy-course"
+                  onClick={() => {
+                    const mId = mentor.id;
+                    const cId = selectedCourse.id;
+                    console.log('Sending Course ID:', cId)
+                    console.log('Sending Mentor ID:', mId)
+                    onBookSession &&
+                      onBookSession({
+                        ...selectedCourse,
+                        course_id: cId,
+                        mentor_id: mId,
+                      });
+                  }}
+                >
                   Buy or Start Class
                 </button>
               </div>

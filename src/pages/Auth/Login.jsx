@@ -45,8 +45,8 @@ function Login({ onBack, onLogin, onShowSignup }) {
     }
 
     // 2️⃣ Fetch the app-specific role from your users table
-    const role = await fetchUserRole(authData.user.id);
-
+    const role = await fetchUserRole(authData.user.email);
+    console.log(role)
     if (!role) {
       setError('Failed to fetch user role');
       return;
