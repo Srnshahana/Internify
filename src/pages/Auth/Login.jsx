@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import supabase from '../../supabaseClient.js'
 import { fetchUserRole, storeAuthData } from '../../utils/auth.js'
 
-function Login({ onBack, onLogin, onShowSignup }) {
+function Login({ onBack, onShowSignup }) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -44,23 +46,36 @@ function Login({ onBack, onLogin, onShowSignup }) {
       return;
     }
 
-    // 2️⃣ Fetch the app-specific role from your users table
+    // 2️⃣ Fetch the app-specific role from users table
     const role = await fetchUserRole(authData.user.email);
-    console.log(role)
+    console.log('User role:', role)
+
     if (!role) {
       setError('Failed to fetch user role');
       return;
     }
 
-    console.log('User role:', role);
-
+    // 3️⃣ Store auth data
     storeAuthData({ id: authData.user.id, role });
 
-    if (onLogin) {
-      onLogin({
-        ...authData.user,
-        role: role
-      });
+    // 4️⃣ Check for pending course purchase and navigate
+    const pendingCourse = sessionStorage.getItem('pendingCourse')
+    console.log('Checking for pending course:', pendingCourse)
+
+    if (pendingCourse) {
+      // Clear the pending course and navigate to payment
+      const course = JSON.parse(pendingCourse)
+      console.log('Found pending course, navigating to payment:', course)
+      sessionStorage.removeItem('pendingCourse')
+      navigate('/payment', { state: { course } })
+    } else {
+      // No pending purchase - navigate to dashboard
+      console.log('No pending course, navigating to dashboard')
+      if (role === 'mentor') {
+        navigate('/mentor-dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     }
   };
   return (

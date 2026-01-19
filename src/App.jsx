@@ -10,6 +10,7 @@ import MentorDashboard from './pages/Mentor/MentorDashboard.jsx'
 import Payment from './pages/Learning/Payment.jsx'
 import LandingPage from './pages/Landing/LandingPage.jsx'
 import ApplyMentor from './pages/Explore/ApplyMentor.jsx'
+import Profile from './pages/Student/Profile.jsx'
 import { courses, mentors } from './data/staticData.js'
 import supabase from './supabaseClient'
 import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
@@ -130,10 +131,6 @@ function ExplorePage() {
     navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
-  const handleBookSession = (course) => {
-    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
-  }
-
   return (
     <Explore
       mentors={mentorsToUse}
@@ -142,7 +139,6 @@ function ExplorePage() {
       renderStars={renderStars}
       initialQuery={initialQuery}
       onMentorClick={handleMentorClick}
-      onBookSession={handleBookSession}
       isLoading={isLoadingExplore}
     />
   )
@@ -157,15 +153,10 @@ function ResourcesPage() {
     navigate(`/mentor/${mentorId}`, { state: { mentor } })
   }
 
-  const handleBookSession = (course) => {
-    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
-  }
-
   return (
     <Resources
       onBack={() => navigate(-1)}
       mentors={mentors}
-      onBookSession={handleBookSession}
       onMentorClick={handleMentorClick}
     />
   )
@@ -255,17 +246,12 @@ function MentorProfilePage() {
     )
   }
 
-  const handleBookSession = (course) => {
-    if (course) { navigate('/payment', { state: { course } }) } else { navigate('/login') }
-  }
-
   return (
     <MentorProfile
       mentor={mentor}
       courses={courses}
       onBack={() => navigate(-1)}
       renderStars={renderStars}
-      onBookSession={handleBookSession}
     />
   )
 }
@@ -273,49 +259,10 @@ function MentorProfilePage() {
 // Login Page Wrapper
 function LoginPage() {
   const navigate = useNavigate()
-  const [userRole, setUserRole] = useState(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const storedAuth = getStoredAuthData()
-      if (storedAuth) {
-        const authUser = await getAuthenticatedUser()
-        if (authUser) {
-          setIsLoggedIn(true)
-          setUserRole(authUser.role)
-        }
-      }
-    }
-    checkAuth()
-  }, [])
-
-  const handleLogin = async (user) => {
-    console.log('Login success:', user)
-    const role = user?.role || 'student'
-    setUserRole(role)
-    setIsLoggedIn(true)
-    navigate('/payment')
-  }
-
-  const handleSignup = (user) => {
-    console.log('Signup success:', user)
-    setUserRole('student')
-    setIsLoggedIn(true)
-    navigate('/payment')
-  }
-
-  if (isLoggedIn) {
-    if (userRole === 'mentor') {
-      return <Navigate to="/mentor-dashboard" replace />
-    }
-    return <Navigate to="/dashboard" replace />
-  }
 
   return (
     <Login
       onBack={() => navigate('/')}
-      onLogin={handleLogin}
       onShowSignup={() => navigate('/signup')}
     />
   )
@@ -423,10 +370,15 @@ function StudentDashboardPage() {
     navigate('/')
   }
 
+  const openProfile = () => {
+    navigate('/profile')
+  }
+
   return (
     <Dashboard
       onLogout={handleLogout}
       onOpenExplore={() => navigate('/explore')}
+      onOpenProfile={openProfile} // pass the function to Dashboard
     />
   )
 }
@@ -442,6 +394,17 @@ function MentorDashboardPage() {
   }
 
   return <MentorDashboard onLogout={handleLogout} />
+}
+
+// Profile Page Wrapper
+function ProfilePage() {
+  const navigate = useNavigate();
+
+  return (
+    <Profile
+      onBack={() => navigate('/dashboard')}
+    />
+  );
 }
 
 // Main App Component
@@ -490,6 +453,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="mentor">
               <MentorDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

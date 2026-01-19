@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import { getCourseById } from '../../data/staticData.js'
 import supabase from '../../supabaseClient.js'
-// Unused mock data removed for code safety
+import { getStoredAuthData } from '../../utils/auth.js'
 
-export default function MentorProfile({ mentor: propMentor, onBack, renderStars, courses = [], onBookSession }) {
+export default function MentorProfile({ mentor: propMentor, onBack, renderStars, courses = [] }) {
+  const navigate = useNavigate()
   const [mentorData, setMentorData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [coursesIndex, setCoursesIndex] = useState(0)
@@ -228,14 +230,26 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   onClick={() => {
                     const mId = mentor.id;
                     const cId = selectedCourse.id;
-                    console.log('Sending Course ID:', cId)
-                    console.log('Sending Mentor ID:', mId)
-                    onBookSession &&
-                      onBookSession({
-                        ...selectedCourse,
-                        course_id: cId,
-                        mentor_id: mId,
-                      });
+                    const course = {
+                      ...selectedCourse,
+                      course_id: cId,
+                      mentor_id: mId,
+                    };
+
+                    console.log('Booking course:', course)
+
+                    // Check if user is logged in
+                    const storedAuth = getStoredAuthData()
+                    if (!storedAuth) {
+                      // Not logged in - save course data and redirect to login
+                      console.log('User not logged in - saving course to sessionStorage')
+                      sessionStorage.setItem('pendingCourse', JSON.stringify(course))
+                      navigate('/login', { state: { returnTo: '/payment' } })
+                    } else {
+                      // Already logged in - go directly to payment
+                      console.log('User logged in - navigating to payment')
+                      navigate('/payment', { state: { course } })
+                    }
                   }}
                 >
                   Buy or Start Class

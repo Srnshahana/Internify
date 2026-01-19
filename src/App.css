@@ -8825,7 +8825,7 @@ h1 span {
 
 .dashboard-section {
   margin-bottom: 48px;
-  background: #111317;
+  /* background: #111317; */
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -8843,7 +8843,7 @@ h1 span {
 }
 
 [data-theme='light'] .dashboard-section {
-  background: #ffffff;
+  background: transparent !important;
   border-color: #e2e8f0;
 }
 
@@ -9623,6 +9623,7 @@ h1 span {
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  /* background-color: #000000; */
   height: fit-content;
 }
 
@@ -9811,7 +9812,7 @@ h1 span {
   font-size: 18px;
   font-weight: 600;
   color: #818cf8;
-  /* Purple/indigo to match UI theme */
+  /* sky blue color to match UI theme */
   margin: 0;
   letter-spacing: -0.01em;
   text-align: center;
@@ -9820,11 +9821,11 @@ h1 span {
 
 [data-theme='dark'] .calendar-month-name {
   color: #818cf8;
-  /* Purple/indigo */
+  /* sky blue color */
 }
 
 [data-theme='light'] .calendar-month-name {
-  color: #6366f1;
+  color: #0ca5e9;
   /* Indigo for light theme */
 }
 
@@ -10007,7 +10008,7 @@ h1 span {
 
 .calendar-day-new.today {
   background: rgba(99, 102, 241, 0.2);
-  /* Dull/muted purple by default */
+  /* Dull/muted sky blue by default */
   color: rgba(255, 255, 255, 0.7);
   /* Muted text color */
   font-weight: 600;
@@ -10027,7 +10028,7 @@ h1 span {
 
 [data-theme='dark'] .calendar-day-new.today {
   background: rgba(99, 102, 241, 0.2);
-  /* Dull/muted purple */
+  /* Dull/muted sky blue */
   color: rgba(255, 255, 255, 0.7);
   /* Muted text */
   box-shadow: none;
@@ -10035,15 +10036,15 @@ h1 span {
 
 [data-theme='light'] .calendar-day-new.today {
   background: rgba(99, 102, 241, 0.15);
-  /* Dull/muted purple for light theme */
+  /* Dull/muted sky blue for light theme */
   color: rgba(0, 0, 0, 0.7);
   /* Muted text */
 }
 
 .calendar-day-new.today:hover,
 .calendar-day-new.today:focus {
-  background: #6366f1;
-  /* Bright purple on hover/focus */
+  background: #0ca5e9;
+  /* Bright sky blue on hover/focus */
   color: #ffffff;
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
@@ -10051,21 +10052,21 @@ h1 span {
 
 [data-theme='dark'] .calendar-day-new.today:hover,
 [data-theme='dark'] .calendar-day-new.today:focus {
-  background: #6366f1;
+  background: #0ca5e9;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 [data-theme='light'] .calendar-day-new.today:hover,
 [data-theme='light'] .calendar-day-new.today:focus {
-  background: #6366f1;
+  background: #0ca5e9;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 /* Dates with events - soft blue text */
 .calendar-day-new.has-event:not(.today) {
-  color: #6366f1;
+  color: #0ca5e9;
   font-weight: 500;
 }
 
@@ -10134,8 +10135,8 @@ h1 span {
 }
 
 .calendar-day-new.selected:not(.today) {
-  background: #6366f1;
-  /* Indigo/purple circle for selected */
+  background: #0ca5e9;
+  /* sky blue color circle for selected */
   color: #ffffff;
   border-radius: 50%;
   width: 36px;
@@ -10149,12 +10150,12 @@ h1 span {
 }
 
 [data-theme='dark'] .calendar-day-new.selected:not(.today) {
-  background: #6366f1;
+  background: #0ca5e9;
   color: #ffffff;
 }
 
 [data-theme='light'] .calendar-day-new.selected:not(.today) {
-  background: #6366f1;
+  background: #0ca5e9;
   color: #ffffff;
 }
 
@@ -10387,7 +10388,7 @@ h1 span {
 
 .calendar-event-action-btn {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   border: none;
   border-radius: 8px;
   color: #ffffff;
@@ -10400,7 +10401,7 @@ h1 span {
 }
 
 .calendar-event-action-btn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0ca5e9 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
@@ -10546,7 +10547,7 @@ h1 span {
 
 .add-list-submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   border: none;
   border-radius: 12px;
   padding: 14px 20px;
@@ -10559,7 +10560,7 @@ h1 span {
 }
 
 .add-list-submit-btn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0ca5e9 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
@@ -10651,12 +10652,12 @@ h1 span {
   transition: all 0.2s ease;
 }
 
-.purple-icon {
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
+.sky-icon {
+  background: rgba(12, 165, 233, 0.12);
+  color: #0ca5e9;
 }
 
-[data-theme='dark'] .purple-icon {
+[data-theme='dark'] .sky-icon {
   background: rgba(99, 102, 241, 0.2);
   color: #818cf8;
 }
@@ -10882,7 +10883,7 @@ h1 span {
 
 .btn-primary-compact {
   padding: 6px 12px;
-  background: #6366f1;
+  background: #0ca5e9;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -10894,7 +10895,7 @@ h1 span {
 }
 
 .btn-primary-compact:hover {
-  background: #4f46e5;
+  background: #0284c7;
   transform: scale(1.05);
 }
 
@@ -14945,7 +14946,7 @@ h1 span {
 [data-theme='light'] .my-classes-section .classroom-carousel-card:hover .carousel-card-arrow {
   background: rgba(99, 102, 241, 0.2);
   border-color: rgba(99, 102, 241, 0.3);
-  color: #6366f1;
+  color: #0ca5e9;
 }
 
 .carousel-header-section {
@@ -15349,13 +15350,13 @@ h1 span {
 
 [data-theme='light'] .view-classroom-btn {
   background: rgba(99, 102, 241, 0.15);
-  color: #6366f1;
+  color: #0ca5e9;
   border-color: rgba(99, 102, 241, 0.25);
 }
 
 [data-theme='light'] .view-classroom-btn:hover {
   background: rgba(99, 102, 241, 0.25);
-  color: #6366f1;
+  color: #0ca5e9;
 }
 
 .join-classroom-btn svg,
@@ -15486,7 +15487,7 @@ h1 span {
 [data-theme='light'] .compact-action-btn {
   background: rgba(99, 102, 241, 0.08);
   border-color: rgba(99, 102, 241, 0.2);
-  color: #6366f1;
+  color: #0ca5e9;
 }
 
 .compact-action-btn:hover {
@@ -15507,7 +15508,7 @@ h1 span {
 [data-theme='light'] .compact-action-btn:hover {
   background: rgba(99, 102, 241, 0.15);
   border-color: rgba(99, 102, 241, 0.35);
-  color: #4f46e5;
+  color: #0284c7;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
 }
 
@@ -15563,7 +15564,7 @@ h1 span {
 
 .carousel-type-tag.hybrid {
   background: rgba(168, 85, 247, 0.2);
-  color: #a855f7;
+  color: #0ca5e9;
 }
 
 /* Bottom Sheet */
@@ -16371,7 +16372,7 @@ h1 span {
 
 .course-badge.level {
   background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  color: #0ca5e9;
 }
 
 .course-badge.type {
@@ -16466,7 +16467,7 @@ h1 span {
 
 .progress-bar-fill-large {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(90deg, #3b82f6, #0ca5e9);
   border-radius: 6px;
   transition: width 0.3s ease;
 }
@@ -17246,7 +17247,7 @@ h1 span {
 }
 
 [data-theme='light'] .featured-session-price {
-  color: #6366f1;
+  color: #0ca5e9;
 }
 
 @media (max-width: 1024px) {
@@ -18639,9 +18640,9 @@ h1 span {
 }
 
 .course-category-badge {
-  background: #8b5cf620;
-  color: #8b5cf6;
-  border: 1px solid #8b5cf6;
+  background: #0ca5e920;
+  color: #0ca5e9;
+  border: 1px solid #0ca5e9;
 }
 
 .course-level-badge {
@@ -19849,7 +19850,7 @@ h1 span {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(90deg, #3b82f6, #0ca5e9);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -20511,7 +20512,7 @@ h1 span {
 .scroll-indicator-mentors {
   margin-top: 40px;
   padding: 24px;
-  background: linear-gradient(135deg, #3b82f620 0%, #8b5cf620 100%);
+  background: linear-gradient(135deg, #3b82f620 0%, #0ca5e920 100%);
   border: 1px solid #3b82f640;
   border-radius: 12px;
   text-align: center;
@@ -21143,7 +21144,7 @@ h1 span {
 
 /* Assessment in Classroom Chat */
 .live-assessment-card {
-  background: linear-gradient(135deg, #3b82f620 0%, #8b5cf620 100%);
+  background: linear-gradient(135deg, #3b82f620 0%, #0ca5e920 100%);
   border: 2px solid #3b82f6;
   border-radius: 12px;
   padding: 20px;
@@ -21508,23 +21509,28 @@ h1 span {
 /* New Dashboard Layout - Redesigned */
 .dashboard-layout-new {
   display: block;
-  /* Switch from grid to block for simpler full-width layout */
   min-height: 100vh;
-  background: #ffffff;
+  background: #ffffff !important;
   transition: background 0.3s ease;
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
   padding-bottom: 80px;
-  /* Space for bottom nav */
 }
 
 [data-theme='light'] .dashboard-layout-new {
-  background: #ffffff;
+  background: #ffffff !important;
 }
 
 [data-theme='dark'] .dashboard-layout-new {
-  background: #0f1115;
+  background: #ffffff !important;
+  color: #1e293b;
+}
+
+.dashboard-page-new {
+  background: transparent !important;
+  padding: 0 !important;
+  max-width: 100%;
 }
 
 /* Left Sidebar Navigation */
@@ -21852,8 +21858,9 @@ h1 span {
 .welcome-left-column {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  /* gap: 24px; */
   width: 100%;
+  /* background-color: #000000; */
   box-sizing: border-box;
 }
 
@@ -21882,7 +21889,7 @@ h1 span {
   grid-template-columns: 1fr auto;
   gap: 32px;
   padding: 32px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   border-radius: 16px;
   position: relative;
   overflow: hidden;
@@ -22013,7 +22020,6 @@ h1 span {
   display: flex;
   flex-direction: column;
   gap: 0;
-  /* Remove gap to allow manual spacing control */
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -22414,11 +22420,11 @@ h1 span {
   left: 0;
   right: 0;
   height: 3px;
-  background: #a855f7;
+  background: #0ca5e9;
 }
 
 .timeline-task-card.task-mentorship .task-color-bar {
-  background: #a855f7;
+  background: #0ca5e9;
 }
 
 .timeline-task-card.task-review .task-color-bar {
@@ -22696,13 +22702,13 @@ h1 span {
 }
 
 .session-btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .session-btn-primary:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0ca5e9 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
@@ -22868,7 +22874,7 @@ h1 span {
 
 .progress-modal-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, #0ca5e9 0%, #0ca5e9 100%);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -22940,7 +22946,7 @@ h1 span {
 
 .progress-modal-list-item-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, #0ca5e9 0%, #0ca5e9 100%);
   border-radius: 2px;
 }
 
@@ -22993,7 +22999,7 @@ h1 span {
 
 .progress-modal-course-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, #0ca5e9 0%, #0ca5e9 100%);
   border-radius: 3px;
 }
 
@@ -23055,7 +23061,7 @@ h1 span {
 .progress-modal-btn-primary {
   flex: 1;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   border: none;
   border-radius: 12px;
   color: #ffffff;
@@ -23066,7 +23072,7 @@ h1 span {
 }
 
 .progress-modal-btn-primary:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0ca5e9 100%);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
@@ -23912,7 +23918,7 @@ h1 span {
 /* Left Side - Visual */
 .login-premium-visual {
   position: relative;
-  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0ca5e9 100%);
   background-size: cover;
   background-position: center;
   display: flex;
@@ -25588,7 +25594,7 @@ h1 span {
 
 .profile-cover-gradient {
   height: 240px;
-  background: linear-gradient(135deg, #0ca5e9 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
   position: relative;
 }
 
@@ -30009,7 +30015,7 @@ html {
 }
 
 .course-progress-fill {
-  background: linear-gradient(90deg, #0ca5e9, #6366f1);
+  background: linear-gradient(90deg, #0ca5e9, #0ca5e9);
   /* Premium gradient */
   height: 100%;
   border-radius: 100px;
@@ -30785,6 +30791,7 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
 /* --- Redesigned Payment Screen --- */
 .payment-premium-container {
   max-width: 1100px;
@@ -30970,7 +30977,7 @@ html {
   color: #475569;
 }
 
-.soft-input-group input, 
+.soft-input-group input,
 .soft-input-group select {
   padding: 14px 16px;
   border-radius: 12px;
@@ -31035,17 +31042,986 @@ html {
   .payment-premium-container {
     padding: 24px 16px;
   }
-  
+
   .payment-header-premium h1 {
     font-size: 26px;
   }
-  
+
   .payment-card-premium {
     padding: 20px;
   }
-  
+
   .escrow-trust-flow {
     overflow-x: auto;
     padding-bottom: 10px;
   }
+}
+
+/* ========================================
+   STUDENT DASHBOARD HOME - MOBILE RESPONSIVE
+   ======================================== */
+
+/* Mobile-first base styles for dashboard home */
+.dashboard-page-new {
+  padding: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+  background: #eff9ff;
+  /* Match landing page background */
+}
+
+[data-theme='dark'] .dashboard-page-new {
+  background: #0f172a;
+}
+
+/* Welcome and Calendar Row - Stack on mobile */
+.welcome-calendar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.welcome-left-column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Welcome Card - Landing Page Hero Style (Glassmorphism) */
+.welcome-header-new {
+  margin-bottom: 8px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.welcome-title-new {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+
+.welcome-date-new {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+/* Home Search Bar Section */
+.home-top-section {
+  background: #eff9ff;
+  padding: 20px 24px 50px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.home-main-content {
+  background: #ffffff;
+  border-radius: 32px 32px 0 0;
+  padding: 24px;
+  margin-top: -32px;
+  box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.home-search-section {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.elegant-navbar.transparent-navbar {
+  background: transparent !important;
+  border-bottom: none;
+  box-shadow: none;
+}
+
+.home-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #ffffff;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 100px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  max-width: 600px;
+}
+
+.home-search-bar:focus-within {
+  border-color: #0ca5e9;
+  box-shadow: 0 8px 24px rgba(12, 165, 233, 0.08);
+  transform: translateY(-1px);
+}
+
+.search-icon-home {
+  color: #64748b;
+  width: 20px;
+  height: 20px;
+  transition: color 0.3s ease;
+}
+
+.home-search-bar:focus-within .search-icon-home {
+  color: #0ca5e9;
+}
+
+.home-search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 15px;
+  color: #0f172a;
+  outline: none;
+  font-weight: 500;
+}
+
+.home-search-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.welcome-subtitle-new {
+  font-size: 16px;
+  color: #475569;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.welcome-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.welcome-card-btn {
+  background: #0ca5e9;
+  color: #ffffff;
+  padding: 12px 28px;
+  border-radius: 100px;
+  /* Fully pill-shaped like landing page */
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(12, 165, 233, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.welcome-card-btn:hover {
+  background: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(12, 165, 233, 0.3);
+}
+
+.welcome-card-btn.secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: #0ca5e9;
+  border: 1px solid rgba(12, 165, 233, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.welcome-card-btn.secondary:hover {
+  background: white;
+  border-color: #0ca5e9;
+}
+
+/* Progress Overview Cards - Compact Small Squares */
+.progress-overview-cards-new {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 0;
+  overflow-x: auto;
+  padding: 4px 0 12px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.progress-overview-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.progress-overview-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #0ca5e980;
+  box-shadow: 0 8px 24px rgba(12, 165, 233, 0.08);
+}
+
+.progress-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f0f9ff;
+  color: #0ca5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.progress-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.progress-card-title {
+  font-size: 8px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.progress-card-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 2px 0 0 0;
+}
+
+.progress-card-bar {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-card-bar-fill {
+  height: 100%;
+  background: #0ca5e9;
+  border-radius: 100px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* My Classes Section */
+.my-classes-section {
+  width: 100%;
+}
+
+.section-header-with-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+[data-theme='dark'] .section-title {
+  color: #f1f5f9;
+}
+
+.view-all-btn-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+[data-theme='dark'] .view-all-btn-arrow {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.view-all-btn-arrow:hover {
+  background: #e2e8f0;
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .view-all-btn-arrow:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.view-all-btn-arrow svg {
+  color: #64748b;
+}
+
+[data-theme='dark'] .view-all-btn-arrow svg {
+  color: #94a3b8;
+}
+
+/* My Classes Section - Premium Carousel */
+.classroom-carousel-card {
+  flex: 0 0 85%;
+  scroll-snap-align: center;
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .classroom-carousel-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.classroom-carousel-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  border-color: #0ca5e9;
+}
+
+.carousel-progress-text {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #f0f9ff;
+  color: #0ca5e9;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme='dark'] .carousel-progress-text {
+  background: rgba(12, 165, 233, 0.2);
+}
+
+.carousel-mentor-photo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2.5px solid #0ca5e9;
+}
+
+.carousel-course-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 16px 0 8px 0;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .carousel-course-title {
+  color: #f8fafc;
+}
+
+.carousel-stars {
+  color: #fbbf24;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.carousel-course-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.carousel-category,
+.carousel-level {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+[data-theme='dark'] .carousel-category,
+[data-theme='dark'] .carousel-level {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+
+.carousel-type-tag {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.carousel-type-tag.live {
+  background: #fff1f2;
+  color: #f43f5e;
+}
+
+.carousel-type-tag.hybrid {
+  background: #f0f9ff;
+  color: #0ca5e9;
+}
+
+/* Compact Action Buttons */
+.my-classes-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.compact-action-btn {
+  flex: 1;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+[data-theme='dark'] .compact-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.compact-action-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme='dark'] .compact-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+}
+
+.compact-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Calendar Compact - Premium Landing Page Style */
+.compact-calendar-new {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+[data-theme='dark'] .compact-calendar-new {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-month-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .calendar-month-name {
+  color: #f8fafc;
+}
+
+.calendar-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .calendar-nav-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.calendar-nav-btn:hover {
+  background: #0ca5e9;
+  color: white;
+  border-color: #0ca5e9;
+}
+
+.calendar-weekday-new {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendar-day-new {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] .calendar-day-new {
+  color: #cbd5e1;
+}
+
+.calendar-day-new.today {
+  background: linear-gradient(135deg, #0ca5e9 0%, #0ca5e9 100%);
+  color: white;
+  font-weight: 800;
+  box-shadow: 0 8px 16px rgba(12, 165, 233, 0.3);
+}
+
+.calendar-day-new.has-event {
+  background: #f0f9ff;
+  color: #0ca5e9;
+}
+
+[data-theme='dark'] .calendar-day-new.has-event {
+  background: rgba(12, 165, 233, 0.15);
+  color: #38bdf8;
+}
+
+.calendar-day-new:hover:not(.empty):not(.today) {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  color: #0ca5e9;
+}
+
+[data-theme='dark'] .calendar-day-new:hover:not(.empty):not(.today) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   TABLET STYLES (640px - 1024px)
+   ======================================== */
+
+@media (min-width: 640px) {
+  .dashboard-page-new {
+    padding: 20px;
+  }
+
+  .welcome-card-new {
+    padding: 24px;
+  }
+
+  .welcome-title-new {
+    font-size: 28px;
+  }
+
+  .welcome-subtitle-new {
+    font-size: 15px;
+  }
+
+  .welcome-card-actions {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .welcome-card-btn {
+    font-size: 14px;
+  }
+
+  /* Progress cards - 2 columns on tablet */
+  .progress-overview-cards-new {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .progress-overview-card {
+    padding: 20px;
+  }
+
+  .progress-card-title {
+    font-size: 14px;
+  }
+
+  .progress-card-value {
+    font-size: 22px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  /* Classes carousel - show 2 cards */
+  .classroom-carousel-card {
+    flex: 0 0 48%;
+  }
+}
+
+/* ========================================
+   DESKTOP STYLES (1024px+)
+   ======================================== */
+
+@media (min-width: 1024px) {
+  .dashboard-page-new {
+    padding: 24px;
+  }
+
+  /* Welcome and Calendar Row - Side by side */
+  .welcome-calendar-row {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .welcome-left-column {
+    width: 70%;
+  }
+
+  .calendar-wrapper-new {
+    width: 30%;
+  }
+
+  .welcome-card-new {
+    flex-direction: row;
+    min-height: 200px;
+    padding: 28px;
+  }
+
+  .welcome-title-new {
+    font-size: 32px;
+  }
+
+  .welcome-subtitle-new {
+    font-size: 16px;
+  }
+
+  .welcome-card-actions {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .welcome-card-btn {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+
+  /* Show illustration on desktop */
+  .welcome-card-illustration {
+    display: block;
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  /* Progress cards - 3 columns on desktop */
+  .progress-overview-cards-new {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .progress-overview-card {
+    padding: 24px;
+  }
+
+  .progress-card-title {
+    font-size: 14px;
+  }
+
+  .progress-card-value {
+    font-size: 24px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  /* Classes carousel - show 2.5-3 cards */
+  .classroom-carousel-card {
+    flex: 0 0 32%;
+  }
+
+  .compact-calendar-new {
+    padding: 20px;
+  }
+
+  .calendar-month-name {
+    font-size: 18px;
+  }
+
+  .calendar-weekday-new {
+    font-size: 12px;
+  }
+
+  .calendar-day-new {
+    font-size: 14px;
+    min-height: 40px;
+  }
+}
+
+/* ========================================
+   LARGE DESKTOP STYLES (1440px+)
+   ======================================== */
+
+@media (min-width: 1440px) {
+  .dashboard-page-new {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .welcome-card-illustration {
+    width: 240px;
+  }
+}
+
+/* Assignments & Tasks - Premium Style */
+.assignments-section-home {
+  margin-top: 32px;
+}
+
+.assignments-list-home {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .assignments-list-home {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .assignments-list-home {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.assignment-card-home {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] .assignment-card-home {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.assignment-card-home:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+  border-color: #0ca5e9;
+}
+
+.assignment-header-home {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.assignment-title-home {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .assignment-title-home {
+  color: #f8fafc;
+}
+
+.assignment-status-badge-home {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assignment-status-badge-home.in-progress {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.assignment-status-badge-home.pending {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.assignment-course-home {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.assignment-due-home {
+  font-size: 12px;
+  color: #f43f5e;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Calendar Event Modals & Items - Premium Polishing */
+.calendar-event-details-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f1f5f9;
+  animation: slideUp 0.3s ease-out;
+}
+
+[data-theme='dark'] .calendar-event-details-modal {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-event-item-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+[data-theme='dark'] .calendar-event-item-title {
+  color: #f8fafc;
+}
+
+.calendar-event-meta {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calendar-event-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.calendar-event-icon.session-icon {
+  background: #f0f9ff;
+  color: #0ca5e9;
+}
+
+.calendar-event-icon.assignment-icon {
+  background: #fff1f2;
+  color: #f43f5e;
+}
+
+.calendar-event-action-btn {
+  background: #0ca5e9;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calendar-event-action-btn:hover {
+  background: #0284c7;
+  transform: translateY(-1px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add List Form Premium Polishing */
+.calendar-add-list-form {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+[data-theme='dark'] .calendar-add-list-form {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.add-list-input {
+  width: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+[data-theme='dark'] .add-list-input {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.add-list-input:focus {
+  border-color: #0ca5e9;
+  box-shadow: 0 0 0 3px rgba(12, 165, 233, 0.1);
 }

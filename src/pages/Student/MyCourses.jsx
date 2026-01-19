@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import supabase from '../../supabaseClient'
 import { getAuthenticatedUser } from '../../utils/auth.js'
 import '../../App.css'
@@ -8,78 +8,81 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [enrolledCourses, setEnrolledCourses] = useState([])
   const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    async function fetchEnrolledCourses() {
-      try {
-        setLoading(true)
 
-        const studentId = localStorage.getItem('auth_id');
+  // Memoize the fetch function with useCallback to prevent unnecessary re-creation
+  const fetchEnrolledCourses = useCallback(async () => {
+    try {
+      setLoading(true)
 
-        // if (!studentId) {
-        //   console.log("No user logged in")
-        //   setLoading(false)
-        //   return
-        // }
+      const studentId = localStorage.getItem('auth_id');
 
-        // 1. Fetch enrollments
-        const { data: enrollments, error: enrollError } = await supabase
-          .from('classes_enrolled')
-          .select('course_id, mentor_id')
-          .eq('student_id', studentId)
+      // if (!studentId) {
+      //   console.log("No user logged in")
+      //   setLoading(false)
+      //   return
+      // }
 
-        if (enrollError) throw enrollError
-        if (!enrollments || enrollments.length === 0) {
-          setEnrolledCourses([])
-          setLoading(false)
-          return
-        }
+      // 1. Fetch enrollments
+      const { data: enrollments, error: enrollError } = await supabase
+        .from('classes_enrolled')
+        .select('course_id, mentor_id')
+        .eq('student_id', studentId)
 
-        // 2. Fetch course details and mentor details
-        const courseIds = enrollments.map(e => e.course_id)
-        const mentorIds = enrollments.map(e => e.mentor_id)
-
-        const [coursesRes, mentorsRes] = await Promise.all([
-          supabase.from('courses').select('*').in('course_id', courseIds),
-          supabase.from('mentors_details').select('mentor_id, name').in('mentor_id', mentorIds)
-        ])
-
-        if (coursesRes.error) throw coursesRes.error
-        if (mentorsRes.error) throw mentorsRes.error
-
-        const coursesMap = new Map(coursesRes.data.map(c => [c.course_id, c]))
-        const mentorsMap = new Map(mentorsRes.data.map(m => [m.mentor_id, m]))
-
-        // 3. Merge data
-        const mergedData = enrollments.map(enrollment => {
-          const course = coursesMap.get(enrollment.course_id)
-          const mentor = mentorsMap.get(enrollment.mentor_id)
-
-          return {
-            id: enrollment.course_id, // UI expects 'id'
-            course_id: enrollment.course_id,
-            mentor_id: enrollment.mentor_id,
-            title: course?.title || 'Unknown Course',
-            category: course?.category || 'General',
-            image: course?.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            rating: course?.rating || 4.8,
-            level: course?.skill_level || course?.level || 'Beginner',
-            mentor: mentor?.name || 'Expert Mentor',
-            progress: 0, // Default to 0 as progress tracking isn't in schema yet
-            status: enrollment.status || 'active',
-            nextSession: 'Coming Soon' // Placeholder
-          }
-        })
-
-        setEnrolledCourses(mergedData)
-      } catch (err) {
-        console.error('Error fetching enrolled courses:', err)
-      } finally {
+      if (enrollError) throw enrollError
+      if (!enrollments || enrollments.length === 0) {
+        setEnrolledCourses([])
         setLoading(false)
+        return
       }
-    }
 
+      // 2. Fetch course details and mentor details
+      const courseIds = enrollments.map(e => e.course_id)
+      const mentorIds = enrollments.map(e => e.mentor_id)
+
+      const [coursesRes, mentorsRes] = await Promise.all([
+        supabase.from('courses').select('*').in('course_id', courseIds),
+        supabase.from('mentors_details').select('mentor_id, name').in('mentor_id', mentorIds)
+      ])
+
+      if (coursesRes.error) throw coursesRes.error
+      if (mentorsRes.error) throw mentorsRes.error
+
+      const coursesMap = new Map(coursesRes.data.map(c => [c.course_id, c]))
+      const mentorsMap = new Map(mentorsRes.data.map(m => [m.mentor_id, m]))
+
+      // 3. Merge data
+      const mergedData = enrollments.map(enrollment => {
+        const course = coursesMap.get(enrollment.course_id)
+        const mentor = mentorsMap.get(enrollment.mentor_id)
+
+        return {
+          id: enrollment.course_id, // UI expects 'id'
+          course_id: enrollment.course_id,
+          mentor_id: enrollment.mentor_id,
+          title: course?.title || 'Unknown Course',
+          category: course?.category || 'General',
+          image: course?.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          rating: course?.rating || 4.8,
+          level: course?.skill_level || course?.level || 'Beginner',
+          mentor: mentor?.name || 'Expert Mentor',
+          progress: 0, // Default to 0 as progress tracking isn't in schema yet
+          status: enrollment.status || 'active',
+          nextSession: 'Coming Soon' // Placeholder
+        }
+      })
+
+      setEnrolledCourses(mergedData)
+    } catch (err) {
+      console.error('Error fetching enrolled courses:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, []) // Empty dependency array - function only created once
+
+  // Call the memoized function on mount
+  useEffect(() => {
     fetchEnrolledCourses()
-  }, [])
+  }, [fetchEnrolledCourses])
 
   const renderStars = (rating) => {
     const full = Math.floor(rating)

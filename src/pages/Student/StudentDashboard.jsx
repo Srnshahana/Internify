@@ -1,7 +1,7 @@
 
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import { useState, useEffect } from 'react'
-import LandingPage from '../Landing/LandingPage.jsx'
+import Home from './Home.jsx'
 import MyCourses from './MyCourses.jsx'
 import Calendar from './Calendar.jsx'
 import Explore from '../Explore/Search.jsx'
@@ -13,7 +13,7 @@ import { HomeIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon,
 import { courses } from '../../data/staticData.js'
 import '../../App.css'
 
-function Dashboard({ onLogout, onOpenExplore }) {
+function Dashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
   const [selectedMentor, setSelectedMentor] = useState(null)
@@ -61,14 +61,14 @@ function Dashboard({ onLogout, onOpenExplore }) {
     switch (page) {
       case 'Home':
         return (
-          <LandingPage
+          <Home
+            onNavigate={(pageName) => setPage(pageName)}
+            onLogout={onLogout}
+            onMentorClick={handleMentorClick}
+            renderStars={renderStars}
             onOpenExplore={() => setPage('Mentors')}
             onOpenResources={() => { }}
-            onOpenLogin={() => { }}
-            onMentorClick={handleMentorClick}
             onBookSession={() => setPage('Calendar')}
-            renderStars={renderStars}
-            showNavbar={false}
           />
         )
       case 'Classrooms':
@@ -97,7 +97,7 @@ function Dashboard({ onLogout, onOpenExplore }) {
       case 'Notification':
         return <Notification />
       default:
-        return <LandingPage onMentorClick={handleMentorClick} renderStars={renderStars} />
+        return <Home onNavigate={(pageName) => setPage(pageName)} onMentorClick={handleMentorClick} renderStars={renderStars} />
     }
   }
 
@@ -151,7 +151,13 @@ function Dashboard({ onLogout, onOpenExplore }) {
           </nav>
 
           {/* Top Header - Reused from Landing Page */}
-          {activePage !== 'Profile' && <StudentAppBar onLogout={onLogout} />}
+          {activePage !== 'Profile' && (
+            <StudentAppBar
+              onLogout={onLogout}
+              isTransparent={activePage === 'Home'}
+              hideLogout={activePage === 'Home'}
+            />
+          )}
         </>
       )}
 

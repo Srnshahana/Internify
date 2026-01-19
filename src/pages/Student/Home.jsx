@@ -8,6 +8,8 @@ import {
   homeUpcomingSessions
 } from '../../data/staticData.js'
 
+import { SearchIcon } from '../../components/Icons.jsx'
+
 function Home({ onNavigate, onMentorClick }) {
   // Upcoming sessions data
   const upcomingSessions = homeUpcomingSessions
@@ -40,9 +42,9 @@ function Home({ onNavigate, onMentorClick }) {
   ]
 
   const progressLines = [
-    { name: 'All', data: allProgressData, color: '#6b7280', gradientId: 'progressGradient' },
-    { name: 'Classroom 1', data: classroom1ProgressData, color: '#3b82f6', gradientId: 'progressGradient1' },
-    { name: 'Classroom 2', data: classroom2ProgressData, color: '#8b5cf6', gradientId: 'progressGradient2' },
+    { name: 'All', data: allProgressData, color: '#64748b', gradientId: 'progressGradient' },
+    { name: 'Classroom 1', data: classroom1ProgressData, color: '#0ca5e9', gradientId: 'progressGradient1' },
+    { name: 'Classroom 2', data: classroom2ProgressData, color: '#bae6fd', gradientId: 'progressGradient2' },
   ]
 
   const maxValue = 100
@@ -387,590 +389,272 @@ function Home({ onNavigate, onMentorClick }) {
   if (activeCourse) {
     return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} userRole="student" />
   }
+  // Format current date for the header
+  const currentDateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  })
 
   return (
     <div className="dashboard-page-new">
-      {/* Welcome Card and Calendar Row */}
-      <div className="welcome-calendar-row">
-        {/* Left Column: Welcome Card + Progress Cards */}
-        <div className="welcome-left-column">
-          {/* Welcome Card with Illustration */}
-          <div className="welcome-card-new">
-            <div className="welcome-card-content">
-              <h1 className="welcome-title-new">Welcome back, Sherin</h1>
-              <p className="welcome-subtitle-new">Here's what's happening with your learning today</p>
-              <div className="welcome-card-actions">
-                <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Search')}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                  Quick Search
-                </button>
-                <button className="welcome-card-btn" onClick={() => onNavigate && onNavigate('Explore')}>
-                  Explore more courses
-                </button>
-                <button className="welcome-card-btn" onClick={handleBookSession}>
-                  Book Session
-                </button>
-                <button className="welcome-card-btn" onClick={handleContinueLearning}>
-                  Continue Learning
-                </button>
-                <button className="welcome-card-btn" onClick={handleGiveFeedback}>
-                  Give Feedback
-                </button>
-              </div>
-            </div>
-            <div className="welcome-card-illustration">
-              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Person on laptop */}
-                <circle cx="100" cy="80" r="25" fill="rgba(255,255,255,0.3)" />
-                <rect x="70" y="105" width="60" height="40" rx="5" fill="rgba(255,255,255,0.2)" />
-                <rect x="75" y="110" width="50" height="30" rx="2" fill="rgba(255,255,255,0.4)" />
-                {/* Books stack */}
-                <rect x="30" y="140" width="40" height="8" rx="2" fill="rgba(255,255,255,0.3)" />
-                <rect x="35" y="148" width="30" height="8" rx="2" fill="rgba(255,255,255,0.25)" />
-                <rect x="40" y="156" width="20" height="8" rx="2" fill="rgba(255,255,255,0.2)" />
-                {/* Abstract shapes */}
-                <circle cx="160" cy="60" r="15" fill="rgba(255,255,255,0.15)" />
-                <circle cx="170" cy="150" r="20" fill="rgba(255,255,255,0.1)" />
-                <rect x="140" y="120" width="30" height="30" rx="5" fill="rgba(255,255,255,0.12)" transform="rotate(45 155 135)" />
-              </svg>
-            </div>
+      <div className="home-top-section">
+        <div className="welcome-header-new">
+          <h1 className="welcome-title-new">Welcome back, Sherin</h1>
+          <p className="welcome-date-new">{currentDateFormatted}</p>
+        </div>
+        <div className="home-search-section">
+          <div className="home-search-bar">
+            <SearchIcon className="search-icon-home" />
+            <input
+              type="text"
+              placeholder="Search your courses, mentors or assignments..."
+              className="home-search-input"
+            />
           </div>
+        </div>
+      </div>
 
-          {/* Progress Overview Cards */}
-          <div className="dashboard-section progress-overview-section-new">
-            <div className="progress-overview-cards-new">
-              {/* Learning Hours Card */}
-              <div
-                className="progress-overview-card"
-                onClick={() => {
-                  setSelectedProgressCard('learning-hours')
-                  setShowProgressModal(true)
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="progress-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
+      <div className="home-main-content">
+        <div className="welcome-calendar-row">
+          <div className="welcome-left-column">
+            <div className="dashboard-section progress-overview-section-new">
+              <div className="progress-overview-cards-new">
+                <div
+                  className="progress-overview-card"
+                  onClick={() => {
+                    setSelectedProgressCard('learning-hours')
+                    setShowProgressModal(true)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="progress-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div className="progress-card-content">
+                    <h3 className="progress-card-title">Learning</h3>
+                    <p className="progress-card-value">{Math.round(learningHours)}/{totalLearningHours}</p>
+                    <div className="progress-card-bar">
+                      <div className="progress-card-bar-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+                    </div>
+                  </div>
                 </div>
-                <div className="progress-card-content">
-                  <h3 className="progress-card-title">Learning hours</h3>
-                  <p className="progress-card-value">{Math.round(learningHours)}/{totalLearningHours}</p>
-                  <div className="progress-card-bar">
-                    <div className="progress-card-bar-fill" style={{ width: `${Math.min(learningHoursProgress, 100)}%` }}></div>
+
+                <div
+                  className="progress-overview-card"
+                  onClick={() => {
+                    setSelectedProgressCard('assessment-status')
+                    setShowProgressModal(true)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="progress-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                    </svg>
+                  </div>
+                  <div className="progress-card-content">
+                    <h3 className="progress-card-title">Assessments</h3>
+                    <p className="progress-card-value">{completedAssessments}/{totalAssessments}</p>
+                    <div className="progress-card-bar">
+                      <div className="progress-card-bar-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="progress-overview-card"
+                  onClick={() => {
+                    setSelectedProgressCard('registered-courses')
+                    setShowProgressModal(true)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="progress-card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                      <path d="M12 11l-2 2 2 2"></path>
+                    </svg>
+                  </div>
+                  <div className="progress-card-content">
+                    <h3 className="progress-card-title">Courses</h3>
+                    <p className="progress-card-value">{String(registeredCoursesCount).padStart(2, '0')}</p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Assessment Status Card */}
-              <div
-                className="progress-overview-card"
-                onClick={() => {
-                  setSelectedProgressCard('assessment-status')
-                  setShowProgressModal(true)
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="progress-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="my-classes-section">
+              <div className="section-header-with-button">
+                <h2 className="section-title">My Classes</h2>
+                <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div className="classroom-carousel-section">
+                <div className="classroom-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
+                  {enrolledCourses.map((course, index) => (
+                    <div
+                      key={course.id}
+                      className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedCourse(course)
+                        setShowCourseDetail(true)
+                      }}
+                    >
+                      <div className="carousel-card-content">
+                        <span className="carousel-progress-text">{course.progress}%</span>
+                        <div className="carousel-header-section">
+                          <img src={course.mentorImage} alt={course.mentor} className="carousel-mentor-photo" />
+                          <div className="carousel-header-info">
+                            <p className="carousel-mentor-name">{course.mentor}</p>
+                            <p className="carousel-mentor-role">Software Developer</p>
+                          </div>
+                        </div>
+                        <div className="carousel-details-section">
+                          <h3 className="carousel-course-title">{course.title}</h3>
+                          <div className="carousel-rating">
+                            <span className="carousel-stars">★★★★☆</span>
+                          </div>
+                        </div>
+                        <div className="carousel-progress-container">
+                          <div className="carousel-progress-bar">
+                            <div className="carousel-progress-fill" style={{ width: `${course.progress}%` }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="my-classes-actions">
+                <button className="compact-action-btn" onClick={handleViewCertifications}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
-                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
                   </svg>
-                </div>
-                <div className="progress-card-content">
-                  <h3 className="progress-card-title">Assessment status</h3>
-                  <p className="progress-card-value">{completedAssessments}/{totalAssessments}</p>
-                  <div className="progress-card-bar">
-                    <div className="progress-card-bar-fill" style={{ width: `${Math.min(assessmentProgress, 100)}%` }}></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Registered Courses Card */}
-              <div
-                className="progress-overview-card"
-                onClick={() => {
-                  setSelectedProgressCard('registered-courses')
-                  setShowProgressModal(true)
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="progress-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <span>Certifications</span>
+                </button>
+                <button className="compact-action-btn" onClick={handleViewStudyMaterials}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                     <line x1="16" y1="13" x2="8" y2="13"></line>
                     <line x1="16" y1="17" x2="8" y2="17"></line>
                     <polyline points="10 9 9 9 8 9"></polyline>
-                    <path d="M12 11l-2 2 2 2"></path>
                   </svg>
-                </div>
-                <div className="progress-card-content">
-                  <h3 className="progress-card-title">Registered courses</h3>
-                  <p className="progress-card-value">{String(registeredCoursesCount).padStart(2, '0')}</p>
-                </div>
+                  <span>Study Materials</span>
+                </button>
               </div>
+
+              {pendingAssignments.length > 0 && (
+                <div className="dashboard-section assignments-section-home">
+                  <div className="section-header-with-button">
+                    <h2 className="section-title">Assignments & Tasks</h2>
+                    <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="assignments-list-home">
+                    {pendingAssignments.map((assignment) => (
+                      <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
+                        <div className="assignment-header-home">
+                          <h3 className="assignment-title-home">{assignment.title}</h3>
+                          <span className={`assignment-status-badge-home ${assignment.status.toLowerCase().replace(' ', '-')}`}>
+                            {assignment.status}
+                          </span>
+                        </div>
+                        <p className="assignment-course-home">{assignment.courseTitle}</p>
+                        {assignment.dueDate && (
+                          <p className="assignment-due-home">
+                            Due: {assignment.dueDate}
+                          </p>
+                        )}
+                        <button
+                          className="btn-secondary btn-small"
+                          onClick={() => {
+                            const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
+                            if (course) {
+                              setSelectedCourse(course)
+                              setShowCourseDetail(true)
+                            } else {
+                              setShowMyCourses(true)
+                            }
+                          }}
+                        >
+                          Open
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* My Classes Section */}
-          <div className="my-classes-section">
-            <div className="section-header-with-button">
-              <h2 className="section-title">My Classes</h2>
-              <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
+          <div className="calendar-wrapper-new">
+            <div className="today-events-section">
+              <h3 className="today-title">Today</h3>
+              <div className="today-events-list">
+                <div className="today-event-card">
+                  <div className="event-icon sky-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                  </div>
+                  <div className="event-details">
+                    <p className="event-title">Design discussion</p>
+                    <p className="event-time">10:30-11:15</p>
+                  </div>
+                </div>
+                <div className="today-event-card">
+                  <div className="event-icon sky-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                  </div>
+                  <div className="event-details">
+                    <p className="event-title">Send demo to PM</p>
+                    <p className="event-time">18:00</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="classroom-carousel-section">
-              <div
-                className="classroom-carousel"
-                ref={carouselRef}
-                onScroll={handleCarouselScroll}
-              >
-                {enrolledCourses.map((course, index) => (
-                  <div
-                    key={course.id}
-                    className={`classroom-carousel-card ${index === activeCourseIndex ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedCourse(course)
-                      setShowCourseDetail(true)
-                    }}
-                  >
-                    <div className="carousel-card-content">
-                      <span className="carousel-progress-text">{course.progress}%</span>
-                      <div className="carousel-header-section">
-                        <div className="carousel-mentor-photo">
-                          <img src={course.mentorImage} alt={course.mentor} />
-                        </div>
-                        <div className="carousel-header-info">
-                          <p className="carousel-mentor-name">{course.mentor}</p>
-                          <p className="carousel-mentor-role">Mobile Application developer</p>
-                        </div>
-                      </div>
-                      <div className="carousel-details-section">
-                        <h3 className="carousel-course-title">{course.title}</h3>
-                        <div className="carousel-rating">
-                          <span className="carousel-stars">{renderStars(course.rating || 4.0)}</span>
-                        </div>
-                        <div className="carousel-course-meta">
-                          <span className="carousel-category">{course.category}</span>
-                          <span className="carousel-level">{course.level}</span>
-                        </div>
-                        <div className="carousel-session-info">
-                          <span className="carousel-session-label">Next Session:</span>
-                          <span className="carousel-session-time">{course.nextSession}</span>
-                        </div>
-                        <div className={`carousel-type-tag ${course.type.toLowerCase()}`}>{course.type}</div>
-                      </div>
-                      <div className="carousel-progress-container">
-                        <div className="carousel-progress-bar">
-                          <div
-                            className="carousel-progress-fill"
-                            style={{ width: `${course.progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="carousel-card-arrow">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                      </div>
+
+            <div className="upcoming-sessions-compact-new">
+              <h2 className="section-title-small">Upcoming Sessions</h2>
+              <div className="upcoming-sessions-list-compact">
+                {upcomingSessions.slice(0, 2).map((session) => (
+                  <div key={session.id} className="upcoming-session-item-compact">
+                    <div className="session-time-compact">
+                      <span className="session-time-value-compact">{session.time}</span>
+                      <span className="session-time-period-compact">{session.period}</span>
                     </div>
+                    <div className="session-info-compact">
+                      <p className="session-course-compact">{session.course}</p>
+                      <p className="session-mentor-compact">{session.mentor}</p>
+                    </div>
+                    <button className="btn-primary-compact" onClick={() => handleJoinUpcomingSession(session)}>Join</button>
                   </div>
                 ))}
               </div>
             </div>
-            {/* Certifications and Study Materials as Small Buttons */}
-            <div className="my-classes-actions">
-              <button className="compact-action-btn" onClick={handleViewCertifications}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                </svg>
-                <span>Certifications</span>
-              </button>
-              <button className="compact-action-btn" onClick={handleViewStudyMaterials}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                <span>Study Materials</span>
-              </button>
-            </div>
 
-            {/* Assignments / Tasks Section - Moved here */}
-            {pendingAssignments.length > 0 && (
-              <div className="dashboard-section assignments-section-home">
-                <div className="section-header-with-button">
-                  <h2 className="section-title">Assignments & Tasks</h2>
-                  <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
-                </div>
-                <div className="assignments-list-home">
-                  {pendingAssignments.map((assignment) => (
-                    <div key={`${assignment.courseTitle}-${assignment.id}`} className="assignment-card-home">
-                      <div className="assignment-header-home">
-                        <h3 className="assignment-title-home">{assignment.title}</h3>
-                        <span className={`assignment-status-badge-home ${assignment.status.toLowerCase().replace(' ', '-')}`}>
-                          {assignment.status}
-                        </span>
-                      </div>
-                      <p className="assignment-course-home">{assignment.courseTitle}</p>
-                      {assignment.dueDate && (
-                        <p className="assignment-due-home">
-                          Due: {assignment.dueDate}
-                        </p>
-                      )}
-                      <button
-                        className="btn-secondary btn-small"
-                        onClick={() => {
-                          const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
-                          if (course) {
-                            setSelectedCourse(course)
-                            setShowCourseDetail(true)
-                          } else {
-                            setShowMyCourses(true)
-                          }
-                        }}
-                      >
-                        Open
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        {/* Right Column: Calendar - 30% */}
-        <div className="calendar-wrapper-new">
-          <div className="dashboard-section compact-calendar-new welcome-calendar calendar-inspiration">
-            {/* Calendar */}
-            <div className="calendar-month-header">
-              <h3 className="calendar-month-name">{currentMonth}</h3>
-              <div className="calendar-nav-buttons">
-                <button
-                  className="calendar-nav-btn"
-                  onClick={() => {
-                    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
-                    setShowAddListForm(false)
-                    setShowEventDetails(false)
-                    setClickedDate(null)
-                    setDateEvents([])
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg>
-                </button>
-                <button
-                  className="calendar-nav-btn"
-                  onClick={() => {
-                    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
-                    setShowAddListForm(false)
-                    setShowEventDetails(false)
-                    setClickedDate(null)
-                    setDateEvents([])
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="calendar-weekdays-new">
-              {weekDays.map((day) => (
-                <div key={day} className="calendar-weekday-new">{day}</div>
-              ))}
-            </div>
-            <div className="calendar-days-grid-new">
-              {(() => {
-                const year = selectedDate.getFullYear()
-                const month = selectedDate.getMonth()
-                const firstDay = new Date(year, month, 1).getDay()
-                const daysInMonth = new Date(year, month + 1, 0).getDate()
-                const days = []
-
-                // Add empty cells for days before the first day of the month
-                for (let i = 0; i < firstDay; i++) {
-                  days.push(null)
-                }
-
-                // Add all days of the month
-                for (let date = 1; date <= daysInMonth; date++) {
-                  days.push(date)
-                }
-
-                // Fill remaining cells to make 35 total (5 rows x 7 days)
-                while (days.length < 35) {
-                  days.push(null)
-                }
-
-                return days.map((date, i) => {
-                  if (date === null) {
-                    return <div key={i} className="calendar-day-new empty"></div>
-                  }
-
-                  const isToday = date === new Date().getDate() &&
-                    month === new Date().getMonth() &&
-                    year === new Date().getFullYear()
-                  const hasEvent = [14, 19, 22, 23, 24].includes(date) // Sample event dates
-                  const isEventRange = date >= 22 && date <= 24
-                  const isSelected = clickedDate && clickedDate.getDate() === date &&
-                    clickedDate.getMonth() === month &&
-                    clickedDate.getFullYear() === year
-
-                  return (
-                    <div
-                      key={i}
-                      className={`calendar-day-new ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isEventRange ? 'event-range' : ''} ${isSelected ? 'selected' : ''}`}
-                      onClick={() => {
-                        const clickedDateObj = new Date(year, month, date)
-                        setClickedDate(clickedDateObj)
-                        const events = getEventsForDate(clickedDateObj)
-                        if (events.length > 0) {
-                          setDateEvents(events)
-                          setShowEventDetails(true)
-                          setShowAddListForm(false)
-                        } else {
-                          setShowEventDetails(false)
-                          setShowAddListForm(true)
-                        }
-                      }}
-                    >
-                      <span className="calendar-day-number">{date}</span>
-                      {hasEvent && !isEventRange && <span className="event-dot"></span>}
-                    </div>
-                  )
-                })
-              })()}
-            </div>
-
-            {/* Event Details Modal - Shown when clicking a date with events */}
-            {showEventDetails && clickedDate && dateEvents.length > 0 && (
-              <div className="calendar-event-details-modal">
-                <div className="calendar-event-details-header">
-                  <div className="calendar-event-details-title-section">
-                    <h3 className="calendar-event-details-title">
-                      {clickedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </h3>
-                    <span className="calendar-event-details-count">{dateEvents.length} {dateEvents.length === 1 ? 'event' : 'events'}</span>
-                  </div>
-                  <button
-                    className="calendar-event-details-close"
-                    onClick={() => {
-                      setShowEventDetails(false)
-                      setClickedDate(null)
-                      setDateEvents([])
-                    }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div className="calendar-event-details-list">
-                  {dateEvents.map((event, index) => (
-                    <div key={index} className="calendar-event-details-item">
-                      {event.type === 'session' && (
-                        <>
-                          <div className="calendar-event-icon session-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                              <line x1="16" y1="2" x2="16" y2="6"></line>
-                              <line x1="8" y1="2" x2="8" y2="6"></line>
-                              <line x1="3" y1="10" x2="21" y2="10"></line>
-                              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
-                            </svg>
-                          </div>
-                          <div className="calendar-event-content">
-                            <h4 className="calendar-event-item-title">{event.title}</h4>
-                            <div className="calendar-event-meta">
-                              <span className="calendar-event-time">{event.time}</span>
-                              {event.mentor && <span className="calendar-event-mentor">with {event.mentor}</span>}
-                              {event.location && <span className="calendar-event-location">{event.location}</span>}
-                            </div>
-                          </div>
-                          <button className="calendar-event-action-btn">Join</button>
-                        </>
-                      )}
-                      {event.type === 'assignment' && (
-                        <>
-                          <div className="calendar-event-icon assignment-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                              <polyline points="14 2 14 8 20 8"></polyline>
-                              <line x1="16" y1="13" x2="8" y2="13"></line>
-                              <line x1="16" y1="17" x2="8" y2="17"></line>
-                              <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
-                          </div>
-                          <div className="calendar-event-content">
-                            <h4 className="calendar-event-item-title">{event.title}</h4>
-                            <div className="calendar-event-meta">
-                              <span className="calendar-event-course">{event.course}</span>
-                              <span className="calendar-event-time">Due: {event.time}</span>
-                            </div>
-                            <span className={`calendar-event-status ${event.status.toLowerCase().replace(' ', '-')}`}>
-                              {event.status}
-                            </span>
-                          </div>
-                          <button className="calendar-event-action-btn">View</button>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Add New List Form - Only shown when a date is clicked without events */}
-            {showAddListForm && clickedDate && !showEventDetails && (
-              <div className="calendar-add-list-form">
-                <div className="add-list-header">
-                  <h3 className="add-list-title">Add new list</h3>
-                  <button
-                    className="add-list-menu-btn"
-                    onClick={() => setShowAddListForm(false)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div className="add-list-inputs">
-                  <input type="text" placeholder="Title" className="add-list-input" />
-                  <div className="add-list-input-wrapper">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Date"
-                      className="add-list-input"
-                      value={clickedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      readOnly
-                    />
-                  </div>
-                  <div className="add-list-input-wrapper">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <input type="text" placeholder="Time" className="add-list-input" />
-                  </div>
-                  <input type="text" placeholder="Invite people" className="add-list-input" />
-                </div>
-                <button
-                  className="add-list-submit-btn"
-                  onClick={() => {
-                    // Handle form submission here
-                    setShowAddListForm(false)
-                    setClickedDate(null)
-                    setDateEvents([])
-                  }}
-                >
-                  Submit List
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Today's Events Section */}
-          <div className="today-events-section">
-            <h3 className="today-title">Today</h3>
-            <div className="today-events-list">
-              <div className="today-event-card">
-                <div className="event-icon purple-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                  </svg>
-                </div>
-                <div className="event-details">
-                  <p className="event-title">Design discussion</p>
-                  <p className="event-time">10:30-11:15</p>
-                </div>
-              </div>
-              <div className="today-event-card">
-                <div className="event-icon purple-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                </div>
-                <div className="event-details">
-                  <p className="event-title">Send demo to PM</p>
-                  <p className="event-time">18:00</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Sessions Below Calendar */}
-          <div className="upcoming-sessions-compact-new">
-            <div className="section-header-with-button">
-              <h2 className="section-title-small">Upcoming Sessions</h2>
-              <button className="view-all-btn-small" onClick={() => onNavigate && onNavigate('Calendar')}>
-                View all
-              </button>
-            </div>
-            <div className="upcoming-sessions-list-compact">
-              {upcomingSessions.slice(0, 2).map((session) => (
-                <div key={session.id} className="upcoming-session-item-compact">
-                  <div className="session-time-compact">
-                    <span className="session-time-value-compact">{session.time}</span>
-                    <span className="session-time-period-compact">{session.period}</span>
-                  </div>
-                  <div className="session-info-compact">
-                    <p className="session-course-compact">{session.course}</p>
-                    <p className="session-mentor-compact">{session.mentor}</p>
-                  </div>
-                  <button
-                    className="btn-primary-compact"
-                    onClick={() => handleJoinUpcomingSession(session)}
-                  >
-                    Join
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Your Learning Progress Section - Below Upcoming Sessions */}
-          <div className="dashboard-section progress-graph-section compact-graph progress-graph-compact">
-            <div className="section-header-with-button">
-              <h2 className="section-title">Your Learning Progress</h2>
-              <button className="view-all-btn">View details</button>
-            </div>
-            <div className="progress-graph-wrapper">
-              {/* Legend as Buttons */}
+            <div className="dashboard-section progress-graph-section compact-graph">
+              <h2 className="section-title">Learning Progress</h2>
               <div className="progress-legend-buttons">
                 {progressLines.map((line) => {
-                  // Only highlight the button if it exactly matches the active line
                   const isActive = activeProgressLine === line.name
                   return (
                     <button
@@ -978,11 +662,8 @@ function Home({ onNavigate, onMentorClick }) {
                       className={`progress-legend-button ${isActive ? 'active' : ''}`}
                       onClick={() => {
                         if (line.name === 'All') {
-                          // Clicking "All" always shows all lines
                           setActiveProgressLine('All')
                         } else {
-                          // Clicking a specific line shows only that line
-                          // If clicking the same line again, show all
                           if (activeProgressLine === line.name) {
                             setActiveProgressLine('All')
                           } else {
@@ -1114,10 +795,10 @@ function Home({ onNavigate, onMentorClick }) {
         {/* Right Column: Calendar */}
         <div className="calendar-assignments-column">
         </div>
-      </div>
+      </div >
 
       {/* Featured Sessions Section - Full Width */}
-      <div className="dashboard-section featured-sessions-section">
+      < div className="dashboard-section featured-sessions-section" >
         <h2 className="featured-sessions-title">Featured Sessions</h2>
         <div className="featured-sessions-grid">
           <div className="featured-session-card">
@@ -1153,7 +834,7 @@ function Home({ onNavigate, onMentorClick }) {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Progress Overview Modal */}
       {

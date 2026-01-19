@@ -7,11 +7,15 @@ import supabase from '../supabaseClient'
  */
 export async function fetchUserRole(email) {
   try {
+    console.log('🔍 fetchUserRole called with email:', email);
+
     const { data, error } = await supabase
       .from('users')
       .select('user_id, role')
       .eq('email', email)
       .maybeSingle();
+
+    console.log('📊 Users table response:', { data, error });
 
     if (error) {
       console.error('Error fetching user role:', error);
@@ -19,11 +23,17 @@ export async function fetchUserRole(email) {
     }
 
     if (!data) {
+      console.warn('⚠️ No user data found for email:', email);
       return null;
     }
 
     // Store user_id in localStorage
+    console.log('💾 Storing user_id in localStorage:', data.user_id);
     localStorage.setItem('auth_id', data.user_id);
+
+    // Verify it was stored
+    const stored = localStorage.getItem('auth_id');
+    console.log('✅ Verified auth_id in localStorage:', stored);
 
     // Return only the role
     return data.role;

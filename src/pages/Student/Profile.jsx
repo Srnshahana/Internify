@@ -1,19 +1,159 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
 import { studentProfileData } from '../../data/staticData.js'
 import { courses } from '../../data/staticData.js'
 import { CertificateIcon } from '../../components/Icons.jsx'
+import supabase from '../../supabaseClient.js'
 
 function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [coursesIndex, setCoursesIndex] = useState(0)
   const [certificatesIndex, setCertificatesIndex] = useState(0)
+  const [profileData, setProfileData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  // Fetch student profile data from database
+  useEffect(() => {
+    console.log('Fetching profile data...')
+    const fetchStudentProfile = async () => {
+      try {
+        setLoading(true)
+
+        // Get authenticated student_id from localStorage
+        const studentId = localStorage.getItem('auth_id')
+
+        if (!studentId) {
+          console.error('No student ID found in localStorage')
+          setError('Please log in to view your profile')
+          setLoading(false)
+          return
+        }
+
+        // Query student_details table
+        const { data, error: fetchError } = await supabase
+          .from('student_details')
+          .select('*')
+          .eq('student_id', studentId)
+          .maybeSingle()
+        console.log('Student profile data:', data)
+        if (fetchError) {
+          console.error('Error fetching student profile:', fetchError)
+          setError('Failed to load profile data')
+          setLoading(false)
+          return
+        }
+
+        if (!data) {
+          console.log('No profile data found for student_id:', studentId)
+          // Use static data as fallback
+          setProfileData(studentProfileData)
+          setLoading(false)
+          return
+        }
+
+        console.log('Raw database data:', data)
+
+        // Helper function to ensure data is an array
+        const ensureArray = (value) => {
+          if (!value) return []
+          if (Array.isArray(value)) return value
+          // If it's a single object, wrap it in an array
+          return [value]
+        }
+
+        // Map database data to profile structure
+        const mappedProfile = {
+          student_id: data.student_id,
+          name: data.name || 'Student Name',
+          about: data.about || studentProfileData.about,
+          address: data.address || 'Location not specified',
+          profile_image: data.profile_image || studentProfileData.avatar,
+          avatar: data.profile_image ? (
+            <img src={data.profile_image} alt={data.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : studentProfileData.avatar,
+          location: data.address || 'Location not specified',
+          skills: Array.isArray(data.skills) ? data.skills : [],
+
+          // Handle education - can be object or array
+          education: ensureArray(data.education).map((edu, index) => ({
+            id: edu.id || index,
+            degree: edu.degree || '',
+            school: edu.college || edu.school || '',
+            year: edu.year || '',
+            description: edu.description || ''
+          })),
+
+          // Handle internships - can be object or array
+          internships: ensureArray(data.internships).map((internship, index) => ({
+            id: internship.id || index,
+            title: internship.job_title || internship.title || '',
+            company: internship.company || '',
+            location: internship.location || '',
+            startDate: internship.start_date || internship.startDate || '',
+            endDate: internship.end_date || internship.endDate || '',
+            description: internship.description || '',
+            skills: internship.skills || []
+          })),
+
+          // Handle certifications - can be object or array
+          certifications: ensureArray(data.certifications).map((cert, index) => ({
+            id: cert.id || index,
+            name: cert.name || cert.title || '',
+            issuer: cert.issuer || cert.organization || '',
+            date: cert.date || cert.issued_date || '',
+            description: cert.description || ''
+          })),
+
+          // Handle projects - can be object or array
+          projects: ensureArray(data.project).map((proj, index) => ({
+            id: proj.id || index,
+            title: proj.title || proj.name || '',
+            description: proj.description || '',
+            technologies: proj.technologies || proj.tech_stack || [],
+            link: proj.link || proj.url || ''
+          })),
+
+          career_fields: Array.isArray(data.career_fields) ? data.career_fields : [],
+        }
+
+        console.log('Mapped profile data:', mappedProfile)
+        setProfileData(mappedProfile)
+        setLoading(false)
+      } catch (err) {
+        console.error('Unexpected error fetching profile:', err)
+        setError('An unexpected error occurred')
+        setLoading(false)
+      }
+    }
+
+    fetchStudentProfile()
+  }, [])
+
+  // Use fetched profile data, fallback to static data
+  const profile = profileData || studentProfileData
+
+  if (loading) {
+    return (
+      <div className="profile-page-elegant" style={{ padding: '40px', textAlign: 'center' }}>
+        <div>Loading profile...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="profile-page-elegant" style={{ padding: '40px', textAlign: 'center' }}>
+        <div style={{ color: '#ef4444' }}>{error}</div>
+        <p style={{ marginTop: '16px', color: '#64748b' }}>Using default profile data</p>
+      </div>
+    )
+  }
 
   const stats = [
     { label: 'Courses Completed', value: '2' },
     { label: 'Courses In Progress', value: '2' },
     { label: 'Mentorship Sessions', value: '45' },
-    { label: 'Certificates', value: '5' },
+    { label: 'Certificates', value: profile.certifications?.length || '5' },
   ]
 
   return (
@@ -27,7 +167,7 @@ function Profile() {
         <div className="profile-intro-card">
           <div className="profile-intro-header">
             <div className="profile-avatar-linkedin">
-              {studentProfileData.avatar}
+              {profile.avatar}
             </div>
             <button className="profile-edit-btn-icon" onClick={() => setIsEditing(!isEditing)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -39,14 +179,17 @@ function Profile() {
 
           <div className="profile-intro-info">
             <div className="profile-main-details">
-              <h1 className="profile-name-linkedin">{studentProfileData.name}</h1>
+              <h1 className="profile-name-linkedin">{profile.name}</h1>
               <p className="profile-headline-tech">
-                Flutter Developer <span>|</span> React Native Enthusiast <span>|</span> UI/UX Designer
+                {profile.career_fields && profile.career_fields.length > 0
+                  ? profile.career_fields.join(' | ')
+                  : 'Flutter Developer | React Native Enthusiast | UI/UX Designer'
+                }
               </p>
 
               <div className="profile-location-linkedin">
                 <span className="location-text">
-                  {studentProfileData.location}
+                  {profile.location}
                 </span>
                 <span className="bullet-separator">•</span>
                 <span className="contact-info-link">Contact info</span>
@@ -113,8 +256,8 @@ function Profile() {
             </button>}
           </div>
           <div className="timeline-linkedin">
-            {studentProfileData.internships && studentProfileData.internships.length > 0 ? (
-              studentProfileData.internships.map((internship) => (
+            {profile.internships && profile.internships.length > 0 ? (
+              profile.internships.map((internship) => (
                 <div key={internship.id} className="timeline-item-linkedin">
                   <div className="timeline-logo-linkedin">
                     {/* Placeholder Company Logo */}
@@ -154,8 +297,8 @@ function Profile() {
             {isEditing && <button className="section-edit-btn-elegant">Add project</button>}
           </div>
           <div className="timeline-elegant">
-            {studentProfileData.projects && studentProfileData.projects.length > 0 ? (
-              studentProfileData.projects.map((project) => (
+            {profile.projects && profile.projects.length > 0 ? (
+              profile.projects.map((project) => (
                 <div key={project.id} className="timeline-item-elegant">
                   <div className="timeline-icon-elegant">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -200,7 +343,7 @@ function Profile() {
             {isEditing && <button className="section-edit-btn-elegant">Add education</button>}
           </div>
           <div className="timeline-elegant">
-            {studentProfileData.education.map((edu) => (
+            {profile.education.map((edu) => (
               <div key={edu.id} className="timeline-item-elegant">
                 <div className="timeline-icon-elegant">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -338,7 +481,7 @@ function Profile() {
         </div>
 
       </div>
-    </div>
+    </div >
   )
 }
 
