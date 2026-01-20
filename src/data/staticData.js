@@ -169,6 +169,78 @@ export const courses = [
   },
 ]
 
+
+export const staticEnrolledCourses = [
+  {
+    id: 1,
+    name: 'Full-Stack Web Development',
+    title: 'Full-Stack Web Development',
+    category: 'Programming',
+    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+    progress: 75,
+    status: 'In Progress',
+    enrolledDate: 'Jan 15, 2024',
+    completionDate: null,
+    rating: 4.8,
+    level: 'Intermediate',
+    mentor: 'Ryan Patel',
+    mentorImage: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=150&q=80',
+    assignments: [],
+    classes: []
+  },
+  {
+    id: 2,
+    name: 'UI/UX Design Mastery',
+    title: 'UI/UX Design Mastery',
+    category: 'Design',
+    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
+    progress: 100,
+    status: 'Completed',
+    enrolledDate: 'Dec 1, 2023',
+    completionDate: 'Feb 20, 2024',
+    rating: 4.9,
+    level: 'Beginner',
+    mentor: 'Aisha Khan',
+    mentorImage: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
+    assignments: [],
+    classes: []
+  },
+  {
+    id: 3,
+    name: 'Data Science & Analytics',
+    title: 'Data Science & Analytics',
+    category: 'Data',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
+    progress: 45,
+    status: 'In Progress',
+    enrolledDate: 'Feb 10, 2024',
+    completionDate: null,
+    rating: 4.7,
+    level: 'Advanced',
+    mentor: 'Mei Chen',
+    mentorImage: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=150&q=80',
+    assignments: [],
+    classes: []
+  },
+  {
+    id: 7,
+    name: 'Mobile App Development',
+    title: 'Mobile App Development',
+    category: 'Programming',
+    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80',
+    progress: 30,
+    status: 'In Progress',
+    enrolledDate: 'Mar 1, 2024',
+    completionDate: null,
+    rating: 4.7,
+    level: 'Intermediate',
+    mentor: 'David Kim',
+    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    assignments: [],
+    classes: []
+  }
+]
+
 // Helper function to get courses by category
 export const getCoursesByCategory = (category) => {
   return courses.filter((course) => course.category === category)
@@ -1425,48 +1497,7 @@ export const studentProfileData = {
   location: 'San Francisco, CA',
   joinedDate: 'January 2024',
   avatar: 'JD',
-  enrolledCourses: [
-    {
-      id: 1,
-      name: 'Full-Stack Web Development',
-      category: 'Programming',
-      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
-      progress: 75,
-      status: 'In Progress',
-      enrolledDate: 'Jan 15, 2024',
-      completionDate: null,
-    },
-    {
-      id: 2,
-      name: 'UI/UX Design Mastery',
-      category: 'Design',
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
-      progress: 100,
-      status: 'Completed',
-      enrolledDate: 'Dec 1, 2023',
-      completionDate: 'Feb 20, 2024',
-    },
-    {
-      id: 3,
-      name: 'Data Science & Analytics',
-      category: 'Data',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
-      progress: 45,
-      status: 'In Progress',
-      enrolledDate: 'Feb 10, 2024',
-      completionDate: null,
-    },
-    {
-      id: 7,
-      name: 'Mobile App Development',
-      category: 'Programming',
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80',
-      progress: 30,
-      status: 'In Progress',
-      enrolledDate: 'Mar 1, 2024',
-      completionDate: null,
-    },
-  ],
+  enrolledCourses: staticEnrolledCourses,
   certificates: [
     {
       id: 1,

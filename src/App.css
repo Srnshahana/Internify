@@ -329,7 +329,6 @@
 .ad-banner-section {
   padding: clamp(15px, 2vw, 30px) 20px;
   /* Added horizontal padding */
-  background: #ffffff;
   overflow: hidden;
 }
 
@@ -2078,11 +2077,12 @@ h1 span {
   transition: all 0.3s ease;
   flex-shrink: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  margin-bottom: 24px;
 }
 
 .program-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .program-card-image-wrapper {
@@ -2107,12 +2107,17 @@ h1 span {
 
 .program-card-gradient-overlay {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  height: 60%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
   z-index: 2;
+  transition: background 0.3s ease;
+}
+
+.program-card:hover .program-card-gradient-overlay {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .program-card-icon-overlay {
@@ -2136,48 +2141,67 @@ h1 span {
 }
 
 .program-card-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 3;
-  padding: clamp(16px, 3vw, 24px);
-  /* Spacious padding */
-  background: rgba(255, 255, 255, 0.4);
-  /* Glass UI */
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  position: relative;
+  background: #ffffff;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.05);
-  /* Rising effect */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border-radius: 0 0 16px 16px;
+  z-index: 2;
 }
 
 .program-card-title {
-  font-size: clamp(13px, 1.6vw, 20px) !important;
+  font-size: 15px;
   font-weight: 700;
-  color: #0f172a;
+  color: #1e293b;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 40px;
+  line-height: 1.35;
+  margin-bottom: 2px;
 }
 
-.program-card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  line-height: 1.3;
+.program-card-mentor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.program-card-mentor-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.program-card-mentor-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 8px;
 }
 
 .program-card-details {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
 }
 
 .program-card-description {
@@ -2210,36 +2234,51 @@ h1 span {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  background: #fffbeb;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #fef3c7;
 }
 
 .program-rating-star {
   color: #fbbf24;
-  font-size: 16px;
+  font-size: 12px;
 }
+
+.program-rating-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+
 
 .program-card-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0ea5e9;
+  background: #f0f9ff;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #e0f2fe;
 }
 
 .program-card-level {
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #0ca5e9;
 }
 
 .program-card-separator {
-  color: rgba(255, 255, 255, 0.5);
+  color: #cbd5e1;
 }
 
 .program-card-duration {
-  color: rgba(255, 255, 255, 0.8);
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 [data-theme='dark'] .program-card {
@@ -2256,6 +2295,19 @@ h1 span {
   color: #f1f5f9;
 }
 
+[data-theme='dark'] .program-card-content {
+  background: #1e293b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .program-card-mentor {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .program-card-mentor-name {
+  color: #94a3b8;
+}
+
 [data-theme='dark'] .program-card-description {
   color: #94a3b8;
 }
@@ -2270,6 +2322,14 @@ h1 span {
 
 [data-theme='dark'] .program-card-meta {
   color: #94a3b8;
+}
+
+[data-theme='dark'] .program-card-gradient-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .program-card:hover .program-card-gradient-overlay {
+  background: rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 768px) {
@@ -8852,12 +8912,7 @@ h1 span {
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 16px 0 24px 0 !important;
-  /* Add padding bottom */
-  margin-bottom: 24px;
-  /* Add margin bottom */
-  /* margin-top: 0px; */
-  /* margin-top: 10px !important; */
+  padding: 16px 0 0px 0 !important;
   box-shadow: none;
   backdrop-filter: none;
   width: 100%;
@@ -14718,9 +14773,6 @@ h1 span {
   /* Ensure cards can move up without being clipped */
 }
 
-.my-classes-section .classroom-carousel {
-  width: fit-content;
-}
 
 .my-classes-header-inline {
   display: flex;
@@ -14776,12 +14828,16 @@ h1 span {
 }
 
 .my-classes-section .classroom-carousel {
-  padding: 8px 0;
-  /* Add vertical padding to prevent cards from being cut off when moving up on hover */
-  gap: 12px;
-  scroll-snap-type: none;
-  overflow: visible;
-  /* Allow cards to move up without clipping */
+  padding: 12px 20px;
+  gap: 16px;
+  scroll-snap-type: x mandatory;
+  overflow-x: auto !important;
+  overflow-y: visible;
+  display: flex !important;
+  align-items: center;
+  position: relative;
+  width: 100% !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .classroom-carousel::-webkit-scrollbar {
@@ -14789,11 +14845,11 @@ h1 span {
 }
 
 .classroom-carousel-card {
-  min-width: calc(50% - 8px);
-  max-width: calc(50% - 8px);
-  scroll-snap-align: center;
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  scroll-snap-align: start;
   flex-shrink: 0;
-  background: #000000;
   border-radius: 14px;
   padding: 16px;
   cursor: pointer;
@@ -14811,24 +14867,72 @@ h1 span {
   touch-action: manipulation;
 }
 
-.my-classes-section .classroom-carousel-card {
-  padding: 32px;
-  /* Increased padding outward */
-  min-height: 200px;
-  background: rgba(30, 41, 59, 0.3);
+/* Force specifically for the home dashboard my classes section */
+.dashboard-page-new .my-classes-section .classroom-carousel .classroom-carousel-card.program-card {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  flex: 0 0 280px !important;
+  padding: 0 !important;
+  min-height: 180px;
+  background: #ffffff;
   border: none;
-  border-radius: 20px;
+  border-radius: 16px;
   opacity: 1;
   transform: none;
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
+  margin-bottom: 40px !important;
+  margin-top: 20px !important;
   scroll-snap-align: start;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  background: #ffffff !important;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-image-wrapper {
+  height: 80px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-content {
+  padding: 10px 12px;
+  gap: 6px !important;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-title {
+  font-size: 13.5px;
+  height: auto;
+  min-height: 34px;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-mentor {
+  padding-top: 6px;
+  margin-top: 0;
+  gap: 6px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-mentor-img {
+  width: 24px;
+  height: 24px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-mentor-name {
+  font-size: 11px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-details {
+  gap: 6px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-rating {
+  font-size: 12px;
+}
+
+.my-classes-section .classroom-carousel-card .program-card-meta {
+  font-size: 11px;
+  gap: 4px;
 }
 
 .my-classes-section .classroom-carousel-card::before {
@@ -14862,14 +14966,14 @@ h1 span {
 }
 
 .my-classes-section .classroom-carousel-card:hover {
-  transform: translateY(-4px);
-  background: rgba(30, 41, 59, 0.5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px);
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.08) !important;
 }
 
 [data-theme='dark'] .my-classes-section .classroom-carousel-card:hover {
-  background: rgba(30, 41, 59, 0.55);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 [data-theme='light'] .my-classes-section .classroom-carousel-card:hover {
@@ -15429,7 +15533,7 @@ h1 span {
 .my-classes-actions {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 8px;
   padding-top: 0;
   /* Removed padding-top */
   border-top: none !important;
@@ -15447,10 +15551,10 @@ h1 span {
   justify-content: center;
   gap: 10px;
   padding: 12px 20px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(12, 165, 233, 0.1);
+  border: 1px solid rgba(12, 165, 233, 0.2);
   border-radius: 12px;
-  color: #818cf8;
+  color: #0ca5e9;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -15479,37 +15583,37 @@ h1 span {
 }
 
 [data-theme='dark'] .compact-action-btn {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.25);
-  color: #818cf8;
+  background: rgba(12, 165, 233, 0.12);
+  border-color: rgba(12, 165, 233, 0.25);
+  color: #38bdf8;
 }
 
 [data-theme='light'] .compact-action-btn {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: rgba(99, 102, 241, 0.2);
+  background: rgba(12, 165, 233, 0.08);
+  border-color: rgba(12, 165, 233, 0.2);
   color: #0ca5e9;
 }
 
 .compact-action-btn:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.4);
-  color: #a5b4fc;
+  background: rgba(12, 165, 233, 0.2);
+  border-color: rgba(12, 165, 233, 0.4);
+  color: #0284c7;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 16px rgba(12, 165, 233, 0.3);
 }
 
 [data-theme='dark'] .compact-action-btn:hover {
-  background: rgba(99, 102, 241, 0.25);
-  border-color: rgba(99, 102, 241, 0.5);
-  color: #a5b4fc;
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  background: rgba(12, 165, 233, 0.25);
+  border-color: rgba(12, 165, 233, 0.5);
+  color: #7dd3fc;
+  box-shadow: 0 6px 20px rgba(12, 165, 233, 0.4);
 }
 
 [data-theme='light'] .compact-action-btn:hover {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.35);
-  color: #0284c7;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+  background: rgba(12, 165, 233, 0.15);
+  border-color: rgba(12, 165, 233, 0.35);
+  color: #0369a1;
+  box-shadow: 0 4px 16px rgba(12, 165, 233, 0.25);
 }
 
 .compact-action-btn:active {
@@ -17103,12 +17207,12 @@ h1 span {
 }
 
 .featured-sessions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
 }
 
 .featured-session-card {
@@ -22043,14 +22147,7 @@ h1 span {
   box-shadow: none !important;
 }
 
-.progress-overview-cards-new {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
+/* Progress Overview Cards New - Styles centralized in dashboard section below */
 
 .progress-overview-section-new .progress-overview-card {
   padding: 16px !important;
@@ -31098,6 +31195,16 @@ html {
   border-bottom: none;
 }
 
+.home-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+  border: 2px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 .welcome-title-new {
   font-size: clamp(24px, 5vw, 32px);
   font-weight: 900;
@@ -31126,14 +31233,53 @@ html {
 
 .home-main-content {
   background: #ffffff;
-  border-radius: 32px 32px 0 0;
+  border-radius: 25px 25px 0 0;
   padding: 24px;
-  margin-top: -32px;
+  margin-top: -30px;
   box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 10;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Dashboard Ad Banner Specific Styles */
+.dashboard-ads-new {
+  margin: 10px 0 32px 0 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  display: block !important;
+  /* Premium Hardware-Accelerated Clipping */
+  isolation: isolate !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+.dashboard-ads-new .ad-carousel-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  background: transparent !important;
+}
+
+.dashboard-ads-new .ad-slide {
+  height: 160px !important;
+  background-color: transparent !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.dashboard-ads-new .ad-slide img {
+  height: 160px !important;
+  width: 100% !important;
+  border-radius: 20px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
 }
 
 .home-search-section {
@@ -31152,11 +31298,13 @@ html {
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  background: #ffffff;
-  border: 1.5px solid #f1f5f9;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 100px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   width: 100%;
   max-width: 600px;
 }
@@ -31245,32 +31393,29 @@ html {
 
 /* Progress Overview Cards - Compact Small Squares */
 .progress-overview-cards-new {
-  display: flex;
-  flex-direction: row;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 12px;
+  width: 100% !important;
   margin-top: 0;
-  overflow-x: auto;
-  padding: 4px 0 12px 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  padding: 4px 0 0 0;
 }
 
 .progress-overview-card {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 14px;
+  border-radius: 20px;
+  padding: 12px 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  border: 1px solid #f1f5f9;
+  border: none !important;
   display: flex;
   flex-direction: column;
-  width: 100px;
-  height: 100px;
-  min-width: 100px;
+  height: auto !important;
+  min-height: 0 !important;
   justify-content: center;
   align-items: center;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
+  width: auto !important;
 }
 
 .progress-overview-card:hover {
@@ -31297,20 +31442,22 @@ html {
 }
 
 .progress-card-title {
-  font-size: 8px;
+  font-size: 10px;
   color: #64748b;
   margin: 0;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 600;
+  text-transform: capitalize;
   letter-spacing: 0.01em;
   line-height: 1.2;
 }
 
 .progress-card-value {
-  font-size: 14px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 2px 0 0 0;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 25px;
+  font-weight: 700;
+  color: #0ca5e9 !important;
+  margin: 4px 0 0 0;
+  line-height: 1;
 }
 
 .progress-card-bar {
@@ -31337,7 +31484,6 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
 
 .section-title {
@@ -31385,32 +31531,6 @@ html {
   color: #94a3b8;
 }
 
-/* My Classes Section - Premium Carousel */
-.classroom-carousel-card {
-  flex: 0 0 85%;
-  scroll-snap-align: center;
-  background: white;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f1f5f9;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-[data-theme='dark'] .classroom-carousel-card {
-  background: rgba(30, 41, 59, 0.6);
-  backdrop-filter: blur(12px);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.classroom-carousel-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-  border-color: #0ca5e9;
-}
 
 .carousel-progress-text {
   position: absolute;
@@ -31505,8 +31625,8 @@ html {
 
 .compact-action-btn {
   flex: 1;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: rgba(12, 165, 233, 0.08);
+  border: 1px solid rgba(12, 165, 233, 0.2);
   border-radius: 12px;
   padding: 10px 12px;
   display: flex;
@@ -31514,28 +31634,28 @@ html {
   justify-content: center;
   gap: 6px;
   font-size: 13px;
-  color: #64748b;
+  color: #0ca5e9;
   cursor: pointer;
   transition: all 0.2s;
   min-height: 44px;
 }
 
 [data-theme='dark'] .compact-action-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: rgba(12, 165, 233, 0.12);
+  border-color: rgba(12, 165, 233, 0.25);
+  color: #38bdf8;
 }
 
 .compact-action-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: rgba(12, 165, 233, 0.2);
+  border-color: rgba(12, 165, 233, 0.4);
+  color: #0284c7;
 }
 
 [data-theme='dark'] .compact-action-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
+  background: rgba(12, 165, 233, 0.25);
+  border-color: rgba(12, 165, 233, 0.5);
+  color: #7dd3fc;
 }
 
 .compact-action-btn svg {
@@ -31691,10 +31811,8 @@ html {
     font-size: 22px;
   }
 
-  /* Classes carousel - show 2 cards */
-  .classroom-carousel-card {
-    flex: 0 0 48%;
-  }
+
+
 }
 
 /* ========================================
@@ -31751,9 +31869,9 @@ html {
     flex-shrink: 0;
   }
 
-  /* Progress cards - 3 columns on desktop */
+  /* Progress cards - 4 columns on desktop */
   .progress-overview-cards-new {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
   }
 
@@ -31773,10 +31891,6 @@ html {
     font-size: 24px;
   }
 
-  /* Classes carousel - show 2.5-3 cards */
-  .classroom-carousel-card {
-    flex: 0 0 32%;
-  }
 
   .compact-calendar-new {
     padding: 20px;

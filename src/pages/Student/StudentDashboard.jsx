@@ -151,7 +151,7 @@ function Dashboard({ onLogout }) {
           </nav>
 
           {/* Top Header - Reused from Landing Page */}
-          {activePage !== 'Profile' && (
+          {activePage !== 'Profile' && activePage !== 'Home' && (
             <StudentAppBar
               onLogout={onLogout}
               isTransparent={activePage === 'Home'}
