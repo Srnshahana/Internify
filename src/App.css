@@ -2167,6 +2167,39 @@ h1 span {
   margin-bottom: 2px;
 }
 
+.program-card-footer-coming-soon {
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #64748b;
+  margin-top: auto;
+}
+
+.program-card-footer-coming-soon .label {
+  font-weight: 600;
+  color: #0ea5e9;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.program-card-footer-coming-soon .content {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* MyCourses page specific card adjustments */
+.courses-grid-elegant .program-card-image-wrapper {
+  height: 80px;
+}
+
 .program-card-mentor {
   display: flex;
   align-items: center;
@@ -2472,8 +2505,8 @@ h1 span {
 }
 
 .section-title {
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 800;
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   transition: color 0.3s ease;
@@ -8884,7 +8917,8 @@ h1 span {
 }
 
 .dashboard-section {
-  margin-bottom: 48px;
+  margin-bottom: 24px;
+  /* Reduced from 48px */
   /* background: #111317; */
   border-radius: 12px;
   padding: 20px;
@@ -8918,9 +8952,26 @@ h1 span {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  margin-bottom: 20px;
+  /* Specific reduced margin */
   overflow-x: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+}
+
+/* Dim "My Classes" title and arrow */
+.my-classes-section .section-title {
+  color: #64748b;
+  /* Slate 500 */
+}
+
+[data-theme='dark'] .my-classes-section .section-title {
+  color: #94a3b8;
+  /* Slate 400 */
+}
+
+.my-classes-section .view-all-btn-arrow {
+  color: #94a3b8;
 }
 
 [data-theme='light'] .my-classes-section {
@@ -13372,7 +13423,7 @@ h1 span {
 }
 
 [data-theme='light'] .session-btn-primary {
-  background: #1a1a1a;
+  background: #0ea5e9;
   color: #ffffff;
 }
 
@@ -15558,12 +15609,115 @@ h1 span {
 /* My Classes Actions (Certifications & Study Materials buttons) */
 .my-classes-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 16px;
   padding-top: 0;
-  /* Removed padding-top */
   border-top: none !important;
-  /* Removed border line */
+}
+
+.home-modal-triggers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.home-full-width-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.home-full-width-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.btn-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-wrapper.blue {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+}
+
+.btn-icon-wrapper.green {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.home-full-width-btn span {
+  font-size: 15px;
+  font-weight: 500;
+  /* Reduced from 600 */
+  color: #64748b;
+  /* Slate 500 */
+}
+
+.btn-arrow {
+  color: #cbd5e1;
+  /* Slate 300 - much lighter/dimmer */
+  transition: transform 0.2s ease;
+}
+
+.home-full-width-btn:hover .btn-arrow {
+  transform: translateX(3px);
+  color: #94a3b8;
+  /* Darker on hover */
+}
+
+[data-theme='dark'] .home-full-width-btn {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .home-full-width-btn span {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .btn-arrow {
+  color: #475569;
+}
+
+.btn-icon-small {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.progress-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+[data-theme='dark'] .progress-modal-title {
+  color: #f8fafc;
 }
 
 [data-theme='light'] .my-classes-actions {
@@ -17215,40 +17369,82 @@ h1 span {
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  margin-top: -16px !important;
-  /* Move up a little more */
+  margin-top: 0 !important;
+  /* Removed negative margin */
+  margin-bottom: 12px !important;
+  /* Reduced bottom margin */
 }
 
 .featured-sessions-title {
-  font-size: 24px;
+  font-size: 18px;
+  /* Reduced from 24px */
   font-weight: 600;
   color: var(--text-primary);
   text-align: left;
-  margin: 0 0 28px;
-  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  /* Reduced from 28px */
+  letter-spacing: -0.01em;
 }
 
 [data-theme='dark'] .featured-sessions-title {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.featured-sessions-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 20px !important;
+.featured-sessions-carousel {
+  display: flex !important;
+  gap: 16px !important;
   width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory;
+  padding: 0 10% 20px 10% !important;
+  /* Added 10% side padding */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.featured-sessions-carousel::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari */
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.3);
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  background: var(--primary-color, #6366f1);
+  width: 24px;
+  border-radius: 4px;
 }
 
 .featured-session-card {
+  min-width: 80%;
+  scroll-snap-align: center;
   background: rgba(30, 41, 59, 0.3);
   border: none;
-  border-radius: 20px;
-  padding: 28px;
+  border-radius: 16px;
+  /* Slightly tighter radius */
+  padding: 20px;
+  /* Reduced from 24px */
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  /* Reduced from 16px */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: none;
   position: relative;
@@ -17293,18 +17489,107 @@ h1 span {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme='light'] .featured-session-card:hover {
-  background: rgba(241, 245, 249, 0.8);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+[data-theme='light'] .featured-session-card {
+  background: rgba(241, 245, 249, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Added subtle shadow back */
+}
+
+/* Fresher Jobs Banner */
+.fresher-jobs-banner {
+  /* margin: 0 0px 20px 0px; */
+  /* background: #94b1c2; Removed to allow image */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 20px;
+  /* padding: 24px 32px; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #0f172a;
+  /* Dark text */
+  position: relative;
+  overflow: hidden;
+  /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); */
+}
+
+[data-theme='dark'] .fresher-jobs-banner {
+  background: rgba(30, 41, 59, 0.4);
+  color: #f8fafc;
+}
+
+.fresher-jobs-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.fresher-jobs-text h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .fresher-jobs-text h3 {
+  color: #f8fafc;
+}
+
+.fresher-jobs-text p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .fresher-jobs-text p {
+  color: #94a3b8;
+}
+
+.fresher-jobs-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* padding: px 18px; */
+  background: #0ea5e9;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.fresher-jobs-btn:hover {
+  background: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+.fresher-jobs-lottie {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* z-index: 1; */
 }
 
 .featured-session-title {
-  font-size: 20px;
+  font-size: 17px;
+  /* Reduced from 20px */
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
-  margin: 0 0 12px;
+  margin: 0 0 8px;
+  /* Reduced from 12px */
   font-family: inherit;
   letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 [data-theme='dark'] .featured-session-title {
@@ -17312,16 +17597,19 @@ h1 span {
 }
 
 [data-theme='light'] .featured-session-title {
-  color: rgba(0, 0, 0, 0.9);
+  color: rgba(15, 23, 42, 0.9);
+  /* Darker slate for better contrast */
 }
 
 .featured-session-description {
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  /* Reduced from 14px */
+  line-height: 1.5;
+  /* Slightly tighter */
+  color: rgba(255, 255, 255, 0.75);
   margin: 0;
   flex: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 [data-theme='dark'] .featured-session-description {
@@ -27599,7 +27887,7 @@ h1 span {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #f1f5f9;
+  border: 0.5px solid #f8fafc;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
 }
@@ -28435,7 +28723,7 @@ h1 span {
 
 .certificate-title-elegant {
   font-size: clamp(16px, 2.5vw, 18px);
-  font-weight: 600;
+  font-weight: 700;
   color: #0f172a;
   margin: 0 0 12px 0;
 }
@@ -28447,8 +28735,8 @@ h1 span {
 }
 
 .certificate-issuer-label {
-  font-size: clamp(12px, 1.8vw, 13px);
-  color: #94a3b8;
+  font-size: 11px;
+  color: #64748b;
   margin: 0 0 4px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -28457,8 +28745,8 @@ h1 span {
 
 .certificate-issuer-name {
   font-size: clamp(14px, 2vw, 15px);
-  color: #475569;
-  font-weight: 600;
+  color: #334155;
+  font-weight: 500;
   margin: 0 0 16px 0;
 }
 
@@ -28540,6 +28828,56 @@ h1 span {
   }
 }
 
+/* Draggable Carousel Styles */
+.draggable-carousel {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  cursor: grab;
+  padding-bottom: 20px;
+  /* Space for shadow/hover effects */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  scroll-behavior: smooth;
+  /* Smooth scrolling for buttons */
+}
+
+.draggable-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.draggable-carousel.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  /* Instant scrolling while dragging */
+  user-select: none;
+}
+
+.draggable-carousel .carousel-slide {
+  flex: 0 0 calc(33.33% - 16px);
+  min-width: 300px;
+  /* Ensure cards don't get squished */
+}
+
+@media (max-width: 1024px) {
+  .draggable-carousel .carousel-slide {
+    flex: 0 0 calc(50% - 16px);
+  }
+}
+
+@media (max-width: 640px) {
+  .draggable-carousel .carousel-slide {
+    flex: 0 0 calc(85% - 16px);
+  }
+}
+
+/* Fix Profile Course Image Size */
+.profile-page-elegant .program-card-image-wrapper {
+  height: 100px;
+}
+
 @media (max-width: 480px) {
   .profile-stats-elegant {
     grid-template-columns: 1fr;
@@ -28602,7 +28940,7 @@ h1 span {
 }
 
 .session-btn-primary {
-  background: #0ca5e9;
+  background: #0ea5e9;
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(12, 165, 233, 0.2);
 }
@@ -29931,12 +30269,12 @@ html {
 
 .session-card-elegant {
   background: #ffffff !important;
-  border: 2px solid #e2e8f0 !important;
+  border: 1px solid #f1f5f9 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
 .session-card-elegant:hover {
-  border-color: #0ca5e9 !important;
+  border-color: #38bdf8 !important;
   box-shadow: 0 8px 24px rgba(12, 165, 233, 0.12) !important;
 }
 
@@ -29960,11 +30298,16 @@ html {
 
 /* Give sessions section a light background to distinguish from calendar */
 .sessions-section-elegant {
+  margin-top: 32px !important;
+  padding-top: 32px !important;
+  border-top: 2px solid #e2e8f0 !important;
   background: #ffffff !important;
-  padding: 24px !important;
-  border-radius: 20px !important;
-  margin-top: 24px !important;
-  border: 1px solid #f1f5f9 !important;
+  margin-left: -24px !important;
+  margin-right: -24px !important;
+  width: calc(100% + 48px) !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  border-radius: 32px 32px 0 0 !important;
 }
 
 /* Or alternative: subtle gradient background */
@@ -31261,39 +31604,56 @@ html {
   background: #ffffff;
   border-radius: 25px 25px 0 0;
   padding: 24px;
-  margin-top: -30px;
-  box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.05);
+  margin-top: -35px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 10;
   width: 100%;
   box-sizing: border-box;
-  transition: transform 0.5s cubic-bezier(0.32, 0.725, 0.32, 1), margin-top 0.5s cubic-bezier(0.32, 0.725, 0.32, 1);
-  min-height: 85vh;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, margin-top;
+  min-height: auto;
 }
 
-.home-main-content.drawer-expanded {
-  margin-top: -200px;
-  /* Reduced to keep handle visible */
-  transform: none;
+/* Infinite background extension for dragging */
+.home-main-content::after {
+  content: none;
 }
 
-.drawer-handle-container {
+.home-main-content.is-expanded {
+  transform: translateY(-200px);
+  /* Adjust based on home-top-section height */
+  margin-top: 0;
+}
+
+.home-main-content.is-dragging {
+  transition: none !important;
+  user-select: none;
+}
+
+.home-drawer-handle {
   width: 100%;
-  padding: 10px 0;
+  height: 24px;
   display: flex;
   justify-content: center;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  cursor: grab;
-  touch-action: none;
-  /* Prevent browser scrolling while dragging handle */
+  align-items: center;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 11;
 }
 
-.drawer-handle-bar {
-  width: 48px;
-  height: 5px;
-  background-color: #e2e8f0;
-  border-radius: 10px;
+.handle-line {
+  width: 40px;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.home-drawer-handle:hover .handle-line {
+  background: #cbd5e1;
 }
 
 /* Dashboard Ad Banner Specific Styles */

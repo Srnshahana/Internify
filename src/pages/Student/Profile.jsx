@@ -1,150 +1,122 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import '../../App.css'
 import { studentProfileData } from '../../data/staticData.js'
 import { courses } from '../../data/staticData.js'
 import { CertificateIcon } from '../../components/Icons.jsx'
-import supabase from '../../supabaseClient.js'
+import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+
+const useDragScroll = () => {
+  const ref = useRef(null)
+  const isDown = useRef(false)
+  const startX = useRef(0)
+  const scrollLeft = useRef(0)
+
+  const onMouseDown = (e) => {
+    isDown.current = true
+    ref.current.classList.add('is-dragging')
+    startX.current = e.pageX - ref.current.offsetLeft
+    scrollLeft.current = ref.current.scrollLeft
+  }
+  const onMouseLeave = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseUp = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseMove = (e) => {
+    if (!isDown.current) return
+    e.preventDefault()
+    const x = e.pageX - ref.current.offsetLeft
+    const walk = (x - startX.current) * 2 // Scroll speed multiplier
+    ref.current.scrollLeft = scrollLeft.current - walk
+  }
+
+  const scroll = (direction) => {
+    if (ref.current) {
+      const amount = direction === 'left' ? -320 : 320
+      ref.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
+
+  return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
+}
 
 function Profile() {
   const [isEditing, setIsEditing] = useState(false)
-  const [coursesIndex, setCoursesIndex] = useState(0)
-  const [certificatesIndex, setCertificatesIndex] = useState(0)
-  const [profileData, setProfileData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  // Fetch student profile data from database
-  useEffect(() => {
-    console.log('Fetching profile data...')
-    const fetchStudentProfile = async () => {
-      try {
-        setLoading(true)
 
-        // Get authenticated student_id from localStorage
-        const studentId = localStorage.getItem('auth_id')
+  const coursesDrag = useDragScroll()
+  const certDrag = useDragScroll()
 
-        if (!studentId) {
-          console.error('No student ID found in localStorage')
-          setError('Please log in to view your profile')
-          setLoading(false)
-          return
-        }
+  // Use global dashboard data from context
+  const { studentProfile, enrolledCourses, loading } = useDashboardData()
 
-        // Query student_details table
-        const { data, error: fetchError } = await supabase
-          .from('student_details')
-          .select('*')
-          .eq('student_id', studentId)
-          .maybeSingle()
-        console.log('Student profile data:', data)
-        if (fetchError) {
-          console.error('Error fetching student profile:', fetchError)
-          setError('Failed to load profile data')
-          setLoading(false)
-          return
-        }
+  // Helper function to ensure data is an array
+  const ensureArray = (value) => {
+    if (!value) return []
+    if (Array.isArray(value)) return value
+    return [value]
+  }
 
-        if (!data) {
-          console.log('No profile data found for student_id:', studentId)
-          // Use static data as fallback
-          setProfileData(studentProfileData)
-          setLoading(false)
-          return
-        }
-
-        console.log('Raw database data:', data)
-
-        // Helper function to ensure data is an array
-        const ensureArray = (value) => {
-          if (!value) return []
-          if (Array.isArray(value)) return value
-          // If it's a single object, wrap it in an array
-          return [value]
-        }
-
-        // Map database data to profile structure
-        const mappedProfile = {
-          student_id: data.student_id,
-          name: data.name || 'Student Name',
-          about: data.about || studentProfileData.about,
-          address: data.address || 'Location not specified',
-          profile_image: data.profile_image || studentProfileData.avatar,
-          avatar: data.profile_image ? (
-            <img src={data.profile_image} alt={data.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : studentProfileData.avatar,
-          location: data.address || 'Location not specified',
-          skills: Array.isArray(data.skills) ? data.skills : [],
-
-          // Handle education - can be object or array
-          education: ensureArray(data.education).map((edu, index) => ({
-            id: edu.id || index,
-            degree: edu.degree || '',
-            school: edu.college || edu.school || '',
-            year: edu.year || '',
-            description: edu.description || ''
-          })),
-
-          // Handle internships - can be object or array
-          internships: ensureArray(data.internships).map((internship, index) => ({
-            id: internship.id || index,
-            title: internship.job_title || internship.title || '',
-            company: internship.company || '',
-            location: internship.location || '',
-            startDate: internship.start_date || internship.startDate || '',
-            endDate: internship.end_date || internship.endDate || '',
-            description: internship.description || '',
-            skills: internship.skills || []
-          })),
-
-          // Handle certifications - can be object or array
-          certifications: ensureArray(data.certifications).map((cert, index) => ({
-            id: cert.id || index,
-            name: cert.name || cert.title || '',
-            issuer: cert.issuer || cert.organization || '',
-            date: cert.date || cert.issued_date || '',
-            description: cert.description || ''
-          })),
-
-          // Handle projects - can be object or array
-          projects: ensureArray(data.project).map((proj, index) => ({
-            id: proj.id || index,
-            title: proj.title || proj.name || '',
-            description: proj.description || '',
-            technologies: proj.technologies || proj.tech_stack || [],
-            link: proj.link || proj.url || ''
-          })),
-
-          career_fields: Array.isArray(data.career_fields) ? data.career_fields : [],
-        }
-
-        console.log('Mapped profile data:', mappedProfile)
-        setProfileData(mappedProfile)
-        setLoading(false)
-      } catch (err) {
-        console.error('Unexpected error fetching profile:', err)
-        setError('An unexpected error occurred')
-        setLoading(false)
-      }
-    }
-
-    fetchStudentProfile()
-  }, [])
+  // Map database data to profile structure (only if studentProfile exists)
+  const mappedProfile = studentProfile ? {
+    student_id: studentProfile.student_id,
+    name: studentProfile.name || 'Student Name',
+    about: studentProfile.about || studentProfileData.about,
+    address: studentProfile.address || 'Location not specified',
+    profile_image: studentProfile.profile_image || studentProfileData.avatar,
+    avatar: studentProfile.profile_image ? (
+      <img src={studentProfile.profile_image} alt={studentProfile.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    ) : studentProfileData.avatar,
+    location: studentProfile.address || 'Location not specified',
+    skills: Array.isArray(studentProfile.skills) ? studentProfile.skills : [],
+    education: ensureArray(studentProfile.education).map((edu, index) => ({
+      id: edu.id || index,
+      degree: edu.degree || '',
+      school: edu.college || edu.school || '',
+      institution: edu.college || edu.school || '',
+      year: edu.year || '',
+      startYear: edu.start_year || '',
+      endYear: edu.end_year || edu.year || '',
+      gpa: edu.gpa || '',
+      description: edu.description || ''
+    })),
+    internships: ensureArray(studentProfile.internships).map((internship, index) => ({
+      id: internship.id || index,
+      title: internship.job_title || internship.title || '',
+      company: internship.company || '',
+      location: internship.location || '',
+      startDate: internship.start_date || internship.startDate || '',
+      endDate: internship.end_date || internship.endDate || '',
+      description: internship.description || '',
+      skills: internship.skills || []
+    })),
+    certifications: ensureArray(studentProfile.certifications).map((cert, index) => ({
+      id: cert.id || index,
+      name: cert.name || cert.title || '',
+      issuer: cert.issuer || cert.organization || '',
+      date: cert.date || cert.issued_date || '',
+      description: cert.description || ''
+    })),
+    projects: ensureArray(studentProfile.project).map((proj, index) => ({
+      id: proj.id || index,
+      title: proj.title || proj.name || '',
+      description: proj.description || '',
+      technologies: proj.technologies || proj.tech_stack || [],
+      skills: proj.technologies || proj.tech_stack || [],
+      link: proj.link || proj.url || ''
+    })),
+    career_fields: Array.isArray(studentProfile.career_fields) ? studentProfile.career_fields : [],
+  } : null
 
   // Use fetched profile data, fallback to static data
-  const profile = profileData || studentProfileData
+  const profile = mappedProfile || studentProfileData
 
   if (loading) {
     return (
       <div className="profile-page-elegant" style={{ padding: '40px', textAlign: 'center' }}>
         <div>Loading profile...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="profile-page-elegant" style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ color: '#ef4444' }}>{error}</div>
-        <p style={{ marginTop: '16px', color: '#64748b' }}>Using default profile data</p>
       </div>
     )
   }
@@ -201,7 +173,6 @@ function Profile() {
             </div>
 
             <div className="profile-actions-linkedin">
-              <button className="btn-linkedin-primary">Open to work</button>
               <button className="btn-linkedin-secondary">Add profile section</button>
               <button className="btn-linkedin-tertiary">More</button>
             </div>
@@ -378,44 +349,66 @@ function Profile() {
           <div className="carousel-container">
             <button
               className="carousel-nav-btn prev"
-              onClick={() => setCoursesIndex(Math.max(0, coursesIndex - 1))}
-              disabled={coursesIndex === 0}
+              onClick={() => coursesDrag.scroll('left')}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
-            <div className="carousel-wrapper" style={{ transform: `translateX(-${coursesIndex * (100 / 3 + 2)}%)` }}>
-              {studentProfileData.enrolledCourses.map((course) => (
-                <div key={course.id} className="carousel-slide">
-                  <div className="course-card-elegant">
-                    <div className="course-image-elegant">
-                      <img src={course.image} alt={course.name} />
-                    </div>
-                    <div className="course-body-elegant">
-                      <h3 className="course-name-elegant">{course.name}</h3>
-                      <p className="course-category-elegant">{course.category}</p>
-                      <div className="course-progress-wrapper">
-                        <div className="course-progress-bar-elegant">
-                          <div
-                            className="course-progress-fill-elegant"
-                            style={{ width: `${course.progress}% ` }}
-                          />
-                        </div>
-                        <span className="course-progress-text-elegant">{course.progress}% Complete</span>
+            <div
+              className="draggable-carousel"
+              ref={coursesDrag.ref}
+              {...coursesDrag.events}
+            >
+              {enrolledCourses && enrolledCourses.length > 0 ? (
+                enrolledCourses.map((course) => (
+                  <div key={course.id} className="carousel-slide">
+                    <div className="program-card">
+                      <div className="program-card-image-wrapper">
+                        <img src={course.image} alt={course.title} className="program-card-image" draggable="false" />
                       </div>
-                      <span className="course-status-badge-elegant" data-status={course.status.toLowerCase()}>
-                        {course.status}
-                      </span>
+                      <div className="program-card-content">
+                        <h3 className="program-card-title">{course.title}</h3>
+                        <div className="program-card-mentor">
+                          <span>{course.mentor || 'Expert Mentor'}</span>
+                        </div>
+                        <div className="program-card-meta">
+                          <span className="program-card-rating">
+                            ⭐ {course.rating || 4.8}
+                          </span>
+                          <span className="program-card-level">{course.level || 'Beginner'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                studentProfileData.enrolledCourses.map((course) => (
+                  <div key={course.id} className="carousel-slide">
+                    <div className="program-card">
+                      <div className="program-card-image-wrapper">
+                        <img src={course.image} alt={course.name} className="program-card-image" draggable="false" />
+                      </div>
+                      <div className="program-card-content">
+                        <h3 className="program-card-title">{course.name}</h3>
+                        <div className="program-card-mentor">
+                          <span>Expert Mentor</span>
+                        </div>
+                        <div className="program-card-meta">
+                          <span className="program-card-rating">
+                            ⭐ 4.8
+                          </span>
+                          <span className="program-card-level">Beginner</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             <button
               className="carousel-nav-btn next"
-              onClick={() => setCoursesIndex(Math.min(studentProfileData.enrolledCourses.length - 3, coursesIndex + 1))}
-              disabled={coursesIndex >= studentProfileData.enrolledCourses.length - 3}
+              onClick={() => coursesDrag.scroll('right')}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -433,14 +426,17 @@ function Profile() {
           <div className="carousel-container">
             <button
               className="carousel-nav-btn prev"
-              onClick={() => setCertificatesIndex(Math.max(0, certificatesIndex - 1))}
-              disabled={certificatesIndex === 0}
+              onClick={() => certDrag.scroll('left')}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
-            <div className="carousel-wrapper" style={{ transform: `translateX(-${certificatesIndex * (100 / 3 + 2)}%)` }}>
+            <div
+              className="draggable-carousel"
+              ref={certDrag.ref}
+              {...certDrag.events}
+            >
               {studentProfileData.certificates.map((cert) => (
                 <div key={cert.id} className="carousel-slide">
                   <div className="certificate-card-elegant">
@@ -470,8 +466,7 @@ function Profile() {
             </div>
             <button
               className="carousel-nav-btn next"
-              onClick={() => setCertificatesIndex(Math.min(studentProfileData.certificates.length - 3, certificatesIndex + 1))}
-              disabled={certificatesIndex >= studentProfileData.certificates.length - 3}
+              onClick={() => certDrag.scroll('right')}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="9 18 15 12 9 6"></polyline>

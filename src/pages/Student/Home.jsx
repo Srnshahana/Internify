@@ -13,7 +13,11 @@ import { SearchIcon, CalendarIcon } from '../../components/Icons.jsx'
 import adds1 from '../../assets/images/adds1.png'
 import adds2 from '../../assets/images/adds2.png'
 import adds3 from '../../assets/images/adds3.png'
+import bannerImage from '../../assets/images/banner.png'
+import Lottie from 'lottie-react'
+import educationJson from '../../assets/lottie/banner.json'
 import supabase from '../../supabaseClient'
+import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
 function Home({ onNavigate, onMentorClick }) {
   // Upcoming sessions data
@@ -74,6 +78,31 @@ function Home({ onNavigate, onMentorClick }) {
   const [currentYSessions, setCurrentYSessions] = useState(0)
   const sessionsContainerRef = useRef(null)
 
+  // Featured Sessions Carousel state
+  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0)
+  const featuredSessionsRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (featuredSessionsRef.current) {
+        const scrollLeft = featuredSessionsRef.current.scrollLeft
+        const width = featuredSessionsRef.current.offsetWidth
+        const index = Math.round(scrollLeft / (width * 0.8)) // approx 80% width per card
+        setCurrentFeaturedIndex(Math.min(index, 2)) // clamp to 0-2
+      }
+    }
+
+    const ref = featuredSessionsRef.current
+    if (ref) {
+      ref.addEventListener('scroll', handleScroll)
+    }
+    return () => {
+      if (ref) {
+        ref.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [])
+
   // Ad Banner state
   const ads = [
     { id: 1, image: adds1, title: 'Internify Ad 1' },
@@ -110,79 +139,83 @@ function Home({ onNavigate, onMentorClick }) {
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [selectedProgressCard, setSelectedProgressCard] = useState(null) // 'learning-hours', 'assessment-status', 'registered-courses'
 
-  // API Data State
-  const [studentProfile, setStudentProfile] = useState(null)
-  const [liveEnrolledCourses, setLiveEnrolledCourses] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Home Drawer state
+  const [isHomeDrawerExpanded, setIsHomeDrawerExpanded] = useState(false)
+  const [dragY, setDragY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startY, setStartY] = useState(0)
 
-  // Fetch student details and enrolled courses
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const studentId = localStorage.getItem('auth_id')
+  // New Modal states
+  const [showUpcomingSessionsModal, setShowUpcomingSessionsModal] = useState(false)
+  const [showProgressGraphModal, setShowProgressGraphModal] = useState(false)
 
-        if (!studentId) {
-          console.error('No student ID found in localStorage')
-          setLoading(false)
-          return
-        }
+  const EXPAND_DISTANCE = 80 // Reduced to ensure handle stays reachable
 
-        // 1. Fetch student details
-        const { data: profileData, error: profileError } = await supabase
-          .from('student_details')
-          .select('*')
-          .eq('student_id', studentId)
-          .maybeSingle()
+  const handleDrawerDragStart = (e) => {
+    setIsDragging(true)
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    setStartY(clientY)
+  }
 
-        if (profileError) throw profileError
-        console.log('Live Student Profile Data:', profileData)
-        setStudentProfile(profileData)
+  const handleDrawerDragMove = (e) => {
+    if (!isDragging) return
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    const deltaY = clientY - startY
 
-        // 2. Fetch enrolled courses (classes_enrolled join with courses and mentors)
-        const { data: enrollments, error: enrollError } = await supabase
-          .from('classes_enrolled')
-          .select(`
-            *,
-            courses (*),
-            mentors_details (mentor_id, name, profile_image)
-          `)
-          .eq('student_id', studentId)
+    // Calculate new drag position with bounds
+    // If collapsed: can only drag up (negative deltaY)
+    // If expanded: can only drag down (positive deltaY)
+    if (!isHomeDrawerExpanded) {
+      // Collapsed state: deltaY should be <= 0, but no more than -EXPAND_DISTANCE
+      setDragY(Math.max(-EXPAND_DISTANCE, Math.min(0, deltaY)))
+    } else {
+      // Expanded state: deltaY should be >= 0, but no more than EXPAND_DISTANCE
+      setDragY(Math.min(EXPAND_DISTANCE, Math.max(0, deltaY)))
+    }
+  }
 
-        if (enrollError) throw enrollError
-        console.log('Live Enrolled Courses Data:', enrollments)
-        setLiveEnrolledCourses(enrollments || [])
+  const handleDrawerDragEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
 
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err)
-      } finally {
-        setLoading(false)
+    const threshold = EXPAND_DISTANCE / 3
+
+    if (!isHomeDrawerExpanded) {
+      // If we dragged up enough, expand
+      if (dragY < -threshold) {
+        setIsHomeDrawerExpanded(true)
+      }
+    } else {
+      // If we dragged down enough, collapse
+      if (dragY > threshold) {
+        setIsHomeDrawerExpanded(false)
       }
     }
+    setDragY(0)
+  }
 
-    fetchData()
-  }, [])
+  const toggleHomeDrawer = () => setIsHomeDrawerExpanded(!isHomeDrawerExpanded)
 
+  // Use global dashboard data from context
+  const { studentProfile, enrolledCourses: liveEnrolledCourses, loading } = useDashboardData()
 
-  // Map live enrolled courses for display
+  // Map live enrolled courses for display (context already provides transformed data)
   const liveCourses = liveEnrolledCourses.map((enrollment, idx) => {
-    const course = enrollment.courses || {}
-    const mentor = enrollment.mentors_details || {}
     return {
-      id: course.course_id || idx,
-      title: course.title || 'Unknown Course',
-      mentor: mentor.name || 'Expert Mentor',
-      mentorImage: mentor.profile_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      image: course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      id: enrollment.id || idx,
+      title: enrollment.title || 'Unknown Course',
+      mentor: enrollment.mentor || 'Expert Mentor',
+      mentorImage: enrollment.mentorImage || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      image: enrollment.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
       progress: enrollment.progress || 0,
-      rating: course.rating || 4.8,
-      level: course.skill_level || course.level || 'Beginner',
-      duration: course.duration || 12,
-      category: course.category || 'General',
-      classes: course.classes || [],
-      resources: course.resources || [],
-      assignments: course.assignments || [],
-      assignmentsCount: (course.assignments || []).length
+      rating: enrollment.rating || 4.8,
+      level: enrollment.level || 'Beginner',
+      duration: 12,
+      category: enrollment.category || 'General',
+      classes: [],
+      resources: [],
+      assignments: [],
+      assignmentsCount: 0
     }
   })
 
@@ -527,12 +560,26 @@ function Home({ onNavigate, onMentorClick }) {
       </div>
 
       <div
-        className={`home-main-content ${isDrawerExpanded ? 'drawer-expanded' : ''}`}
-        onTouchStart={handleDrawerTouchStart}
-        onTouchEnd={handleDrawerTouchEnd}
+        className={`home-main-content ${isHomeDrawerExpanded ? 'is-expanded' : ''} ${isDragging ? 'is-dragging' : ''}`}
+        style={{
+          transform: isDragging ? `translateY(${isHomeDrawerExpanded ? -EXPAND_DISTANCE + dragY : dragY}px)` : ''
+        }}
+        onMouseMove={handleDrawerDragMove}
+        onMouseUp={handleDrawerDragEnd}
+        onMouseLeave={handleDrawerDragEnd}
+        onTouchMove={handleDrawerDragMove}
+        onTouchEnd={handleDrawerDragEnd}
       >
-        <div className="drawer-handle-container" onClick={toggleDrawer}>
-          <div className="drawer-handle-bar"></div>
+        <div
+          className="home-drawer-handle"
+          onMouseDown={handleDrawerDragStart}
+          onTouchStart={handleDrawerDragStart}
+          onClick={(e) => {
+            // Only toggle if we didn't drag much
+            if (Math.abs(dragY) < 5) toggleHomeDrawer()
+          }}
+        >
+          <div className="handle-line"></div>
         </div>
 
 
@@ -606,7 +653,6 @@ function Home({ onNavigate, onMentorClick }) {
 
 
 
-
               {/* Ad Banner Section */}
               <section className="ad-banner-section dashboard-ads-new">
                 <div className="ad-carousel-container" style={{ borderRadius: '16px' }}>
@@ -644,16 +690,53 @@ function Home({ onNavigate, onMentorClick }) {
 
 
 
+              {/* High Fidelity Modal Triggers */}
+              <div className="home-modal-triggers">
+                <button className="home-full-width-btn" onClick={() => setShowUpcomingSessionsModal(true)}>
+                  <div className="btn-left">
+                    <div className="btn-icon-wrapper blue">
+                      <CalendarIcon className="btn-icon-svg" />
+                    </div>
+                    <span>Upcoming Sessions</span>
+                  </div>
+                  <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+
+                <button className="home-full-width-btn" onClick={() => setShowProgressGraphModal(true)}>
+                  <div className="btn-left">
+                    <div className="btn-icon-wrapper green">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                      </svg>
+                    </div>
+                    <span>Learning Progress</span>
+                  </div>
+                  <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+
+
+
+
+
+
+
 
               <div className="my-classes-section">
-                <div className="section-header-with-button">
+                {/* <div className="section-header-with-button">
                   <h2 className="section-title">My Classes</h2>
                   <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
-                </div>
+                </div> */}
                 <div className="classroom-carousel-section">
                   <div className="classroom-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
                     {enrolledCourses.map((course, index) => (
@@ -695,6 +778,28 @@ function Home({ onNavigate, onMentorClick }) {
 
 
 
+                {/* Fresher Jobs Banner */}
+                <div className="fresher-jobs-banner" style={{ backgroundImage: `url(${bannerImage})` }}>
+                  <div className="fresher-jobs-text">
+                    {/* <h3>Ready for your first job?</h3> */}
+                    {/* <p>Explore fresher-friendly jobs curated for you</p> */}
+                    {/* <button className="fresher-jobs-btn">
+                      Explore Jobs
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </button> */}
+                  </div>
+                  <div className="fresher-jobs-lottie">
+                    <Lottie animationData={educationJson} loop={true} style={{ height: 180 }} />
+                  </div>
+                </div>
+
+
+
+
+
                 <div className="my-classes-actions">
                   <button className="compact-action-btn" onClick={handleViewCertifications}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -716,8 +821,6 @@ function Home({ onNavigate, onMentorClick }) {
                     <span>Study Materials</span>
                   </button>
                 </div>
-
-
 
 
 
@@ -768,246 +871,29 @@ function Home({ onNavigate, onMentorClick }) {
                   </div>
                 )}
               </div>
+
+
             </div>
 
-            {/* Combined "Upcoming Sessions" Stacked Card Section */}
-            <div className="stacked-sessions-wrapper">
-              <h2 className="section-title">Upcoming Sessions</h2>
-
-              <div
-                className="stacked-sessions-container"
-                onTouchStart={(e) => setStartYSessions(e.touches[0].clientY)}
-                onTouchMove={(e) => {
-                  const touchY = e.touches[0].clientY;
-                  const diff = startYSessions - touchY;
-                  if (Math.abs(diff) > 5) e.stopPropagation(); // Prevent page scroll when swiping cards
-                }}
-                onTouchEnd={(e) => {
-                  const endY = e.changedTouches[0].clientY;
-                  const diff = startYSessions - endY;
-                  if (Math.abs(diff) > 50) {
-                    // Swipe Up (Next)
-                    if (diff > 0) {
-                      setCurrentSessionIndex(prev => (prev + 1) % allCombinedSessions.length);
-                    }
-                    // Swipe Down (Prev)
-                    else {
-                      setCurrentSessionIndex(prev => (prev - 1 + allCombinedSessions.length) % allCombinedSessions.length);
-                    }
-                  }
-                }}
-              >
-                {allCombinedSessions.map((session, index) => {
-                  // Logic to determine card position
-                  let positionClass = '';
-                  const activeIndex = currentSessionIndex;
-                  const total = allCombinedSessions.length;
-
-                  // Calculate relative index
-                  const diff = (index - activeIndex + total) % total;
-
-                  if (index === activeIndex) {
-                    positionClass = 'active';
-                  } else if (diff === 1) {
-                    positionClass = 'next';
-                  } else if (diff === 2) {
-                    positionClass = 'next-2';
-                  } else {
-                    positionClass = 'hidden';
-                  }
-
-                  return (
-                    <div
-                      key={session.id || index}
-                      className={`stacked-session-card ${positionClass} ${session.isToday ? 'is-today' : ''}`}
-                    >
-                      <div className="stacked-card-header">
-                        <span className="stacked-card-label">
-                          {session.isToday ? 'Today' : 'Upcoming'}
-                        </span>
-                        <span className="stacked-card-time">
-                          {session.time} {session.period}
-                        </span>
-                      </div>
-
-                      <h3 className="stacked-card-title">{session.title || session.course}</h3>
-                      <p className="stacked-card-mentor">with {session.mentor}</p>
-
-                      {index === activeIndex && (
-                        <button className="stacked-card-join-btn">
-                          Join Session
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            {/* --------------------------------- */}
-
-
-
-
-            <div className="dashboard-section progress-graph-section compact-graph">
-              <h2 className="section-title">Learning Progress</h2>
-              <div className="progress-legend-buttons">
-                {progressLines.map((line) => {
-                  const isActive = activeProgressLine === line.name
-                  return (
-                    <button
-                      key={line.name}
-                      className={`progress-legend-button ${isActive ? 'active' : ''}`}
-                      onClick={() => {
-                        if (line.name === 'All') {
-                          setActiveProgressLine('All')
-                        } else {
-                          if (activeProgressLine === line.name) {
-                            setActiveProgressLine('All')
-                          } else {
-                            setActiveProgressLine(line.name)
-                          }
-                        }
-                      }}
-                    >
-                      <div className="progress-legend-color" style={{ background: line.color }}></div>
-                      <span className="progress-legend-label">{line.name}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="progress-chart-container">
-                <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
-                  <defs>
-                    {progressLines.map((line) => (
-                      <linearGradient key={line.gradientId} id={line.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor={line.color} stopOpacity="0.2" />
-                        <stop offset="100%" stopColor={line.color} stopOpacity="0.02" />
-                      </linearGradient>
-                    ))}
-                  </defs>
-
-                  {/* Grid lines */}
-                  {[0, 25, 50, 75, 100].map((value) => {
-                    const y = padding.top + graphHeight - (value / maxValue) * graphHeight
-                    return (
-                      <line
-                        key={`grid-${value}`}
-                        x1={padding.left}
-                        y1={y}
-                        x2={padding.left + graphWidth}
-                        y2={y}
-                        stroke="#e5e7eb"
-                        strokeWidth="1"
-                        strokeDasharray="2 4"
-                        opacity="0.4"
-                      />
-                    )
-                  })}
-
-                  {/* Y-axis labels */}
-                  {[0, 25, 50, 75, 100].map((value) => {
-                    const y = padding.top + graphHeight - (value / maxValue) * graphHeight
-                    return (
-                      <text
-                        key={`label-${value}`}
-                        x={padding.left - 12}
-                        y={y + 4}
-                        textAnchor="end"
-                        fontSize="11"
-                        fill="#6b7280"
-                        opacity="0.9"
-                        fontWeight="400"
-                      >
-                        {value}%
-                      </text>
-                    )
-                  })}
-
-                  {/* Progress lines - render each line based on active state */}
-                  {progressLines
-                    .filter((line) => activeProgressLine === 'All' || activeProgressLine === line.name)
-                    .map((line) => {
-                      const points = line.data.map((d, i) => {
-                        const x = padding.left + (i / (line.data.length - 1)) * graphWidth
-                        const y = padding.top + graphHeight - (d.value / maxValue) * graphHeight
-                        return { x, y, value: d.value }
-                      })
-
-                      const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
-                      const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
-
-                      return (
-                        <g key={line.name}>
-                          <path d={areaPath} fill={`url(#${line.gradientId})`} className="progress-area" />
-                          <path
-                            d={linePath}
-                            fill="none"
-                            stroke={line.color}
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="progress-line"
-                            opacity="0.9"
-                          />
-                          {points.map((point, i) => (
-                            <circle
-                              key={`point-${line.name}-${i}`}
-                              cx={point.x}
-                              cy={point.y}
-                              r="3.5"
-                              fill={line.color}
-                              className="progress-point"
-                              opacity="1"
-                            />
-                          ))}
-                        </g>
-                      )
-                    })}
-
-                  {/* X-axis labels */}
-                  {allProgressData.map((d, i) => {
-                    const x = padding.left + (i / (allProgressData.length - 1)) * graphWidth
-                    return (
-                      <text
-                        key={`xlabel-${i}`}
-                        x={x}
-                        y={chartHeight - padding.bottom + 20}
-                        textAnchor="middle"
-                        fontSize="11"
-                        fill="#6b7280"
-                        opacity="0.9"
-                        fontWeight="400"
-                      >
-                        {d.week}
-                      </text>
-                    )
-                  })}
-                </svg>
-              </div>
+            <div className="home-main-bottom-filler">
+              {/* This area is simplified as logic moved to modals */}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Calendar */}
-        <div className="calendar-assignments-column">
-        </div>
-      </div >
-
-      {/* Featured Sessions Section - Full Width */}
-      < div className="dashboard-section featured-sessions-section" >
-        <h2 className="featured-sessions-title">Featured Sessions</h2>
-        <div className="featured-sessions-grid">
-          <div className="featured-session-card">
-            <h3 className="featured-session-title">Free Consultation</h3>
-            <p className="featured-session-description">
-              Get a free consultation with Internify on any confusion about the platform, course selection, career guidance, or how to get started.
-            </p>
-            <div className="featured-session-footer">
-              <span className="featured-session-duration">Approx. 30 minutes</span>
-              <span className="featured-session-price">Free</span>
+        <div className="dashboard-section featured-sessions-section">
+          <h2 className="featured-sessions-title" style={{ paddingLeft: '16px' }}>Featured Sessions</h2>
+          <div className="featured-sessions-carousel" ref={featuredSessionsRef}>
+            <div className="featured-session-card">
+              <h3 className="featured-session-title">Free Consultation</h3>
+              <p className="featured-session-description">
+                Get a free consultation with Internify on any confusion about the platform, course selection, career guidance, or how to get started.
+              </p>
+              <div className="featured-session-footer">
+                <span className="featured-session-duration">Approx. 30 minutes</span>
+                <span className="featured-session-price">Free</span>
+              </div>
             </div>
-          </div>
 
           <div className="featured-session-card">
             <h3 className="featured-session-title">Work Review</h3>
@@ -1020,18 +906,28 @@ function Home({ onNavigate, onMentorClick }) {
             </div>
           </div>
 
-          <div className="featured-session-card">
-            <h3 className="featured-session-title">Interview Preparation</h3>
-            <p className="featured-session-description">
-              Some big interviews coming up? In this 1-hour session, a mentor with hiring experience will act as a technical interviewer and ask you some standard hiring questions.
-            </p>
-            <div className="featured-session-footer">
-              <span className="featured-session-duration">Approx. 60 minutes</span>
-              <span className="featured-session-price">$99</span>
+            <div className="featured-session-card">
+              <h3 className="featured-session-title">Interview Preparation</h3>
+              <p className="featured-session-description">
+                Some big interviews coming up? In this 1-hour session, a mentor with hiring experience will act as a technical interviewer and ask you some standard hiring questions.
+              </p>
+              <div className="featured-session-footer">
+                <span className="featured-session-duration">Approx. 60 minutes</span>
+                <span className="featured-session-price">$99</span>
+              </div>
             </div>
           </div>
+          <div className="carousel-dots" style={{ marginTop: '16px' }}>
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className={`carousel-dot ${index === currentFeaturedIndex ? 'active' : ''}`}
+              ></div>
+            ))}
+          </div>
         </div>
-      </div >
+      </div>
+
 
       {/* Progress Overview Modal */}
       {
@@ -1218,10 +1114,227 @@ function Home({ onNavigate, onMentorClick }) {
               </div>
             </div>
           </div>
-        )
-      }
-    </div>
+        )}
+      {/* Upcoming Sessions Modal */}
+      {showUpcomingSessionsModal && (
+        <div className="progress-modal-overlay" onClick={() => setShowUpcomingSessionsModal(false)}>
+          <div className="progress-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header">
+              <h2 className="progress-modal-title">Upcoming Sessions</h2>
+              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="progress-modal-body">
+              <div className="today-events-section">
+                <h3 className="today-title">Today's Schedule</h3>
+                <div className="today-events-list">
+                  <div className="today-event-card">
+                    <div className="event-icon sky-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                    </div>
+                    <div className="event-details">
+                      <p className="event-title">Design discussion</p>
+                      <p className="event-time">10:30-11:15</p>
+                    </div>
+                  </div>
+                  <div className="today-event-card">
+                    <div className="event-icon sky-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                    </div>
+                    <div className="event-details">
+                      <p className="event-title">Send demo to PM</p>
+                      <p className="event-time">18:00</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              <div className="upcoming-sessions-compact-new" style={{ marginTop: '24px' }}>
+                <h3 className="today-title">All Sessions</h3>
+                <div className="upcoming-sessions-list-compact">
+                  {upcomingSessions.map((session) => (
+                    <div key={session.id} className="upcoming-session-item-compact">
+                      <div className="session-time-compact">
+                        <span className="session-time-value-compact">{session.time}</span>
+                        <span className="session-time-period-compact">{session.period}</span>
+                      </div>
+                      <div className="session-info-compact">
+                        <p className="session-course-compact">{session.course}</p>
+                        <p className="session-mentor-compact">{session.mentor}</p>
+                      </div>
+                      <button className="btn-primary-compact" onClick={() => {
+                        setShowUpcomingSessionsModal(false)
+                        handleJoinUpcomingSession(session)
+                      }}>Join</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Graph Modal */}
+      {showProgressGraphModal && (
+        <div className="progress-modal-overlay" onClick={() => setShowProgressGraphModal(false)}>
+          <div className="progress-modal-content" style={{ maxWidth: '700px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header">
+              <h2 className="progress-modal-title">Learning Progress</h2>
+              <button className="progress-modal-close" onClick={() => setShowProgressGraphModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="progress-modal-body">
+              <div className="dashboard-section progress-graph-section compact-graph" style={{ margin: 0, padding: 0, background: 'transparent', boxShadow: 'none' }}>
+                <div className="progress-legend-buttons">
+                  {progressLines.map((line) => {
+                    const isActive = activeProgressLine === line.name
+                    return (
+                      <button
+                        key={line.name}
+                        className={`progress-legend-button ${isActive ? 'active' : ''}`}
+                        onClick={() => {
+                          if (line.name === 'All') {
+                            setActiveProgressLine('All')
+                          } else {
+                            if (activeProgressLine === line.name) {
+                              setActiveProgressLine('All')
+                            } else {
+                              setActiveProgressLine(line.name)
+                            }
+                          }
+                        }}
+                      >
+                        <div className="progress-legend-color" style={{ background: line.color }}></div>
+                        <span className="progress-legend-label">{line.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="progress-chart-container">
+                  <svg className="progress-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
+                    <defs>
+                      {progressLines.map((line) => (
+                        <linearGradient key={line.gradientId} id={line.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor={line.color} stopOpacity="0.2" />
+                          <stop offset="100%" stopColor={line.color} stopOpacity="0.02" />
+                        </linearGradient>
+                      ))}
+                    </defs>
+
+                    {/* Grid lines */}
+                    {[0, 25, 50, 75, 100].map((value) => {
+                      const y = padding.top + graphHeight - (value / maxValue) * graphHeight
+                      return (
+                        <line
+                          key={`grid-${value}`}
+                          x1={padding.left}
+                          y1={y}
+                          x2={padding.left + graphWidth}
+                          y2={y}
+                          stroke="#e5e7eb"
+                          strokeWidth="1"
+                          strokeDasharray="2 4"
+                          opacity="0.4"
+                        />
+                      )
+                    })}
+
+                    {/* Y-axis labels */}
+                    {[0, 25, 50, 75, 100].map((value) => {
+                      const y = padding.top + graphHeight - (value / maxValue) * graphHeight
+                      return (
+                        <text
+                          key={`label-${value}`}
+                          x={padding.left - 12}
+                          y={y + 4}
+                          textAnchor="end"
+                          fontSize="11"
+                          fill="#6b7280"
+                          opacity="0.9"
+                          fontWeight="400"
+                        >
+                          {value}%
+                        </text>
+                      )
+                    })}
+
+                    {/* Progress lines */}
+                    {progressLines
+                      .filter((line) => activeProgressLine === 'All' || activeProgressLine === line.name)
+                      .map((line) => {
+                        const points = line.data.map((d, i) => {
+                          const x = padding.left + (i / (line.data.length - 1)) * graphWidth
+                          const y = padding.top + graphHeight - (d.value / maxValue) * graphHeight
+                          return { x, y, value: d.value }
+                        })
+
+                        const areaPath = `M ${points[0].x},${padding.top + graphHeight} ${points.map(p => `L ${p.x},${p.y}`).join(' ')} L ${points[points.length - 1].x},${padding.top + graphHeight} Z`
+                        const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
+
+                        return (
+                          <g key={line.name}>
+                            <path d={areaPath} fill={`url(#${line.gradientId})`} className="progress-area" />
+                            <path
+                              d={linePath}
+                              fill="none"
+                              stroke={line.color}
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="progress-line"
+                              opacity="0.9"
+                            />
+                            {points.map((point, i) => (
+                              <circle
+                                key={`point-${line.name}-${i}`}
+                                cx={point.x}
+                                cy={point.y}
+                                r="3.5"
+                                fill={line.color}
+                                className="progress-point"
+                                opacity="1"
+                              />
+                            ))}
+                          </g>
+                        )
+                      })}
+
+                    {/* X-axis labels */}
+                    {allProgressData.map((d, i) => {
+                      const x = padding.left + (i / (allProgressData.length - 1)) * graphWidth
+                      return (
+                        <text
+                          key={`xlabel-${i}`}
+                          x={x}
+                          y={chartHeight - padding.bottom + 20}
+                          textAnchor="middle"
+                          fontSize="11"
+                          fill="#6b7280"
+                          opacity="0.9"
+                          fontWeight="400"
+                        >
+                          {d.week}
+                        </text>
+                      )
+                    })}
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
