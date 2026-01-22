@@ -139,8 +139,15 @@ function Home({ onNavigate, onMentorClick }) {
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [selectedProgressCard, setSelectedProgressCard] = useState(null) // 'learning-hours', 'assessment-status', 'registered-courses'
 
-  // Home Drawer state
+  // Home Drawer state (Starts collapsed, then expands)
   const [isHomeDrawerExpanded, setIsHomeDrawerExpanded] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHomeDrawerExpanded(true)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startY, setStartY] = useState(0)
@@ -729,14 +736,14 @@ function Home({ onNavigate, onMentorClick }) {
 
 
               <div className="my-classes-section">
-                {/* <div className="section-header-with-button">
-                  <h2 className="section-title">My Classes</h2>
+                <div className="section-header-with-button">
+                  <p className="section-title">my Classes</p>
                   <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
-                </div> */}
+                </div>
                 <div className="classroom-carousel-section">
                   <div className="classroom-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
                     {enrolledCourses.map((course, index) => (
@@ -777,7 +784,6 @@ function Home({ onNavigate, onMentorClick }) {
 
 
 
-
                 {/* Fresher Jobs Banner */}
                 <div className="fresher-jobs-banner" style={{ backgroundImage: `url(${bannerImage})` }}>
                   <div className="fresher-jobs-text">
@@ -795,6 +801,7 @@ function Home({ onNavigate, onMentorClick }) {
                     <Lottie animationData={educationJson} loop={true} style={{ height: 180 }} />
                   </div>
                 </div>
+
 
 
 
@@ -895,16 +902,16 @@ function Home({ onNavigate, onMentorClick }) {
               </div>
             </div>
 
-          <div className="featured-session-card">
-            <h3 className="featured-session-title">Work Review</h3>
-            <p className="featured-session-description">
-              In this session, a mentor will sit down with you, and give you some inputs to make your work better, be it a review, inputs on your design, or some inspiration.
-            </p>
-            <div className="featured-session-footer">
-              <span className="featured-session-duration">Approx. 45 minutes</span>
-              <span className="featured-session-price">$89</span>
+            <div className="featured-session-card">
+              <h3 className="featured-session-title">Work Review</h3>
+              <p className="featured-session-description">
+                In this session, a mentor will sit down with you, and give you some inputs to make your work better, be it a review, inputs on your design, or some inspiration.
+              </p>
+              <div className="featured-session-footer">
+                <span className="featured-session-duration">Approx. 45 minutes</span>
+                <span className="featured-session-price">$89</span>
+              </div>
             </div>
-          </div>
 
             <div className="featured-session-card">
               <h3 className="featured-session-title">Interview Preparation</h3>

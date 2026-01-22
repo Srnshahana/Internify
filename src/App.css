@@ -8946,7 +8946,7 @@ h1 span {
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 16px 0 0px 0 !important;
+  padding: 20px 0 0px 0 !important;
   box-shadow: none;
   backdrop-filter: none;
   width: 100%;
@@ -8981,12 +8981,14 @@ h1 span {
 }
 
 .my-classes-section .section-title {
-  color: var(--text-primary) !important;
-  margin: 0 0 0px !important;
+  color: #475569 !important;
+  /* Slate 600 */
+  margin-top: 10px !important;
   padding-top: 0;
-  font-size: 22px !important;
+  font-size: 16px !important;
   font-weight: 600 !important;
-  letter-spacing: -0.02em;
+  /* letter-spacing: -0.01em; */
+  text-transform: capitalize;
 }
 
 [data-theme='dark'] .my-classes-section .section-title {
@@ -14887,7 +14889,8 @@ h1 span {
 }
 
 .my-classes-section .classroom-carousel {
-  padding: 12px 20px;
+  padding: 12px 32px;
+  /* Increased padding to prevent shadow clipping */
   gap: 16px;
   scroll-snap-type: x mandatory;
   overflow-x: auto !important;
@@ -14939,8 +14942,9 @@ h1 span {
   border-radius: 16px;
   opacity: 1;
   transform: none;
-  margin-bottom: 40px !important;
-  margin-top: 20px !important;
+  /* margin-bottom: 40px !important; */
+  margin: 10px !important;
+  /* Increased margin for safer shadow spread */
   scroll-snap-align: start;
   position: relative;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -15731,10 +15735,12 @@ h1 span {
   justify-content: center;
   gap: 10px;
   padding: 12px 20px;
-  background: rgba(12, 165, 233, 0.1);
-  border: 1px solid rgba(12, 165, 233, 0.2);
+  background: #83b4e4 !important;
+  /* Powder Blue */
+  border: none !important;
   border-radius: 12px;
-  color: #0ca5e9;
+  color: #0f172a !important;
+  /* Dark Slate for contrast */
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -15762,38 +15768,14 @@ h1 span {
   left: 100%;
 }
 
-[data-theme='dark'] .compact-action-btn {
-  background: rgba(12, 165, 233, 0.12);
-  border-color: rgba(12, 165, 233, 0.25);
-  color: #38bdf8;
-}
 
-[data-theme='light'] .compact-action-btn {
-  background: rgba(12, 165, 233, 0.08);
-  border-color: rgba(12, 165, 233, 0.2);
-  color: #0ca5e9;
-}
 
 .compact-action-btn:hover {
-  background: rgba(12, 165, 233, 0.2);
-  border-color: rgba(12, 165, 233, 0.4);
-  color: #0284c7;
+  background: #90cbd3 !important;
+  /* Slightly darker powder blue */
+  color: #0f172a !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(12, 165, 233, 0.3);
-}
-
-[data-theme='dark'] .compact-action-btn:hover {
-  background: rgba(12, 165, 233, 0.25);
-  border-color: rgba(12, 165, 233, 0.5);
-  color: #7dd3fc;
-  box-shadow: 0 6px 20px rgba(12, 165, 233, 0.4);
-}
-
-[data-theme='light'] .compact-action-btn:hover {
-  background: rgba(12, 165, 233, 0.15);
-  border-color: rgba(12, 165, 233, 0.35);
-  color: #0369a1;
-  box-shadow: 0 4px 16px rgba(12, 165, 233, 0.25);
+  box-shadow: 0 4px 16px rgba(176, 224, 230, 0.3);
 }
 
 .compact-action-btn:active {
@@ -17398,7 +17380,7 @@ h1 span {
   margin: 0 !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory;
-  padding: 0 10% 20px 10% !important;
+  padding: 0 10% 0px 10% !important;
   /* Added 10% side padding */
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -17434,7 +17416,7 @@ h1 span {
 
 .featured-session-card {
   min-width: 80%;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   background: rgba(30, 41, 59, 0.3);
   border: none;
   border-radius: 16px;
@@ -18710,7 +18692,7 @@ h1 span {
 }
 
 .request-detail-section .section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 10px 0;
@@ -31680,14 +31662,14 @@ html {
 }
 
 .dashboard-ads-new .ad-slide {
-  height: 160px !important;
+  height: 120px !important;
   background-color: transparent !important;
   border-radius: 16px !important;
   overflow: hidden !important;
 }
 
 .dashboard-ads-new .ad-slide img {
-  height: 160px !important;
+  height: 120px !important;
   width: 100% !important;
   border-radius: 20px !important;
   object-fit: cover !important;
