@@ -9,28 +9,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark Theme (Default) */
-:root,
-[data-theme='dark'] {
-  --bg-primary: #030303;
-  --bg-secondary: #0f1115;
-  --bg-tertiary: #111317;
-  --bg-card: #0b0b0f;
-  --bg-card-light: rgba(206, 208, 212, 0.197);
-  --bg-hero: linear-gradient(135deg, #0c0c0e, #111317);
-  --bg-quote-box: #1f242d;
-  --text-primary: #f8fafc;
-  --text-secondary: #e5e7eb;
-  --text-tertiary: #d1d5db;
-  --text-muted: #9ca3af;
-  --text-dark: #0b0b0f;
-  --border-color: #1f242d;
-  --border-light: #334155;
-  --border-quote: #ffffff;
-}
-
-/* Light Theme - Sky Blue Palette */
-[data-theme='light'] {
+/* Light Theme (Default) */
+:root {
   --bg-primary: #ffffff;
   --bg-secondary: #f0f9ff;
   --bg-tertiary: #e0f2fe;

@@ -11,18 +11,15 @@ import '../../App.css'
 function MentorDashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('dashboard-theme')
-    return savedTheme || 'light'
-  })
+  const [theme] = useState('light')
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('dashboard-theme', theme)
-  }, [theme])
+    document.documentElement.setAttribute('data-theme', 'light')
+    localStorage.setItem('dashboard-theme', 'light')
+  }, [])
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+    // Theme toggle disabled
   }
 
   const navItems = [

@@ -12,7 +12,7 @@ function Login({ onBack, onShowSignup }) {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const theme = document.documentElement.getAttribute('data-theme') || 'dark'
+  const theme = 'light'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
