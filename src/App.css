@@ -8983,7 +8983,7 @@ h1 span {
 .my-classes-section .section-title {
   color: #475569 !important;
   /* Slate 600 */
-  margin-top: 10px !important;
+  /* margin-top: 10px !important; */
   padding-top: 0;
   font-size: 16px !important;
   font-weight: 600 !important;
@@ -14889,9 +14889,9 @@ h1 span {
 }
 
 .my-classes-section .classroom-carousel {
-  padding: 12px 32px;
-  /* Increased padding to prevent shadow clipping */
   gap: 16px;
+  padding: 12px 0 !important;
+  /* Removed side padding to rely on margin */
   scroll-snap-type: x mandatory;
   overflow-x: auto !important;
   overflow-y: visible;
@@ -14943,7 +14943,7 @@ h1 span {
   opacity: 1;
   transform: none;
   /* margin-bottom: 40px !important; */
-  margin: 10px !important;
+  margin: 5px !important;
   /* Increased margin for safer shadow spread */
   scroll-snap-align: start;
   position: relative;
@@ -14952,6 +14952,18 @@ h1 span {
   overflow: hidden;
   background: #ffffff !important;
 }
+
+.dashboard-page-new .my-classes-section .classroom-carousel .classroom-carousel-card.program-card:first-child {
+  margin-left: 25px !important;
+  /* Explicitly add margin to first card for shadow */
+}
+
+/* Fail-safe rule for first child margin */
+.my-classes-section .classroom-carousel> :first-child {
+  margin-left: 30px !important;
+}
+
+
 
 .my-classes-section .classroom-carousel-card .program-card-image-wrapper {
   height: 80px;
@@ -15615,8 +15627,10 @@ h1 span {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 16px;
-  padding-top: 0;
+  margin-top: 10px;
+  /* Closer to the cards */
+  /* padding: 0 32px; */
+  /* Match carousel padding */
   border-top: none !important;
 }
 
@@ -15735,14 +15749,14 @@ h1 span {
   justify-content: center;
   gap: 10px;
   padding: 12px 20px;
-  background: #83b4e4 !important;
-  /* Powder Blue */
-  border: none !important;
-  border-radius: 12px;
-  color: #0f172a !important;
-  /* Dark Slate for contrast */
+  background: #e6f1ff !important;
+  /* White background */
+  /* border: 1.5px solid #077db8 !important; */
+  /* Sharp Blue Border */
+  color: #077db8 !important;
+  /* Sharp Blue Text */
   font-size: 14px;
-  font-weight: 600;
+
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
@@ -15771,11 +15785,12 @@ h1 span {
 
 
 .compact-action-btn:hover {
-  background: #90cbd3 !important;
-  /* Slightly darker powder blue */
-  color: #0f172a !important;
+  background: #077db8 !important;
+  /* Solid Blue fill on hover */
+  color: #ffffff !important;
+  /* White text on hover */
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(176, 224, 230, 0.3);
+  box-shadow: 0 4px 12px rgba(7, 125, 184, 0.2);
 }
 
 .compact-action-btn:active {
@@ -17358,10 +17373,11 @@ h1 span {
 }
 
 .featured-sessions-title {
-  font-size: 18px;
-  /* Reduced from 24px */
+  font-size: 16px !important;
+  /* Reduced from 18px to match My Classes */
   font-weight: 600;
-  color: var(--text-primary);
+  color: #475569 !important;
+  /* Slate 600 */
   text-align: left;
   margin: 0 0 16px;
   /* Reduced from 28px */
@@ -17480,21 +17496,26 @@ h1 span {
 
 /* Fresher Jobs Banner */
 .fresher-jobs-banner {
-  /* margin: 0 0px 20px 0px; */
-  /* background: #94b1c2; Removed to allow image */
+  height: 100px;
   background-size: contain;
+  /* Fixed height for consistent look */
+  width: 100%;
+  background-size: cover !important;
+  /* Force cover */
   background-position: center;
+  /* margin: 0 0px 0px 0px; */
   background-repeat: no-repeat;
+  margin-top: 20px;
   border-radius: 20px;
   /* padding: 24px 32px; */
-  display: flex;
-  justify-content: space-between;
+  /* display: flex; */
+  /* justify-content: space-between; Removed */
   align-items: center;
   color: #0f172a;
-  /* Dark text */
   position: relative;
   overflow: hidden;
-  /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); */
+  padding: 24px 32px;
+  /* Restore padding for text */
 }
 
 [data-theme='dark'] .fresher-jobs-banner {
@@ -17508,6 +17529,8 @@ h1 span {
   gap: 8px;
   align-items: flex-start;
   z-index: 2;
+  max-width: 60%;
+  /* Prevent overlap with lottie */
 }
 
 .fresher-jobs-text h3 {
@@ -17559,12 +17582,20 @@ h1 span {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* z-index: 1; */
+  position: absolute;
+  /* Absolute positioning */
+  right: 10px;
+  bottom: 0;
+  height: 90%;
+  /* Scale relative to banner */
+  width: auto;
+  pointer-events: none;
+  /* Let clicks pass through if needed */
 }
 
 .featured-session-title {
-  font-size: 17px;
-  /* Reduced from 20px */
+  font-size: 15px;
+  /* Reduced from 17px */
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
   margin: 0 0 8px;
@@ -17636,7 +17667,7 @@ h1 span {
 }
 
 .featured-session-price {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #818cf8;
   letter-spacing: -0.02em;
@@ -21915,7 +21946,7 @@ h1 span {
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
-  padding-bottom: 80px;
+  /* padding-bottom: 80px; Removed to fix bottom gap */
 }
 
 [data-theme='light'] .dashboard-layout-new {
@@ -31662,14 +31693,14 @@ html {
 }
 
 .dashboard-ads-new .ad-slide {
-  height: 120px !important;
+  height: 180px !important;
   background-color: transparent !important;
   border-radius: 16px !important;
   overflow: hidden !important;
 }
 
 .dashboard-ads-new .ad-slide img {
-  height: 120px !important;
+  height: 180px !important;
   width: 100% !important;
   border-radius: 20px !important;
   object-fit: cover !important;
