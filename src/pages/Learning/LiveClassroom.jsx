@@ -2,7 +2,19 @@ import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
 
 function LiveClassroom({ course, onBack, userRole = 'student' }) {
-  const [activeSessionId, setActiveSessionId] = useState(2)
+  // Use course.sessions (new) or course.classes (legacy)
+  const initialSessions = course?.sessions || course?.classes || [
+    { id: 1, title: 'Introduction & Setup', status: 'completed' },
+    { id: 2, title: 'Components & Props', status: 'upcoming' },
+    { id: 3, title: 'State & Hooks', status: 'upcoming' },
+  ]
+
+  // Find first pending or default to first session ID
+  const firstPendingId = initialSessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
+    initialSessions.find(s => s.sessionId)?.sessionId ||
+    initialSessions[0]?.id || 1
+
+  const [activeSessionId, setActiveSessionId] = useState(firstPendingId)
   const [messageInput, setMessageInput] = useState('')
   const [showAssessmentForm, setShowAssessmentForm] = useState(false)
   const [newAssessment, setNewAssessment] = useState({
@@ -87,13 +99,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     mentor: 'Sarah Chen',
   }
 
-  const [sessions, setSessions] = useState([
-    { id: 1, title: 'Introduction & Setup', status: 'completed' },
-    { id: 2, title: 'Components & Props', status: 'upcoming' },
-    { id: 3, title: 'State & Hooks', status: 'upcoming' },
-    { id: 4, title: 'Routing & Navigation', status: 'upcoming' },
-    { id: 5, title: 'Project Wrap-up', status: 'upcoming' },
-  ])
+  const [sessions, setSessions] = useState(initialSessions)
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
   const visibleMessages = messages.filter((m) => m.sectionId === activeSession.id)
@@ -395,7 +401,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
           <div className="live-avatar-circle"></div>
           <div className="live-avatar-circle second"></div>
         </button>
-        <div className="live-topbar-title">Classroom name</div>
+        <div className="live-topbar-title">{classroom.title}</div>
         <button
           type="button"
           className="live-topbar-chat"

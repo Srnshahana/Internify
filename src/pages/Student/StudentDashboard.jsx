@@ -14,7 +14,7 @@ import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import '../../App.css'
 
-function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, selectedMentor, setSelectedMentor, navItems, renderPage }) {
+function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, selectedMentor, setSelectedMentor, navItems, renderPage }) {
   const { loading } = useDashboardData()
 
   if (loading) {
@@ -44,7 +44,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
-      {!isLiveClassroomActive && (
+      {!isLiveClassroomActive && !isCourseDetailActive && (
         <>
           {/* Bottom Navigation Bar */}
           <nav className="premium-bottom-nav">
@@ -99,6 +99,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 function Dashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
+  const [isCourseDetailActive, setIsCourseDetailActive] = useState(false)
   const [selectedMentor, setSelectedMentor] = useState(null)
   const [theme] = useState('light')
 
@@ -122,7 +123,7 @@ function Dashboard({ onLogout }) {
   const renderPage = (page) => {
     switch (page) {
       case 'Home':
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} />
+        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} />
       case 'Classrooms':
         return (
           <MyCourses
@@ -130,6 +131,7 @@ function Dashboard({ onLogout }) {
             onBack={() => setActivePage('Home')}
             onEnterClassroom={() => setIsLiveClassroomActive(true)}
             onMentorClick={setSelectedMentor}
+            setIsCourseDetailActive={setIsCourseDetailActive}
           />
         )
       case 'Calendar':
@@ -164,6 +166,7 @@ function Dashboard({ onLogout }) {
         setActivePage={setActivePage}
         isLiveClassroomActive={isLiveClassroomActive}
         setIsLiveClassroomActive={setIsLiveClassroomActive}
+        isCourseDetailActive={isCourseDetailActive}
         selectedMentor={selectedMentor}
         setSelectedMentor={setSelectedMentor}
         navItems={navItems}

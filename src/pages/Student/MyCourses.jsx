@@ -1,11 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
 import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorClick }) {
+function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorClick, setIsCourseDetailActive }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
+
+  useEffect(() => {
+    if (setIsCourseDetailActive) {
+      setIsCourseDetailActive(!!selectedCourse)
+    }
+  }, [selectedCourse, setIsCourseDetailActive])
 
   // Use global dashboard data from context
   const { enrolledCourses, loading } = useDashboardData()
@@ -172,7 +178,11 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
                     {/* Attached Coming Soon Footer */}
                     <div className="program-card-footer-coming-soon">
                       <span className="label">Ongoing Session</span>
-                      <span className="content">Module 1</span>
+                      <span className="content">
+                        {course.sessions?.find(s => s.status === 'pending')?.title ||
+                          course.sessions?.[0]?.title ||
+                          'Module 1'}
+                      </span>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
                         <polyline points="9 18 15 12 9 6"></polyline>
                       </svg>

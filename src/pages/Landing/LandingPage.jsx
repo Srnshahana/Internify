@@ -595,7 +595,7 @@ export default function LandingPage({
       )}
 
       <section className="elegant-hero">
-        <div className="hero-blur-bg"></div>
+        {/* <div className="hero-blur-bg"></div> */}
         <div className="hero-glass-card">
           <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
 
@@ -612,7 +612,7 @@ export default function LandingPage({
               <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
             </div>
 
-            <div className="suggestion-tags">
+            {/* <div className="suggestion-tags">
               {['Career Guidance',
                 'Tech & Digital',
                 'Content Creation',
@@ -627,55 +627,55 @@ export default function LandingPage({
                     {tag}
                   </button>
                 ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
 
 
       <section className="elegant-programs-section">
-        <h2 className="programs-heading-small">Top rated programs</h2>
-        <div className="programs-grid-elegant">
-          {latestSkills.slice(0, 4).map((skill) => {
-            const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
-            const rating = courseData?.rating || 4.5
-            const level = courseData?.level || 'Intermediate'
-            const duration = courseData?.duration || 12
-            const durationHours = duration * 5
+        <h2 className="programs-heading-small landing-section-title" style={{ paddingLeft: '0%' }}>Top rated programs</h2>
 
-            return (
-              <div
-                className="program-card"
-                key={skill.id || skill.name}
-                onClick={() => handleNavSearch(skill.name)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="program-card-image-wrapper">
-                  <img src={skill.image} alt={skill.name} className="program-card-image" />
-                  <div className="program-card-gradient-overlay"></div>
+        <div className="landing-carousel-container">
+          <div className="classroom-carousel">
+            {latestSkills.slice(0, 4).map((skill) => {
+              const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
+              const rating = courseData?.rating || 4.5
+              const level = courseData?.level || 'Intermediate'
+              const duration = courseData?.duration || 12
+
+              return (
+                <div
+                  className="classroom-carousel-card landing-program-card"
+                  key={skill.id || skill.name}
+                  onClick={() => handleNavSearch(skill.name)}
+                >
+                  <div className="program-card-image-wrapper">
+                    <img src={skill.image} alt={skill.name} className="program-card-image" />
+                    <div className="program-card-gradient-overlay"></div>
+                  </div>
                   <div className="program-card-content">
                     <h3 className="program-card-title">{skill.name}</h3>
+
                     <div className="program-card-details">
-                      {rating && (
-                        <div className="program-card-rating">
-                          <span className="program-rating-star">★</span>
-                          <span className="program-rating-value">{rating}</span>
-                        </div>
-                      )}
+                      <div className="program-card-rating">
+                        <span className="program-rating-star">★</span>
+                        <span className="program-rating-value">{rating}</span>
+                      </div>
                       <div className="program-card-meta">
                         <span className="program-card-level">{level}</span>
                         <span className="program-card-separator">•</span>
-                        <span className="program-card-duration">{durationHours}h</span>
+                        <span className="program-card-duration">{duration} Weeks</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
-        <div className="view-more-container" onClick={() => navigate('/explore')}>
+        <div className="view-more-container" onClick={() => navigate('/explore')} style={{ paddingRight: '5%' }}>
           <span>View more</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>

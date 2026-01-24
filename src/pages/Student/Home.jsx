@@ -18,8 +18,26 @@ import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import { useNavigate } from 'react-router-dom' // Added this import for useNavigate
 
-function Home({ onNavigate, onMentorClick }) {
+function Home({ onNavigate, onMentorClick, setIsCourseDetailActive }) {
+  const [activeTab, setActiveTab] = useState('My Classes')
+  const { userProfile, studentProfile, enrolledCourses: liveEnrolledCourses, loading } = useDashboardData()
+  const navigate = useNavigate()
+
+  // Classroom/My Classes state
+  const [activeCourseIndex, setActiveCourseIndex] = useState(0)
+  const [activeCourse, setActiveCourse] = useState(null)
+  const [showCourseDetail, setShowCourseDetail] = useState(false)
+  const [showMyCourses, setShowMyCourses] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const carouselRef = useRef(null)
+
+  useEffect(() => {
+    if (setIsCourseDetailActive) {
+      setIsCourseDetailActive(showCourseDetail)
+    }
+  }, [showCourseDetail, setIsCourseDetailActive])
   // Upcoming sessions data
   // Upcoming sessions data
   const upcomingSessions = homeUpcomingSessions
@@ -114,13 +132,7 @@ function Home({ onNavigate, onMentorClick }) {
   const [isAdTransitioning, setIsAdTransitioning] = useState(true)
   const adCarouselTimerRef = useRef(null)
 
-  // Classroom/My Classes state
-  const [activeCourseIndex, setActiveCourseIndex] = useState(0)
-  const [activeCourse, setActiveCourse] = useState(null)
-  const [showCourseDetail, setShowCourseDetail] = useState(false)
-  const [showMyCourses, setShowMyCourses] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState(null)
-  const carouselRef = useRef(null)
+
 
 
   // Calendar state
@@ -203,26 +215,15 @@ function Home({ onNavigate, onMentorClick }) {
 
   const toggleHomeDrawer = () => setIsHomeDrawerExpanded(!isHomeDrawerExpanded)
 
-  // Use global dashboard data from context
-  const { studentProfile, enrolledCourses: liveEnrolledCourses, loading } = useDashboardData()
+  // Map live enrolled courses via context data
 
   // Map live enrolled courses for display (context already provides transformed data)
   const liveCourses = liveEnrolledCourses.map((enrollment, idx) => {
     return {
+      ...enrollment,
       id: enrollment.id || idx,
-      title: enrollment.title || 'Unknown Course',
-      mentor: enrollment.mentor || 'Expert Mentor',
-      mentorImage: enrollment.mentorImage || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      image: enrollment.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      progress: enrollment.progress || 0,
-      rating: enrollment.rating || 4.8,
-      level: enrollment.level || 'Beginner',
-      duration: 12,
-      category: enrollment.category || 'General',
-      classes: [],
-      resources: [],
-      assignments: [],
-      assignmentsCount: 0
+      classes: enrollment.sessions || [], // Alias sessions to classes for components expecting both
+      assignmentsCount: enrollment.assignments?.length || 0
     }
   })
 

@@ -51,6 +51,8 @@ export const DashboardDataProvider = ({ children }) => {
                 .eq('student_id', studentId)
 
             if (enrollError) throw enrollError
+            console.log('Raw enrollments:', enrollments)
+            console.log('Courses from enrollments:', enrollments?.map(e => e.courses))
 
             // Transform to consistent format
             const transformedCourses = (enrollments || []).map((enrollment, idx) => {
@@ -70,11 +72,21 @@ export const DashboardDataProvider = ({ children }) => {
                     mentorImage: mentor.profile_image,
                     progress: 0, // Can be extended with actual progress tracking
                     status: enrollment.status || 'active',
-                    nextSession: 'Coming Soon'
+                    nextSession: 'Coming Soon',
+
+                    // NEW: Sessions array
+                    sessions: course.sections?.map((section, i) => ({
+                        sessionId: `${course.course_id}-${i + 1}`,
+                        title: section.title,
+                        topics: section.topics || [],
+                        status: section.status || 'pending',
+                        completed: section.status === 'completed'
+                    })) || []
                 }
             })
 
             setEnrolledCourses(transformedCourses)
+            console.log('Enrolled Courses:', transformedCourses)
 
         } catch (err) {
             console.error('Error fetching dashboard data:', err)

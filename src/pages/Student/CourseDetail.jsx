@@ -1,9 +1,49 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import supabase from '../../supabaseClient'
 import '../../App.css'
 import LiveClassroom from '../Learning/LiveClassroom.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   const [showLiveClassroom, setShowLiveClassroom] = useState(false)
+  const { enrolledCourses } = useDashboardData()
+
+  // Try to find the latest data from context, fallback to prop
+  const contextCourse = enrolledCourses?.find(c => c.id === course?.id)
+  const [courseDetails, setCourseDetails] = useState(contextCourse || course)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // If context has the data (especially sessions), use it immediately
+    if (contextCourse) {
+      setCourseDetails(prev => ({ ...prev, ...contextCourse }))
+    }
+
+    const fetchCourseDetails = async () => {
+      if (!course?.id) return
+
+      try {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from('course_details')
+          .select('*')
+          .eq('course_id', course.id)
+          .single()
+
+        if (error) {
+          console.log('Fetching detailed info from Supabase (optional)...')
+        } else if (data) {
+          setCourseDetails(prev => ({ ...prev, ...data }))
+        }
+      } catch (err) {
+        console.error('Fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCourseDetails()
+  }, [course, contextCourse])
 
   const renderStars = (rating) => {
     const full = Math.floor(rating)
@@ -33,10 +73,10 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   if (showLiveClassroom) {
-    return <LiveClassroom course={course} onBack={() => setShowLiveClassroom(false)} userRole="student" />
+    return <LiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} userRole="student" />
   }
 
-  if (!course) {
+  if (!courseDetails) {
     return null
   }
 
@@ -57,29 +97,29 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
         {/* Hero Section */}
         <div className="course-hero-elegant">
           <div className="course-badges-elegant">
-            <span className="course-badge-elegant badge-category">{course.category}</span>
-            <span className="course-badge-elegant badge-level">{course.level}</span>
-            <span className="course-badge-elegant badge-type">{course.type}</span>
+            <span className="course-badge-elegant badge-category">{courseDetails.category}</span>
+            <span className="course-badge-elegant badge-level">{courseDetails.level}</span>
+            <span className="course-badge-elegant badge-type">{courseDetails.type}</span>
           </div>
 
-          <h2 className="course-title-elegant">{course.title}</h2>
-          <p className="course-description-elegant">{course.description}</p>
+          <h2 className="course-title-elegant">{courseDetails.title}</h2>
+          <p className="course-description-elegant">{courseDetails.description}</p>
 
           <div className="course-rating-elegant">
-            <span className="rating-stars-elegant">{renderStars(course.rating || 4.0)}</span>
-            <span className="rating-value-elegant">{course.rating || 4.0}</span>
+            <span className="rating-stars-elegant">{renderStars(courseDetails.rating || 4.0)}</span>
+            <span className="rating-value-elegant">{courseDetails.rating || 4.0}</span>
           </div>
 
           <div className="course-progress-section-elegant">
             <div className="course-progress-box-elegant">
               <div className="progress-header-elegant">
                 <span className="progress-label-elegant">Progress</span>
-                <span className="progress-percentage-elegant">{course.progress}%</span>
+                <span className="progress-percentage-elegant">{courseDetails.progress}%</span>
               </div>
               <div className="progress-bar-elegant-large">
                 <div
                   className="progress-fill-elegant-large"
-                  style={{ width: `${course.progress}%` }}
+                  style={{ width: `${courseDetails.progress}%` }}
                 ></div>
               </div>
             </div>
@@ -98,14 +138,14 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
           <h3 className="section-title-elegant">Your Mentor</h3>
           <div className="mentor-card-elegant" onClick={handleMentorClick}>
             <div className="mentor-avatar-elegant">
-              <img src={course.mentorImage} alt={course.mentor} />
+              <img src={courseDetails.mentorImage} alt={courseDetails.mentor} />
             </div>
             <div className="mentor-info-elegant">
-              <h4 className="mentor-name-elegant">{course.mentor}</h4>
+              <h4 className="mentor-name-elegant">{courseDetails.mentor}</h4>
               <p className="mentor-role-elegant">Mobile Application Developer</p>
               <div className="mentor-rating-elegant">
-                <span className="rating-stars-elegant">{renderStars(course.rating || 4.0)}</span>
-                <span>{course.rating || 4.0} Rating</span>
+                <span className="rating-stars-elegant">{renderStars(courseDetails.rating || 4.0)}</span>
+                <span>{courseDetails.rating || 4.0} Rating</span>
               </div>
             </div>
             <div className="mentor-view-icon">
@@ -123,7 +163,12 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
             <div className="info-card-elegant">
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Next Session:</span>
-                <span className="info-value-elegant">{course.nextSession}</span>
+                <span className="info-value-elegant">
+                  {courseDetails.sessions?.find(s => s.status === 'pending')?.title ||
+                    courseDetails.sessions?.[0]?.title ||
+                    courseDetails.nextSession ||
+                    'Coming Soon'}
+                </span>
               </div>
             </div>
           </div>
@@ -133,43 +178,55 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
             <div className="info-card-elegant">
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Assignments:</span>
-                <span className="info-value-elegant">{course.assignmentsCount || course.assignments?.length || 0}</span>
+                <span className="info-value-elegant">{courseDetails.assignmentsCount || courseDetails.assignments?.length || 0}</span>
               </div>
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Classes:</span>
-                <span className="info-value-elegant">{course.classes?.length || 0}</span>
+                <span className="info-value-elegant">{courseDetails.classes?.length || 0}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* All Sessions List */}
-        {course.classes && course.classes.length > 0 && (
+        {/* All Sessions List (Support both 'sessions' and legacy 'classes') */}
+        {(courseDetails.sessions || courseDetails.classes) && (
           <div className="course-section-elegant">
             <h3 className="section-title-elegant">All Sessions</h3>
-            {course.classes.map((cls) => (
-              <div key={cls.id} className={`session-item-elegant ${cls.completed ? 'completed' : ''}`}>
+            {(courseDetails.sessions || courseDetails.classes).map((session, index) => (
+              <div key={session.sessionId || session.id || index} className={`session-item-elegant ${session.completed ? 'completed' : ''}`}>
                 <div className="session-header-elegant">
-                  <h4 className="session-title-elegant">{cls.title}</h4>
-                  <span className={`session-status-elegant ${cls.completed ? 'status-completed' : 'status-pending'}`}>
-                    {cls.completed ? '✓ Completed' : '○ Pending'}
+                  <h4 className="session-title-elegant">{session.title}</h4>
+                  <span className={`session-status-elegant ${session.completed ? 'status-completed' : 'status-pending'}`}>
+                    {session.completed ? '✓ Completed' : '○ Pending'}
                   </span>
                 </div>
-                <div className="session-meta-elegant">
-                  <span>{cls.duration}</span>
-                  <span>•</span>
-                  <span>{cls.type}</span>
-                </div>
+
+                {session.topics && session.topics.length > 0 && (
+                  <div className="session-topics-list">
+                    {session.topics.map((topic, i) => (
+                      <span key={i} className="session-topic-tag">{typeof topic === 'string' ? topic : topic.name}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Legacy Fallback */}
+                {session.duration && (
+                  <div className="session-meta-elegant">
+                    <span>{session.duration}</span>
+                    <span>•</span>
+                    <span>{session.type}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
 
         {/* Assignments List */}
-        {course.assignments && course.assignments.length > 0 && (
+        {courseDetails.assignments && courseDetails.assignments.length > 0 && (
           <div className="course-section-elegant">
             <h3 className="section-title-elegant">Assignments</h3>
-            {course.assignments.map((assignment) => (
+            {courseDetails.assignments.map((assignment) => (
               <div key={assignment.id} className="assignment-item-elegant">
                 <div className="assignment-header-elegant">
                   <h4 className="assignment-title-elegant">{assignment.title}</h4>
@@ -186,10 +243,10 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
         )}
 
         {/* Resources */}
-        {course.resources && course.resources.length > 0 && (
+        {courseDetails.resources && courseDetails.resources.length > 0 && (
           <div className="course-section-elegant">
             <h3 className="section-title-elegant">Resources</h3>
-            {course.resources.map((resource) => (
+            {courseDetails.resources.map((resource) => (
               <div key={resource.id} className="resource-item-elegant">
                 <div className="resource-icon-elegant">
                   {resource.type === 'PDF' && (

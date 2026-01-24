@@ -69,7 +69,7 @@
 }
 
 .elegant-hero {
-  padding: clamp(60px, 10vw, 120px) 5% 180px;
+  padding: clamp(20px, 20%, 0px) 5% 180px;
   /* More bottom padding for sheet */
   background: #eff9ff;
   display: flex;
@@ -268,12 +268,66 @@
   box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.04);
 }
 
+/* Landing Page Carousel - Clean Implementation */
+.landing-carousel-container {
+  padding: 10px 0 40px 0;
+  background: transparent;
+  width: 100%;
+}
+
+.landing-carousel-container .classroom-carousel {
+  padding: 12px 5% !important;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.landing-carousel-container .classroom-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.landing-program-card {
+  min-width: 280px !important;
+  width: 280px !important;
+  margin: 5px !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 16px !important;
+  opacity: 1 !important;
+  transform: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  cursor: pointer;
+  display: flex !important;
+  flex-direction: column;
+  min-height: 180px;
+  /* Match Home */
+}
+
+.landing-section-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  /* Slate 600 */
+  text-transform: capitalize;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.landing-program-card .program-card-image-wrapper {
+  height: 140px !important;
+}
+
+.landing-program-card .program-card-content {
+  padding: 16px !important;
+  gap: 8px !important;
+}
+
 .programs-heading-small {
   font-size: clamp(24px, 4vw, 40px);
   /* Section H2 */
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: clamp(32px, 5vw, 60px);
   text-align: left;
 }
 
@@ -315,7 +369,7 @@
   cursor: pointer;
   color: #0ca5e9;
   font-weight: 600;
-  margin-top: clamp(10px, 2vw, 20px);
+  /* margin-top: clamp(10px, 2vw, 20px); */
   font-size: clamp(14px, 1.5vw, 18px);
   /* Clearer Body hierarchy */
   width: 100%;
@@ -328,6 +382,7 @@
 /* Ad Banner Slider */
 .ad-banner-section {
   padding: clamp(15px, 2vw, 30px) 20px;
+  background-color: #ffffff;
   /* Added horizontal padding */
   overflow: hidden;
 }
