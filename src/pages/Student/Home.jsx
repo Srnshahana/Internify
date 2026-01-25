@@ -20,10 +20,35 @@ import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import { useNavigate } from 'react-router-dom' // Added this import for useNavigate
 
-function Home({ onNavigate, onMentorClick, setIsCourseDetailActive }) {
+function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQuery }) {
   const [activeTab, setActiveTab] = useState('My Classes')
   const { userProfile, studentProfile, enrolledCourses: liveEnrolledCourses, loading } = useDashboardData()
   const navigate = useNavigate()
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      if (setSearchQuery) {
+        setSearchQuery(searchTerm.trim())
+      }
+      if (onNavigate) {
+        onNavigate('Explore')
+      }
+    }
+  }
+
+  const handleSearchClick = () => {
+    if (searchTerm.trim()) {
+      if (setSearchQuery) {
+        setSearchQuery(searchTerm.trim())
+      }
+      if (onNavigate) {
+        onNavigate('Explore')
+      }
+    }
+  }
 
   // Classroom/My Classes state
   const [activeCourseIndex, setActiveCourseIndex] = useState(0)
@@ -556,11 +581,14 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive }) {
         </div>
         <div className="home-search-section">
           <div className="home-search-bar">
-            <SearchIcon className="search-icon-home" />
+            <SearchIcon className="search-icon-home" onClick={handleSearchClick} style={{ cursor: 'pointer' }} />
             <input
               type="text"
               placeholder="Search your courses, mentors or assignments..."
               className="home-search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearch}
             />
           </div>
         </div>

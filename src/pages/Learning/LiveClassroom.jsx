@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
+import supabase from '../../supabaseClient'
 
 function LiveClassroom({ course, onBack, userRole = 'student' }) {
   // Use course.sessions (new) or course.classes (legacy)
@@ -353,39 +354,66 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     setAssessmentSubmission({ textSubmission: '', attachments: [] })
   }
 
-  const handleCompleteSession = () => {
+  const handleCompleteSession = async () => {
+    // 1. Locally update the UI state
+    const currentSession = sessions.find((s) => s.id === activeSessionId)
+    const isCurrentlyCompleted = currentSession?.status === 'completed'
+    const newCompletionStatus = !isCurrentlyCompleted
+
     setSessions((prev) => {
       if (!prev.length) return prev
 
-      const currentSession = prev.find((s) => s.id === activeSessionId)
-      const isCurrentlyCompleted = currentSession?.status === 'completed'
-
       if (isCurrentlyCompleted) {
-        // Toggle: uncomplete (back to upcoming), keep it the active one
-        return prev.map((s) => {
-          if (s.id === activeSessionId) {
-            return { ...s, status: 'upcoming' }
-          }
-          return s
-        })
+        return prev.map((s) => (s.id === activeSessionId ? { ...s, status: 'upcoming' } : s))
       }
 
-      // Mark current active session as completed and move to next session
-      const updated = prev.map((s) =>
-        s.id === activeSessionId ? { ...s, status: 'completed' } : s
-      )
-
+      const updated = prev.map((s) => (s.id === activeSessionId ? { ...s, status: 'completed' } : s))
       const currentIndex = updated.findIndex((s) => s.id === activeSessionId)
-      if (currentIndex === -1) return updated
-
-      // Find the next session in order (by index)
-      const nextIndex = updated.findIndex((_, i) => i > currentIndex)
-      if (nextIndex !== -1) {
-        setActiveSessionId(updated[nextIndex].id)
+      if (currentIndex !== -1) {
+        const nextIndex = updated.findIndex((_, i) => i > currentIndex)
+        if (nextIndex !== -1) setActiveSessionId(updated[nextIndex].id)
       }
-
       return updated
     })
+
+    // 2. Persist to course_session_progress table if mentor
+    if (userRole === 'mentor') {
+      try {
+        const mentorId = localStorage.getItem('auth_id')
+        const courseId = course?.course_id || course?.id
+        const sessionId = activeSessionId
+        // student_id might be in the course object if it's an enrollment record
+        const studentId = course?.student_id || null
+        console.log("studentId", studentId)
+        console.log("mentorId", mentorId)
+        console.log("sessionId", sessionId)
+        console.log("courseId", courseId)
+        if (!courseId || !sessionId || !mentorId) {
+          console.warn('Missing required IDs for progress update:', { courseId, sessionId, mentorId })
+          return
+        }
+
+        const { error } = await supabase
+          .from('course_session_progress')
+          .upsert({
+            course_id: courseId,
+            session_id: sessionId,
+            mentor_id: mentorId,
+            student_id: studentId,
+            is_completed: newCompletionStatus
+          }, {
+            onConflict: 'course_id,session_id,mentor_id,student_id'
+          })
+
+        if (error) {
+          console.error('Error updating session progress:', error)
+        } else {
+          console.log(`✅ Session ${sessionId} progress updated to ${newCompletionStatus}`)
+        }
+      } catch (err) {
+        console.error('Unexpected error updating session progress:', err)
+      }
+    }
   }
 
   return (

@@ -7,6 +7,7 @@
 
 
 
+/* --- NAVBAR & SHARED LAYOUT --- */
 .elegant-navbar {
   display: flex;
   justify-content: space-between;
@@ -67,6 +68,10 @@
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(12, 165, 233, 0.3);
 }
+
+/* ==========================================================================
+   LANDING PAGE STYLES
+   ========================================================================== */
 
 .elegant-hero {
   padding: clamp(20px, 20%, 0px) 5% 180px;
@@ -590,6 +595,10 @@ h1 span {
   transform: translateX(-200px);
   animation-delay: 0.8s;
 }
+
+/* ==========================================================================
+   ANIMATIONS & KEYFRAMES
+   ========================================================================== */
 
 @keyframes heroSlideSmooth {
   0% {
@@ -7100,6 +7109,10 @@ h1 span {
   }
 }
 
+/* ==========================================================================
+   AUTH PAGES (LOGIN & SIGNUP)
+   ========================================================================== */
+
 /* Login Page Styles */
 .login-page {
   min-height: 100vh;
@@ -10000,6 +10013,10 @@ h1 span {
   /* Indigo for light theme */
 }
 
+/* ==========================================================================
+   CALENDAR PAGE STYLES
+   ========================================================================== */
+
 .calendar-nav-buttons {
   display: flex;
   gap: 8px;
@@ -12456,6 +12473,10 @@ h1 span {
 }
 
 /* Live Classroom */
+/* ==========================================================================
+   LEARNING & LIVE CLASSROOM
+   ========================================================================== */
+
 .live-classroom-page {
   display: flex;
   flex-direction: column;
@@ -22089,14 +22110,15 @@ h1 span {
   width: 90%;
   max-width: 500px;
   height: 72px;
-  background: rgba(255, 255, 255, 0.05);
-  /* More transparent */
+  background: rgba(255, 255, 255, 0.7);
+  /* Increased opacity for light mode visibility */
   backdrop-filter: blur(20px);
   /* Heavy blur for glass effect */
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  /* Darker border for definition in light mode */
   border-radius: 40px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28115,6 +28137,10 @@ h1 span {
 }
 
 /* --- Intro Card --- */
+/* ==========================================================================
+   MENTOR & STUDENT PROFILE STYLES
+   ========================================================================== */
+
 .profile-intro-card {
   background: #ffffff;
   border-radius: 12px;
@@ -31626,6 +31652,10 @@ html {
 }
 
 /* Welcome Card - Landing Page Hero Style (Glassmorphism) */
+/* ==========================================================================
+   DASHBOARD HOME & CORE UI STYLES
+   ========================================================================== */
+
 .welcome-header-new {
   margin-bottom: 8px;
   padding-bottom: 0;

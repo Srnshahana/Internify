@@ -8,47 +8,39 @@ import MyCourses from './MyCourses.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, ClassroomIcon } from '../../components/Icons.jsx'
 import '../../App.css'
 
-function MentorDashboard({ onLogout }) {
-  const [activePage, setActivePage] = useState('Home')
-  const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
-  const [theme] = useState('light')
+import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'light')
-    localStorage.setItem('dashboard-theme', 'light')
-  }, [])
+function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems, renderPage }) {
+  const { loading } = useDashboardData()
 
-  const toggleTheme = () => {
-    // Theme toggle disabled
-  }
-
-  const navItems = [
-    { id: 'Home', label: 'Home', icon: HomeIcon },
-    { id: 'Classrooms', label: 'Classrooms', icon: ClassroomIcon },
-    { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
-    { id: 'Profile', label: 'Profile', icon: ProfileIcon },
-  ]
-
-  const renderPage = (page, setPage) => {
-    switch (page) {
-      case 'Home':
-        return <Home onNavigate={(pageName) => setActivePage(pageName)} />
-      case 'Classrooms':
-        return <MyCourses />
-      case 'Calendar':
-        return <Calendar />
-      case 'Profile':
-        return <Profile />
-      case 'Notification':
-        return <Notification />
-      default:
-        return <Home onNavigate={(pageName) => setActivePage(pageName)} />
-    }
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#eff9ff'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '50px',
+            height: '50px',
+            border: '4px solid #e0f2fe',
+            borderTop: '4px solid #0ea5e9',
+            borderRadius: '50%',
+            animation: 'spinner 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#0ea5e9', fontSize: '16px', fontWeight: 500 }}>Loading mentor dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
-      {!isLiveClassroomActive && (
+      {!isLiveClassroomActive && !isCourseDetailActive && (
         <>
           {/* Bottom Navigation Bar */}
           <nav className="premium-bottom-nav">
@@ -87,10 +79,67 @@ function MentorDashboard({ onLogout }) {
 
       <main className="dashboard-main-new">
         <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
-          {renderPage(activePage, setActivePage)}
+          {renderPage(activePage)}
         </div>
       </main>
     </div>
+  )
+}
+
+function MentorDashboard({ onLogout }) {
+  const [activePage, setActivePage] = useState('Home')
+  const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
+  const [isCourseDetailActive, setIsCourseDetailActive] = useState(false)
+  const [theme] = useState('light')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'light')
+    localStorage.setItem('dashboard-theme', 'light')
+  }, [])
+
+  const navItems = [
+    { id: 'Home', label: 'Home', icon: HomeIcon },
+    { id: 'Classrooms', label: 'Classrooms', icon: ClassroomIcon },
+    { id: 'Calendar', label: 'Calendar', icon: CalendarIcon },
+    { id: 'Profile', label: 'Profile', icon: ProfileIcon },
+  ]
+
+  const renderPage = (page) => {
+    switch (page) {
+      case 'Home':
+        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} />
+      case 'Classrooms':
+        return <MyCourses onBack={() => setActivePage('Home')} setIsCourseDetailActive={setIsCourseDetailActive} />
+      case 'Calendar':
+        return <Calendar />
+      case 'Profile':
+        return <Profile />
+      case 'Notification':
+        return <Notification />
+      default:
+        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} />
+    }
+  }
+
+  return (
+    <DashboardDataProvider>
+      <style>{`
+        @keyframes spinner {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+      <DashboardContent
+        onLogout={onLogout}
+        activePage={activePage}
+        setActivePage={setActivePage}
+        isLiveClassroomActive={isLiveClassroomActive}
+        setIsLiveClassroomActive={setIsLiveClassroomActive}
+        isCourseDetailActive={isCourseDetailActive}
+        setIsCourseDetailActive={setIsCourseDetailActive}
+        navItems={navItems}
+        renderPage={renderPage}
+      />
+    </DashboardDataProvider>
   )
 }
 

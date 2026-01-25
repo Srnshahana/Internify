@@ -55,10 +55,11 @@ function Signup({ onBack, onSignup }) {
 
         // 2️⃣ Insert into user table
         const { error: insertError } = await supabase
-            .from('user')
+            .from('users')
             .insert({
-                id: userId,               // ✅ REQUIRED (uuid)
-                name: fullName,
+                // id: '15',               // ✅ REQUIRED (uuid)
+                // name: fullName,
+                user_id: 15,
                 email: email,
                 role: 'student',
                 phone_number: '1234567890',

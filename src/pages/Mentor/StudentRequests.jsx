@@ -106,8 +106,8 @@ function StudentRequests({ onBack }) {
   const rejectedCount = requests.filter(r => r.status === 'Rejected').length
 
   const handleApprove = (requestId) => {
-    setRequests(prev => prev.map(req => 
-      req.id === requestId 
+    setRequests(prev => prev.map(req =>
+      req.id === requestId
         ? { ...req, status: 'Approved', approvedAt: new Date().toISOString() }
         : req
     ))
@@ -115,8 +115,8 @@ function StudentRequests({ onBack }) {
   }
 
   const handleReject = (requestId, reason) => {
-    setRequests(prev => prev.map(req => 
-      req.id === requestId 
+    setRequests(prev => prev.map(req =>
+      req.id === requestId
         ? { ...req, status: 'Rejected', rejectedAt: new Date().toISOString(), rejectionReason: reason }
         : req
     ))
@@ -124,8 +124,8 @@ function StudentRequests({ onBack }) {
   }
 
   const handleReschedule = (requestId, newDate, newTime) => {
-    setRequests(prev => prev.map(req => 
-      req.id === requestId 
+    setRequests(prev => prev.map(req =>
+      req.id === requestId
         ? { ...req, requestedDate: newDate, requestedTime: newTime }
         : req
     ))
@@ -188,7 +188,7 @@ function StudentRequests({ onBack }) {
                 <h2 className="request-student-name">{request.studentName}</h2>
                 <p className="request-student-email">{request.studentEmail}</p>
               </div>
-              <span 
+              <span
                 className="request-status-badge"
                 style={{
                   backgroundColor: `${getStatusColor(request.status)}20`,
@@ -243,8 +243,8 @@ function StudentRequests({ onBack }) {
                 </div>
               </div>
               <div className="progress-bar" style={{ marginTop: '12px' }}>
-                <div 
-                  className="progress-fill" 
+                <div
+                  className="progress-fill"
                   style={{ width: `${request.studentProgress}%` }}
                 ></div>
               </div>
@@ -261,13 +261,13 @@ function StudentRequests({ onBack }) {
               <div className="request-actions-section">
                 <h3 className="section-title">Actions</h3>
                 <div className="request-actions">
-                  <button 
+                  <button
                     className="btn-primary"
                     onClick={() => handleApprove(request.id)}
                   >
                     Approve Request
                   </button>
-                  <button 
+                  <button
                     className="btn-secondary"
                     onClick={() => {
                       const newDate = prompt('Enter new date (YYYY-MM-DD):', request.requestedDate)
@@ -279,7 +279,7 @@ function StudentRequests({ onBack }) {
                   >
                     Reschedule
                   </button>
-                  <button 
+                  <button
                     className="btn-danger"
                     onClick={() => {
                       const reason = prompt('Enter rejection reason:', 'Time slot not available')
@@ -301,7 +301,7 @@ function StudentRequests({ onBack }) {
                   This session has been approved. You can reschedule if needed.
                 </p>
                 <div className="request-actions">
-                  <button 
+                  <button
                     className="btn-secondary"
                     onClick={() => {
                       const newDate = prompt('Enter new date (YYYY-MM-DD):', request.requestedDate)
@@ -313,7 +313,7 @@ function StudentRequests({ onBack }) {
                   >
                     Reschedule
                   </button>
-                  <button 
+                  <button
                     className="btn-danger"
                     onClick={() => {
                       const reason = prompt('Enter cancellation reason:', '')
@@ -428,7 +428,7 @@ function StudentRequests({ onBack }) {
           ) : (
             filteredRequests.map((request) => {
               const statusColor = getStatusColor(request.status)
-              
+
               return (
                 <div key={request.id} className="request-card">
                   <div className="request-card-header">
@@ -441,7 +441,7 @@ function StudentRequests({ onBack }) {
                         <p className="request-student-email-small">{request.studentEmail}</p>
                       </div>
                     </div>
-                    <span 
+                    <span
                       className="request-status-badge"
                       style={{
                         backgroundColor: `${statusColor}20`,
@@ -485,7 +485,7 @@ function StudentRequests({ onBack }) {
                   </div>
 
                   <div className="request-card-actions">
-                    <button 
+                    <button
                       className="btn-secondary"
                       onClick={() => setSelectedRequest(request.id)}
                     >
@@ -493,13 +493,13 @@ function StudentRequests({ onBack }) {
                     </button>
                     {request.status === 'Pending' && (
                       <>
-                        <button 
+                        <button
                           className="btn-primary"
                           onClick={() => handleApprove(request.id)}
                         >
                           Approve
                         </button>
-                        <button 
+                        <button
                           className="btn-danger"
                           onClick={() => {
                             const reason = prompt('Enter rejection reason:', 'Time slot not available')

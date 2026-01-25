@@ -101,6 +101,7 @@ function Dashboard({ onLogout }) {
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
   const [isCourseDetailActive, setIsCourseDetailActive] = useState(false)
   const [selectedMentor, setSelectedMentor] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [theme] = useState('light')
 
   // Set theme for dashboard
@@ -123,7 +124,7 @@ function Dashboard({ onLogout }) {
   const renderPage = (page) => {
     switch (page) {
       case 'Home':
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} />
+        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
       case 'Classrooms':
         return (
           <MyCourses
@@ -140,7 +141,14 @@ function Dashboard({ onLogout }) {
         return selectedMentor ? (
           <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
         ) : (
-          <Explore onMentorClick={setSelectedMentor} />
+          <Explore
+            onMentorClick={setSelectedMentor}
+            initialQuery={searchQuery}
+            onBack={() => {
+              setActivePage('Home');
+              setSearchQuery('');
+            }}
+          />
         )
       case 'Profile':
         return <Profile />
@@ -149,7 +157,7 @@ function Dashboard({ onLogout }) {
       case 'Assessments':
         return <Assessments />
       default:
-        return <Home />
+        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
     }
   }
 

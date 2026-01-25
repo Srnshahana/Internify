@@ -209,6 +209,12 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
                   </div>
                 )}
 
+                {session.description && (
+                  <p className="session-description-elegant" style={{ fontSize: '14px', color: '#64748b', marginTop: '8px' }}>
+                    {session.description}
+                  </p>
+                )}
+
                 {/* Legacy Fallback */}
                 {session.duration && (
                   <div className="session-meta-elegant">

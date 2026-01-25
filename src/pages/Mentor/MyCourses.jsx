@@ -1,241 +1,184 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
+import CourseDetail from './CourseDetail.jsx'
+import { SearchIcon } from '../../components/Icons.jsx'
+import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-const mentorCourses = [
-  {
-    id: 1,
-    title: 'React Advanced Patterns',
-    description: 'Master advanced React patterns including hooks, context, and performance optimization.',
-    category: 'Programming',
-    level: 'Advanced',
-    type: 'Live',
-    rating: 4.8,
-    totalStudents: 15,
-    activeStudents: 12,
-    completedSessions: 45,
-    totalSessions: 60,
-    enrollments: 15,
-    status: 'Active',
-    createdAt: '2024-01-15',
-  },
-  {
-    id: 2,
-    title: 'UI/UX Design Principles',
-    description: 'Learn user-centered design principles, create stunning interfaces, and build a portfolio.',
-    category: 'Design',
-    level: 'Beginner',
-    type: 'Hybrid',
-    rating: 4.6,
-    totalStudents: 10,
-    activeStudents: 8,
-    completedSessions: 30,
-    totalSessions: 50,
-    enrollments: 10,
-    status: 'Active',
-    createdAt: '2024-02-01',
-  },
-  {
-    id: 3,
-    title: 'DSA Mastery',
-    description: 'Comprehensive Data Structures and Algorithms course for interview preparation.',
-    category: 'Programming',
-    level: 'Intermediate',
-    type: 'Live',
-    rating: 4.9,
-    totalStudents: 25,
-    activeStudents: 20,
-    completedSessions: 80,
-    totalSessions: 100,
-    enrollments: 25,
-    status: 'Active',
-    createdAt: '2023-12-10',
-  },
-  {
-    id: 4,
-    title: 'System Design Fundamentals',
-    description: 'Learn to design scalable systems and ace system design interviews.',
-    category: 'Programming',
-    level: 'Advanced',
-    type: 'Live',
-    rating: 4.7,
-    totalStudents: 8,
-    activeStudents: 5,
-    completedSessions: 20,
-    totalSessions: 40,
-    enrollments: 8,
-    status: 'Active',
-    createdAt: '2024-03-01',
-  },
-]
-
-function MyCourses({ onBack }) {
+function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
 
-  const handleEditCourse = (courseId) => {
-    console.log('Edit course:', courseId)
-    // Navigate to edit course page or open modal
+  useEffect(() => {
+    if (setIsCourseDetailActive) {
+      setIsCourseDetailActive(!!selectedCourse)
+    }
+  }, [selectedCourse, setIsCourseDetailActive])
+
+  // Use global dashboard data from context
+  const { enrolledCourses: taughtCourses, loading } = useDashboardData()
+
+  // Unique the taught courses to avoid duplicates if multiple students are enrolled
+  const uniqueTaughtCourses = taughtCourses ? Array.from(new Map(taughtCourses.map(c => [c.id, c])).values()) : []
+
+  // Home Drawer state (reused logic for consistant design)
+  const [isHomeDrawerExpanded, setIsHomeDrawerExpanded] = useState(false)
+  const [dragY, setDragY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startY, setStartY] = useState(0)
+
+  const EXPAND_DISTANCE = 80
+
+  const handleDrawerDragStart = (e) => {
+    setIsDragging(true)
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    setStartY(clientY)
   }
 
-  const handleViewEnrollments = (course) => {
-    setSelectedCourse(course)
+  const handleDrawerDragMove = (e) => {
+    if (!isDragging) return
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    const deltaY = clientY - startY
+
+    if (!isHomeDrawerExpanded) {
+      setDragY(Math.max(-EXPAND_DISTANCE, Math.min(0, deltaY)))
+    } else {
+      setDragY(Math.min(EXPAND_DISTANCE, Math.max(0, deltaY)))
+    }
   }
 
-  const handleBackFromEnrollments = () => {
-    setSelectedCourse(null)
+  const handleDrawerDragEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+    const threshold = EXPAND_DISTANCE / 3
+
+    if (!isHomeDrawerExpanded) {
+      if (dragY < -threshold) setIsHomeDrawerExpanded(true)
+    } else {
+      if (dragY > threshold) setIsHomeDrawerExpanded(false)
+    }
+    setDragY(0)
   }
 
-  if (selectedCourse) {
+  const toggleHomeDrawer = () => setIsHomeDrawerExpanded(!isHomeDrawerExpanded)
+
+  if (loading) {
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
-          <button className="back-button" onClick={handleBackFromEnrollments}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Back
-          </button>
-          <h1 className="page-title">Enrollments - {selectedCourse.title}</h1>
-        </div>
-
-        <div className="enrollments-container">
-          <div className="enrollments-header">
-            <div className="enrollment-stats">
-              <div className="enrollment-stat-card">
-                <span className="stat-label">Total Enrollments</span>
-                <span className="stat-value">{selectedCourse.enrollments}</span>
-              </div>
-              <div className="enrollment-stat-card">
-                <span className="stat-label">Active Students</span>
-                <span className="stat-value">{selectedCourse.activeStudents}</span>
-              </div>
-              <div className="enrollment-stat-card">
-                <span className="stat-label">Completion Rate</span>
-                <span className="stat-value">
-                  {Math.round((selectedCourse.completedSessions / selectedCourse.totalSessions) * 100)}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="enrollments-list">
-            {Array.from({ length: selectedCourse.enrollments }, (_, i) => {
-              const studentId = i + 1
-              const progress = Math.floor(Math.random() * 100)
-              const status = progress === 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Not Started'
-
-              return (
-                <div key={studentId} className="enrollment-card">
-                  <div className="enrollment-student-info">
-                    <div className="student-avatar">
-                      <span>{`Student ${studentId}`.charAt(0)}</span>
-                    </div>
-                    <div className="student-details">
-                      <h3 className="student-name">Student {studentId}</h3>
-                      <p className="student-email">student{studentId}@example.com</p>
-                    </div>
-                  </div>
-                  <div className="enrollment-progress">
-                    <div className="progress-header">
-                      <span className="progress-label">Progress</span>
-                      <span className="progress-percentage">{progress}%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                    <span className={`enrollment-status ${status.toLowerCase().replace(' ', '-')}`}>
-                      {status}
-                    </span>
-                  </div>
-                  <div className="enrollment-actions">
-                    <button className="btn-secondary">View Details</button>
-                    <button className="btn-primary">Message</button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+      <div className="dashboard-page-new" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <p style={{ color: '#0ea5e9', fontWeight: '500' }}>Loading courses...</p>
       </div>
     )
   }
 
+  if (selectedCourse) {
+    return (
+      <CourseDetail
+        course={selectedCourse}
+        onBack={() => setSelectedCourse(null)}
+        onMentorClick={onMentorClick}
+      />
+    )
+  }
+
+
   return (
-    <div className="classroom-page-wrapper">
-      <div className="course-detail-header">
-        <h1 className="page-title">My Courses</h1>
+    <div className="dashboard-page-new">
+      {/* Top Section matching Home design */}
+      <div className="home-top-section">
+        <div className="welcome-header-new">
+          <div className="welcome-text-container">
+            <h1 className="welcome-title-new" style={{ marginTop: 0 }}>My Courses</h1>
+            <p className="welcome-date-new">Manage and monitor your classrooms</p>
+          </div>
+        </div>
+        <div className="home-search-section">
+          <div className="home-search-bar">
+            <SearchIcon className="search-icon-home" />
+            <input
+              type="text"
+              placeholder="Search your courses..."
+              className="home-search-input"
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="classroom-container">
-        <div className="courses-grid-elegant">
-          {mentorCourses.map((course) => {
-            const completionRate = Math.round((course.completedSessions / course.totalSessions) * 100)
+      {/* Main Content Drawer */}
+      <div
+        className={`home-main-content ${isHomeDrawerExpanded ? 'is-expanded' : ''} ${isDragging ? 'is-dragging' : ''}`}
+        style={{
+          transform: isDragging ? `translateY(${isHomeDrawerExpanded ? -EXPAND_DISTANCE + dragY : dragY}px)` : '',
+          marginTop: '-35px' // Ensure overlap matches Home
+        }}
+        onMouseMove={handleDrawerDragMove}
+        onMouseUp={handleDrawerDragEnd}
+        onMouseLeave={handleDrawerDragEnd}
+        onTouchMove={handleDrawerDragMove}
+        onTouchEnd={handleDrawerDragEnd}
+      >
+        <div
+          className="home-drawer-handle"
+          onMouseDown={handleDrawerDragStart}
+          onTouchStart={handleDrawerDragStart}
+          onClick={(e) => {
+            if (Math.abs(dragY) < 5) toggleHomeDrawer()
+          }}
+        >
+          <div className="handle-line"></div>
+        </div>
 
-            return (
-              <div
-                key={course.id}
-                className="course-card-elegant"
-                onClick={() => handleViewEnrollments(course)}
-              >
-                <div className="course-image-wrapper-elegant">
-                  <img
-                    src={`https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80`} // Placeholder for now
-                    alt={course.title}
-                    className="course-image-elegant"
-                  />
-                  <div className="course-status-pill-elegant" style={{
-                    backgroundColor: course.status === 'Active' ? '#0ca5e9' : '#94a3b8'
-                  }}>
-                    {completionRate}%
-                  </div>
-                </div>
+        <div className="classroom-container" style={{ padding: '0', marginTop: '20px' }}>
+          {uniqueTaughtCourses.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
+              <p style={{ fontSize: '18px', marginBottom: '10px' }}>You aren't teaching any courses yet.</p>
+            </div>
+          ) : (
+            <div className="courses-grid-elegant" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+              {uniqueTaughtCourses.map((course, index) => {
+                return (
+                  <div
+                    key={course.id}
+                    className="program-card"
+                    onClick={() => setSelectedCourse(course)}
+                    style={{ cursor: 'pointer', height: 'auto' }}
+                  >
+                    <div className="program-card-image-wrapper">
+                      <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'} alt={course.title} className="program-card-image" />
+                      <div className="program-card-gradient-overlay"></div>
+                    </div>
 
-                <div className="course-content-elegant">
-                  <div className="course-header-elegant">
-                    <span className="course-category-elegant">{course.category}</span>
-                    <div className="course-rating-box">
-                      <span className="star-icon">★</span>
-                      <span>{course.rating}</span>
+                    <div className="program-card-content" style={{ flex: 1 }}>
+                      <h3 className="program-card-title">{course.title}</h3>
+                      <span className="program-card-mentor-name">{course.category} • {course.level || 'Expert'}</span>
+
+                      <div className="program-card-details">
+                        <div className="program-card-rating">
+                          <span className="program-rating-star">★</span>
+                          <span className="program-rating-value">{course.rating || 4.8}</span>
+                        </div>
+                        <div className="program-card-meta">
+                          <span className="program-card-level">Active</span>
+                          <span className="program-card-separator">•</span>
+                          <span className="program-card-duration">
+                            Sessions: {course.sessions?.length || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Attached Mentor Action Footer */}
+                    <div className="program-card-footer-coming-soon">
+                      <span className="label">Status</span>
+                      <span className="content">
+                        {course.status || 'Active'}
+                      </span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="compact-action-btn-small" style={{ background: 'transparent', border: 'none', color: '#0ca5e9', fontWeight: 'bold' }}>View</button>
+                      </div>
                     </div>
                   </div>
-
-                  <h3 className="course-title-elegant">{course.title}</h3>
-                  <p className="course-mentor-elegant">{course.totalStudents} Students Enrolled</p>
-
-                  <div className="course-current-session-box" style={{ borderLeft: `4px solid ${course.status === 'Active' ? '#0ca5e9' : '#94a3b8'}` }}>
-                    <span className="session-label">Mentorship Status</span>
-                    <h4 className="session-name">{course.completedSessions}/{course.totalSessions} Sessions Completed</h4>
-                    <span className="session-time">{course.status} • {course.level}</span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                    <button
-                      className="light-theme-btn-primary"
-                      style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '14px' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleViewEnrollments(course)
-                      }}
-                    >
-                      Enrollments
-                    </button>
-                    <button
-                      className="light-theme-btn-outline"
-                      style={{ flex: 1, padding: '12px', borderRadius: '10px', fontSize: '14px' }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEditCourse(course.id)
-                      }}
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

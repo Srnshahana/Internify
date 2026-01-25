@@ -12,7 +12,7 @@ export const useDashboardData = () => {
 }
 
 export const DashboardDataProvider = ({ children }) => {
-    const [studentProfile, setStudentProfile] = useState(null)
+    const [userProfile, setUserProfile] = useState(null) // Generic profile
     const [enrolledCourses, setEnrolledCourses] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -22,71 +22,146 @@ export const DashboardDataProvider = ({ children }) => {
             setLoading(true)
             setError(null)
 
-            const studentId = localStorage.getItem('auth_id')
+            const authId = localStorage.getItem('auth_id')
+            const role = localStorage.getItem('auth_user_role')
 
-            if (!studentId) {
-                console.error('No student ID found in localStorage')
+            if (!authId) {
+                console.error('No auth ID found in localStorage')
                 setLoading(false)
                 return
             }
 
-            // 1. Fetch student profile
-            const { data: profileData, error: profileError } = await supabase
-                .from('student_details')
-                .select('*')
-                .eq('student_id', studentId)
-                .maybeSingle()
+            if (role === 'mentor') {
+                // --- MENTOR FLOW ---
+                // 1. Fetch mentor profile
+                const { data: profileData, error: profileError } = await supabase
+                    .from('mentors_details')
+                    .select('*')
+                    .eq('mentor_id', authId)
+                    .maybeSingle()
 
-            if (profileError) throw profileError
-            setStudentProfile(profileData)
+                if (profileError) throw profileError
+                console.log('👨‍🏫 Mentor profile fetched:', profileData)
+                setUserProfile(profileData)
 
-            // 2. Fetch enrolled courses with full details
-            const { data: enrollments, error: enrollError } = await supabase
-                .from('classes_enrolled')
-                .select(`
-          *,
-          courses (*),
-          mentors_details (mentor_id, name, profile_image)
-        `)
-                .eq('student_id', studentId)
+                // Fetch courses taught by mentor including sessions and student info
+                const { data: enrollments, error: enrollError } = await supabase
+                    .from('classes_enrolled')
+                    .select(`
+                        *,
+                        courses (*, course_sessions (*)),
+                        student_details (student_id, name, profile_image)
+                    `)
+                    .eq('mentor_id', authId)
 
-            if (enrollError) throw enrollError
-            console.log('Raw enrollments:', enrollments)
-            console.log('Courses from enrollments:', enrollments?.map(e => e.courses))
+                if (enrollError) throw enrollError
+                console.log('📚 Mentor enrolled courses with students:', enrollments)
 
-            // Transform to consistent format
-            const transformedCourses = (enrollments || []).map((enrollment, idx) => {
-                const course = enrollment.courses || {}
-                const mentor = enrollment.mentors_details || {}
+                // Transform mentor courses with student context
+                const transformed = (enrollments || []).map((enrollment, idx) => {
+                    const course = enrollment.courses || {}
+                    const sessionsFromDb = course.course_sessions || []
+                    const student = enrollment.student_details || {}
 
-                return {
-                    id: course.course_id || idx,
-                    course_id: course.course_id,
-                    mentor_id: mentor.mentor_id,
-                    title: course.title || 'Unknown Course',
-                    category: course.category || 'General',
-                    image: course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-                    rating: course.rating || 4.8,
-                    level: course.skill_level || course.level || 'Beginner',
-                    mentor: mentor.name || 'Expert Mentor',
-                    mentorImage: mentor.profile_image,
-                    progress: 0, // Can be extended with actual progress tracking
-                    status: enrollment.status || 'active',
-                    nextSession: 'Coming Soon',
+                    return {
+                        // Enrollment context
+                        enrollment_id: enrollment.id,
+                        student_id: enrollment.student_id,
+                        student_name: student.name || 'Student',
+                        student_image: student.profile_image,
+                        mentor_id: enrollment.mentor_id,
+                        course_id: enrollment.course_id,
 
-                    // NEW: Sessions array
-                    sessions: course.sections?.map((section, i) => ({
-                        sessionId: `${course.course_id}-${i + 1}`,
-                        title: section.title,
-                        topics: section.topics || [],
-                        status: section.status || 'pending',
-                        completed: section.status === 'completed'
-                    })) || []
-                }
-            })
+                        // Course data
+                        title: course.title || 'Unknown Course',
+                        description: course.description,
+                        category: course.category,
+                        career_field: course.career_field,
+                        skill_level: course.skill_level,
+                        image:
+                            course.image ||
+                            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
 
-            setEnrolledCourses(transformedCourses)
-            console.log('Enrolled Courses:', transformedCourses)
+                        // Mentor info
+                        mentor: profileData?.name || profileData?.full_name || 'Expert Mentor',
+                        mentorImage: profileData?.profile_image,
+
+                        // Sessions
+                        sessions: sessionsFromDb
+                            .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                            .map((session) => ({
+                                id: session.id,
+                                sessionId: session.id,
+                                title: session.title,
+                                description: session.description,
+                                duration: session.duration_minutes,
+                                orderIndex: session.order_index,
+                                completed: false
+                            }))
+                    }
+                })
+
+                console.log("transformed", transformed)
+                setEnrolledCourses(transformed)
+
+            } else {
+                // --- STUDENT FLOW ---
+                // 1. Fetch student profile
+                const { data: profileData, error: profileError } = await supabase
+                    .from('student_details')
+                    .select('*')
+                    .eq('student_id', authId)
+                    .maybeSingle()
+
+                if (profileError) throw profileError
+                setUserProfile(profileData)
+
+                // 2. Fetch enrolled courses with full details including sessions
+                const { data: enrollments, error: enrollError } = await supabase
+                    .from('classes_enrolled')
+                    .select(`
+                        *,
+                        courses (*, course_sessions (*)),
+                        mentors_details (mentor_id, name, profile_image)
+                    `)
+                    .eq('student_id', authId)
+
+                if (enrollError) throw enrollError
+                const transformedCourses = (enrollments || []).map((enrollment, idx) => {
+                    const course = enrollment.courses || {}
+                    const mentor = enrollment.mentors_details || {}
+                    const sessionsFromDb = course.course_sessions || []
+
+                    return {
+                        ...enrollment,
+                        id: course.course_id || idx,
+                        course_id: course.course_id,
+                        mentor_id: mentor.mentor_id,
+                        title: course.title || 'Unknown Course',
+                        category: course.category || 'General',
+                        image: course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+                        rating: course.rating || 4.8,
+                        level: course.level || 'Beginner',
+                        mentor: mentor.name || 'Expert Mentor',
+                        mentorImage: mentor.profile_image,
+                        progress: enrollment.progress || 0,
+                        status: enrollment.status || 'active',
+                        sessions: sessionsFromDb
+                            .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                            .map((session) => ({
+                                id: session.id,
+                                sessionId: session.id,
+                                title: session.title,
+                                description: session.description,
+                                duration: session.duration_minutes,
+                                orderIndex: session.order_index,
+                                status: 'pending',
+                                completed: false
+                            }))
+                    }
+                })
+                setEnrolledCourses(transformedCourses)
+            }
 
         } catch (err) {
             console.error('Error fetching dashboard data:', err)
@@ -102,7 +177,8 @@ export const DashboardDataProvider = ({ children }) => {
     }, [])
 
     const value = {
-        studentProfile,
+        userProfile, // Replaces studentProfile to be generic
+        studentProfile: userProfile, // Legacy support
         enrolledCourses,
         loading,
         error,

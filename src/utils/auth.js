@@ -113,8 +113,8 @@ export async function getAuthenticatedUser() {
     return null
   }
 
-  // Fetch role from database
-  const role = await fetchUserRole(user.id)
+  // Fetch role from database using user email
+  const role = await fetchUserRole(user.email)
 
   // Store in localStorage for persistence
   storeAuthData({ id: user.id, role })
