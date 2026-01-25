@@ -124,6 +124,53 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     }
   }, [visibleMessages])
 
+  // Fetch initial progress from course_session_progress
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const courseId = course?.course_id || course?.id
+      // Ensure we have correct IDs based on role
+      const mentorId = userRole === 'mentor' ? localStorage.getItem('auth_id') : (course?.mentor_id || course?.mentor_details?.mentor_id)
+      const studentId = userRole === 'student' ? localStorage.getItem('auth_id') : course?.student_id
+
+      if (!courseId || !mentorId || !studentId) {
+        console.warn('Missing context IDs for progress fetch:', { courseId, mentorId, studentId })
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('course_session_progress')
+          .select('session_id, is_completed')
+          .eq('course_id', courseId)
+          .eq('mentor_id', mentorId)
+          .eq('student_id', studentId)
+
+        if (error) {
+          console.error('Error fetching session progress:', error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const progressMap = new Map(data.map(p => [Number(p.session_id), p.is_completed]))
+
+          setSessions(prev => prev.map(session => {
+            const sid = Number(session.id || session.sessionId)
+            const isCompleted = progressMap.get(sid)
+            return {
+              ...session,
+              status: isCompleted ? 'completed' : 'upcoming'
+            }
+          }))
+          console.log(`📊 Loaded progress for ${data.length} sessions`)
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching session progress:', err)
+      }
+    }
+
+    fetchProgress()
+  }, [course, userRole])
+
   const getCurrentTime = () => {
     const now = new Date()
     return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
