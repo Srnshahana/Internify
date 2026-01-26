@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
 import supabase from '../../supabaseClient'
+import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
 function LiveClassroom({ course, onBack, userRole = 'student' }) {
+  const { refetch } = useDashboardData()
+
+  // Define chatId from the enrollment
+  const chatId = course?.id  // enrollment ID
+
+  // Current user ID from local storage
+  const currentUserId = localStorage.getItem('auth_id')
+
   // Use course.sessions (new) or course.classes (legacy)
   const initialSessions = course?.sessions || course?.classes || [
     { id: 1, title: 'Introduction & Setup', status: 'completed' },
@@ -23,73 +32,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     description: '',
     dueDate: '',
   })
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      from: 'mentor',
-      type: 'text',
-      content: "Welcome to today's session. We will focus on building reusable components.",
-      time: '10:00 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-    {
-      id: 2,
-      from: userRole === 'mentor' ? 'mentor' : 'learner',
-      type: 'text',
-      content: 'Should we use function components only, or class components as well?',
-      time: '10:02 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-    {
-      id: 3,
-      from: 'mentor',
-      type: 'file',
-      fileName: 'session-2-components.pdf',
-      fileSize: '2.1 MB',
-      time: '10:05 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-    {
-      id: 4,
-      from: 'mentor',
-      type: 'link',
-      linkLabel: 'Zoom meeting link',
-      url: 'https://zoom.us/j/123-456',
-      time: '10:10 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-    {
-      id: 5,
-      from: userRole === 'mentor' ? 'mentor' : 'learner',
-      type: 'text',
-      content: 'I have pushed my latest changes to GitHub. Please review when possible.',
-      time: '10:20 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-    {
-      id: 6,
-      from: 'mentor',
-      type: 'assessment',
-      assessmentTitle: 'React Hooks Implementation Assignment',
-      assessmentDescription: 'Create a custom hook for managing form state with validation. Your hook should handle:\n\n1. Form field values and updates\n2. Validation rules for each field\n3. Error messages\n4. Form submission handling\n\nSubmit your code file and a brief explanation of your implementation approach.',
-      assessmentDueDate: '2024-03-25',
-      assessmentId: 1001,
-      time: '10:25 AM',
-      sectionId: 2,
-      highlightColor: null,
-      selfNote: '',
-    },
-  ])
+  const [messages, setMessages] = useState([])
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
   const imageInputRef = useRef(null)
@@ -100,10 +43,125 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     mentor: 'Sarah Chen',
   }
 
+  // Debug: Track course data
+  useEffect(() => {
+    console.log('📦 LiveClassroom course data:', course)
+    console.log('🔑 Current chatId being used:', chatId)
+  }, [course, chatId])
+
+  // Debug: Monitor messages state changes
+  useEffect(() => {
+    console.log('📈 Current messages count:', messages.length)
+    console.log('📝 Messages list:', messages)
+  }, [messages])
+
+  // 1. Fetch initial message history
+  useEffect(() => {
+    if (!chatId) {
+      console.warn('⚠️ fetchMessages skipped: chatId is missing')
+      return
+    }
+
+    const fetchMessages = async () => {
+      console.log('🔍 Fetching messages for chatId:', chatId)
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('chat_id', Number(chatId))
+          .order('created_at', { ascending: true })
+
+        if (error) {
+          console.error('❌ Supabase fetch error:', error)
+          throw error
+        }
+
+        console.log('📥 Raw data from Supabase:', data)
+
+        if (data) {
+          const mapped = data.map(m => ({
+            ...m,
+            from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+            type: m.type || 'text',
+            time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+          }))
+          console.log('🗺️ Mapped messages:', mapped)
+          setMessages(mapped)
+        }
+      } catch (err) {
+        console.error('❌ Catch block fetching chat history:', err)
+      }
+    }
+
+    fetchMessages()
+  }, [chatId])
+
+  // 2. Real-time Subscription
+  useEffect(() => {
+    if (!chatId) return
+
+    console.log('📡 Setting up subscription for chatId:', chatId)
+    const channel = supabase
+      .channel(`chat:${chatId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `chat_id=eq.${chatId}`
+      }, (payload) => {
+        console.log('📥 NEW Realtime payload received:', payload)
+        const newMessage = payload.new
+
+        setMessages((prev) => {
+          // 1. Check if ID exists
+          if (prev.some(m => m.id === newMessage.id)) return prev
+
+          // 2. Check if this payload is the "real" version of an optimistic message
+          // (Matching content and sender and recent timestamp)
+          const optimisticMatchIndex = prev.findIndex(m =>
+            m.content === newMessage.content &&
+            m.sender_id === newMessage.sender_id &&
+            typeof m.id === 'number' && m.id > 1700000000000 // Simple check for Date.now() style IDs
+          )
+
+          const msgForState = {
+            ...newMessage,
+            from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+            type: newMessage.type || 'text',
+            time: newMessage.created_at ? new Date(newMessage.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+          }
+
+          if (optimisticMatchIndex !== -1) {
+            console.log('🔄 Replacing optimistic message with real DB entry')
+            const newState = [...prev]
+            newState[optimisticMatchIndex] = msgForState
+            return newState
+          }
+
+          console.log('✅ Appending new realtime message')
+          return [...prev, msgForState]
+        })
+      })
+      .subscribe((status) => {
+        console.log('📡 Subscription status update:', status)
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Realtime channel error. Check Supabase DB Replication settings.')
+        }
+      })
+
+    return () => {
+      console.log('🔌 Cleaning up subscription for chatId:', chatId)
+      supabase.removeChannel(channel)
+    }
+  }, [chatId])
+
   const [sessions, setSessions] = useState(initialSessions)
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
-  const visibleMessages = messages.filter((m) => m.sectionId === activeSession.id)
+  // Filter messages by activeSessionId
+  const visibleMessages = messages.filter(m =>
+    Number(m.session_id) === Number(activeSessionId)
+  )
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
   const [replyTo, setReplyTo] = useState(null)
@@ -176,32 +234,54 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
   }
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!messageInput.trim()) return
+    console.log('💬 Attempting to send message:', { messageInput, chatId, userRole, currentUserId })
 
-    const base = {
-      id: messages.length + 1,
-      from: userRole === 'mentor' ? 'mentor' : 'learner',
-      type: 'text',
-      content: messageInput.trim(),
-      time: getCurrentTime(),
-      sectionId: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
-      replyTo: replyTo
-        ? {
-          id: replyTo.id,
-          preview:
-            replyTo.content ||
-            replyTo.fileName ||
-            replyTo.linkLabel ||
-            replyTo.type.toUpperCase(),
-        }
-        : null,
+    if (!messageInput.trim()) {
+      console.warn('❌ Cannot send empty message')
+      return
     }
 
-    setMessages([...messages, base])
+    if (!chatId) {
+      console.error('❌ Cannot send message: chatId is missing. Course data:', course)
+      alert('Error: Chat session not found. Please re-enter the classroom.')
+      return
+    }
+
+    const pendingMsg = {
+      chat_id: Number(chatId),
+      session_id: Number(activeSessionId),
+      role: userRole === 'mentor' ? 'mentor' : 'student',
+      sender_id: Number(currentUserId),
+      content: messageInput.trim(),
+      read: false
+    }
+
+    console.log('📤 Sending to DB (type is omitted for DB):', pendingMsg)
+
+    // Optimistically update the UI so the user sees it immediately
+    const optimisticMsg = {
+      ...pendingMsg,
+      id: Date.now(), // temporary ID
+      from: 'learner', // Right side for YOU
+      type: 'text',   // REQUIRED for UI to show the text
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    }
+    setMessages(prev => [...prev, optimisticMsg])
+
+    // Insert to Supabase
+    const { error } = await supabase
+      .from('messages')
+      .insert([pendingMsg])
+
+    if (error) {
+      console.error('❌ Error sending message to Supabase:', error)
+      alert('Failed to send message: ' + error.message)
+      return
+    }
+
+    console.log('✅ Message sent successfully')
     setMessageInput('')
     setReplyTo(null)
     setShowAttachOptions(false)
@@ -456,6 +536,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
           console.error('Error updating session progress:', error)
         } else {
           console.log(`✅ Session ${sessionId} progress updated to ${newCompletionStatus}`)
+          if (refetch) refetch()
         }
       } catch (err) {
         console.error('Unexpected error updating session progress:', err)

@@ -14,8 +14,8 @@ import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import '../../App.css'
 
-function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, selectedMentor, setSelectedMentor, navItems, renderPage }) {
-  const { loading } = useDashboardData()
+function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) {
+  const { loading, enrolledCourses } = useDashboardData()
 
   if (loading) {
     return (
@@ -40,6 +40,46 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
         </div>
       </div>
     )
+  }
+
+  const renderPage = (page) => {
+    switch (page) {
+      case 'Home':
+        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
+      case 'Classrooms':
+        return (
+          <MyCourses
+            courses={enrolledCourses}
+            onBack={() => setActivePage('Home')}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            onMentorClick={setSelectedMentor}
+            setIsCourseDetailActive={setIsCourseDetailActive}
+          />
+        )
+      case 'Calendar':
+        return <Calendar />
+      case 'Explore':
+        return selectedMentor ? (
+          <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
+        ) : (
+          <Explore
+            onMentorClick={setSelectedMentor}
+            initialQuery={searchQuery}
+            onBack={() => {
+              setActivePage('Home');
+              setSearchQuery('');
+            }}
+          />
+        )
+      case 'Profile':
+        return <Profile />
+      case 'Notification':
+        return <Notification />
+      case 'Assessments':
+        return <Assessments />
+      default:
+        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
+    }
   }
 
   return (
@@ -89,7 +129,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
       <main className="dashboard-main-new">
         <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
-          {renderPage(activePage, setActivePage)}
+          {renderPage(activePage)}
         </div>
       </main>
     </div>
@@ -121,46 +161,6 @@ function Dashboard({ onLogout }) {
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
-  const renderPage = (page) => {
-    switch (page) {
-      case 'Home':
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
-      case 'Classrooms':
-        return (
-          <MyCourses
-            courses={courses}
-            onBack={() => setActivePage('Home')}
-            onEnterClassroom={() => setIsLiveClassroomActive(true)}
-            onMentorClick={setSelectedMentor}
-            setIsCourseDetailActive={setIsCourseDetailActive}
-          />
-        )
-      case 'Calendar':
-        return <Calendar />
-      case 'Explore':
-        return selectedMentor ? (
-          <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
-        ) : (
-          <Explore
-            onMentorClick={setSelectedMentor}
-            initialQuery={searchQuery}
-            onBack={() => {
-              setActivePage('Home');
-              setSearchQuery('');
-            }}
-          />
-        )
-      case 'Profile':
-        return <Profile />
-      case 'Notification':
-        return <Notification />
-      case 'Assessments':
-        return <Assessments />
-      default:
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
-    }
-  }
-
   return (
     <DashboardDataProvider>
       <style>{`
@@ -175,10 +175,12 @@ function Dashboard({ onLogout }) {
         isLiveClassroomActive={isLiveClassroomActive}
         setIsLiveClassroomActive={setIsLiveClassroomActive}
         isCourseDetailActive={isCourseDetailActive}
+        setIsCourseDetailActive={setIsCourseDetailActive}
         selectedMentor={selectedMentor}
         setSelectedMentor={setSelectedMentor}
         navItems={navItems}
-        renderPage={renderPage}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
     </DashboardDataProvider>
   )

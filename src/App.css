@@ -75,14 +75,34 @@
 
 .elegant-hero {
   padding: clamp(20px, 20%, 0px) 5% 180px;
+  padding-top: 100px;
   /* More bottom padding for sheet */
-  background: #eff9ff;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   position: relative;
   overflow: hidden;
+}
+
+.hero-lottie-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0.15;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-lottie-bg>div {
+  width: 100%;
+  max-width: none;
 }
 
 .hero-glass-card {
@@ -258,74 +278,197 @@
   background: #eff9ff;
 }
 
-/* Programs Grid Section */
+/* Programs Section - Modern Grid Design */
 .elegant-programs-section {
-  padding: clamp(60px, 15vw, 0px) 5%;
-  /* Very generous padding for 'proper' look */
-  background: #ffffff !important;
-  /* Force solid white */
+  padding: 50px 3%;
+  background: #f8fafc !important;
   position: relative;
   z-index: 10;
-  margin-top: -160px;
-  /* Strong overlap effect */
-  border-radius: 40px 40px 0 0;
-  /* More pronounced organic curve */
-  box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.04);
+
+  margin-top: -100px;
+  border-radius: 48px 48px 0 0;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.03);
 }
 
-/* Landing Page Carousel - Clean Implementation */
+/* Programs Grid Container */
 .landing-carousel-container {
-  padding: 10px 0 40px 0;
-  background: transparent;
+  margin-top: 40px;
   width: 100%;
 }
 
 .landing-carousel-container .classroom-carousel {
-  padding: 12px 5% !important;
-  gap: 16px;
-  -webkit-overflow-scrolling: touch;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 28px;
+  padding: 10px;
 }
 
-.landing-carousel-container .classroom-carousel::-webkit-scrollbar {
-  display: none;
+@media (max-width: 1200px) {
+  .landing-carousel-container .classroom-carousel {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
 }
 
+@media (max-width: 768px) {
+  .landing-carousel-container .classroom-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 0 20px;
+  }
+
+  .landing-carousel-container .classroom-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .landing-program-card {
+    min-width: 280px !important;
+    flex: 0 0 280px !important;
+    scroll-snap-align: center;
+  }
+}
+
+/* Modern Program Card Design */
 .landing-program-card {
-  min-width: 280px !important;
-  width: 280px !important;
-  margin: 5px !important;
+  width: 100% !important;
+  min-width: unset !important;
+  flex: unset !important;
+  margin: 0 !important;
   background: #ffffff !important;
-  border: none !important;
-  border-radius: 16px !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
   opacity: 1 !important;
   transform: none !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
   padding: 0 !important;
   overflow: hidden !important;
   cursor: pointer;
   display: flex !important;
   flex-direction: column;
-  min-height: 180px;
-  /* Match Home */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
 }
 
-.landing-section-title {
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  color: #475569 !important;
-  /* Slate 600 */
-  text-transform: capitalize;
-  margin-bottom: 12px;
-  text-align: left;
+.landing-program-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border-color: #0ca5e9 !important;
 }
 
 .landing-program-card .program-card-image-wrapper {
-  height: 140px !important;
+  height: 200px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-program-card .program-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.landing-program-card:hover .program-card-image {
+  transform: scale(1.05);
+}
+
+.landing-program-card .program-card-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  pointer-events: none;
 }
 
 .landing-program-card .program-card-content {
-  padding: 16px !important;
-  gap: 8px !important;
+  padding: 24px !important;
+  gap: 12px !important;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.landing-program-card .program-card-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #0f172a;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
+}
+
+.landing-program-card .program-card-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.landing-program-card .program-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.landing-program-card .program-rating-star {
+  color: #fbbf24;
+  font-size: 16px;
+}
+
+.landing-program-card .program-rating-value {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.landing-program-card .program-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.landing-program-card .program-card-separator {
+  color: #cbd5e1;
+}
+
+.landing-section-title {
+  font-size: clamp(28px, 5vw, 42px) !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px !important;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.landing-section-subtitle {
+  font-size: 14px;
+  color: #0ca5e9;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.landing-program-card .program-card-image-wrapper {
+  height: 180px !important;
+}
+
+.landing-program-card .program-card-content {
+  padding: 20px !important;
+  gap: 10px !important;
+}
+
+.landing-program-card .program-card-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
 }
 
 .programs-heading-small {
@@ -386,9 +529,8 @@
 
 /* Ad Banner Slider */
 .ad-banner-section {
-  padding: clamp(15px, 2vw, 30px) 20px;
+  padding: clamp(15px, 2vw, 30px) 3%;
   background-color: #ffffff;
-  /* Added horizontal padding */
   overflow: hidden;
 }
 
@@ -412,7 +554,7 @@
 
 .ad-slide {
   flex: 0 0 100%;
-  height: clamp(200px, 30vw, 300px);
+  /* height: clamp(200px, 30vw, 300px); */
   border-radius: 24px;
   background-color: #c91818;
   display: flex;
@@ -5118,9 +5260,9 @@ h1 span {
 }
 
 .light-theme-mentors-section {
-  padding: clamp(60px, 8vw, 100px) clamp(20px, 5vw, 100px) !important;
+  padding: 50px 3% !important;
   width: 100%;
-  background: #ffffff;
+  background: #f8fafc;
   border-radius: 0;
 }
 
@@ -24265,12 +24407,14 @@ h1 span {
 .get-in-touch-card {
   max-width: 1200px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 32px;
   padding: clamp(40px, 5vw, 64px);
   text-align: center;
-  border: 1px solid #bae6fd;
-  box-shadow: 0 20px 40px rgba(12, 165, 233, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 20px 40px rgba(12, 165, 233, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 .get-in-touch-content {
@@ -32824,4 +32968,561 @@ html {
 
 [data-theme='dark'] .my-classes-section .section-title {
   color: #f1f5f9 !important;
+}
+
+/* ==========================================================================
+   DESKTOP OPTIMIZATIONS (WIDTH > 1024px)
+   ========================================================================== */
+@media (min-width: 1024px) {
+
+  /* Central Layout Constraint */
+  .dashboard-main-new {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 20px 40px;
+  }
+
+  .dashboard-header-new {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    border-radius: 0 0 20px 20px;
+  }
+
+  /* Dashboard Home Adjustments */
+  .welcome-calendar-row {
+    flex-direction: row !important;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .welcome-left-column {
+    flex: 2;
+  }
+
+  /* Convert Carousel to Grid on Desktop */
+  .my-classes-section .classroom-carousel {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 24px !important;
+    overflow: visible !important;
+    padding: 10px 0 !important;
+  }
+
+  .my-classes-section .classroom-carousel-card {
+    min-width: 0 !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  /* Progress Overview for Desktop */
+  .progress-overview-cards-new {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 24px !important;
+  }
+
+  /* Home Banner / Ad Banner Desktop Width */
+  .dashboard-ads-new {
+    max-width: 100%;
+  }
+
+  /* Mentor Trigger Buttons constraint */
+  .home-modal-triggers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .home-full-width-btn {
+    width: 100% !important;
+  }
+
+  /* Course Detail Responsive */
+  .course-detail-content-elegant {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .course-sidebar-elegant {
+    position: sticky;
+    top: 100px;
+  }
+
+  /* Fix for the home drawer expanding behavior on desktop */
+  .home-main-content {
+    border-radius: 25px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    margin-top: 20px !important;
+    transform: none !important;
+  }
+
+  .home-drawer-handle {
+    display: none !important;
+  }
+}
+
+/* Reference Design Card Styles */
+.landing-program-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  /* margin-top: 10px; */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.38) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  border: none !important;
+  cursor: default !important;
+  width: 100% !important;
+  min-width: unset !important;
+  flex: unset !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.landing-program-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.landing-program-card .program-card-image-wrapper {
+  width: 100% !important;
+  height: 180px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+  background: #f1f5f9 !important;
+  position: relative !important;
+}
+
+.landing-program-card .program-card-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: none !important;
+}
+
+.landing-program-card .program-card-rating {
+  display: flex !important;
+  gap: 4px !important;
+  margin-bottom: 12px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.landing-program-card .star-filled {
+  color: #fbbf24 !important;
+  font-size: 16px !important;
+}
+
+.landing-program-card .star-empty {
+  color: #e5e7eb !important;
+  font-size: 16px !important;
+}
+
+.landing-program-card .program-card-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0 0 4px 0 !important;
+  line-height: 1.3 !important;
+}
+
+.landing-program-card .program-card-subtitle {
+  font-size: 14px !important;
+  color: #64748b !important;
+  margin: 0 0 16px 0 !important;
+}
+
+.landing-program-card .program-card-tags {
+  display: flex !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+
+.landing-program-card .program-tag {
+  font-size: 12px !important;
+  color: #64748b !important;
+  background: #f1f5f9 !important;
+  padding: 4px 12px !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+}
+
+.landing-program-card .program-card-actions {
+  display: flex !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.landing-program-card .btn-primary {
+  flex: 1 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.landing-program-card .btn-primary:hover {
+  background: #1d4ed8 !important;
+}
+
+.landing-program-card .btn-secondary {
+  flex: 1 !important;
+  background: transparent !important;
+  color: #2563eb !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.landing-program-card .btn-secondary:hover {
+  background: #f8fafc !important;
+  border-color: #2563eb !important;
+}
+
+@media (max-width: 768px) {
+  .landing-carousel-container .classroom-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding: 0 16px 0 16px;
+    padding-right: calc(100% - (41.67% * 2.4) - (12px * 1.4));
+  }
+
+  .landing-carousel-container .classroom-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .landing-program-card {
+    min-width: 41.67% !important;
+    flex: 0 0 41.67% !important;
+    scroll-snap-align: start;
+    padding: 20px !important;
+  }
+}
+
+/* How it Works Section - Enhanced */
+.how-it-works-section {
+  background: #ffffff !important;
+  padding: 100px 5% !important;
+}
+
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  margin-top: 60px;
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.how-it-works-step {
+  padding: 48px 32px;
+  background: #ffffff;
+  border-radius: 32px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.how-it-works-step:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+  border-color: #0ca5e9;
+}
+
+.how-it-works-icon {
+  width: 80px;
+  height: 80px;
+  background: #f0f9ff;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+  color: #0ca5e9;
+  font-size: 32px;
+}
+
+.how-it-works-step h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.how-it-works-step p {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+/* Job Portal Section - Enhanced */
+.job-portal-section {
+  background: #f8fafc !important;
+  padding: 80px 5% !important;
+}
+
+.job-portal-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 40px;
+  padding: 80px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(15, 23, 42, 0.2);
+}
+
+.job-portal-banner::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(12, 165, 233, 0.15) 0%, transparent 70%);
+  z-index: 1;
+}
+
+.job-portal-content {
+  flex: 1.2;
+  position: relative;
+  z-index: 2;
+}
+
+.job-portal-content h2 {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 850;
+  margin-bottom: 24px;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.job-portal-content p {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 40px;
+  max-width: 550px;
+  line-height: 1.6;
+}
+
+.job-portal-actions {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.job-portal-visual {
+  flex: 0.8;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 2;
+}
+
+/* Why Choose Us Section - Enhanced */
+.why-choose-section {
+  background: #ffffff !important;
+  padding: 100px 5% !important;
+}
+
+.why-choose-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 60px;
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.why-choose-card {
+  padding: 40px;
+  background: #f8fafc;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.why-choose-card:hover {
+  background: #ffffff;
+  border-color: #0ca5e9;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  transform: translateY(-5px);
+}
+
+.why-choose-icon {
+  width: 56px;
+  height: 56px;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0ca5e9;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  font-size: 24px;
+}
+
+.why-choose-text h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.why-choose-text p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Workshops Section - Enhanced */
+.workshops-section {
+  background: #f8fafc !important;
+  padding: 80px 5% !important;
+}
+
+.workshops-card {
+  background: #ffffff;
+  border-radius: 40px;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.04);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.workshops-info {
+  flex: 1;
+}
+
+.workshops-info h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 850;
+  color: #0f172a;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.workshops-info p {
+  font-size: 18px;
+  color: #64748b;
+  margin-bottom: 32px;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+.workshops-illustration {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 1200px) {
+  .why-choose-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+
+  .job-portal-banner,
+  .workshops-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .job-portal-actions {
+    justify-content: center;
+  }
+
+  .job-portal-visual,
+  .workshops-illustration {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .job-portal-content h2 {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .how-it-works-grid,
+  .why-choose-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .how-it-works-section,
+  .why-choose-section,
+  .workshops-section,
+  .job-portal-section {
+    padding: 60px 5% !important;
+  }
+
+  .job-portal-banner {
+    padding: 40px 24px;
+  }
+
+  .workshops-card {
+    padding: 40px 24px;
+  }
+
+  .landing-program-card .program-card-image-wrapper {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .landing-program-card .program-card-title {
+    font-size: 16px !important;
+  }
+
+  .landing-program-card .btn-primary,
+  .landing-program-card .btn-secondary {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
 }

@@ -17,7 +17,7 @@ import adds2 from '../../assets/images/adds2.png'
 import adds3 from '../../assets/images/adds3.png'
 import { SearchIcon, CalendarIcon } from '../../components/Icons.jsx'
 
-function MentorHome({ onNavigate, setIsCourseDetailActive }) {
+function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive }) {
   const { userProfile, enrolledCourses: taughtCourses, loading } = useDashboardData()
   const navigate = useNavigate()
 
@@ -97,7 +97,16 @@ function MentorHome({ onNavigate, setIsCourseDetailActive }) {
   if (showStudentRequests) return <StudentRequests onBack={() => setShowStudentRequests(false)} />
   if (showPendingWork) return <PendingWork onBack={() => setShowPendingWork(false)} />
   if (showMessages) return <Messages onBack={() => setShowMessages(false)} />
-  if (activeCourse) return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} userRole="mentor" />
+  if (activeCourse) return (
+    <LiveClassroom
+      course={activeCourse}
+      onBack={() => {
+        setActiveCourse(null)
+        if (setIsLiveClassroomActive) setIsLiveClassroomActive(false)
+      }}
+      userRole="mentor"
+    />
+  )
   if (showAssessments) return <Assessments onBack={() => setShowAssessments(false)} />
   if (showMyCourses) return <MyCourses onBack={() => setShowMyCourses(false)} setIsCourseDetailActive={setIsCourseDetailActive} />
 
@@ -113,6 +122,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive }) {
           setActiveCourse(course)
           setShowCourseDetail(false)
           setSelectedCourse(null)
+          if (onEnterClassroom) onEnterClassroom()
         }}
         onNavigate={(pageName) => {
           if (pageName === 'Assessments') {

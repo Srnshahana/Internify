@@ -57,14 +57,30 @@ export const DashboardDataProvider = ({ children }) => {
                 if (enrollError) throw enrollError
                 console.log('📚 Mentor enrolled courses with students:', enrollments)
 
+                // 3. Fetch session progress for mentor's students
+                const { data: progressData, error: progressError } = await supabase
+                    .from('course_session_progress')
+                    .select('session_id, is_completed, course_id, student_id')
+                    .eq('mentor_id', authId)
+
+                if (progressError) console.error('Error fetching mentor session progress:', progressError)
+
                 // Transform mentor courses with student context
                 const transformed = (enrollments || []).map((enrollment, idx) => {
                     const course = enrollment.courses || {}
                     const sessionsFromDb = course.course_sessions || []
                     const student = enrollment.student_details || {}
 
+                    // Filter progress for this specific course AND student
+                    const studentCourseProgress = progressData?.filter(p =>
+                        p.course_id === course.course_id &&
+                        p.student_id === enrollment.student_id
+                    ) || []
+                    const progressMap = new Map(studentCourseProgress.map(p => [p.session_id, p.is_completed]))
+
                     return {
                         // Enrollment context
+                        id: enrollment.id,
                         enrollment_id: enrollment.id,
                         student_id: enrollment.student_id,
                         student_name: student.name || 'Student',
@@ -89,15 +105,19 @@ export const DashboardDataProvider = ({ children }) => {
                         // Sessions
                         sessions: sessionsFromDb
                             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-                            .map((session) => ({
-                                id: session.id,
-                                sessionId: session.id,
-                                title: session.title,
-                                description: session.description,
-                                duration: session.duration_minutes,
-                                orderIndex: session.order_index,
-                                completed: false
-                            }))
+                            .map((session) => {
+                                const isCompleted = progressMap.get(session.id) || false
+                                return {
+                                    id: session.id,
+                                    sessionId: session.id,
+                                    title: session.title,
+                                    description: session.description,
+                                    duration: session.duration_minutes,
+                                    orderIndex: session.order_index,
+                                    completed: isCompleted,
+                                    status: isCompleted ? 'completed' : 'pending'
+                                }
+                            })
                     }
                 })
 
@@ -116,7 +136,7 @@ export const DashboardDataProvider = ({ children }) => {
                 if (profileError) throw profileError
                 setUserProfile(profileData)
 
-                // 2. Fetch enrolled courses with full details including sessions
+                // 2. Fetch enrolled courses
                 const { data: enrollments, error: enrollError } = await supabase
                     .from('classes_enrolled')
                     .select(`
@@ -127,14 +147,28 @@ export const DashboardDataProvider = ({ children }) => {
                     .eq('student_id', authId)
 
                 if (enrollError) throw enrollError
+
+                // 3. Fetch session progress for student
+                const { data: progressData, error: progressError } = await supabase
+                    .from('course_session_progress')
+                    .select('session_id, is_completed, course_id')
+                    .eq('student_id', authId)
+
+                if (progressError) console.error('Error fetching student session progress:', progressError)
+
                 const transformedCourses = (enrollments || []).map((enrollment, idx) => {
                     const course = enrollment.courses || {}
                     const mentor = enrollment.mentors_details || {}
                     const sessionsFromDb = course.course_sessions || []
 
+                    // Filter progress for this specific course
+                    const courseProgress = progressData?.filter(p => p.course_id === course.course_id) || []
+                    const progressMap = new Map(courseProgress.map(p => [p.session_id, p.is_completed]))
+
                     return {
                         ...enrollment,
-                        id: course.course_id || idx,
+                        id: enrollment.id, // Explicitly set to enrollment ID
+                        enrollment_id: enrollment.id,
                         course_id: course.course_id,
                         mentor_id: mentor.mentor_id,
                         title: course.title || 'Unknown Course',
@@ -148,16 +182,19 @@ export const DashboardDataProvider = ({ children }) => {
                         status: enrollment.status || 'active',
                         sessions: sessionsFromDb
                             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-                            .map((session) => ({
-                                id: session.id,
-                                sessionId: session.id,
-                                title: session.title,
-                                description: session.description,
-                                duration: session.duration_minutes,
-                                orderIndex: session.order_index,
-                                status: 'pending',
-                                completed: false
-                            }))
+                            .map((session) => {
+                                const isCompleted = progressMap.get(session.id) || false
+                                return {
+                                    id: session.id,
+                                    sessionId: session.id,
+                                    title: session.title,
+                                    description: session.description,
+                                    duration: session.duration_minutes,
+                                    orderIndex: session.order_index,
+                                    status: isCompleted ? 'completed' : 'pending',
+                                    completed: isCompleted
+                                }
+                            })
                     }
                 })
                 setEnrolledCourses(transformedCourses)

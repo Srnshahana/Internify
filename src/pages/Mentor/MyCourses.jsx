@@ -4,7 +4,7 @@ import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive }) {
+function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
 
   useEffect(() => {
@@ -74,6 +74,9 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive }) {
         course={selectedCourse}
         onBack={() => setSelectedCourse(null)}
         onMentorClick={onMentorClick}
+        onEnterClassroom={(course) => {
+          if (onEnterClassroom) onEnterClassroom(course)
+        }}
       />
     )
   }

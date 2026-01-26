@@ -10,8 +10,8 @@ import '../../App.css'
 
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems, renderPage }) {
-  const { loading } = useDashboardData()
+function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems }) {
+  const { loading, enrolledCourses } = useDashboardData()
 
   if (loading) {
     return (
@@ -36,6 +36,38 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
         </div>
       </div>
     )
+  }
+
+  const renderPage = (page) => {
+    switch (page) {
+      case 'Home':
+        return (
+          <Home
+            onNavigate={setActivePage}
+            setIsCourseDetailActive={setIsCourseDetailActive}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            setIsLiveClassroomActive={setIsLiveClassroomActive}
+          />
+        )
+      case 'Classrooms':
+        return (
+          <MyCourses
+            courses={enrolledCourses}
+            onBack={() => setActivePage('Home')}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            setIsCourseDetailActive={setIsCourseDetailActive}
+            setIsLiveClassroomActive={setIsLiveClassroomActive}
+          />
+        )
+      case 'Calendar':
+        return <Calendar />
+      case 'Profile':
+        return <Profile />
+      case 'Notification':
+        return <Notification />
+      default:
+        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} onEnterClassroom={() => setIsLiveClassroomActive(true)} />
+    }
   }
 
   return (
@@ -104,23 +136,6 @@ function MentorDashboard({ onLogout }) {
     { id: 'Profile', label: 'Profile', icon: ProfileIcon },
   ]
 
-  const renderPage = (page) => {
-    switch (page) {
-      case 'Home':
-        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} />
-      case 'Classrooms':
-        return <MyCourses onBack={() => setActivePage('Home')} setIsCourseDetailActive={setIsCourseDetailActive} />
-      case 'Calendar':
-        return <Calendar />
-      case 'Profile':
-        return <Profile />
-      case 'Notification':
-        return <Notification />
-      default:
-        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} />
-    }
-  }
-
   return (
     <DashboardDataProvider>
       <style>{`
@@ -137,7 +152,6 @@ function MentorDashboard({ onLogout }) {
         isCourseDetailActive={isCourseDetailActive}
         setIsCourseDetailActive={setIsCourseDetailActive}
         navItems={navItems}
-        renderPage={renderPage}
       />
     </DashboardDataProvider>
   )

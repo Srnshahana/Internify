@@ -1,5 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Lottie from 'lottie-react'
+import techBgJson from '../../assets/lottie/Technology backgrounds.json'
+import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import { mentors, courses } from '../../data/staticData.js'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
@@ -576,26 +579,18 @@ export default function LandingPage({
 
   return (
     <div className="landing-page-new">
-      {showNavbar && (
-        <nav className="elegant-navbar">
-          <div className="user-profile-left">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User Profile" />
-          </div>
-          <div className="nav-actions-right">
-            {isLoggedIn ? (
-              <button className="login-btn-elegant" onClick={handleLogout}>Logout</button>
-            ) : (
-              <>
-                <button className="apply-mentor-btn" onClick={() => navigate('/login')}>Login</button>
-                <button className="login-btn-elegant" onClick={() => navigate('/apply-mentor')}>Apply as mentor</button>
-              </>
-            )}
-          </div>
-        </nav>
-      )}
+      {/* {showNavbar && (
+        <StudentAppBar
+          onLogout={handleLogout}
+          hideProfile={true}
+          hideLogout={!isLoggedIn}
+        />
+      )} */}
 
       <section className="elegant-hero">
-        {/* <div className="hero-blur-bg"></div> */}
+        <div className="hero-lottie-bg">
+          <Lottie animationData={techBgJson} loop={true} />
+        </div>
         <div className="hero-glass-card">
           <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
 
@@ -611,170 +606,217 @@ export default function LandingPage({
               />
               <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* <div className="suggestion-tags">
-              {['Career Guidance',
-                'Tech & Digital',
-                'Content Creation',
-                'Entrepreneurship',
-                'Marketing & Growth',
-                'Soft Skills'].map(tag => (
-                  <button
-                    key={tag}
-                    className="suggestion-tag"
-                    onClick={() => handleNavSearch(tag)}
+      <section className="elegant-programs-section landing-section">
+        <div className="page-content-wrapper">
+          <span className="landing-section-subtitle">Featured Programs</span>
+          <h2 className="landing-section-title">Top rated programs</h2>
+
+          <div className="landing-carousel-container">
+            <div className="classroom-carousel">
+              {latestSkills.slice(0, 6).map((skill) => {
+                const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
+                const rating = courseData?.rating || 4.5
+                const level = courseData?.level || 'Intermediate'
+                const duration = courseData?.duration || 12
+
+                return (
+                  <div
+                    className="landing-program-card"
+                    key={skill.id || skill.name}
                   >
-                    {tag}
-                  </button>
-                ))}
-            </div> */}
-          </div>
-        </div>
-      </section>
-
-
-      <section className="elegant-programs-section">
-        <h2 className="programs-heading-small landing-section-title" style={{ paddingLeft: '0%' }}>Top rated programs</h2>
-
-        <div className="landing-carousel-container">
-          <div className="classroom-carousel">
-            {latestSkills.slice(0, 4).map((skill) => {
-              const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
-              const rating = courseData?.rating || 4.5
-              const level = courseData?.level || 'Intermediate'
-              const duration = courseData?.duration || 12
-
-              return (
-                <div
-                  className="classroom-carousel-card landing-program-card"
-                  key={skill.id || skill.name}
-                  onClick={() => handleNavSearch(skill.name)}
-                >
-                  <div className="program-card-image-wrapper">
-                    <img src={skill.image} alt={skill.name} className="program-card-image" />
-                    <div className="program-card-gradient-overlay"></div>
-                  </div>
-                  <div className="program-card-content">
-                    <h3 className="program-card-title">{skill.name}</h3>
-
-                    <div className="program-card-details">
-                      <div className="program-card-rating">
-                        <span className="program-rating-star">★</span>
-                        <span className="program-rating-value">{rating}</span>
-                      </div>
-                      <div className="program-card-meta">
-                        <span className="program-card-level">{level}</span>
-                        <span className="program-card-separator">•</span>
-                        <span className="program-card-duration">{duration} Weeks</span>
-                      </div>
+                    <div className="program-card-image-wrapper">
+                      <img src={skill.image} alt={skill.name} className="program-card-image" />
                     </div>
+
+                    <div className="program-card-rating">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={i < Math.floor(rating) ? "star-filled" : "star-empty"}>★</span>
+                      ))}
+                    </div>
+
+                    <h3 className="program-card-title">{skill.name}</h3>
+                    <p className="program-card-subtitle">at {level}</p>
+
+                    <div className="program-card-tags">
+                      <span className="program-tag">Duration: {duration}w</span>
+                      <span className="program-tag">Enrollment</span>
+                    </div>
+
+                    {/* <div className="program-card-actions">
+                      <button className="btn-primary" onClick={() => handleNavSearch(skill.name)}>
+                        View Program
+                      </button>
+                      <button className="btn-secondary" onClick={() => handleNavSearch(skill.name)}>
+                        Quick View
+                      </button>
+                    </div> */}
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="view-more-container" onClick={() => navigate('/explore')} style={{ paddingRight: '5%' }}>
-          <span>View more</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </div>
-      </section>
-
-
-      <section className="ad-banner-section">
-        <div className="ad-carousel-container" style={{ borderRadius: 0 }}>
-          <div
-            className="ad-track"
-            onTransitionEnd={handleTransitionEnd}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseLeave={() => setTouchStart(null)}
-            style={{
-              transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)' : 'none',
-              transform: `translateX(-${currentAdIndex * 100}%)`,
-              display: 'flex',
-              width: '100%'
-            }}
-          >
-            {displayAds.map((ad, index) => {
-              const isActive = index === currentAdIndex
-              return (
-                <div
-                  key={`${ad.id}-${index}`}
-                  className={`ad-slide ${isActive ? 'active' : ''}`}
-                  style={{ flex: '0 0 100%', cursor: 'grab' }}
-                >
-                  <img
-                    src={ad.image}
-                    alt={ad.title}
-                    draggable="false"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0', pointerEvents: 'none' }}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-
-      {/* <section className="get-in-touch-section">
-        <div className="page-content-wrapper">
-          <div className="get-in-touch-card">
-            <div className="get-in-touch-content">
-              <h2 className="get-in-touch-title">Make an Enquiry</h2>
-              <p className="get-in-touch-description">
-                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-              </p>
+                )
+              })}
             </div>
-            <form className="get-in-touch-form" onSubmit={(e) => {
-              e.preventDefault()
-              console.log('Email submitted:', contactEmail)
-              setContactEmail('')
-              alert('Thank you for your message! We\'ll get back to you soon.')
-            }}>
-              <div className="get-in-touch-input-wrapper">
-                <input
-                  type="email"
-                  className="get-in-touch-input"
-                  placeholder="Enter your email address"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  required
-                />
-                <button type="submit" className="get-in-touch-submit">
-                  Send
-                </button>
+          </div>
+
+          <div className="view-more-container" onClick={() => navigate('/explore')} style={{ paddingRight: '5%' }}>
+            <span>View more</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section className="how-it-works-section landing-section">
+        <div className="page-content-wrapper">
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <span className="landing-section-subtitle">How it Works</span>
+            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Kickstart your career in 3 simple steps</h2>
+          </div>
+
+          <div className="how-it-works-grid">
+            <div className="how-it-works-step">
+              <div className="how-it-works-icon">
+                <ExploreIcon size={32} />
               </div>
-            </form>
-          </div>
-        </div> */}
-      {/* </section> */}
+              <h3>1. Sign up & explore</h3>
+              <p>Create your account and discover hundreds of practical courses tailored to industry needs.</p>
+            </div>
 
+            <div className="how-it-works-step">
+              <div className="how-it-works-icon">
+                <ProfileIcon size={32} />
+              </div>
+              <h3>2. Connect with mentors</h3>
+              <p>Get personalized guidance from experienced professionals at top tech companies.</p>
+            </div>
 
-
-      <section className="light-theme-mentors-section">
-        <div className="page-content-wrapper">
-          <div className="light-theme-mentors-header">
-            <div className="light-theme-mentors-title-row">
-              <h2 className="light-theme-mentors-title">Our top mentors</h2>
-              <button className="light-theme-mentors-view-all-btn" onClick={() => navigate('/explore')}>
-                <span>View all</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
+            <div className="how-it-works-step">
+              <div className="how-it-works-icon">
+                <ClassroomIcon size={32} />
+              </div>
+              <h3>3. Apply & Grow</h3>
+              <p>Apply for real job opportunities and track your growth with our assessment tools.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="job-portal-section landing-section">
+        <div className="page-content-wrapper">
+          <div className="job-portal-banner">
+            <div className="job-portal-content">
+              <h2>Start applying to real opportunities</h2>
+              <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
+              <div className="job-portal-actions">
+                <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
+                <button className="btn-secondary" style={{ borderColor: 'rgba(255,255,255,0.3)', color: '#fff', padding: '16px 32px' }} onClick={() => navigate('/internships')}>Explore Internships</button>
+              </div>
+            </div>
+            <div className="job-portal-visual">
+              <div style={{
+                width: '320px',
+                height: '220px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '32px',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
+              }}>
+                <FolderIcon size={80} color="rgba(255,255,255,0.3)" />
+                <div style={{ marginTop: '20px', width: '60%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}></div>
+                <div style={{ marginTop: '10px', width: '40%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="why-choose-section landing-section">
+        <div className="page-content-wrapper">
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <span className="landing-section-subtitle">Values</span>
+            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Why Choose Internify</h2>
+          </div>
+
+          <div className="why-choose-cards">
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <CertificateIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Industry-experienced mentors</h3>
+                <p>Learn from those who have already succeeded in the roles you dream of.</p>
+              </div>
+            </div>
+
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <ProgrammingIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Practical courses</h3>
+                <p>Project-based learning that gives you real experience, not just theory.</p>
+              </div>
+            </div>
+
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <CalendarIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Career guidance</h3>
+                <p>From resume building to interview prep, we support you at every stage.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="workshops-section landing-section">
+        <div className="page-content-wrapper">
+          <div className="workshops-card">
+            <div className="workshops-info">
+              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
+              <h2>Attend Workshops & Career Talks</h2>
+              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
+              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
+            </div>
+            <div className="workshops-illustration">
+              <div style={{ display: 'flex', gap: '24px' }}>
+                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
+                  <DesignIcon size={48} color="#0ca5e9" />
+                </div>
+                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
+                  <AIIcon size={48} color="#f43f5e" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="light-theme-mentors-section landing-section">
+        <div className="page-content-wrapper">
+          <span className="landing-section-subtitle">Expert Guidance</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
+            <h2 className="landing-section-title" style={{ marginBottom: 0 }}>Our top mentors</h2>
+            <button className="light-theme-mentors-view-all-btn" onClick={() => navigate('/explore')}>
+              <span>View all</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+
           <div className="light-theme-mentor-slider">
             <div className="light-theme-mentor-track" ref={mentorTrackRef}>
               {isLoadingMentors ? (
@@ -833,13 +875,10 @@ export default function LandingPage({
         </div>
       </section>
 
-
-
-
-
-      <section className="simple-testimonials-section">
+      <section className="simple-testimonials-section landing-section">
         <div className="page-content-wrapper">
-          <h2 className="simple-testimonials-title">Students Testimonials</h2>
+          <span className="landing-section-subtitle">Success Stories</span>
+          <h2 className="landing-section-title">Students Testimonials</h2>
           <div className="simple-testimonials-grid">
             {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial) => (
               <div
@@ -883,7 +922,7 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="get-in-touch-section">
+      <section className="get-in-touch-section landing-section">
         <div className="page-content-wrapper">
           <div className="get-in-touch-card">
             <div className="get-in-touch-content">
