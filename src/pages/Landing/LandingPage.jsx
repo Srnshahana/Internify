@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import techBgJson from '../../assets/lottie/Technology backgrounds.json'
+import bannerJson from '../../assets/lottie/landingapgae-robot.json'
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import { mentors, courses } from '../../data/staticData.js'
 import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../../components/Icons.jsx'
@@ -25,47 +26,87 @@ import supabase from '../../supabaseClient'
 import '../../App.css'
 
 // Map courses to skills format
-// Top Rated Programs Data
+// Smart Careers for 2027 Data
 const latestSkills = [
   {
-    id: 'top-1',
-    name: 'Coding / Software Engineering',
+    id: 'smart-1',
+    name: 'AI & Machine Learning Specialist',
     image: topprogram1,
-    category: 'Development',
-    description: 'Master full-stack development and engineering principles.',
+    category: 'Future Tech',
+    description: 'Master the algorithms and models driving the 2027 industrial revolution.',
     rating: 4.9,
-    level: 'All Levels',
+    level: 'Advanced',
+    duration: 16
+  },
+  {
+    id: 'smart-2',
+    name: 'Generative AI & Prompt Engineering',
+    image: topprogram2,
+    category: 'AI Strategy',
+    description: 'Transform industries by mastering the art of AI communication and workflow automation.',
+    rating: 4.8,
+    level: 'Intermediate',
     duration: 12
   },
   {
-    id: 'top-2',
-    name: 'Content Creation & Digital Media',
-    image: topprogram2,
-    category: 'Creative',
-    description: 'Build your brand and master digital storytelling.',
-    rating: 4.8,
-    level: 'Beginner',
-    duration: 8
-  },
-  {
-    id: 'top-3',
-    name: 'Soft Skills & Career Growth',
+    id: 'smart-3',
+    name: 'Cybersecurity & Data Sovereignty',
     image: topprogram3,
-    category: 'Personal Growth',
-    description: 'Enhance communication, leadership, and interview skills.',
+    category: 'Digital Security',
+    description: 'Protect the future of digital assets and personal privacy in a hyper-connected world.',
     rating: 4.9,
     level: 'All Levels',
-    duration: 4
+    duration: 14
   },
   {
-    id: 'top-4',
-    name: 'Entrepreneurship & Business',
+    id: 'smart-4',
+    name: 'Full Stack Cloud Architecture',
     image: topprogram4,
-    category: 'Business',
-    description: 'Learn to launch, manage, and scale your business ideas.',
+    category: 'Cloud Dev',
+    description: 'Build scalable, resilient systems using Next.js, Go, and modern cloud infrastructures.',
     rating: 4.7,
+    level: 'Professional',
+    duration: 18
+  },
+  {
+    id: 'smart-5',
+    name: 'AR/VR Experience Designer',
+    image: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?auto=format&fit=crop&w=800&q=80',
+    category: 'Immersive Tech',
+    description: 'Design the next generation of spatial computing interfaces and virtual worlds.',
+    rating: 4.8,
     level: 'Intermediate',
-    duration: 16
+    duration: 14
+  },
+  {
+    id: 'smart-6',
+    name: 'Blockchain Infrastructure Engineer',
+    image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=800&q=80',
+    category: 'Web3',
+    description: 'Engineer decentralized systems and smart contracts for the trustless economy.',
+    rating: 4.7,
+    level: 'Advanced',
+    duration: 15
+  },
+  {
+    id: 'smart-7',
+    name: 'Quantum Computing Explorer',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80',
+    category: 'Deep Tech',
+    description: 'Harness the power of cubits to solve problems beyond the reach of classical computers.',
+    rating: 4.9,
+    level: 'Expert',
+    duration: 24
+  },
+  {
+    id: 'smart-8',
+    name: 'Sustainable Tech Architect',
+    image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=800&q=80',
+    category: 'Green Tech',
+    description: 'Design carbon-neutral digital solutions and eco-friendly hardware systems.',
+    rating: 4.6,
+    level: 'Intermediate',
+    duration: 12
   }
 ]
 
@@ -275,6 +316,55 @@ const categories = [
   { id: 'devops', name: 'DevOps', icon: DevOpsIcon, searchTerm: 'devops' },
 ]
 
+// Scroll-based Typewriter component
+const TypewriterText = ({ text }) => {
+  const [index, setIndex] = useState(0)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (!containerRef.current) {
+            ticking = false
+            return
+          }
+
+          const rect = containerRef.current.getBoundingClientRect()
+          const windowHeight = window.innerHeight
+
+          // Calculate progress: 0 when bottom enters, 1 when it's through the middle
+          const startTrigger = windowHeight * 0.9
+          const endTrigger = windowHeight * 0.3
+
+          let progress = (startTrigger - rect.top) / (startTrigger - endTrigger)
+          progress = Math.max(0, Math.min(1, progress))
+
+          const newIndex = Math.floor(progress * text.length)
+          setIndex(newIndex)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [text])
+
+  return (
+    <span ref={containerRef} className="typewriter-font">
+      <span className="typed-text">{text.substring(0, index)}</span>
+      {index < text.length && <span className="typewriter-cursor">|</span>}
+      <span className="untyped-text">{text.substring(index)}</span>
+    </span>
+  )
+}
+
 export default function LandingPage({
   onOpenExplore,
   onOpenResources,
@@ -461,6 +551,13 @@ export default function LandingPage({
     }))
     : mentors.slice(0, 5)
 
+  const scrollSkills = (dir) => {
+    const el = skillsTrackRef.current
+    if (!el) return
+    const distance = el.clientWidth * 0.8
+    el.scrollBy({ left: dir === 'next' ? distance : -distance, behavior: 'smooth' })
+  }
+
   const scrollMentors = (dir) => {
     const el = mentorTrackRef.current
     if (!el) return
@@ -577,6 +674,32 @@ export default function LandingPage({
     }
   }
 
+  const [revealProgress, setRevealProgress] = useState(0)
+  const revealContainerRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!revealContainerRef.current) return
+
+      const rect = revealContainerRef.current.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+
+      // Calculate progress based on how much of the wrapper is scrolled through
+      // 0: bottom of wrapper is at bottom of viewport
+      // 1: top of wrapper reached top of viewport
+      const totalHeight = rect.height
+      const scrolled = windowHeight - rect.top
+
+      let progress = scrolled / totalHeight
+      progress = Math.max(0, Math.min(1, progress))
+      setRevealProgress(progress)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className="landing-page-new">
       {/* {showNavbar && (
@@ -613,33 +736,15 @@ export default function LandingPage({
       <section className="problem-solution-section landing-section">
         <div className="page-content-wrapper problem-solution-grid">
           <div className="problem-column">
-            <h2 className="problem-heading">Feeling stuck in your career journey?</h2>
-            <div className="problem-statements">
-              <p className="problem-statement">Spending hours on tutorials but still feeling unprepared for real work.</p>
-              <p className="problem-statement">Applying to dozens of roles without hearing back from recruiters.</p>
-              <p className="problem-statement">Navigating complex career decisions without a clear roadmap or guidance.</p>
-              <p className="problem-statement">The overwhelming pressure to keep up with rapidly changing tech trends.</p>
+            <div className="hero-lottie-banner">
+              <Lottie animationData={bannerJson} loop={true} />
             </div>
-            <p className="problem-closing">It doesn't have to be this way. Clarity is just one conversation away.</p>
           </div>
 
           <div className="solution-column">
-            <div className="mentorship-matters-card">
-              <h3 className="mentorship-card-title">Why Mentorship Matters Today</h3>
-              <div className="insight-blocks">
-                <div className="insight-block">
-                  <p><strong>Accelerated Growth</strong></p>
-                  <p>Skip years of trial and error by learning directly from those who've already blazed the trail.</p>
-                </div>
-                <div className="insight-block">
-                  <p><strong>Personalized Roadmap</strong></p>
-                  <p>Get a custom plan tailored to your unique strengths, goals, and current industry demands.</p>
-                </div>
-                <div className="insight-block">
-                  <p><strong>Quiet Confidence</strong></p>
-                  <p>Gain the reassurance that you're focusing on the right skills and making the right moves.</p>
-                </div>
-              </div>
+            <h3 className="mentorship-card-title">Why Mentorship Matters Today</h3>
+            <div style={{ maxWidth: '650px' }}>
+              <TypewriterText text="In a world full of noise, endless courses, and confusing advice, mentorship gives you clarity. It saves you from wasting years figuring things out alone, helps you focus on the right skills, and gives you the confidence of knowing someone who’s already succeeded is guiding your next move — so your career doesn’t grow by chance, but by choice." />
             </div>
           </div>
         </div>
@@ -647,16 +752,43 @@ export default function LandingPage({
 
       <section className="elegant-programs-section landing-section">
         <div className="page-content-wrapper">
-          <span className="landing-section-subtitle">Featured Programs</span>
-          <h2 className="landing-section-title">Top rated programs</h2>
+          <div className="landing-section-header">
+            <div className="landing-section-header-text">
+              <span className="landing-section-subtitle">Future Trends</span>
+              <h2 className="landing-section-title">Smart careers for 2027</h2>
+            </div>
+            <div className="view-more-container desktop-only" onClick={() => navigate('/explore')}>
+              <span>View more</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
 
           <div className="landing-carousel-container">
-            <div className="classroom-carousel">
-              {latestSkills.slice(0, 6).map((skill) => {
+            <div className="carousel-controls desktop-only">
+              <button className="carousel-nav prev" onClick={() => scrollSkills('prev')}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button className="carousel-nav next" onClick={() => scrollSkills('next')}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <div
+              className="classroom-carousel"
+              ref={skillsTrackRef}
+            >
+              {latestSkills.map((skill) => {
                 const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
-                const rating = courseData?.rating || 4.5
-                const level = courseData?.level || 'Intermediate'
-                const duration = courseData?.duration || 12
+                const rating = skill.rating || courseData?.rating || 4.5
+                const level = skill.level || courseData?.level || 'Intermediate'
+                const duration = skill.duration || courseData?.duration || 12
 
                 return (
                   <div
@@ -667,6 +799,7 @@ export default function LandingPage({
                       <img src={skill.image} alt={skill.name} className="program-card-image" />
                     </div>
 
+                    {/* <div className="program-card-content"> */}
                     <div className="program-card-rating">
                       {[...Array(5)].map((_, i) => (
                         <span key={i} className={i < Math.floor(rating) ? "star-filled" : "star-empty"}>★</span>
@@ -674,28 +807,36 @@ export default function LandingPage({
                     </div>
 
                     <h3 className="program-card-title">{skill.name}</h3>
-                    <p className="program-card-subtitle">at {level}</p>
+                    <p className="program-card-subtitle">{skill.description}</p>
 
                     <div className="program-card-tags">
-                      <span className="program-tag">Duration: {duration}w</span>
-                      <span className="program-tag">Enrollment</span>
+                      <span className="program-tag">{level}</span>
+                      <span className="program-tag">{duration} weeks</span>
                     </div>
-
-                    {/* <div className="program-card-actions">
-                      <button className="btn-primary" onClick={() => handleNavSearch(skill.name)}>
-                        View Program
-                      </button>
-                      <button className="btn-secondary" onClick={() => handleNavSearch(skill.name)}>
-                        Quick View
-                      </button>
-                    </div> */}
+                    {/* </div> */}
                   </div>
                 )
               })}
             </div>
+
+            <div className="carousel-dots">
+              {[...Array(skillsTotalPages)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`dot ${currentSkillsPage === i ? 'active' : ''}`}
+                  onClick={() => {
+                    const track = skillsTrackRef.current;
+                    if (track) {
+                      const scrollAmount = track.clientWidth * i;
+                      track.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="view-more-container" onClick={() => navigate('/explore')} style={{ paddingRight: '5%' }}>
+          <div className="view-more-container mobile-only" onClick={() => navigate('/explore')}>
             <span>View more</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -705,74 +846,78 @@ export default function LandingPage({
         </div>
       </section>
 
+      <div className="job-portal-reveal-wrapper" ref={revealContainerRef}>
+        <section
+          className="job-portal-section landing-section sticky-reveal-section"
+          style={{
+            transform: `translateY(${100 - (revealProgress * 100)}%)`,
+            opacity: Math.min(1, revealProgress * 1.5)
+          }}
+        >
+          <div className="page-content-wrapper">
+            <div className="job-portal-banner">
+              <div className="job-portal-content">
+                <h2>Start applying to real opportunities</h2>
+                <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
+                <div className="job-portal-actions">
+                  <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
+                </div>
+              </div>
+              <div className="job-portal-visual desktop-only">
+                <div style={{
+                  width: '320px',
+                  height: '220px',
+                  background: 'rgba(255,255,255,0.05)',
+                  borderRadius: '32px',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
+                }}>
+                  <FolderIcon size={80} color="rgba(255,255,255,0.3)" />
+                  <div style={{ marginTop: '20px', width: '60%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}></div>
+                  <div style={{ marginTop: '10px', width: '40%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+
       <section className="how-it-works-section landing-section">
         <div className="page-content-wrapper">
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <span className="landing-section-subtitle">How it Works</span>
-            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Kickstart your career in 3 simple steps</h2>
+          <div className="landing-section-center-header">
+            <span className="landing-section-subtitle">Process</span>
+            <h2 className="landing-section-title">Kickstart your career in 3 simple steps</h2>
           </div>
 
           <div className="how-it-works-grid">
-            <div className="how-it-works-step">
-              <div className="how-it-works-icon">
-                <ExploreIcon size={32} />
-              </div>
-              <h3>1. Sign up & explore</h3>
+            <div className="how-it-works-step accent-blue">
+              <div className="step-number-circle">1</div>
+              <h3>Sign up & explore</h3>
               <p>Create your account and discover hundreds of practical courses tailored to industry needs.</p>
             </div>
 
-            <div className="how-it-works-step">
-              <div className="how-it-works-icon">
-                <ProfileIcon size={32} />
-              </div>
-              <h3>2. Connect with mentors</h3>
+            <div className="how-it-works-step accent-purple">
+              <div className="step-number-circle">2</div>
+              <h3>Connect with mentors</h3>
               <p>Get personalized guidance from experienced professionals at top tech companies.</p>
             </div>
 
-            <div className="how-it-works-step">
-              <div className="how-it-works-icon">
-                <ClassroomIcon size={32} />
-              </div>
-              <h3>3. Apply & Grow</h3>
+            <div className="how-it-works-step accent-green">
+              <div className="step-number-circle">3</div>
+              <h3>Apply & Grow</h3>
               <p>Apply for real job opportunities and track your growth with our assessment tools.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="job-portal-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="job-portal-banner">
-            <div className="job-portal-content">
-              <h2>Start applying to real opportunities</h2>
-              <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
-              <div className="job-portal-actions">
-                <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
-                <button className="btn-secondary" style={{ borderColor: 'rgba(255,255,255,0.3)', color: '#fff', padding: '16px 32px' }} onClick={() => navigate('/internships')}>Explore Internships</button>
-              </div>
-            </div>
-            <div className="job-portal-visual">
-              <div style={{
-                width: '320px',
-                height: '220px',
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: '32px',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
-              }}>
-                <FolderIcon size={80} color="rgba(255,255,255,0.3)" />
-                <div style={{ marginTop: '20px', width: '60%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}></div>
-                <div style={{ marginTop: '10px', width: '40%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       <section className="why-choose-section landing-section">
         <div className="page-content-wrapper">
