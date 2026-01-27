@@ -610,6 +610,41 @@ export default function LandingPage({
         </div>
       </section>
 
+      <section className="problem-solution-section landing-section">
+        <div className="page-content-wrapper problem-solution-grid">
+          <div className="problem-column">
+            <h2 className="problem-heading">Feeling stuck in your career journey?</h2>
+            <div className="problem-statements">
+              <p className="problem-statement">Spending hours on tutorials but still feeling unprepared for real work.</p>
+              <p className="problem-statement">Applying to dozens of roles without hearing back from recruiters.</p>
+              <p className="problem-statement">Navigating complex career decisions without a clear roadmap or guidance.</p>
+              <p className="problem-statement">The overwhelming pressure to keep up with rapidly changing tech trends.</p>
+            </div>
+            <p className="problem-closing">It doesn't have to be this way. Clarity is just one conversation away.</p>
+          </div>
+
+          <div className="solution-column">
+            <div className="mentorship-matters-card">
+              <h3 className="mentorship-card-title">Why Mentorship Matters Today</h3>
+              <div className="insight-blocks">
+                <div className="insight-block">
+                  <p><strong>Accelerated Growth</strong></p>
+                  <p>Skip years of trial and error by learning directly from those who've already blazed the trail.</p>
+                </div>
+                <div className="insight-block">
+                  <p><strong>Personalized Roadmap</strong></p>
+                  <p>Get a custom plan tailored to your unique strengths, goals, and current industry demands.</p>
+                </div>
+                <div className="insight-block">
+                  <p><strong>Quiet Confidence</strong></p>
+                  <p>Gain the reassurance that you're focusing on the right skills and making the right moves.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="elegant-programs-section landing-section">
         <div className="page-content-wrapper">
           <span className="landing-section-subtitle">Featured Programs</span>

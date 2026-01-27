@@ -93,7 +93,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-  opacity: 0.15;
+  opacity: 0.95;
   pointer-events: none;
   display: flex;
   justify-content: center;
@@ -279,6 +279,120 @@
 }
 
 /* Programs Section - Modern Grid Design */
+/* Problem & Solution Section - Tension vs Clarity */
+.problem-solution-section {
+  background: #ffffff;
+  padding: 10px 5% !important;
+}
+
+.problem-solution-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: clamp(40px, 8vw, 100px);
+  align-items: center;
+}
+
+.problem-column {
+  text-align: left;
+}
+
+.problem-heading {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+}
+
+.problem-statements {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.problem-statement {
+  font-size: clamp(16px, 1.8vw, 18px);
+  color: #64748b;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 24px;
+}
+
+.problem-statement::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+.problem-closing {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0ca5e9;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.mentorship-matters-card {
+  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 40px;
+  padding: clamp(32px, 5vw, 64px);
+  box-shadow: 0 20px 40px rgba(12, 165, 233, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  border: 1px solid #bae6fd;
+}
+
+.mentorship-card-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0369a1;
+  margin-bottom: 32px;
+  letter-spacing: -0.01em;
+}
+
+.insight-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.insight-block p {
+  margin: 0;
+  line-height: 1.6;
+  color: #0c4a6e;
+}
+
+.insight-block strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 4px;
+  color: #0369a1;
+}
+
+@media (max-width: 1024px) {
+  .problem-solution-grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+    text-align: center;
+  }
+
+  .problem-column,
+  .problem-statements {
+    align-items: center;
+    text-align: center;
+  }
+
+  .problem-statement {
+    padding-left: 0;
+  }
+
+  .problem-statement::before {
+    display: none;
+  }
+}
+
 .elegant-programs-section {
   padding: 50px 3%;
   background: #f8fafc !important;
