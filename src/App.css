@@ -282,15 +282,18 @@
 /* Problem & Solution Section - Tension vs Clarity */
 .problem-solution-section {
   background: #ffffff;
-  padding: 20px 5% !important;
+  padding: 80px 0 !important;
+  margin: 0 !important;
+  /* Removed vertical margin to fix background gap */
 }
 
 .problem-solution-grid {
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
   gap: 20px;
-  /* Reduced gap to bring it closer */
   align-items: center;
+  padding: 0 5%;
+  /* Moved page padding here */
 }
 
 .hero-lottie-banner {
@@ -355,17 +358,18 @@
 }
 
 .elegant-programs-section {
-  padding: 80px 5% !important;
-  /* Increased padding for better spacing */
+  padding: 80px 0 !important;
   background: #ffffff !important;
+  /* Added significant vertical margin */
   position: relative;
   z-index: 10;
 }
 
 /* Programs Grid Container */
 .landing-carousel-container {
-  margin-top: 40px;
-  width: 100%;
+  margin: 60px 5% !important;
+  position: relative;
+  overflow: visible !important;
 }
 
 .landing-carousel-container .classroom-carousel {
@@ -374,9 +378,14 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   gap: 28px;
-  padding: 20px 10px;
+  padding: 40px;
+  /* Essential runway for shadows */
+  margin: 0 -40px;
+  /* Offset runway to align content with container margin */
   scroll-behavior: smooth;
 }
+
+/* Removed redundant margin workaround */
 
 .landing-carousel-container .classroom-carousel::-webkit-scrollbar {
   display: none;
@@ -391,8 +400,8 @@
 .carousel-controls {
   position: absolute;
   top: 50%;
-  left: -24px;
-  right: -24px;
+  left: 20px;
+  right: 20px;
   transform: translateY(-50%);
   display: flex;
   justify-content: space-between;
@@ -480,7 +489,7 @@
   border-radius: 20px !important;
   opacity: 1 !important;
   transform: none !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
   /* Lightened shadow */
   padding: 0 !important;
   overflow: hidden !important;
@@ -700,6 +709,8 @@
   align-items: flex-end;
   margin-bottom: 48px;
   gap: 20px;
+  padding: 0 5%;
+  /* Restore page alignment */
 }
 
 .landing-section-center-header {
@@ -4712,8 +4723,10 @@ h1 span {
 
 /* Simple Testimonials Section */
 .simple-testimonials-section {
-  padding: clamp(40px, 5vw, 80px) 5%;
+  padding: 80px 5% !important;
+  /* Standardized padding */
   background: #ffffff;
+  position: relative;
 }
 
 .simple-testimonials-title {
@@ -5608,13 +5621,16 @@ h1 span {
 .light-theme-mentor-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  overflow: visible;
-  transition: all 0.3s ease;
+  border-radius: 24px;
+  /* More rounded premium look */
+  overflow: hidden;
+  /* Ensure rounded corners clip content */
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06);
+  /* Refined shadow */
 }
 
 .light-theme-mentor-card:hover {
@@ -5627,12 +5643,14 @@ h1 span {
 .light-theme-mentor-card-image-wrapper {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 260px;
+  /* Slightly taller for better aspect ratio */
   overflow: hidden;
-  background: #f1f5f9;
-  border-radius: 16px 16px 0 0 !important;
-  border-bottom: 2px solid rgba(226, 232, 240, 0.6);
-  isolation: isolate;
+  background: transparent;
+  /* Removed gray background */
+  border-bottom: none;
+  padding: 16px 16px 0 16px;
+  /* Added padding for isolated look */
 }
 
 .light-theme-mentor-card-image {
@@ -5640,7 +5658,14 @@ h1 span {
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 16px 16px 0 0;
+  transition: transform 0.6s ease;
+  border-radius: 16px;
+  /* Rounded corners for the image itself */
+}
+
+.light-theme-mentor-card:hover .light-theme-mentor-card-image {
+  transform: scale(1.05);
+  /* Subtle zoom effect */
 }
 
 .light-theme-mentor-card-content {
@@ -33259,16 +33284,18 @@ html {
 /* Reference Design Card Styles */
 .landing-program-card {
   background: #ffffff !important;
-  border-radius: 16px !important;
+  border-radius: 24px !important;
   padding: 24px !important;
-  /* margin-top: 10px; */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.38) !important;
-  transition: all 0.3s ease !important;
+  /* Deep, multi-layered shadow for a premium feel */
+  box-shadow:
+    0 12px 30px -5px rgba(0, 0, 0, 0.25),
+    0 8px 12px -6px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   text-align: center !important;
-  border: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
   cursor: default !important;
   width: 100% !important;
   min-width: unset !important;
@@ -33281,8 +33308,8 @@ html {
 }
 
 .landing-program-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-10px) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .landing-program-card .program-card-image-wrapper {
@@ -33421,14 +33448,163 @@ html {
   padding: 100px 5% !important;
 }
 
-.how-it-works-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
-  margin-top: 60px;
-  max-width: 1300px;
-  margin-left: auto;
-  margin-right: auto;
+/* Roadmap Styles */
+.roadmap-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  max-width: 1200px;
+  margin: 60px auto 0;
+  padding: 0 20px;
+}
+
+.roadmap-track {
+  position: absolute;
+  top: 25px;
+  /* Aligns with the center of the node (50px height) */
+  left: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 1;
+}
+
+.roadmap-line-bg {
+  width: 100%;
+  height: 100%;
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+
+.roadmap-line-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #0ca5e9;
+  border-radius: 2px;
+  transition: width 1s ease-in-out;
+}
+
+.roadmap-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.roadmap-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  position: relative;
+  opacity: 0.5;
+  transition: all 0.5s ease;
+  transform: translateY(20px);
+}
+
+.roadmap-step.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.roadmap-node {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 20px;
+  margin-bottom: 24px;
+  border: 4px solid #ffffff;
+  /* Creates gap around line */
+  box-shadow: 0 0 0 2px #e2e8f0;
+  transition: all 0.5s ease;
+  position: relative;
+}
+
+.roadmap-step.active .roadmap-node {
+  background: #0ca5e9;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(12, 165, 233, 0.2);
+  transform: scale(1.1);
+}
+
+.roadmap-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.roadmap-content p {
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.roadmap-step.active .roadmap-content h3 {
+  color: #0ca5e9;
+  /* Sky blue text for active step */
+}
+
+@media (max-width: 768px) {
+  .roadmap-track.desktop-only {
+    display: none;
+  }
+
+  .roadmap-steps {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .roadmap-step {
+    flex-direction: row;
+    text-align: left;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .roadmap-node {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  /* Vertical Line for Mobile */
+  .roadmap-vertical-line {
+    position: absolute;
+    top: 50px;
+    /* Start below the node */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: calc(100% + 40px);
+    /* Reach next node */
+    background: #e2e8f0;
+    z-index: -1;
+  }
+
+  .roadmap-step:last-child .roadmap-vertical-line {
+    display: none;
+  }
+
+  .roadmap-vertical-progress {
+    width: 100%;
+    background: #0ca5e9;
+    transition: height 1s ease-in-out;
+  }
+
+  .roadmap-content p {
+    margin: 0;
+    max-width: 100%;
+  }
 }
 
 .how-it-works-step {
@@ -33528,11 +33704,32 @@ html {
   transition: opacity 0.3s ease;
 }
 
-.sticky-reveal-section .job-portal-banner {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03) !important;
+/* Job Portal Ad Banner Section */
+.job-portal-section {
+  display: block;
+  margin: 0 !important;
+  /* Removed margin */
+  padding: 80px 5% !important;
+  /* Added sizing via padding */
+  background: #ffffff !important;
+  /* Background behind the card */
+  position: relative;
+  z-index: 10;
+}
+
+.job-portal-banner {
+  background: #ffffff !important;
+  /* Pure white background */
+  border-radius: 32px;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+  /* Softer shadow */
 }
 
 @media (max-width: 768px) {
@@ -33548,8 +33745,9 @@ html {
   right: -10%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(12, 165, 233, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
   z-index: 1;
+  pointer-events: none;
 }
 
 .job-portal-content {
@@ -33559,17 +33757,17 @@ html {
 }
 
 .job-portal-content h2 {
-  font-size: clamp(36px, 5vw, 56px);
+  font-size: clamp(36px, 5vw, 48px);
   font-weight: 850;
   margin-bottom: 24px;
-  color: #ffffff;
+  color: #0f172a;
   line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
 .job-portal-content p {
   font-size: 20px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #475569;
   margin-bottom: 40px;
   max-width: 550px;
   line-height: 1.6;
@@ -33592,7 +33790,7 @@ html {
 /* Why Choose Us Section - Enhanced */
 .why-choose-section {
   background: #ffffff !important;
-  padding: 100px 5% !important;
+  padding: 10px 5% !important;
 }
 
 .why-choose-cards {

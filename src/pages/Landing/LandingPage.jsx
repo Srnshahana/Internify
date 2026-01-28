@@ -409,6 +409,36 @@ export default function LandingPage({
   const howItWorksSectionRef = useRef(null)
   const careerGuidanceRightRef = useRef(null)
   const careerGuidanceTrackRef = useRef(null)
+  const [roadmapStep, setRoadmapStep] = useState(0)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        // Animation sequence:
+        // 0.5: Line starts traveling to Node 1
+        // 1.0: Line hits Node 1, Node 1 activates
+        // 1.5: Line travels to Node 2
+        // 2.0: Line hits Node 2, Node 2 activates
+        // 2.5: Line travels to Node 3
+        // 3.0: Line hits Node 3, Node 3 activates
+
+        setRoadmapStep(0.5)
+        setTimeout(() => setRoadmapStep(1), 600)
+        setTimeout(() => setRoadmapStep(1.5), 1400)
+        setTimeout(() => setRoadmapStep(2), 2000)
+        setTimeout(() => setRoadmapStep(2.5), 2800)
+        setTimeout(() => setRoadmapStep(3), 3400)
+        observer.disconnect()
+      }
+    }, { threshold: 0.3 })
+
+    if (howItWorksSectionRef.current) {
+      observer.observe(howItWorksSectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   const ads = [
     { id: 1, image: adds1, title: 'Internify Ad 1' },
     { id: 2, image: adds2, title: 'Internify Ad 2' },
@@ -846,76 +876,7 @@ export default function LandingPage({
         </div>
       </section>
 
-      <div className="job-portal-reveal-wrapper" ref={revealContainerRef}>
-        <section
-          className="job-portal-section landing-section sticky-reveal-section"
-          style={{
-            transform: `translateY(${100 - (revealProgress * 100)}%)`,
-            opacity: Math.min(1, revealProgress * 1.5)
-          }}
-        >
-          <div className="page-content-wrapper">
-            <div className="job-portal-banner">
-              <div className="job-portal-content">
-                <h2>Start applying to real opportunities</h2>
-                <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
-                <div className="job-portal-actions">
-                  <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
-                </div>
-              </div>
-              <div className="job-portal-visual desktop-only">
-                <div style={{
-                  width: '320px',
-                  height: '220px',
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '32px',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
-                }}>
-                  <FolderIcon size={80} color="rgba(255,255,255,0.3)" />
-                  <div style={{ marginTop: '20px', width: '60%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}></div>
-                  <div style={{ marginTop: '10px', width: '40%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
 
-
-      <section className="how-it-works-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="landing-section-center-header">
-            <span className="landing-section-subtitle">Process</span>
-            <h2 className="landing-section-title">Kickstart your career in 3 simple steps</h2>
-          </div>
-
-          <div className="how-it-works-grid">
-            <div className="how-it-works-step accent-blue">
-              <div className="step-number-circle">1</div>
-              <h3>Sign up & explore</h3>
-              <p>Create your account and discover hundreds of practical courses tailored to industry needs.</p>
-            </div>
-
-            <div className="how-it-works-step accent-purple">
-              <div className="step-number-circle">2</div>
-              <h3>Connect with mentors</h3>
-              <p>Get personalized guidance from experienced professionals at top tech companies.</p>
-            </div>
-
-            <div className="how-it-works-step accent-green">
-              <div className="step-number-circle">3</div>
-              <h3>Apply & Grow</h3>
-              <p>Apply for real job opportunities and track your growth with our assessment tools.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
 
@@ -960,28 +921,75 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="workshops-section landing-section">
+
+
+
+
+
+      <section className="how-it-works-section landing-section" ref={howItWorksSectionRef}>
         <div className="page-content-wrapper">
-          <div className="workshops-card">
-            <div className="workshops-info">
-              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
-              <h2>Attend Workshops & Career Talks</h2>
-              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
-              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
+          <div className="landing-section-center-header">
+            <span className="landing-section-subtitle">Process</span>
+            <h2 className="landing-section-title">Kickstart your career in 3 simple steps</h2>
+          </div>
+
+          <div className={`roadmap-container ${roadmapStep > 0 ? 'active' : ''}`}>
+            {/* Desktop Horizontal Line */}
+            <div className="roadmap-track desktop-only">
+              <div className="roadmap-line-bg"></div>
+              <div
+                className="roadmap-line-progress"
+                style={{ width: `${(Math.max(0, roadmapStep - 0.5) / 2.5) * 100}%` }}
+              ></div>
             </div>
-            <div className="workshops-illustration">
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
-                  <DesignIcon size={48} color="#0ca5e9" />
+
+            <div className="roadmap-steps">
+              <div className={`roadmap-step ${roadmapStep >= 1 ? 'active' : ''}`}>
+                <div className="roadmap-node">
+                  <span className="roadmap-number">1</span>
+                  {/* Mobile Vertical Line */}
+                  <div className="roadmap-vertical-line mobile-only">
+                    <div className="roadmap-vertical-progress" style={{ height: roadmapStep >= 2 ? '100%' : '0%' }}></div>
+                  </div>
                 </div>
-                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
-                  <AIIcon size={48} color="#f43f5e" />
+                <div className="roadmap-content">
+                  <h3>Sign up & explore</h3>
+                  <p>Create your account and discover hundreds of practical courses tailored to industry needs.</p>
+                </div>
+              </div>
+
+              <div className={`roadmap-step ${roadmapStep >= 2 ? 'active' : ''}`}>
+                <div className="roadmap-node">
+                  <span className="roadmap-number">2</span>
+                  {/* Mobile Vertical Line */}
+                  <div className="roadmap-vertical-line mobile-only">
+                    <div className="roadmap-vertical-progress" style={{ height: roadmapStep >= 3 ? '100%' : '0%' }}></div>
+                  </div>
+                </div>
+                <div className="roadmap-content">
+                  <h3>Connect with mentors</h3>
+                  <p>Get personalized guidance from experienced professionals at top tech companies.</p>
+                </div>
+              </div>
+
+              <div className={`roadmap-step ${roadmapStep >= 3 ? 'active' : ''}`}>
+                <div className="roadmap-node">
+                  <span className="roadmap-number">3</span>
+                </div>
+                <div className="roadmap-content">
+                  <h3>Apply & Grow</h3>
+                  <p>Apply for real job opportunities and track your growth with our assessment tools.</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+
+
+
+
 
       <section className="light-theme-mentors-section landing-section">
         <div className="page-content-wrapper">
@@ -1054,6 +1062,72 @@ export default function LandingPage({
           </div>
         </div>
       </section>
+
+
+
+
+
+      <section className="workshops-section landing-section">
+        <div className="page-content-wrapper">
+          <div className="workshops-card">
+            <div className="workshops-info">
+              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
+              <h2>Attend Workshops & Career Talks</h2>
+              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
+              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
+            </div>
+            <div className="workshops-illustration">
+              <div style={{ display: 'flex', gap: '24px' }}>
+                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
+                  <DesignIcon size={48} color="#0ca5e9" />
+                </div>
+                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
+                  <AIIcon size={48} color="#f43f5e" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+      <section className="job-portal-section landing-section">
+        <div className="page-content-wrapper">
+          <div className="job-portal-banner">
+            <div className="job-portal-content">
+              <h2>Start applying to real opportunities</h2>
+              <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
+              <div className="job-portal-actions">
+                <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
+              </div>
+            </div>
+            <div className="job-portal-visual desktop-only">
+              <div style={{
+                width: '320px',
+                height: '220px',
+                background: '#ffffff',
+                borderRadius: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.1)'
+              }}>
+                <FolderIcon size={80} color="#0ca5e9" />
+                <div style={{ marginTop: '20px', width: '60%', height: '8px', background: '#f1f5f9', borderRadius: '4px' }}></div>
+                <div style={{ marginTop: '10px', width: '40%', height: '8px', background: '#f1f5f9', borderRadius: '4px' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+
 
       <section className="simple-testimonials-section landing-section">
         <div className="page-content-wrapper">
