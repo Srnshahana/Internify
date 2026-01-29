@@ -12,6 +12,7 @@ import MentorProfile from '../Explore/MentorProfileView.jsx'
 import { HomeIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, GridIcon, FolderIcon, SettingsIcon, SearchIcon, CalendarIcon, ClassroomIcon } from '../../components/Icons.jsx'
 import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+// import Sidebar from '../../components/shared/Sidebar.jsx' // Removed
 import '../../App.css'
 
 function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) {
@@ -84,54 +85,52 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
-      {!isLiveClassroomActive && !isCourseDetailActive && (
-        <>
-          {/* Bottom Navigation Bar */}
-          <nav className="premium-bottom-nav">
-            <div className="bottom-nav-container">
-              {/* Sliding Glass Highlight */}
-              <div
-                className="nav-glass-highlight"
-                style={{
-                  transform: `translateX(${navItems.findIndex(item => item.id === activePage) * 100}%)`
-                }}
-              />
-
-              {navItems.map((item) => {
-                const IconComponent = item.icon
-                const isActive = activePage === item.id
-                return (
-                  <button
-                    key={item.id}
-                    className={`bottom-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setActivePage(item.id)}
-                  >
-                    <div className="nav-icon-wrapper">
-                      <IconComponent />
-                    </div>
-                    <span className="nav-label">{item.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </nav>
-
-          {/* Top Header - Reused from Landing Page */}
-          {activePage !== 'Profile' && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Calendar' && (
-            <StudentAppBar
-              onLogout={onLogout}
-              isTransparent={activePage === 'Home'}
-              hideLogout={activePage === 'Home'}
-            />
-          )}
-        </>
+      {/* Top Header - Restored */}
+      {!isLiveClassroomActive && (
+        <StudentAppBar
+          onLogout={onLogout}
+          isTransparent={false} // Traditional opaque bar
+          hideLogout={false}
+          hideProfile={false} // Ensure profile is shown on left
+        />
       )}
 
-      <main className="dashboard-main-new">
+      {/* Main Content - Full Width */}
+      <main className="dashboard-main-new full-width-main">
         <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
           {renderPage(activePage)}
         </div>
       </main>
+
+      {/* Bottom Navigation for Mobile Only (optional if needed, user didn't mention it but requested traditional app bar, so assuming desktop focus) */}
+      {!isLiveClassroomActive && !isCourseDetailActive && (
+        <nav className="premium-bottom-nav">
+          <div className="bottom-nav-container">
+            <div
+              className="nav-glass-highlight"
+              style={{
+                transform: `translateX(${navItems.findIndex(item => item.id === activePage) * 100}%)`
+              }}
+            />
+            {navItems.map((item) => {
+              const IconComponent = item.icon
+              const isActive = activePage === item.id
+              return (
+                <button
+                  key={item.id}
+                  className={`bottom-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setActivePage(item.id)}
+                >
+                  <div className="nav-icon-wrapper">
+                    <IconComponent />
+                  </div>
+                  <span className="nav-label">{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </nav>
+      )}
     </div>
   )
 }

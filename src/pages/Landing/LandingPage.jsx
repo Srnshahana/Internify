@@ -22,6 +22,7 @@ import testimonial1 from '../../assets/images/testimonial1.png'
 import testimonial2 from '../../assets/images/testimonial2.png'
 import testimonial3 from '../../assets/images/testimonial3.png'
 import testimonial4 from '../../assets/images/testimonial4.png'
+import topmentor from '../../assets/images/topmentor.mp4'
 import supabase from '../../supabaseClient'
 import '../../App.css'
 
@@ -316,6 +317,55 @@ const categories = [
   { id: 'devops', name: 'DevOps', icon: DevOpsIcon, searchTerm: 'devops' },
 ]
 
+// Hardcoded Premium Mentors
+const apiMentors = [
+  {
+    id: 1,
+    name: 'Sarah Chen',
+    role: 'Senior Product Designer',
+    company: 'Google',
+    experience: '12 years exp',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2576&auto=format&fit=crop',
+    rating: 4.9,
+  },
+  {
+    id: 2,
+    name: 'James Wilson',
+    role: 'Full Stack Engineer',
+    company: 'Instagram',
+    experience: '8 years exp',
+    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2574&auto=format&fit=crop',
+    rating: 4.8,
+  },
+  {
+    id: 3,
+    name: 'Priya Patel',
+    role: 'Data Scientist',
+    company: 'Wipro',
+    experience: '10 years exp',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=2561&auto=format&fit=crop',
+    rating: 4.9,
+  },
+  {
+    id: 4,
+    name: 'Michael Ross',
+    role: 'Backend lead',
+    company: 'Spotify',
+    experience: '15 years exp',
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2670&auto=format&fit=crop',
+    rating: 5.0,
+  },
+  {
+    id: 5,
+    name: 'Emily Zhang',
+    role: 'Product Manager',
+    company: 'Airbnb',
+    experience: '9 years exp',
+    image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=2574&auto=format&fit=crop',
+    rating: 4.7,
+  },
+]
+
 // Scroll-based Typewriter component
 const TypewriterText = ({ text }) => {
   const [index, setIndex] = useState(0)
@@ -400,8 +450,8 @@ export default function LandingPage({
   const [mentorTotalPages, setMentorTotalPages] = useState(1)
   const categoryScrollRef = useRef(null)
   const heroSectionRef = useRef(null)
-  const [apiMentors, setApiMentors] = useState([])
-  const [isLoadingMentors, setIsLoadingMentors] = useState(true)
+  // const [apiMentors, setApiMentors] = useState([])     <-- Removed, using hardcoded data
+  // const [isLoadingMentors, setIsLoadingMentors] = useState(true) <-- Removed
   const [currentCareerGuidanceIndex, setCurrentCareerGuidanceIndex] = useState(0)
   const [currentSimpleTestimonialPage, setCurrentSimpleTestimonialPage] = useState(1)
   const [contactEmail, setContactEmail] = useState('')
@@ -411,33 +461,42 @@ export default function LandingPage({
   const careerGuidanceTrackRef = useRef(null)
   const [roadmapStep, setRoadmapStep] = useState(0)
 
+  const roadmapContainerRef = useRef(null)
+
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        // Animation sequence:
-        // 0.5: Line starts traveling to Node 1
-        // 1.0: Line hits Node 1, Node 1 activates
-        // 1.5: Line travels to Node 2
-        // 2.0: Line hits Node 2, Node 2 activates
-        // 2.5: Line travels to Node 3
-        // 3.0: Line hits Node 3, Node 3 activates
-
-        setRoadmapStep(0.5)
-        setTimeout(() => setRoadmapStep(1), 600)
-        setTimeout(() => setRoadmapStep(1.5), 1400)
-        setTimeout(() => setRoadmapStep(2), 2000)
-        setTimeout(() => setRoadmapStep(2.5), 2800)
-        setTimeout(() => setRoadmapStep(3), 3400)
-        observer.disconnect()
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // When visible, animate to full gradually or instantly with CSS transition
+            // We want "line goes full till 3"
+            // Let's set it to 3 and let CSS transition handle the duration
+            setRoadmapStep(3)
+          } else {
+            // When leaving, reset after a delay so user doesn't see it snap back immediately
+            const timer = setTimeout(() => {
+              setRoadmapStep(0)
+            }, 1000) // 1s delay before reset
+            return () => clearTimeout(timer)
+          }
+        })
+      },
+      {
+        threshold: 0.4, // Trigger when 40% visible
       }
-    }, { threshold: 0.3 })
+    )
 
-    if (howItWorksSectionRef.current) {
-      observer.observe(howItWorksSectionRef.current)
+    if (roadmapContainerRef.current) {
+      observer.observe(roadmapContainerRef.current)
     }
 
-    return () => observer.disconnect()
+    return () => {
+      if (roadmapContainerRef.current) {
+        observer.unobserve(roadmapContainerRef.current)
+      }
+    }
   }, [])
+
 
   const ads = [
     { id: 1, image: adds1, title: 'Internify Ad 1' },
@@ -529,57 +588,19 @@ export default function LandingPage({
   }
 
   // Fetch mentors from API
-  useEffect(() => {
-    const fetchMentors = async () => {
-      try {
-        setIsLoadingMentors(true)
-        const { data: mentorsFromApi, error: mentorsError } = await supabase
-          .from('mentors_details')
-          .select('*')
-          .limit(5)
-        console.log('mentorsFromApi', mentorsFromApi)
-        if (mentorsError) {
-          console.error('Error fetching mentors:', mentorsError)
-          setApiMentors([])
-        } else {
-          setApiMentors(mentorsFromApi || [])
-        }
-      } catch (error) {
-        console.error('Error fetching mentors:', error)
-        setApiMentors([])
-      } finally {
-        setIsLoadingMentors(false)
-      }
-    }
+  // Hardcoded Premium Mentors moved to module scope or defined here
 
-    fetchMentors()
-  }, [])
-
-  const renderStarsFunc = renderStars || ((score) => {
-    const full = Math.floor(score)
-    const half = score - full >= 0.5
-    const stars = Array(5).fill('☆').map((star, i) => {
-      if (i < full) return '★'
-      if (i === full && half) return '½'
-      return '☆'
-    }).join('')
-    return stars
-  })
-
-  const mentorsToDisplay = apiMentors.length > 0
-    ? apiMentors.map(mentor => ({
-      id: mentor.mentor_id || mentor.id,
-      name: mentor.name || 'Mentor',
-      role: mentor.career_field || mentor.role || 'Mentor',
-      company: mentor.company || '',
-      focus: mentor.bio || mentor.description || '',
-      rating: mentor.rating || 4.5,
-      assured: true,
-      experience: mentor.experience || 0,
-      hourlyRate: mentor.hourly_rate || 50,
-      image: mentor.profile_image || mentor.image || 'https://via.placeholder.com/150',
-    }))
-    : mentors.slice(0, 5)
+  const mentorsToDisplay = apiMentors.map(mentor => ({
+    id: mentor.id,
+    name: mentor.name,
+    role: mentor.role,
+    company: mentor.company,
+    focus: mentor.role, // fallback
+    rating: mentor.rating || 4.9,
+    assured: true,
+    experience: mentor.experience,
+    image: mentor.image
+  }))
 
   const scrollSkills = (dir) => {
     const el = skillsTrackRef.current
@@ -740,6 +761,14 @@ export default function LandingPage({
         />
       )} */}
 
+      <header className="landing-header">
+        <div className="landing-logo">Internify.</div>
+        <div className="landing-nav-actions">
+          <button className="btn-text" onClick={() => navigate('/login')}>Login</button>
+          <button className="btn-primary-outline" onClick={() => navigate('/apply-mentor')}>Apply as a Mentor</button>
+        </div>
+      </header>
+
       <section className="elegant-hero">
         <div className="hero-lottie-bg">
           <Lottie animationData={techBgJson} loop={true} />
@@ -880,51 +909,6 @@ export default function LandingPage({
 
 
 
-      <section className="why-choose-section landing-section">
-        <div className="page-content-wrapper">
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <span className="landing-section-subtitle">Values</span>
-            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Why Choose Internify</h2>
-          </div>
-
-          <div className="why-choose-cards">
-            <div className="why-choose-card">
-              <div className="why-choose-icon">
-                <CertificateIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Industry-experienced mentors</h3>
-                <p>Learn from those who have already succeeded in the roles you dream of.</p>
-              </div>
-            </div>
-
-            <div className="why-choose-card">
-              <div className="why-choose-icon">
-                <ProgrammingIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Practical courses</h3>
-                <p>Project-based learning that gives you real experience, not just theory.</p>
-              </div>
-            </div>
-
-            <div className="why-choose-card">
-              <div className="why-choose-icon">
-                <CalendarIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Career guidance</h3>
-                <p>From resume building to interview prep, we support you at every stage.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-
-
 
       <section className="how-it-works-section landing-section" ref={howItWorksSectionRef}>
         <div className="page-content-wrapper">
@@ -933,7 +917,7 @@ export default function LandingPage({
             <h2 className="landing-section-title">Kickstart your career in 3 simple steps</h2>
           </div>
 
-          <div className={`roadmap-container ${roadmapStep > 0 ? 'active' : ''}`}>
+          <div className={`roadmap-container ${roadmapStep > 0 ? 'active' : ''}`} ref={roadmapContainerRef}>
             {/* Desktop Horizontal Line */}
             <div className="roadmap-track desktop-only">
               <div className="roadmap-line-bg"></div>
@@ -992,26 +976,38 @@ export default function LandingPage({
 
 
       <section className="light-theme-mentors-section landing-section">
+        {/* Video Background */}
+        <video
+          className="mentor-section-video-bg"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src={topmentor} type="video/mp4" />
+        </video>
+
+        {/* Optional Overlay for better readability */}
+        <div className="mentor-section-overlay"></div>
+
         <div className="page-content-wrapper">
-          <span className="landing-section-subtitle">Expert Guidance</span>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
-            <h2 className="landing-section-title" style={{ marginBottom: 0 }}>Our top mentors</h2>
-            <button className="light-theme-mentors-view-all-btn" onClick={() => navigate('/explore')}>
+          <div className="landing-section-header">
+            <div className="landing-section-header-text">
+              <span className="landing-section-subtitle">Expert Guidance</span>
+              <h2 className="landing-section-title">Our top mentors</h2>
+            </div>
+            <div className="view-more-container desktop-only" onClick={() => navigate('/explore')}>
               <span>View all</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-            </button>
+            </div>
           </div>
 
           <div className="light-theme-mentor-slider">
             <div className="light-theme-mentor-track" ref={mentorTrackRef}>
-              {isLoadingMentors ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-                  Loading mentors...
-                </div>
-              ) : mentorsToDisplay.length > 0 ? (
+              {mentorsToDisplay.length > 0 ? (
                 mentorsToDisplay.map((mentor) => (
                   <div
                     className="light-theme-mentor-card"
@@ -1025,10 +1021,9 @@ export default function LandingPage({
                     <div className="light-theme-mentor-card-content">
                       <h3 className="light-theme-mentor-card-name">{mentor.name}</h3>
                       <p className="light-theme-mentor-card-role">{mentor.role}</p>
-                      <p className="light-theme-mentor-card-description">{mentor.focus || mentor.bio?.substring(0, 100) || 'Experienced mentor'}</p>
+                      <p className="light-theme-mentor-card-company">{mentor.company}</p>
                       <div className="light-theme-mentor-card-footer">
-                        <span className="light-theme-mentor-card-rating">{renderStarsFunc(mentor.rating || 4.5)}</span>
-                        <span className="light-theme-mentor-card-price">${mentor.hourlyRate || '50'}/h</span>
+                        <span className="light-theme-mentor-card-experience">{mentor.experience}</span>
                       </div>
                     </div>
                   </div>
@@ -1067,28 +1062,48 @@ export default function LandingPage({
 
 
 
-      <section className="workshops-section landing-section">
+
+      <section className="why-choose-section landing-section">
         <div className="page-content-wrapper">
-          <div className="workshops-card">
-            <div className="workshops-info">
-              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
-              <h2>Attend Workshops & Career Talks</h2>
-              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
-              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <span className="landing-section-subtitle">Values</span>
+            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Why Choose Internify</h2>
+          </div>
+
+          <div className="why-choose-cards">
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <CertificateIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Industry-experienced mentors</h3>
+                <p>Learn from those who have already succeeded in the roles you dream of.</p>
+              </div>
             </div>
-            <div className="workshops-illustration">
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
-                  <DesignIcon size={48} color="#0ca5e9" />
-                </div>
-                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
-                  <AIIcon size={48} color="#f43f5e" />
-                </div>
+
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <ProgrammingIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Practical courses</h3>
+                <p>Project-based learning that gives you real experience, not just theory.</p>
+              </div>
+            </div>
+
+            <div className="why-choose-card">
+              <div className="why-choose-icon">
+                <CalendarIcon size={24} />
+              </div>
+              <div className="why-choose-text">
+                <h3>Career guidance</h3>
+                <p>From resume building to interview prep, we support you at every stage.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
 
 
@@ -1127,6 +1142,31 @@ export default function LandingPage({
 
 
 
+      {/* <section className="workshops-section landing-section">
+        <div className="page-content-wrapper">
+          <div className="workshops-card">
+            <div className="workshops-info">
+              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
+              <h2>Attend Workshops & Career Talks</h2>
+              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
+              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
+            </div>
+            <div className="workshops-illustration">
+              <div style={{ display: 'flex', gap: '24px' }}>
+                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
+                  <DesignIcon size={48} color="#0ca5e9" />
+                </div>
+                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
+                  <AIIcon size={48} color="#f43f5e" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section> */}
+
+
+
 
 
       <section className="simple-testimonials-section landing-section">
@@ -1141,12 +1181,12 @@ export default function LandingPage({
                 onClick={() => setSelectedTestimonial(testimonial)}
                 style={{ cursor: 'pointer' }}
               >
+                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
                 <div className="simple-testimonial-content">
                   <h4 className="simple-testimonial-name">{testimonial.name}</h4>
                   <p className="simple-testimonial-role">{testimonial.role} • {testimonial.company}</p>
                   <p className="simple-testimonial-quote">{testimonial.quote}</p>
                 </div>
-                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
               </div>
             ))}
           </div>
