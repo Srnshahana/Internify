@@ -490,10 +490,26 @@ export default function LandingPage({
       observer.observe(roadmapContainerRef.current)
     }
 
+    // New Reveal Observer
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible')
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+
+    const revealElements = document.querySelectorAll('.reveal')
+    revealElements.forEach((el) => revealObserver.observe(el))
+
     return () => {
       if (roadmapContainerRef.current) {
         observer.unobserve(roadmapContainerRef.current)
       }
+      revealElements.forEach((el) => revealObserver.unobserve(el))
     }
   }, [])
 
@@ -773,10 +789,10 @@ export default function LandingPage({
         <div className="hero-lottie-bg">
           <Lottie animationData={techBgJson} loop={true} />
         </div>
-        <div className="hero-glass-card">
+        <div className="hero-glass-card reveal reveal-up">
           <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
 
-          <div className="elegant-search-container">
+          <div className="elegant-search-container reveal reveal-up stagger-1">
             <div className="elegant-search-box">
               <input
                 type="text"
@@ -794,13 +810,13 @@ export default function LandingPage({
 
       <section className="problem-solution-section landing-section">
         <div className="page-content-wrapper problem-solution-grid">
-          <div className="problem-column">
+          <div className="problem-column reveal reveal-right">
             <div className="hero-lottie-banner">
               <Lottie animationData={bannerJson} loop={true} />
             </div>
           </div>
 
-          <div className="solution-column">
+          <div className="solution-column reveal reveal-left">
             <h3 className="mentorship-card-title">Why Mentorship Matters Today</h3>
             <div style={{ maxWidth: '650px' }}>
               <TypewriterText text="In a world full of noise, endless courses, and confusing advice, mentorship gives you clarity. It saves you from wasting years figuring things out alone, helps you focus on the right skills, and gives you the confidence of knowing someone who’s already succeeded is guiding your next move — so your career doesn’t grow by chance, but by choice." />
@@ -811,7 +827,7 @@ export default function LandingPage({
 
       <section className="elegant-programs-section landing-section">
         <div className="page-content-wrapper">
-          <div className="landing-section-header">
+          <div className="landing-section-header reveal reveal-up">
             <div className="landing-section-header-text">
               <span className="landing-section-subtitle">Future Trends</span>
               <h2 className="landing-section-title">Smart careers for 2027</h2>
@@ -843,7 +859,7 @@ export default function LandingPage({
               className="classroom-carousel"
               ref={skillsTrackRef}
             >
-              {latestSkills.map((skill) => {
+              {latestSkills.map((skill, index) => {
                 const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
                 const rating = skill.rating || courseData?.rating || 4.5
                 const level = skill.level || courseData?.level || 'Intermediate'
@@ -851,7 +867,7 @@ export default function LandingPage({
 
                 return (
                   <div
-                    className="landing-program-card"
+                    className={`landing-program-card reveal reveal-up stagger-${(index % 4) + 1}`}
                     key={skill.id || skill.name}
                   >
                     <div className="program-card-image-wrapper">
@@ -991,7 +1007,7 @@ export default function LandingPage({
         <div className="mentor-section-overlay"></div>
 
         <div className="page-content-wrapper">
-          <div className="landing-section-header">
+          <div className="landing-section-header reveal reveal-up">
             <div className="landing-section-header-text">
               <span className="landing-section-subtitle">Expert Guidance</span>
               <h2 className="landing-section-title">Our top mentors</h2>
@@ -1008,9 +1024,9 @@ export default function LandingPage({
           <div className="light-theme-mentor-slider">
             <div className="light-theme-mentor-track" ref={mentorTrackRef}>
               {mentorsToDisplay.length > 0 ? (
-                mentorsToDisplay.map((mentor) => (
+                mentorsToDisplay.map((mentor, index) => (
                   <div
-                    className="light-theme-mentor-card"
+                    className={`light-theme-mentor-card reveal reveal-up stagger-${(index % 4) + 1}`}
                     key={mentor.id || mentor.name}
                     onClick={() => navigate(`/mentor/${mentor.id || mentor.name}`)}
                     style={{ cursor: 'pointer' }}
@@ -1071,7 +1087,7 @@ export default function LandingPage({
           </div>
 
           <div className="why-choose-cards">
-            <div className="why-choose-card">
+            <div className="why-choose-card reveal reveal-up stagger-1">
               <div className="why-choose-icon">
                 <CertificateIcon size={24} />
               </div>
@@ -1081,7 +1097,7 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="why-choose-card">
+            <div className="why-choose-card reveal reveal-up stagger-2">
               <div className="why-choose-icon">
                 <ProgrammingIcon size={24} />
               </div>
@@ -1091,7 +1107,7 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="why-choose-card">
+            <div className="why-choose-card reveal reveal-up stagger-3">
               <div className="why-choose-icon">
                 <CalendarIcon size={24} />
               </div>
@@ -1111,7 +1127,7 @@ export default function LandingPage({
 
       <section className="job-portal-section landing-section">
         <div className="page-content-wrapper">
-          <div className="job-portal-banner">
+          <div className="job-portal-banner reveal reveal-up">
             <div className="job-portal-content">
               <h2>Start applying to real opportunities</h2>
               <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
@@ -1174,10 +1190,10 @@ export default function LandingPage({
           <span className="landing-section-subtitle">Success Stories</span>
           <h2 className="landing-section-title">Students Testimonials</h2>
           <div className="simple-testimonials-grid">
-            {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial) => (
+            {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial, index) => (
               <div
                 key={testimonial.id}
-                className="simple-testimonial-card"
+                className={`simple-testimonial-card reveal reveal-up stagger-${(index % 3) + 1}`}
                 onClick={() => setSelectedTestimonial(testimonial)}
                 style={{ cursor: 'pointer' }}
               >
@@ -1218,7 +1234,7 @@ export default function LandingPage({
 
       <section className="get-in-touch-section landing-section">
         <div className="page-content-wrapper">
-          <div className="get-in-touch-card">
+          <div className="get-in-touch-card reveal reveal-up">
             <div className="get-in-touch-content">
               <h2 className="get-in-touch-title">Make an Enquiry</h2>
               <p className="get-in-touch-description">
