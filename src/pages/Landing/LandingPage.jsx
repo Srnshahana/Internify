@@ -5,7 +5,7 @@ import techBgJson from '../../assets/lottie/Technology backgrounds.json'
 import bannerJson from '../../assets/lottie/landingapgae-robot.json'
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import { mentors, courses } from '../../data/staticData.js'
-import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon } from '../../components/Icons.jsx'
+import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon, BoltIcon, TargetIcon, FinanceIcon, ProductIcon, MobileIcon, WebIcon, DevOpsIcon } from '../../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 const SuccessStory1 = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80'
@@ -251,52 +251,7 @@ const simpleTestimonials = [
   }
 ]
 
-// Additional icon components
-const TargetIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="6" />
-    <circle cx="12" cy="12" r="2" />
-  </svg>
-)
 
-const FinanceIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" x2="12" y1="2" y2="22" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-)
-
-const ProductIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <line x1="9" x2="9" y1="3" y2="21" />
-    <line x1="3" x2="21" y1="12" y2="12" />
-  </svg>
-)
-
-const MobileIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-    <line x1="12" x2="12" y1="18" y2="18" />
-  </svg>
-)
-
-const WebIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" x2="22" y1="12" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-  </svg>
-)
-
-const DevOpsIcon = ({ className = "" }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-    <line x1="12" x2="12" y1="22.08" y2="12" />
-  </svg>
-)
 
 // Category data with icons
 const categories = [
@@ -323,10 +278,11 @@ const apiMentors = [
     id: 1,
     name: 'Sarah Chen',
     role: 'Senior Product Designer',
-    company: 'Google',
+    company: 'Meta',
     experience: '12 years exp',
     image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2576&auto=format&fit=crop',
     rating: 4.9,
+    reviews: 124
   },
   {
     id: 2,
@@ -336,15 +292,17 @@ const apiMentors = [
     experience: '8 years exp',
     image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2574&auto=format&fit=crop',
     rating: 4.8,
+    reviews: 89
   },
   {
     id: 3,
     name: 'Priya Patel',
     role: 'Data Scientist',
-    company: 'Wipro',
+    company: 'Google',
     experience: '10 years exp',
     image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=2561&auto=format&fit=crop',
     rating: 4.9,
+    reviews: 156
   },
   {
     id: 4,
@@ -354,6 +312,7 @@ const apiMentors = [
     experience: '15 years exp',
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2670&auto=format&fit=crop',
     rating: 5.0,
+    reviews: 210
   },
   {
     id: 5,
@@ -363,7 +322,68 @@ const apiMentors = [
     experience: '9 years exp',
     image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=2574&auto=format&fit=crop',
     rating: 4.7,
+    reviews: 95
   },
+  {
+    id: 6,
+    name: 'David Kim',
+    role: 'ML Engineer',
+    company: 'Tesla',
+    experience: '7 years exp',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2574&auto=format&fit=crop',
+    rating: 4.8,
+    reviews: 112
+  },
+  {
+    id: 7,
+    name: 'Sofia Rodriguez',
+    role: 'iOS Developer',
+    company: 'Apple',
+    experience: '6 years exp',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2564&auto=format&fit=crop',
+    rating: 4.9,
+    reviews: 78
+  },
+  {
+    id: 8,
+    name: 'Marcus Thorne',
+    role: 'Security Architect',
+    company: 'Cloudflare',
+    experience: '11 years exp',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=2574&auto=format&fit=crop',
+    rating: 5.0,
+    reviews: 145
+  },
+]
+
+const topCourses = [
+  {
+    id: 1,
+    title: 'UX Strategy Masterclass',
+    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop',
+    rating: 4.9,
+    reviews: '1.2k',
+    price: '$49.00',
+    type: 'featured'
+  },
+  {
+    id: 2,
+    title: 'Creative Coding',
+    image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop',
+    rating: 4.8,
+    reviews: '850',
+    price: '$35.00',
+    type: 'small'
+  },
+  {
+    id: 3,
+    title: 'Motion Design',
+    image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2574&auto=format&fit=crop',
+    rating: 4.7,
+    reviews: '620',
+    price: '$42.00',
+    type: 'small'
+  }
 ]
 
 // Scroll-based Typewriter component
@@ -426,8 +446,46 @@ export default function LandingPage({
 }) {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  /* State for dynamic data */
+  /* State for dynamic data */
+  const [topCourses, setTopCourses] = useState(courses)
+  const [topMentors, setTopMentors] = useState(mentors)
 
   useEffect(() => {
+    // Scroll to top on mount
+    window.scrollTo(0, 0)
+
+    const fetchMentors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('mentors_details')
+          .select('*')
+          .limit(4)
+
+        if (error) {
+          console.error('Error fetching mentors:', error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const formattedMentors = data.map(m => ({
+            id: m.mentor_id || m.id,
+            name: m.name || m.full_name || 'Mentor',
+            role: m.role || 'Senior Mentor',
+            company: m.company || 'Tech Giant',
+            image: m.profile_image || m.image || 'https://via.placeholder.com/150',
+            rating: m.rating || m.avg_rating || 5.0,
+            reviews: m.reviews_count || (m.testimonial ? m.testimonial.length : 24)
+          }))
+          setTopMentors(formattedMentors)
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching mentors:', err)
+      }
+    }
+
+    fetchMentors()
+
     const checkUser = async () => {
       const user = await checkAuthSession()
       setIsLoggedIn(!!user)
@@ -444,6 +502,13 @@ export default function LandingPage({
   const mentorTrackRef = useRef(null)
   const skillsTrackRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [trackSet, setTrackSet] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTrackSet(prev => (prev === 0 ? 1 : 0))
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [])
   const [currentSkillsPage, setCurrentSkillsPage] = useState(0)
   const [skillsTotalPages, setSkillsTotalPages] = useState(1)
   const [currentMentorPage, setCurrentMentorPage] = useState(0)
@@ -511,8 +576,7 @@ export default function LandingPage({
       }
       revealElements.forEach((el) => revealObserver.unobserve(el))
     }
-  }, [])
-
+  }, [topMentors, topCourses])
 
   const ads = [
     { id: 1, image: adds1, title: 'Internify Ad 1' },
@@ -613,10 +677,17 @@ export default function LandingPage({
     company: mentor.company,
     focus: mentor.role, // fallback
     rating: mentor.rating || 4.9,
+    reviews: mentor.reviews || 100,
     assured: true,
     experience: mentor.experience,
     image: mentor.image
   }))
+
+  const platformFeatures = [
+    { id: 'feat-1', name: '1-on-1 Mentorship', icon: ProgrammingIcon, desc: 'Personalized guidance from experts.' },
+    { id: 'feat-2', name: 'Real World Projects', icon: FolderIcon, desc: 'Build portfolio-ready industry apps.' },
+    { id: 'feat-3', name: 'Direct Referrals', icon: BoltIcon, desc: 'Get referred to top tech giants.' }
+  ]
 
   const scrollSkills = (dir) => {
     const el = skillsTrackRef.current
@@ -631,6 +702,7 @@ export default function LandingPage({
     const distance = el.clientWidth * 0.8
     el.scrollBy({ left: dir === 'next' ? distance : -distance, behavior: 'smooth' })
   }
+
 
   const handleSearch = () => {
     const q = searchTerm.trim().toLowerCase()
@@ -690,7 +762,7 @@ export default function LandingPage({
       const cardWidth = 350 // minmax(320px, 380px) average
       const gap = 24
       const cardsPerPage = Math.floor(track.clientWidth / (cardWidth + gap)) || 1
-      const totalPages = Math.ceil(mentorsToDisplay.length / cardsPerPage)
+      const totalPages = Math.ceil(topMentors.length / cardsPerPage)
       setMentorTotalPages(totalPages)
       return { cardsPerPage, totalPages, cardWidth, gap }
     }
@@ -717,7 +789,7 @@ export default function LandingPage({
       track.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
     }
-  }, [mentorsToDisplay.length])
+  }, [topMentors.length])
 
   const scrollCareerGuidance = (direction) => {
     if (direction === 'right') {
@@ -768,503 +840,363 @@ export default function LandingPage({
   }, [])
 
   return (
-    <div className="landing-page-new">
-      {/* {showNavbar && (
-        <StudentAppBar
-          onLogout={handleLogout}
-          hideProfile={true}
-          hideLogout={!isLoggedIn}
-        />
-      )} */}
+    <div className="landing-page-new font-sans">
+      <div className="background-effects">
+        <div className="grain-texture absolute inset-0"></div>
+        <div className="floating-shape w-64 h-64 bg-sky-400 opacity-10 top-[-10%] left-[-10%] animate-pulse" style={{ width: '16rem', height: '16rem', background: 'rgba(14, 165, 233, 0.1)' }}></div>
+        <div className="floating-shape w-80 h-80 bg-purple-200 opacity-20 bottom-[-10%] right-[-10%]" style={{ width: '20rem', height: '20rem', background: 'rgba(233, 213, 255, 0.2)' }}></div>
+        <div className="absolute top-1/4 left-1/2 w-4 h-4 rounded-full bg-sky-400 opacity-40 shadow-[0_0_20px_rgba(14,165,233,0.5)]" style={{ width: '1rem', height: '1rem', background: 'rgba(14, 165, 233, 0.4)' }}></div>
+      </div>
 
-      <header className="landing-header">
-        <div className="landing-logo">Internify.</div>
-        <div className="landing-nav-actions">
-          <button className="btn-text" onClick={() => navigate('/login')}>Login</button>
-          <button className="btn-primary-outline" onClick={() => navigate('/apply-mentor')}>Apply as a Mentor</button>
+      <nav className="nav-pill-wrapper reveal reveal-down">
+        <div className="nav-pill">
+          <div className="nav-logo-group">
+            <div className="nav-logo-icon">
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
+            </div>
+            <h2 className="nav-logo-text">Internify</h2>
+          </div>
+          <div className="nav-btn-group">
+            {!isLoggedIn && (
+              <button className="nav-login-btn" onClick={() => navigate('/login')}>
+                Login
+              </button>
+            )}
+            <button className="nav-join-btn" onClick={() => isLoggedIn ? navigate('/dashboard') : navigate('/signup')}>
+              {isLoggedIn ? 'Dashboard' : 'Join'}
+            </button>
+          </div>
         </div>
-      </header>
+      </nav>
 
-      <section className="elegant-hero">
-        <div className="hero-lottie-bg">
-          <Lottie animationData={techBgJson} loop={true} />
-        </div>
-        <div className="hero-glass-card reveal reveal-up">
-          <h1 className="hero-heading-elegant">Find your <span>perfect mentor</span></h1>
+      <main className="landing-main-content">
+        <section className="elegant-hero">
+          <div className="hero-lottie-bg">
+            <Lottie animationData={techBgJson} loop={true} />
+          </div>
 
-          <div className="elegant-search-container reveal reveal-up stagger-1">
-            <div className="elegant-search-box">
+          <div className="hero-glass-card">
+            <h1 className="hero-title-new">
+              Master your <br />
+              <span className="italic-blue">perfect craft</span>
+            </h1>
+            <p className="hero-subtitle-new">
+              Learn from industry veterans through <br />
+              personalized mentorship and guided paths.
+            </p>
+
+            <div className="hero-search-pill">
               <input
                 type="text"
-                className="elegant-search-input"
-                placeholder="Search for mentors, skills, or career paths..."
+                className="hero-search-input"
+                placeholder="Search mentors, skills..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
-              <button className="elegant-search-btn" onClick={handleSearch}>Search</button>
+              <button className="hero-search-btn" onClick={handleSearch}>Search</button>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="problem-solution-section landing-section">
-        <div className="page-content-wrapper problem-solution-grid">
-          <div className="problem-column reveal reveal-right">
-            <div className="hero-lottie-banner">
-              <Lottie animationData={bannerJson} loop={true} />
-            </div>
-          </div>
-
-          <div className="solution-column reveal reveal-left">
-            <h3 className="mentorship-card-title">Why Mentorship Matters Today</h3>
-            <div style={{ maxWidth: '650px' }}>
-              <TypewriterText text="In a world full of noise, endless courses, and confusing advice, mentorship gives you clarity. It saves you from wasting years figuring things out alone, helps you focus on the right skills, and gives you the confidence of knowing someone who’s already succeeded is guiding your next move — so your career doesn’t grow by chance, but by choice." />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="elegant-programs-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="landing-section-header reveal reveal-up">
-            <div className="landing-section-header-text">
-              <span className="landing-section-subtitle">Future Trends</span>
-              <h2 className="landing-section-title">Smart careers for 2027</h2>
-            </div>
-            <div className="view-more-container desktop-only" onClick={() => navigate('/explore')}>
-              <span>View more</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
+            <div className="hero-mentors-badge">
+              <div className="avatar-stack">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
+                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
+                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
+              </div>
+              <span className="mentors-count">582+ Active Mentors</span>
             </div>
           </div>
 
-          <div className="landing-carousel-container">
-            <div className="carousel-controls desktop-only">
-              <button className="carousel-nav prev" onClick={() => scrollSkills('prev')}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </button>
-              <button className="carousel-nav next" onClick={() => scrollSkills('next')}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
+          <div className="hero-stats-row">
+            <div className="hero-stat-card liquid-glass">
+              <span className="stat-label-small">SUCCESS RATE</span>
+              <span className="stat-value-large">98%</span>
             </div>
+            <div className="hero-stat-card liquid-glass">
+              <span className="stat-label-small">GLOBAL MENTEES</span>
+              <span className="stat-value-large">10k+</span>
+            </div>
+          </div>
+        </section>
 
-            <div
-              className="classroom-carousel"
-              ref={skillsTrackRef}
-            >
-              {latestSkills.map((skill, index) => {
-                const courseData = courses.find(c => c.id === skill.id || c.name === skill.name)
-                const rating = skill.rating || courseData?.rating || 4.5
-                const level = skill.level || courseData?.level || 'Intermediate'
-                const duration = skill.duration || courseData?.duration || 12
+        <section className="mission-section landing-section reveal reveal-up">
+          <div className="mission-container">
+            <div className="mission-content">
+              <h2 className="section-title-v2">About <span>Our Mission</span></h2>
+              <p className="mission-text">
+                We bridge the gap between aspiration and achievement by providing a seamless platform
+                for high-impact mentorship and professional networking. Our goal is to make expert
+                knowledge accessible to everyone, everywhere.
+              </p>
+            </div>
+            <div className="mission-visual">
+              <Lottie animationData={bannerJson} loop={true} className="mission-lottie" />
+            </div>
+          </div>
+        </section>
 
-                return (
-                  <div
-                    className={`landing-program-card reveal reveal-up stagger-${(index % 4) + 1}`}
-                    key={skill.id || skill.name}
-                  >
-                    <div className="program-card-image-wrapper">
-                      <img src={skill.image} alt={skill.name} className="program-card-image" />
-                    </div>
+        <section className="benefits-section landing-section reveal reveal-up">
+          <div className="benefits-header">
+            <h2 className="Benefits-title-v2">Why Choose Us</h2>
+          </div>
+          <div className="benefits-grid-v2">
+            <div className="benefit-card-v2">
+              <div className="benefit-icon-v2 icon-blue">
+                <span className="material-symbols-outlined">verified_user</span>
+              </div>
+              <h3 className="benefit-name-v2">Vetted Mentors</h3>
+              <p className="benefit-desc-v2">Top 1% industry experts globally.</p>
+            </div>
+            <div className="benefit-card-v2">
+              <div className="benefit-icon-v2 icon-sky">
+                <span className="material-symbols-outlined">videocam</span>
+              </div>
+              <h3 className="benefit-name-v2">1-on-1 Calls</h3>
+              <p className="benefit-desc-v2">Schedule focused video sessions.</p>
+            </div>
+            <div className="benefit-card-v2">
+              <div className="benefit-icon-v2 icon-purple">
+                <span className="material-symbols-outlined">school</span>
+              </div>
+              <h3 className="benefit-name-v2">Curated Courses</h3>
+              <p className="benefit-desc-v2">High impact tracks for institutions.</p>
+            </div>
+            <div className="benefit-card-v2">
+              <div className="benefit-icon-v2 icon-ocean">
+                <span className="material-symbols-outlined">map</span>
+              </div>
+              <h3 className="benefit-name-v2">Career Path</h3>
+              <p className="benefit-desc-v2">Real time progress tracking.</p>
+            </div>
+          </div>
+        </section>
 
-                    {/* <div className="program-card-content"> */}
-                    <div className="program-card-rating">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className={i < Math.floor(rating) ? "star-filled" : "star-empty"}>★</span>
-                      ))}
-                    </div>
-
-                    <h3 className="program-card-title">{skill.name}</h3>
-                    <p className="program-card-subtitle">{skill.description}</p>
-
-                    <div className="program-card-tags">
-                      <span className="program-tag">{level}</span>
-                      <span className="program-tag">{duration} weeks</span>
-                    </div>
-                    {/* </div> */}
+        <section className="top-courses-section-v2 landing-section reveal">
+          <div className="tracks-header reveal reveal-up">
+            <h2 className="section-title-v2">Top <span>Courses</span></h2>
+            <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
+          </div>
+          <div className="courses-marquee-container">
+            {/* Row 1: First half of courses, duplicated for loop */}
+            <div className="marquee-row marquee-left-1">
+              {[...topCourses.slice(0, 6), ...topCourses.slice(0, 6)].map((course, idx) => (
+                <div key={`${course.id}-r1-${idx}`} className="course-card-marquee">
+                  <div className="course-thumb-v2">
+                    <img src={course.image} alt={course.title} />
+                    <div className="course-tag-v2">{course.category || 'Design'}</div>
                   </div>
-                )
-              })}
+                  <div className="course-content-v2">
+                    <h3 className="course-name-v2">{course.title}</h3>
+                    <div className="course-meta-v2">
+                      <div className="course-rating-v2">
+                        <span className="material-symbols-outlined">star</span>
+                        <span>{course.rating}</span>
+                      </div>
+                      <div className="course-reviews-v2">({course.reviews || 24} reviews)</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="carousel-dots">
-              {[...Array(skillsTotalPages)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`dot ${currentSkillsPage === i ? 'active' : ''}`}
-                  onClick={() => {
-                    const track = skillsTrackRef.current;
-                    if (track) {
-                      const scrollAmount = track.clientWidth * i;
-                      track.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-                    }
-                  }}
-                />
+            {/* Row 2: Second half (or mixed), duplicated for loop */}
+            <div className="marquee-row marquee-right">
+              {[...topCourses.slice(6, 12), ...topCourses.slice(6, 12)].map((course, idx) => (
+                <div key={`${course.id}-r2-${idx}`} className="course-card-marquee">
+                  <div className="course-thumb-v2">
+                    <img src={course.image} alt={course.title} />
+                    <div className="course-tag-v2">{course.category || 'Tech'}</div>
+                  </div>
+                  <div className="course-content-v2">
+                    <h3 className="course-name-v2">{course.title}</h3>
+                    <div className="course-meta-v2">
+                      <div className="course-rating-v2">
+                        <span className="material-symbols-outlined">star</span>
+                        <span>{course.rating}</span>
+                      </div>
+                      <div className="course-reviews-v2">({course.reviews || 85} reviews)</div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-
-          <div className="view-more-container mobile-only" onClick={() => navigate('/explore')}>
-            <span>View more</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </div>
-        </div>
-      </section>
+        </section>
 
 
 
 
-
-
-      <section className="how-it-works-section landing-section" ref={howItWorksSectionRef}>
-        <div className="page-content-wrapper">
-          <div className="landing-section-center-header">
-            <span className="landing-section-subtitle">Process</span>
-            <h2 className="landing-section-title">Kickstart your career in 3 simple steps</h2>
-          </div>
-
-          <div className={`roadmap-container ${roadmapStep > 0 ? 'active' : ''}`} ref={roadmapContainerRef}>
-            {/* Desktop Horizontal Line */}
-            <div className="roadmap-track desktop-only">
-              <div className="roadmap-line-bg"></div>
-              <div
-                className="roadmap-line-progress"
-                style={{ width: `${(Math.max(0, roadmapStep - 0.5) / 2.5) * 100}%` }}
-              ></div>
-            </div>
-
-            <div className="roadmap-steps">
-              <div className={`roadmap-step ${roadmapStep >= 1 ? 'active' : ''}`}>
-                <div className="roadmap-node">
-                  <span className="roadmap-number">1</span>
-                  {/* Mobile Vertical Line */}
-                  <div className="roadmap-vertical-line mobile-only">
-                    <div className="roadmap-vertical-progress" style={{ height: roadmapStep >= 2 ? '100%' : '0%' }}></div>
+        <section className="disciplines-section landing-section reveal">
+          <h2 className="font-serif text-3xl text-deep-charcoal mb-8 reveal reveal-up">Rising<br />Disciplines</h2>
+          <div className="flex overflow-x-auto gap-8 pb-10 no-scrollbar reveal reveal-up stagger-1" style={{ scrollSnapType: 'x mandatory', display: 'flex', WebkitOverflowScrolling: 'touch' }}>
+            {/* Platform Features with Organic Design */}
+            {platformFeatures.map((feat, index) => (
+              <div key={feat.id} className={`discipline-item reveal reveal-right stagger-${index + 1}`}>
+                <div className="feature-tag">Featured</div>
+                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${index % 2 === 0 ? 'rotate-6' : '-rotate-6'}`} style={{ borderColor: 'var(--primary-sky)' }}>
+                  <div className="w-full h-full bg-sky-50 flex items-center justify-center organic-card">
+                    <feat.icon className="text-sky-500" size={40} />
                   </div>
                 </div>
-                <div className="roadmap-content">
-                  <h3>Sign up & explore</h3>
-                  <p>Create your account and discover hundreds of practical courses tailored to industry needs.</p>
+                <div className="discipline-info">
+                  <p className="discipline-name" style={{ fontWeight: '800' }}>{feat.name}</p>
+                  <p className="discipline-count" style={{ fontSize: '11px', opacity: 0.8 }}>{feat.desc}</p>
                 </div>
               </div>
+            ))}
 
-              <div className={`roadmap-step ${roadmapStep >= 2 ? 'active' : ''}`}>
-                <div className="roadmap-node">
-                  <span className="roadmap-number">2</span>
-                  {/* Mobile Vertical Line */}
-                  <div className="roadmap-vertical-line mobile-only">
-                    <div className="roadmap-vertical-progress" style={{ height: roadmapStep >= 3 ? '100%' : '0%' }}></div>
+            {/* Existing Categories */}
+            {categories.map((cat, index) => (
+              <div key={cat.id} className={`discipline-item reveal reveal-right stagger-${((index + platformFeatures.length) % 4) + 1}`}>
+                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${(index + platformFeatures.length) % 2 === 0 ? 'rotate-6' : '-rotate-6'}`}>
+                  <div className="w-full h-full bg-slate-100 flex items-center justify-center organic-card">
+                    <cat.icon className="text-sky-500" size={40} />
                   </div>
                 </div>
-                <div className="roadmap-content">
-                  <h3>Connect with mentors</h3>
-                  <p>Get personalized guidance from experienced professionals at top tech companies.</p>
-                </div>
-              </div>
-
-              <div className={`roadmap-step ${roadmapStep >= 3 ? 'active' : ''}`}>
-                <div className="roadmap-node">
-                  <span className="roadmap-number">3</span>
-                </div>
-                <div className="roadmap-content">
-                  <h3>Apply & Grow</h3>
-                  <p>Apply for real job opportunities and track your growth with our assessment tools.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-
-
-
-      <section className="light-theme-mentors-section landing-section">
-        {/* Video Background */}
-        <video
-          className="mentor-section-video-bg"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          <source src={topmentor} type="video/mp4" />
-        </video>
-
-        {/* Optional Overlay for better readability */}
-        <div className="mentor-section-overlay"></div>
-
-        <div className="page-content-wrapper">
-          <div className="landing-section-header reveal reveal-up">
-            <div className="landing-section-header-text">
-              <span className="landing-section-subtitle">Expert Guidance</span>
-              <h2 className="landing-section-title">Our top mentors</h2>
-            </div>
-            <div className="view-more-container desktop-only" onClick={() => navigate('/explore')}>
-              <span>View all</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </div>
-          </div>
-
-          <div className="light-theme-mentor-slider">
-            <div className="light-theme-mentor-track" ref={mentorTrackRef}>
-              {mentorsToDisplay.length > 0 ? (
-                mentorsToDisplay.map((mentor, index) => (
-                  <div
-                    className={`light-theme-mentor-card reveal reveal-up stagger-${(index % 4) + 1}`}
-                    key={mentor.id || mentor.name}
-                    onClick={() => navigate(`/mentor/${mentor.id || mentor.name}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="light-theme-mentor-card-image-wrapper">
-                      <img src={mentor.image || 'https://via.placeholder.com/400x280?text=Mentor'} alt={mentor.name} className="light-theme-mentor-card-image" />
-                    </div>
-                    <div className="light-theme-mentor-card-content">
-                      <h3 className="light-theme-mentor-card-name">{mentor.name}</h3>
-                      <p className="light-theme-mentor-card-role">{mentor.role}</p>
-                      <p className="light-theme-mentor-card-company">{mentor.company}</p>
-                      <div className="light-theme-mentor-card-footer">
-                        <span className="light-theme-mentor-card-experience">{mentor.experience}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-                  No mentors available
-                </div>
-              )}
-            </div>
-            {mentorTotalPages > 1 && (
-              <div className="light-theme-mentor-dots">
-                {Array.from({ length: mentorTotalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    className={`light-theme-mentor-dot ${index === currentMentorPage ? 'active' : ''}`}
-                    onClick={() => {
-                      const track = mentorTrackRef.current
-                      if (!track) return
-                      const cardWidth = 350
-                      const gap = 24
-                      const cardsPerPage = Math.floor(track.clientWidth / (cardWidth + gap)) || 1
-                      const scrollLeft = index * (cardWidth + gap) * cardsPerPage
-                      track.scrollTo({ left: scrollLeft, behavior: 'smooth' })
-                    }}
-                    aria-label={`Go to mentor page ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-
-
-
-
-
-      <section className="why-choose-section landing-section">
-        <div className="page-content-wrapper">
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <span className="landing-section-subtitle">Values</span>
-            <h2 className="landing-section-title" style={{ textAlign: 'center' }}>Why Choose Internify</h2>
-          </div>
-
-          <div className="why-choose-cards">
-            <div className="why-choose-card reveal reveal-up stagger-1">
-              <div className="why-choose-icon">
-                <CertificateIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Industry-experienced mentors</h3>
-                <p>Learn from those who have already succeeded in the roles you dream of.</p>
-              </div>
-            </div>
-
-            <div className="why-choose-card reveal reveal-up stagger-2">
-              <div className="why-choose-icon">
-                <ProgrammingIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Practical courses</h3>
-                <p>Project-based learning that gives you real experience, not just theory.</p>
-              </div>
-            </div>
-
-            <div className="why-choose-card reveal reveal-up stagger-3">
-              <div className="why-choose-icon">
-                <CalendarIcon size={24} />
-              </div>
-              <div className="why-choose-text">
-                <h3>Career guidance</h3>
-                <p>From resume building to interview prep, we support you at every stage.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-
-
-
-      <section className="job-portal-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="job-portal-banner reveal reveal-up">
-            <div className="job-portal-content">
-              <h2>Start applying to real opportunities</h2>
-              <p>Connect with top recruiters and find your dream internship or first job. Your future starts here.</p>
-              <div className="job-portal-actions">
-                <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/jobs')}>Explore Jobs</button>
-              </div>
-            </div>
-            <div className="job-portal-visual desktop-only">
-              <div style={{
-                width: '320px',
-                height: '220px',
-                background: '#ffffff',
-                borderRadius: '32px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.1)'
-              }}>
-                <FolderIcon size={80} color="#0ca5e9" />
-                <div style={{ marginTop: '20px', width: '60%', height: '8px', background: '#f1f5f9', borderRadius: '4px' }}></div>
-                <div style={{ marginTop: '10px', width: '40%', height: '8px', background: '#f1f5f9', borderRadius: '4px' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-      {/* <section className="workshops-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="workshops-card">
-            <div className="workshops-info">
-              <span className="landing-section-subtitle" style={{ marginBottom: '12px' }}>Community</span>
-              <h2>Attend Workshops & Career Talks</h2>
-              <p>Join live sessions with industry leaders and accelerate your career path with expert insights.</p>
-              <button className="btn-primary" style={{ padding: '16px 32px' }} onClick={() => navigate('/events')}>See Upcoming Events</button>
-            </div>
-            <div className="workshops-illustration">
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <div style={{ width: '140px', height: '140px', background: '#f0f9ff', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(12, 165, 233, 0.1)' }}>
-                  <DesignIcon size={48} color="#0ca5e9" />
-                </div>
-                <div style={{ width: '140px', height: '140px', background: '#fff1f2', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '40px', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.1)' }}>
-                  <AIIcon size={48} color="#f43f5e" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
-
-
-
-
-      <section className="simple-testimonials-section landing-section">
-        <div className="page-content-wrapper">
-          <span className="landing-section-subtitle">Success Stories</span>
-          <h2 className="landing-section-title">Students Testimonials</h2>
-          <div className="simple-testimonials-grid">
-            {(isMobile ? simpleTestimonials : simpleTestimonials.slice((currentSimpleTestimonialPage - 1) * 3, currentSimpleTestimonialPage * 3)).map((testimonial, index) => (
-              <div
-                key={testimonial.id}
-                className={`simple-testimonial-card reveal reveal-up stagger-${(index % 3) + 1}`}
-                onClick={() => setSelectedTestimonial(testimonial)}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src={testimonial.avatar} alt={testimonial.name} className="simple-testimonial-avatar" />
-                <div className="simple-testimonial-content">
-                  <h4 className="simple-testimonial-name">{testimonial.name}</h4>
-                  <p className="simple-testimonial-role">{testimonial.role} • {testimonial.company}</p>
-                  <p className="simple-testimonial-quote">{testimonial.quote}</p>
+                <div className="discipline-info">
+                  <p className="discipline-name">{cat.name}</p>
+                  <p className="discipline-count">100+ Mentors</p>
                 </div>
               </div>
             ))}
           </div>
-          {!isMobile && (
-            <div className="simple-testimonials-pagination">
-              <button
-                className="simple-testimonials-prev"
-                onClick={() => setCurrentSimpleTestimonialPage(prev => Math.max(1, prev - 1))}
-                disabled={currentSimpleTestimonialPage === 1}
-                aria-label="Previous page"
-              >
-                ←
-              </button>
-              <span className="simple-testimonials-page-indicator">
-                {String(currentSimpleTestimonialPage).padStart(2, '0')}/{String(Math.ceil(simpleTestimonials.length / 3)).padStart(2, '0')}
-              </span>
-              <button
-                className="simple-testimonials-next"
-                onClick={() => setCurrentSimpleTestimonialPage(prev => Math.min(Math.ceil(simpleTestimonials.length / 3), prev + 1))}
-                disabled={currentSimpleTestimonialPage === Math.ceil(simpleTestimonials.length / 3)}
-                aria-label="Next page"
-              >
-                →
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
 
-      <section className="get-in-touch-section landing-section">
-        <div className="page-content-wrapper">
-          <div className="get-in-touch-card reveal reveal-up">
-            <div className="get-in-touch-content">
-              <h2 className="get-in-touch-title">Make an Enquiry</h2>
-              <p className="get-in-touch-description">
-                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-              </p>
-            </div>
-            <form className="get-in-touch-form" onSubmit={(e) => {
-              e.preventDefault()
-              console.log('Email submitted:', contactEmail)
-              setContactEmail('')
-              alert('Thank you for your message! We\'ll get back to you soon.')
-            }}>
-              <div className="get-in-touch-input-wrapper">
-                <input
-                  type="email"
-                  className="get-in-touch-input"
-                  placeholder="Enter your email address"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  required
-                />
-                <button type="submit" className="get-in-touch-submit">
-                  Send
-                </button>
+
+        <section className="top-mentors-section-v2 landing-section reveal">
+          <div className="tracks-header reveal reveal-up">
+            <h2 className="section-title-v2">Top <span>Mentors</span></h2>
+            <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
+          </div>
+          <div className="mentors-grid-v2">
+            {topMentors.slice(0, 4).map((mentor, index) => (
+              <div key={mentor.id} className={`mentor-card-horizontal-v2 reveal reveal-up stagger-${index + 1}`}>
+                <div className="mentor-card-header-v2">
+                  <img src={mentor.image} alt={mentor.name} className="mentor-avatar-large-v2" />
+                  <div className="mentor-company-tag-v2">{mentor.company}</div>
+                </div>
+                <div className="mentor-card-body-v2">
+                  <h3 className="mentor-name-v2">{mentor.name}</h3>
+                  <p className="mentor-role-v2">{mentor.role}</p>
+                  <div className="mentor-stats-row-v2">
+                    <div className="mentor-stat-v2">
+                      <span className="material-symbols-outlined">star</span> {mentor.rating}
+                    </div>
+                    <div className="mentor-stat-v2">
+                      <span className="material-symbols-outlined">group</span> {mentor.reviews}
+                    </div>
+                  </div>
+                  <button className="btn-connect-card-v2" onClick={() => onMentorClick(mentor)}>Connect</button>
+                </div>
               </div>
-            </form>
+            ))}
+          </div>
+        </section>
+
+        <section className="cta-side-by-side landing-section reveal">
+          <div className="cta-split-container">
+            <div className="referral-banner-v2 reveal reveal-up">
+              <div className="referral-icon-v2">
+                <span className="material-symbols-outlined">rocket</span>
+              </div>
+              <h2 className="referral-title-v2">Get Hired Instantly</h2>
+              <p className="referral-text-v2">
+                Join our exclusive placement program and get direct referrals to top tech firms.
+              </p>
+              <button className="btn-referral-v2" onClick={() => navigate('/explore')}>Apply for Referrals</button>
+            </div>
+
+            <div className="mentor-cta-card-v2 reveal reveal-up">
+              <div className="mentor-cta-icon-v2">
+                <span className="material-symbols-outlined">campaign</span>
+              </div>
+              <h2 className="mentor-cta-title-v2">Become a Mentor</h2>
+              <p className="mentor-cta-text-v2">
+                Share your knowledge and help shape the next generation of professionals.
+              </p>
+              <button className="btn-mentor-cta-v2" onClick={() => navigate('/apply-mentor')}>Start Teaching</button>
+            </div>
+          </div>
+
+          <div className="success-stories-section-v2 internal-section reveal reveal-up">
+            <div className="section-header-v2">
+              <h2 className="section-title-v2">Success <span>Stories</span></h2>
+            </div>
+            <div className="success-stories-grid">
+              {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
+                <div key={story.id} className={`success-story-card-small reveal reveal-up stagger-${idx + 1}`}>
+                  <div className="story-header-small">
+                    <img src={story.mentorImage} alt={story.mentorName} className="story-avatar-small" />
+                    <div className="story-meta-small">
+                      <span className="story-name-small">{story.mentorName}</span>
+                      <span className="story-role-small">{story.mentorRole}</span>
+                    </div>
+                  </div>
+                  <div className="story-rating-small">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined icon-filled">star</span>
+                    ))}
+                  </div>
+                  <p className="story-quote-small">"{story.quote}"</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="get-in-touch-section-new reveal">
+          <div className="get-in-touch-container liquid-glass glow-edge reveal reveal-up">
+            <h2 className="get-in-touch-title-new">Get in Touch</h2>
+            <p className="get-in-touch-desc-new">
+              Have questions or need guidance? Our team is here to help you navigate your career journey.
+            </p>
+            <div className="get-in-touch-form-new">
+              <input type="email" placeholder="Enter your email" className="get-in-touch-input-new" />
+              <button className="get-in-touch-btn-new">Send Message</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer-redesign reveal">
+        <div className="footer-content-new">
+          <div className="footer-logo-row reveal reveal-up">
+            <div className="footer-logo-icon">
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
+            </div>
+            <h2 className="footer-logo-text">Internify</h2>
+          </div>
+          <div className="footer-links-grid">
+            <div className="footer-column reveal reveal-up stagger-1">
+              <h4 className="footer-column-title">Platform</h4>
+              <ul className="footer-links-list">
+                <li className="footer-link-item" onClick={() => navigate('/explore')}>Mentorship</li>
+                <li className="footer-link-item" onClick={() => navigate('/explore')}>Courses</li>
+                <li className="footer-link-item" onClick={() => navigate('/jobs')}>Careers</li>
+              </ul>
+            </div>
+            <div className="footer-column reveal reveal-up stagger-2">
+              <h4 className="footer-column-title">Company</h4>
+              <ul className="footer-links-list">
+                <li className="footer-link-item">About</li>
+                <li className="footer-link-item">Terms</li>
+                <li className="footer-link-item">Privacy</li>
+              </ul>
+            </div>
+          </div>
+          <div className="footer-bottom-new reveal reveal-up stagger-3">
+            <p className="footer-copyright">© 2026 Internify</p>
+            <div className="footer-socials">
+              <div className="social-icon-pill">
+                <span className="material-symbols-outlined">public</span>
+              </div>
+              <div className="social-icon-pill">
+                <span className="material-symbols-outlined">share</span>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-
+      </footer>
     </div >
   )
 }
