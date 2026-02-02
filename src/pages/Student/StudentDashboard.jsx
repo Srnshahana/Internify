@@ -86,7 +86,9 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
       {/* Top Header - Restored */}
-      {!isLiveClassroomActive && (
+      {/* Top Header - Restored */}
+      {/* Top Header - Restored */}
+      {!isLiveClassroomActive && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Profile' && activePage !== 'Calendar' && (
         <StudentAppBar
           onLogout={onLogout}
           isTransparent={false} // Traditional opaque bar
@@ -97,7 +99,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
       {/* Main Content - Full Width */}
       <main className="dashboard-main-new full-width-main">
-        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
+        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} style={activePage === 'Home' || activePage === 'Classrooms' ? { padding: 0, maxWidth: '100%' } : {}}>
           {renderPage(activePage)}
         </div>
       </main>
