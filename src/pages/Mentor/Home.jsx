@@ -6,7 +6,7 @@ import StudentRequests from './StudentRequests.jsx'
 import PendingWork from './PendingWork.jsx'
 import Messages from './Messages.jsx'
 import Assessments from './Assessments.jsx'
-import LiveClassroom from '../Learning/LiveClassroom.jsx'
+import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
@@ -98,13 +98,12 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   if (showPendingWork) return <PendingWork onBack={() => setShowPendingWork(false)} />
   if (showMessages) return <Messages onBack={() => setShowMessages(false)} />
   if (activeCourse) return (
-    <LiveClassroom
+    <MentorLiveClassroom
       course={activeCourse}
       onBack={() => {
         setActiveCourse(null)
         if (setIsLiveClassroomActive) setIsLiveClassroomActive(false)
       }}
-      userRole="mentor"
     />
   )
   if (showAssessments) return <Assessments onBack={() => setShowAssessments(false)} />

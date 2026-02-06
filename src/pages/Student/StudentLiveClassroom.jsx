@@ -3,7 +3,8 @@ import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function LiveClassroom({ course, onBack, userRole = 'student' }) {
+function StudentLiveClassroom({ course, onBack }) {
+  const userRole = 'student'
   const { refetch } = useDashboardData()
 
   // Define chatId from the enrollment
@@ -27,18 +28,15 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
 
   const [activeSessionId, setActiveSessionId] = useState(firstPendingId)
   const [messageInput, setMessageInput] = useState('')
-  const [showAssessmentForm, setShowAssessmentForm] = useState(false)
-  const [newAssessment, setNewAssessment] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-  })
+
+  // Removed mentor assessment creation state
   const [showAssessmentListModal, setShowAssessmentListModal] = useState(false)
   const [messages, setMessages] = useState([])
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
+
   const imageInputRef = useRef(null)
-  const studyMaterialInputRef = useRef(null)
+  // Removed study material ref
   const assessmentFileInputRef = useRef(null)
 
   const classroom = course || {
@@ -666,142 +664,11 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     }
   }
 
-  const handleAttachStudyMaterial = () => {
-    console.log('📤 [Start] Uploading study material:')
-    if (studyMaterialInputRef.current) studyMaterialInputRef.current.click()
-  }
 
-  const handleStudyMaterialSelected = async (e) => {
-    console.log('📤 [Start] Uploading study material:')
-    const file = e.target.files && e.target.files[0]
-    if (!file) {
-      console.warn('⚠️ No file selected for study material')
-      return
-    }
 
-    try {
-      console.log('📤 [Start] Uploading study material:', file.name, 'Size:', file.size)
-      console.log('📦 Bucket: course-files')
 
-      // 1. Upload to Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
-      console.log('📄 Generated storage path:', fileName)
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file)
-
-      if (uploadError) {
-        console.error('❌ Upload failed:', uploadError)
-        throw uploadError
-      }
-      console.log('✅ Upload successful:', uploadData)
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName)
-
-      console.log('🔗 Generated Public URL:', publicUrl)
-
-      // 2. Insert into Attachments Table
-      console.log('💾 Inserting into attachments table...')
-      const { data: attachmentData, error: attachmentError } = await supabase
-        .from('attachments')
-        .insert({
-          session_id: activeSessionId,
-          uploaded_by: currentUserId,
-          type: 'Document',
-          file_name: file.name,
-          file_url: publicUrl,
-          description: 'Study Material',
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (attachmentError) {
-        console.error('❌ Error inserting attachment record:', attachmentError)
-        alert('Table Insert Failed: ' + attachmentError.message)
-        // throw attachmentError // Uncomment if you want to stop the flow
-      } else {
-        console.log('✅ Attachment record created:', attachmentData)
-      }
-
-      // 3. Send Message to Chat
-      console.log('💬 Inserting message into chat...')
-      const studyMsg = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
-        role: 'mentor',
-        sender_id: Number(currentUserId),
-        content: file.name,
-        file_url: publicUrl,
-        read: false
-        // Removed: type
-      }
-
-      console.log('📤 Message payload:', studyMsg)
-
-      const { data: msgData, error: msgError } = await supabase
-        .from('messages')
-        .insert([studyMsg])
-        .select()
-
-      if (msgError) {
-        console.error('❌ Message insert failed:', msgError)
-        throw msgError
-      }
-      console.log('✅ Message inserted:', msgData)
-
-      // Optimistic UI Update
-      const optimisticMsg = {
-        ...studyMsg,
-        id: Date.now(),
-        from: 'mentor',
-        time: getCurrentTime(),
-        fileName: file.name,
-        fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`
-      }
-      setMessages(prev => [...prev, optimisticMsg])
-      alert('Study Material uploaded successfully!')
-
-    } catch (err) {
-      console.error('❌ CRITICAL Error uploading study material:', err)
-      alert('Failed to upload study material: ' + err.message)
-    } finally {
-      e.target.value = ''
-      setShowAttachOptions(false)
-    }
-  }
-
-  const handleSendAssessment = () => {
-    if (!newAssessment.title || !newAssessment.description || !newAssessment.dueDate) {
-      alert('Please fill in all fields')
-      return
-    }
-
-    const assessmentMessage = {
-      id: messages.length + 1,
-      from: 'mentor',
-      type: 'assessment',
-      assessmentTitle: newAssessment.title,
-      assessmentDescription: newAssessment.description,
-      assessmentDueDate: newAssessment.dueDate,
-      assessmentId: Date.now(), // Simple ID generation
-      assessmentId: Date.now(), // Simple ID generation
-      time: getCurrentTime(),
-      session_id: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
-    }
-
-    setMessages((prev) => [...prev, assessmentMessage])
-    setNewAssessment({ title: '', description: '', dueDate: '' })
-    setShowAssessmentForm(false)
-    setShowAttachOptions(false)
-  }
 
   const handleViewAssessment = (assessmentMessage) => {
     setSelectedAssessment(assessmentMessage)
@@ -1252,79 +1119,9 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
             style={{ display: 'none' }}
             accept="image/*"
           />
-          <input
-            type="file"
-            ref={studyMaterialInputRef}
-            onChange={handleStudyMaterialSelected}
-            style={{ display: 'none' }}
-            // Accept broadly for study materials
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.mp4,image/*"
-          />
 
-          {/* Assessment Form Modal */}
-          {showAssessmentForm && (
-            <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentForm(false)}>
-              <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>Create Assessment</h2>
-                  <button
-                    className="modal-close-btn"
-                    onClick={() => setShowAssessmentForm(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="assessment-modal-content">
-                  <div className="form-group">
-                    <label className="form-label">Assessment Title</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g., React Hooks Implementation"
-                      value={newAssessment.title}
-                      onChange={(e) => setNewAssessment({ ...newAssessment, title: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Instructions / What to Do</label>
-                    <textarea
-                      className="form-textarea"
-                      rows="6"
-                      placeholder="Describe what students need to do for this assessment..."
-                      value={newAssessment.description}
-                      onChange={(e) => setNewAssessment({ ...newAssessment, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Due Date</label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={newAssessment.dueDate}
-                      onChange={(e) => setNewAssessment({ ...newAssessment, dueDate: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="assessment-modal-actions">
-                  <button
-                    className="btn-primary"
-                    onClick={handleSendAssessment}
-                  >
-                    Send Assessment
-                  </button>
-                  <button
-                    className="btn-secondary"
-                    onClick={() => {
-                      setShowAssessmentForm(false)
-                      setNewAssessment({ title: '', description: '', dueDate: '' })
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+
+
 
           {/* Assessment View Modal for Students */}
           {selectedAssessment && userRole === 'student' && (
@@ -1550,29 +1347,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
             <span className="live-session-title">Course Complete</span>
           </button>
 
-          {userRole === 'mentor' && (
-            <>
-              <button
-                type="button"
-                className="live-course-complete-btn" // Reuse style or add new class
-                style={{ backgroundColor: '#22c55e', marginLeft: '12px' }}
-                onClick={() => {
-                  setShowAssessmentForm(true)
-                  setShowAttachOptions(false)
-                }}
-              >
-                <span className="live-session-title">Create Poll</span>
-              </button>
-              <button
-                type="button"
-                className="live-course-complete-btn"
-                style={{ backgroundColor: '#eab308', marginLeft: '12px' }}
-                onClick={handleAttachStudyMaterial}
-              >
-                <span className="live-session-title">Study Material</span>
-              </button>
-            </>
-          )}
+
         </div>
 
         {/* Course Completion Modal */}
@@ -1617,6 +1392,6 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   )
 }
 
-export default LiveClassroom
+export default StudentLiveClassroom
 
 

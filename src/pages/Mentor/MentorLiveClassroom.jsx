@@ -3,7 +3,8 @@ import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function LiveClassroom({ course, onBack, userRole = 'student' }) {
+function MentorLiveClassroom({ course, onBack }) {
+  const userRole = 'mentor'
   const { refetch } = useDashboardData()
 
   // Define chatId from the enrollment
@@ -28,12 +29,12 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   const [activeSessionId, setActiveSessionId] = useState(firstPendingId)
   const [messageInput, setMessageInput] = useState('')
   const [showAssessmentForm, setShowAssessmentForm] = useState(false)
+  const [showAssessmentListModal, setShowAssessmentListModal] = useState(false)
   const [newAssessment, setNewAssessment] = useState({
     title: '',
     description: '',
     dueDate: '',
   })
-  const [showAssessmentListModal, setShowAssessmentListModal] = useState(false)
   const [messages, setMessages] = useState([])
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
@@ -197,11 +198,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [showCompletionModal, setShowCompletionModal] = useState(false)
-  const [selectedAssessment, setSelectedAssessment] = useState(null)
-  const [assessmentSubmission, setAssessmentSubmission] = useState({
-    textSubmission: '',
-    attachments: [],
-  })
+  // Removed student assessment view states
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -939,7 +936,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
               <button
                 className="live-complete-btn-v2"
                 onClick={() => {
-                  setShowAssessmentForm(true)
+                  setShowAssessmentListModal(true)
                   setShowAttachOptions(false)
                 }}
                 title="Create Assessment"
@@ -1326,185 +1323,100 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
             </div>
           )}
 
-          {/* Assessment View Modal for Students */}
-          {selectedAssessment && userRole === 'student' && (
-            <div className="live-assessment-modal-overlay" onClick={() => setSelectedAssessment(null)}>
-              <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>Assessment</h2>
-                  <button
-                    className="modal-close-btn"
-                    onClick={() => setSelectedAssessment(null)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="assessment-modal-content">
-                  <div className="assessment-view-header">
-                    <h3>{selectedAssessment.assessmentTitle}</h3>
-                    <p className="assessment-view-course">{course?.title || 'Course'}</p>
-                  </div>
-                  <div className="assessment-view-details">
-                    <div className="info-item">
-                      <span className="info-label">Due Date:</span>
-                      <span className="info-value">
-                        {new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="assessment-view-description">
-                    <h4>Instructions</h4>
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{selectedAssessment.assessmentDescription}</p>
-                  </div>
-
-                  {/* Submission Form */}
-                  <div className="assessment-submission-form">
-                    <h4>Your Submission</h4>
-
-                    <div className="form-group">
-                      <label className="form-label">Write your response / description</label>
-                      <textarea
-                        className="form-textarea"
-                        rows="8"
-                        placeholder="Describe your work, explain your approach, or provide any additional context..."
-                        value={assessmentSubmission.textSubmission}
-                        onChange={(e) => setAssessmentSubmission({ ...assessmentSubmission, textSubmission: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Attach Files / Documents</label>
-                      <div className="file-upload-area">
-                        <input
-                          type="file"
-                          id="assessment-file-upload"
-                          multiple
-                          className="file-input"
-                          ref={assessmentFileInputRef}
-                          onChange={handleAssessmentFileUpload}
-                          style={{ display: 'none' }}
-                        />
-                        <label htmlFor="assessment-file-upload" className="file-upload-label">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                          </svg>
-                          Click to upload files or drag and drop
-                        </label>
-                      </div>
-
-                      {assessmentSubmission.attachments.length > 0 && (
-                        <div className="attachments-list" style={{ marginTop: '12px' }}>
-                          {assessmentSubmission.attachments.map((attachment, idx) => (
-                            <div key={idx} className="attachment-item">
-                              <div className="attachment-icon">
-                                {attachment.type === 'pdf' && '📄'}
-                                {attachment.type === 'js' && '📜'}
-                                {attachment.type === 'ts' && '📘'}
-                                {attachment.type === 'figma' && '🎨'}
-                                {attachment.type === 'zip' && '📦'}
-                                {!['pdf', 'js', 'ts', 'figma', 'zip'].includes(attachment.type) && '📎'}
-                              </div>
-                              <div className="attachment-info">
-                                <span className="attachment-name">{attachment.name}</span>
-                                <span className="attachment-size">{attachment.size}</span>
-                              </div>
-                              <button
-                                className="btn-danger btn-small"
-                                onClick={() => handleRemoveAssessmentAttachment(idx)}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Assessment List Moved Out */}
-                    </div>
-
-                    <div className="assessment-view-actions">
-                      <button
-                        className="btn-primary btn-full"
-                        onClick={handleSubmitAssessment}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="22" y1="2" x2="11" y2="13"></line>
-                          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
-                        Submit Assessment
-                      </button>
-                      <button
-                        className="btn-secondary btn-full"
-                        onClick={() => {
-                          setSelectedAssessment(null)
-                          setAssessmentSubmission({ textSubmission: '', attachments: [] })
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Assessment List Modal for Students (Correctly placed) */}
+          {/* Assessment List Modal for Mentors */}
           {showAssessmentListModal && (
             <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentListModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>All Assessments</h2>
-                  <button
-                    className="modal-close-btn"
-                    onClick={() => setShowAssessmentListModal(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="assessment-modal-content">
-                  <div className="assessment-list-container">
-                    {/* Hardcoded Item */}
-                    <div
-                      className="assessment-list-item"
+                <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
+                  <h2>Assessments</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      className="modal-action-btn"
                       onClick={() => {
-                        setSelectedAssessment({
-                          id: 999,
-                          assessmentTitle: 'Module 1: React Basics Assessment',
-                          assessmentDescription: 'Please create a simple todo list application using React hooks (useState, useEffect). Implement add, delete, and toggle completion features. \n\nSubmit the link to your GitHub repository and a brief explanation of your component structure.',
-                          assessmentDueDate: new Date(Date.now() + 86400000 * 5).toISOString() // 5 days from now
-                        })
+                        setShowAssessmentForm(true)
                         setShowAssessmentListModal(false)
                       }}
+                      title="Create New Assessment"
                       style={{
-                        padding: '16px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '12px',
-                        marginBottom: '12px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        fontSize: '20px'
                       }}
-                      onMouseEnter={(e) => e.target.style.borderColor = '#3b82f6'}
-                      onMouseLeave={(e) => e.target.style.borderColor = '#e2e8f0'}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>Module 1: React Basics Assessment</h4>
-                        <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#ecfdf5', color: '#047857' }}>Pending</span>
-                      </div>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        Please create a simple todo list application using React hooks (useState, useEffect)...
-                      </p>
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
-                        Due: {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}
-                      </div>
-                    </div>
+                      +
+                    </button>
+                    <button
+                      className="modal-close-btn"
+                      onClick={() => setShowAssessmentListModal(false)}
+                    >
+                      ✕
+                    </button>
                   </div>
+                </div>
+                <div className="assessment-modal-content">
+                  {messages.filter(m => m.type === 'assessment').length > 0 ? (
+                    <div className="assessment-list-container">
+                      {messages.filter(m => m.type === 'assessment').map((assessment, idx) => (
+                        <div
+                          key={assessment.id || idx}
+                          className="assessment-list-item"
+                          style={{
+                            padding: '16px',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            marginBottom: '12px',
+                            background: '#fff'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.assessmentTitle}</h4>
+                            <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#f1f5f9', color: '#64748b' }}>
+                              Due: {new Date(assessment.assessmentDueDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {assessment.assessmentDescription}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-state" style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
+                      <p>No assessments created yet.</p>
+                      <button
+                        onClick={() => {
+                          setShowAssessmentForm(true)
+                          setShowAssessmentListModal(false)
+                        }}
+                        style={{
+                          marginTop: '12px',
+                          color: '#3b82f6',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '500'
+                        }}
+                      >
+                        Create your first assessment
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
+
+
+          {/* Assessment List Modal for Students (Correctly placed) */}
+
 
           <input
             ref={docInputRef}
@@ -1557,7 +1469,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                 className="live-course-complete-btn" // Reuse style or add new class
                 style={{ backgroundColor: '#22c55e', marginLeft: '12px' }}
                 onClick={() => {
-                  setShowAssessmentForm(true)
+                  setShowAssessmentListModal(true)
                   setShowAttachOptions(false)
                 }}
               >
@@ -1617,6 +1529,6 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   )
 }
 
-export default LiveClassroom
+export default MentorLiveClassroom
 
 

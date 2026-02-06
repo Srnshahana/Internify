@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
-import LiveClassroom from '../Learning/LiveClassroom.jsx'
+import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 import CourseDetail from './CourseDetail.jsx'
 import MyCourses from './MyCourses.jsx'
 import {
@@ -527,7 +527,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
   // If active course is selected, show LiveClassroom
   if (activeCourse) {
-    return <LiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} userRole="student" />
+    return <StudentLiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
   }
   // Format current date for the header
   const currentDateFormatted = new Date().toLocaleDateString('en-US', {

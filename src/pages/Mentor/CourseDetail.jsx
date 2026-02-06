@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
 import '../../App.css'
-import LiveClassroom from '../Learning/LiveClassroom.jsx'
+import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import Assessments from './Assessments.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
@@ -42,7 +42,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   }
 
   if (showLiveClassroom) {
-    return <LiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} userRole="mentor" />
+    return <MentorLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} />
   }
 
   if (!courseDetails) {

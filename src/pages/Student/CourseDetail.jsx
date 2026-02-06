@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
 import '../../App.css'
-import LiveClassroom from '../Learning/LiveClassroom.jsx'
+import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   const [showLiveClassroom, setShowLiveClassroom] = useState(false)
@@ -73,7 +73,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   if (showLiveClassroom) {
-    return <LiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} userRole="student" />
+    return <StudentLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} />
   }
 
   if (!courseDetails) {
@@ -81,55 +81,60 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   return (
-    <div className="course-detail-page-elegant">
-      {/* Header */}
-      <div className="course-detail-header-elegant">
-        <button className="back-btn-elegant" onClick={onBack}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
+    <div className="course-detail-page-v2">
+      {/* V2 Header (Glass) */}
+      <div className="course-detail-header-v2">
+        <button className="back-btn-v2" onClick={onBack}>
+          <span className="material-symbols-outlined">arrow_back</span>
           Back
         </button>
-        <h1 className="course-detail-page-title">Course Details</h1>
+        <span className="header-course-title-v2">{courseDetails.title}</span>
+        <div style={{ flex: 1 }}></div>
       </div>
 
-      <div className="course-detail-content-wrapper">
-        {/* Hero Section */}
-        <div className="course-hero-elegant">
-          <div className="course-badges-elegant">
-            <span className="course-badge-elegant badge-category">{courseDetails.category}</span>
-            <span className="course-badge-elegant badge-level">{courseDetails.level}</span>
-            <span className="course-badge-elegant badge-type">{courseDetails.type}</span>
-          </div>
-
-          <h2 className="course-title-elegant">{courseDetails.title}</h2>
-          <p className="course-description-elegant">{courseDetails.description}</p>
-
-          <div className="course-rating-elegant">
-            <span className="rating-stars-elegant">{renderStars(courseDetails.rating || 4.0)}</span>
-            <span className="rating-value-elegant">{courseDetails.rating || 4.0}</span>
-          </div>
-
-          <div className="course-progress-section-elegant">
-            <div className="course-progress-box-elegant">
-              <div className="progress-header-elegant">
-                <span className="progress-label-elegant">Progress</span>
-                <span className="progress-percentage-elegant">{courseDetails.progress}%</span>
-              </div>
-              <div className="progress-bar-elegant-large">
-                <div
-                  className="progress-fill-elegant-large"
-                  style={{ width: `${courseDetails.progress}%` }}
-                ></div>
-              </div>
+      <div className="course-detail-content-wrapper-v2">
+        {/* V2 Hero Section (2-Column) */}
+        <div className="course-hero-v2 single-column">
+          <div className="hero-info-column">
+            <div className="course-badges-v2">
+              <span className="course-badge-v2 badge-category-v2">{courseDetails.category}</span>
+              <span className="course-badge-v2 badge-level-v2">{courseDetails.level}</span>
+              <span className="course-badge-v2 badge-type-v2">{courseDetails.type}</span>
             </div>
 
-            <button className="enter-classroom-btn-elegant" onClick={handleEnterClassroom}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              Enter Classroom
-            </button>
+            <h1 className="course-title-v2">{courseDetails.title}</h1>
+            <p className="course-description-v2">{courseDetails.description}</p>
+
+            {/* Meta Row: Mentor, Rating, Progress, Action */}
+            <div className="hero-actions-row-v2">
+              <div className="hero-meta-group">
+                {/* <div className="mentor-mini-profile-v2">
+                  <img src={courseDetails.mentorImage} alt={courseDetails.mentor} />
+                  <div className="mentor-text">
+                    <span className="mentor-label">Mentor</span>
+                    <span className="mentor-name">{courseDetails.mentor}</span>
+                  </div>
+                </div> */}
+                <div className="course-rating-v2">
+                  <span className="rating-star-icon-v2">★</span>
+                  <span className="rating-value-v2">{courseDetails.rating || 4.0}</span>
+                </div>
+              </div>
+
+              <div className="hero-progress-group">
+                <div className="progress-info-v2">
+                  <span className="progress-label-v2">Your Progress</span>
+                  <span className="progress-percent-v2">{courseDetails.progress}%</span>
+                </div>
+                <div className="progress-bar-v2-container">
+                  <div className="progress-bar-v2-fill" style={{ width: `${courseDetails.progress}%` }}></div>
+                </div>
+              </div>
+
+              <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
+                Enter Classroom
+              </button>
+            </div>
           </div>
         </div>
 
