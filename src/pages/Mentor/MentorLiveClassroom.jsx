@@ -35,6 +35,12 @@ function MentorLiveClassroom({ course, onBack }) {
     description: '',
     dueDate: '',
   })
+  const [showScheduleClassModal, setShowScheduleClassModal] = useState(false)
+  const [scheduleClassData, setScheduleClassData] = useState({
+    title: '',
+    scheduled_date: '',
+    meeting_link: ''
+  })
   const [messages, setMessages] = useState([])
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
@@ -847,6 +853,88 @@ function MentorLiveClassroom({ course, onBack }) {
     }
   }
 
+  const handleScheduleClass = async () => {
+    // 1. Validation
+    if (!scheduleClassData.title || !scheduleClassData.scheduled_date || !scheduleClassData.meeting_link) {
+      alert('Please fill in all fields (Title, Date, Link)')
+      return
+    }
+
+    try {
+      console.log('📅 Scheduling Class...', scheduleClassData)
+      const courseId = course?.course_id || course?.id
+
+      // 2. Insert into scheduled_classes table
+      const { data: classData, error: dbError } = await supabase
+        .from('scheduled_classes')
+        .insert({
+          course_id: courseId,
+          session_id: activeSessionId,
+          mentor_id: currentUserId,
+          title: scheduleClassData.title,
+          scheduled_date: scheduleClassData.scheduled_date,
+          meeting_link: scheduleClassData.meeting_link,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (dbError) {
+        console.error('❌ DB Insert Error:', dbError)
+        throw dbError
+      }
+      console.log('✅ Class Scheduled in DB:', classData)
+
+      // 3. Send Message to Chat (Card format)
+      // We store the structured data in 'content' as a JSON string
+      const contentJson = JSON.stringify({
+        title: scheduleClassData.title,
+        scheduled_date: scheduleClassData.scheduled_date,
+        meeting_link: scheduleClassData.meeting_link,
+        class_id: classData.id
+      })
+
+      const messagePayload = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: 'mentor',
+        sender_id: Number(currentUserId),
+        type: 'scheduled_class', // New Type
+        content: contentJson,
+        read: false
+      }
+
+      const { error: msgError } = await supabase
+        .from('messages')
+        .insert([messagePayload])
+
+      if (msgError) throw msgError
+
+      console.log('✅ Scheduled Class Message Sent')
+
+      // Optimistic Update
+      const newMessage = {
+        ...messagePayload,
+        id: Date.now(),
+        from: 'mentor',
+        time: getCurrentTime(),
+        // Client-side convenient props for rendering logic
+        classTitle: scheduleClassData.title,
+        classDate: scheduleClassData.scheduled_date,
+        classLink: scheduleClassData.meeting_link
+      }
+      setMessages(prev => [...prev, newMessage])
+
+      alert('Class scheduled successfully!')
+      setScheduleClassData({ title: '', scheduled_date: '', meeting_link: '' })
+      setShowScheduleClassModal(false)
+
+    } catch (err) {
+      console.error('❌ Error scheduling class:', err)
+      alert('Failed to schedule class: ' + err.message)
+    }
+  }
+
 
 
   const handlePostAssessmentToChat = async (assessment) => {
@@ -1030,6 +1118,14 @@ function MentorLiveClassroom({ course, onBack }) {
             <>
               <button
                 className="live-complete-btn-v2"
+                onClick={() => setShowScheduleClassModal(true)}
+                title="Schedule Class"
+                style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+              >
+                <span className="material-symbols-outlined">calendar_month</span>
+              </button>
+              <button
+                className="live-complete-btn-v2"
                 onClick={() => {
                   setShowAssessmentListModal(true)
                   setShowAttachOptions(false)
@@ -1081,7 +1177,7 @@ function MentorLiveClassroom({ course, onBack }) {
             {visibleMessages.map((message) => (
               <div
                 key={message.id}
-                className={`live-message ${message.from === 'mentor' ? 'from-mentor' : 'from-learner'}`}
+                className={`live-message ${String(message.sender_id) === String(currentUserId) ? 'from-learner' : 'from-mentor'}`}
               >
                 <div
                   className={`live-message-bubble ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
@@ -1159,6 +1255,30 @@ function MentorLiveClassroom({ course, onBack }) {
                         {userRole === 'student' && (
                           <button className="assessment-view-btn">View & Submit</button>
                         )}
+                      </div>
+                    </div>
+                  )}
+                  {message.type === 'scheduled_class' && (
+                    <div className="live-assessment-card" style={{ borderColor: '#3b82f6', background: '#eff6ff' }}>
+                      <div className="assessment-card-header">
+                        <div className="assessment-icon">📅</div>
+                        <div className="assessment-badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Scheduled Class</div>
+                      </div>
+                      <h4 className="assessment-card-title">{message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })())}</h4>
+                      <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#475569' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
+                          {new Date(message.classDate || (message.content && (() => { try { return JSON.parse(message.content).scheduled_date } catch (e) { return Date.now() } })())).toLocaleString()}
+                        </div>
+                        <a
+                          href={message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })())}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="assessment-view-btn"
+                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#3b82f6' }}
+                        >
+                          Join Class
+                        </a>
                       </div>
                     </div>
                   )}
@@ -1318,13 +1438,6 @@ function MentorLiveClassroom({ course, onBack }) {
                   <span className="material-symbols-outlined">image</span>
                 </div>
                 <span className="attach-label">Gallery</span>
-              </button>
-
-              <button className="attach-option-btn" onClick={handleAttachLink}>
-                <div className="attach-icon-circle blue">
-                  <span className="material-symbols-outlined">link</span>
-                </div>
-                <span className="attach-label">Link</span>
               </button>
             </div>
           )}
@@ -1515,6 +1628,60 @@ function MentorLiveClassroom({ course, onBack }) {
             </div>
           )}
 
+
+          {/* Schedule Class Modal */}
+          {showScheduleClassModal && (
+            <div className="live-assessment-modal-overlay" onClick={() => setShowScheduleClassModal(false)}>
+              <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="assessment-modal-header">
+                  <h2>Schedule Next Class</h2>
+                  <button
+                    className="modal-close-btn"
+                    onClick={() => setShowScheduleClassModal(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="assessment-modal-content">
+                  <div className="form-group">
+                    <label className="form-label">Class Title</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g., Advanced React Patterns"
+                      value={scheduleClassData.title}
+                      onChange={(e) => setScheduleClassData({ ...scheduleClassData, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      className="form-input"
+                      value={scheduleClassData.scheduled_date}
+                      onChange={(e) => setScheduleClassData({ ...scheduleClassData, scheduled_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Meeting Link</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g., https://meet.google.com/..."
+                      value={scheduleClassData.meeting_link}
+                      onChange={(e) => setScheduleClassData({ ...scheduleClassData, meeting_link: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="assessment-modal-actions">
+                  <button className="btn-secondary" onClick={() => setShowScheduleClassModal(false)}>Cancel</button>
+                  <button className="btn-primary" onClick={handleScheduleClass} style={{ background: '#3b82f6' }}>
+                    Save & Schedule
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Assessment List Modal for Students (Correctly placed) */}
 

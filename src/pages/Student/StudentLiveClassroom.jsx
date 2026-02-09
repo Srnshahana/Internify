@@ -40,6 +40,29 @@ function StudentLiveClassroom({ course, onBack }) {
   // Removed study material ref
   const assessmentFileInputRef = useRef(null)
 
+  const [dbAssessments, setDbAssessments] = useState([])
+
+  useEffect(() => {
+    if (showAssessmentListModal) {
+      fetchDbAssessments()
+    }
+  }, [showAssessmentListModal])
+
+  const fetchDbAssessments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('assessments')
+        .select('*')
+        .eq('course_id', course?.course_id || course?.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbAssessments(data || [])
+    } catch (err) {
+      console.error('Error fetching assessments:', err)
+    }
+  }
+
   const classroom = course || {
     title: 'React App Development – Batch 1',
     mentor: 'Sarah Chen',
@@ -699,33 +722,113 @@ function StudentLiveClassroom({ course, onBack }) {
     })
   }
 
-  const handleSubmitAssessment = () => {
+  const handleSubmitAssessment = async () => {
     if (!assessmentSubmission.textSubmission && assessmentSubmission.attachments.length === 0) {
       alert('Please provide either text submission or attach files')
       return
     }
 
-    // Create a submission confirmation message
-    const submissionMessage = {
-      id: messages.length + 1,
-      from: 'learner',
-      type: 'text',
-      content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
-      type: 'text',
-      content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
-      time: getCurrentTime(),
-      session_id: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
+    try {
+      console.log('🚀 Submitting Assessment:', selectedAssessment.id)
+
+      const uploadedAttachments = []
+
+      // 1. Upload Attachments if any
+      if (assessmentSubmission.attachments.length > 0) {
+        console.log('📤 Uploading attachments...')
+        for (const attachment of assessmentSubmission.attachments) {
+          const file = attachment.file
+          const fileName = `assessments/${selectedAssessment.id}/${currentUserId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+
+          const { error: uploadError } = await supabase.storage
+            .from('course-files')
+            .upload(fileName, file)
+
+          if (uploadError) {
+            console.error('❌ Attachment Upload Error:', uploadError)
+            continue // Skip failed uploads or throw? Let's skip for resilience
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('course-files')
+            .getPublicUrl(fileName)
+
+          uploadedAttachments.push({
+            name: file.name,
+            url: publicUrl,
+            type: attachment.type,
+            size: attachment.size
+          })
+        }
+      }
+
+      // 2. Insert into assessment_submissions table
+      console.log('💾 Saving submission to DB...')
+
+      // Construct a single text body including attachments since the 'attachments' column is missing
+      let finalSubmissionText = assessmentSubmission.textSubmission || ''
+      if (uploadedAttachments.length > 0) {
+        finalSubmissionText += '\n\n__Attachments:__\n'
+        uploadedAttachments.forEach(att => {
+          finalSubmissionText += `- [${att.name}](${att.url})\n`
+        })
+      }
+
+      const submissionPayload = {
+        assessment_id: selectedAssessment.id,
+        student_id: currentUserId,
+        text_submission: finalSubmissionText, // Using text column to store everything
+        // attachments: uploadedAttachments, // REMOVED: Column does not exist
+        submitted_at: new Date().toISOString(),
+        status: 'submitted'
+      }
+
+      // Try inserting. If submission_text also fails, we will need to know the correct column name.
+      const { error: dbError } = await supabase
+        .from('assessment_submissions')
+        .insert([submissionPayload])
+
+      if (dbError) {
+        console.error('❌ DB Submission Error:', dbError)
+        throw dbError
+      }
+
+      console.log('✅ Submission Saved!')
+
+      // 3. Post confirmation to Chat
+      const submissionMessage = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: 'student',
+        sender_id: Number(currentUserId),
+        type: 'text',
+        content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission ? 'Note: ' + assessmentSubmission.textSubmission : ''}\n${uploadedAttachments.length > 0 ? '📎 ' + uploadedAttachments.length + ' file(s) attached' : ''}`,
+        read: false
+      }
+
+      const { error: msgError } = await supabase.from('messages').insert([submissionMessage])
+      if (msgError) console.error('Error posting submission msg:', msgError)
+
+      // Optimistic Chat Update
+      const optimisticMsg = {
+        ...submissionMessage,
+        id: Date.now(),
+        from: 'learner',
+        time: getCurrentTime(),
+        highlightColor: null,
+        selfNote: ''
+      }
+      setMessages((prev) => [...prev, optimisticMsg])
+
+      alert('Assessment submitted successfully!')
+      setSelectedAssessment(null)
+      setAssessmentSubmission({ textSubmission: '', attachments: [] })
+      setShowAssessmentListModal(false)
+
+    } catch (err) {
+      console.error('❌ Submission Failed:', err)
+      alert('Failed to submit assessment: ' + err.message)
     }
-
-    setMessages((prev) => [...prev, submissionMessage])
-
-    // Mark assessment as submitted (you could add a submitted flag to the assessment)
-    alert('Assessment submitted successfully!')
-
-    setSelectedAssessment(null)
-    setAssessmentSubmission({ textSubmission: '', attachments: [] })
   }
 
   const handleCompleteSession = async () => {
@@ -936,6 +1039,30 @@ function StudentLiveClassroom({ course, onBack }) {
                       </div>
                     </div>
                   )}
+                  {message.type === 'scheduled_class' && (
+                    <div className="live-assessment-card" style={{ borderColor: '#3b82f6', background: '#eff6ff' }}>
+                      <div className="assessment-card-header">
+                        <div className="assessment-icon">📅</div>
+                        <div className="assessment-badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Scheduled Class</div>
+                      </div>
+                      <h4 className="assessment-card-title">{message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })())}</h4>
+                      <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#475569' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
+                          {new Date(message.classDate || (message.content && (() => { try { return JSON.parse(message.content).scheduled_date } catch (e) { return Date.now() } })())).toLocaleString()}
+                        </div>
+                        <a
+                          href={message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })())}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="assessment-view-btn"
+                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#3b82f6' }}
+                        >
+                          Join Class
+                        </a>
+                      </div>
+                    </div>
+                  )}
                   {noteEditingId === message.id ? (
                     <div className="live-self-note-editor">
                       <textarea
@@ -1085,12 +1212,7 @@ function StudentLiveClassroom({ course, onBack }) {
                 <span className="attach-label">Gallery</span>
               </button>
 
-              <button className="attach-option-btn" onClick={handleAttachLink}>
-                <div className="attach-icon-circle blue">
-                  <span className="material-symbols-outlined">link</span>
-                </div>
-                <span className="attach-label">Link</span>
-              </button>
+
             </div>
           )}
 
@@ -1135,7 +1257,10 @@ function StudentLiveClassroom({ course, onBack }) {
                     <div className="info-item">
                       <span className="info-label">Due Date:</span>
                       <span className="info-value">
-                        {new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()}
+                        {/* {selectedAssessment.assessmentDueDate && !isNaN(new Date(selectedAssessment.assessmentDueDate).getTime())
+                          ? new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()
+                          : 'No Due Date'} */}
+                        To be announced
                       </span>
                     </div>
                   </div>
@@ -1238,7 +1363,7 @@ function StudentLiveClassroom({ course, onBack }) {
             </div>
           )}
 
-          {/* Assessment List Modal for Students (Correctly placed) */}
+          {/* Assessment List Modal for Students */}
           {showAssessmentListModal && (
             <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentListModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
@@ -1253,40 +1378,61 @@ function StudentLiveClassroom({ course, onBack }) {
                 </div>
                 <div className="assessment-modal-content">
                   <div className="assessment-list-container">
-                    {/* Hardcoded Item */}
-                    <div
-                      className="assessment-list-item"
-                      onClick={() => {
-                        setSelectedAssessment({
-                          id: 999,
-                          assessmentTitle: 'Module 1: React Basics Assessment',
-                          assessmentDescription: 'Please create a simple todo list application using React hooks (useState, useEffect). Implement add, delete, and toggle completion features. \n\nSubmit the link to your GitHub repository and a brief explanation of your component structure.',
-                          assessmentDueDate: new Date(Date.now() + 86400000 * 5).toISOString() // 5 days from now
-                        })
-                        setShowAssessmentListModal(false)
-                      }}
-                      style={{
-                        padding: '16px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '12px',
-                        marginBottom: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.target.style.borderColor = '#3b82f6'}
-                      onMouseLeave={(e) => e.target.style.borderColor = '#e2e8f0'}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>Module 1: React Basics Assessment</h4>
-                        <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#ecfdf5', color: '#047857' }}>Pending</span>
+                    {dbAssessments.length > 0 ? (
+                      dbAssessments.map((assessment, idx) => (
+                        <div
+                          key={assessment.id || idx}
+                          className="assessment-list-item"
+                          onClick={() => {
+                            console.log('� [DEBUG] Assessment Clicked:', assessment)
+
+                            // 1. Reset submission state FIRST to avoid stale data conflicts
+                            setAssessmentSubmission({ textSubmission: '', attachments: [] })
+                            console.log('🔄 [DEBUG] assessmentSubmission state reset')
+
+                            const mapped = {
+                              id: assessment.id,
+                              assessmentTitle: assessment.title || 'Untitled Assessment',
+                              assessmentDescription: assessment.description || '',
+                              assessmentDueDate: assessment.due_date || assessment.created_at
+                            }
+                            console.log('✨ [DEBUG] Setting selectedAssessment:', mapped)
+
+                            setSelectedAssessment(mapped)
+                            setShowAssessmentListModal(false)
+                          }}
+                          style={{
+                            padding: '16px',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            marginBottom: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            background: '#fff',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                          onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.title}</h4>
+                            <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#ecfdf5', color: '#047857' }}>Pending</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {assessment.description}
+                          </p>
+                          <div style={{ alignSelf: 'flex-end', fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>
+                            {/* Due: {new Date(assessment.due_date).toLocaleDateString()} */}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
+                        No assessments available.
                       </div>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        Please create a simple todo list application using React hooks (useState, useEffect)...
-                      </p>
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
-                        Due: {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1379,7 +1525,7 @@ function StudentLiveClassroom({ course, onBack }) {
           </div>
         )}
       </div>
-    </div>
+    </div >
   )
 }
 

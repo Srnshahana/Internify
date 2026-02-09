@@ -857,13 +857,11 @@ export default function LandingPage({
             <h2 className="nav-logo-text">Internify</h2>
           </div>
           <div className="nav-btn-group">
-            {!isLoggedIn && (
-              <button className="nav-login-btn" onClick={() => navigate('/login')}>
-                Login
-              </button>
-            )}
+            <button className="nav-login-btn" onClick={() => navigate('/login')}>
+              Login
+            </button>
             <button className="nav-join-btn" onClick={() => isLoggedIn ? navigate('/dashboard') : navigate('/signup')}>
-              {isLoggedIn ? 'Dashboard' : 'Join'}
+              {isLoggedIn ? 'Enter Dashboard' : 'Join'}
             </button>
           </div>
         </div>

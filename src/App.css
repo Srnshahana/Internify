@@ -36399,6 +36399,66 @@ html {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
+.mentor-cta-card-v2 {
+  background: #ffffff;
+  border-radius: 3rem;
+  padding: 2rem 2rem;
+  text-align: center;
+  color: #1e293b;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.mentor-cta-icon-v2 {
+  width: 60px;
+  height: 60px;
+  background: #f1f5f9;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #3b82f6;
+}
+
+.mentor-cta-icon-v2 .material-symbols-outlined {
+  font-size: 2.5rem;
+}
+
+.mentor-cta-title-v2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #0f172a;
+}
+
+.mentor-cta-text-v2 {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 600px;
+  margin-bottom: 1.5rem;
+}
+
+.btn-mentor-cta-v2 {
+  background: #0f172a;
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  transition: all 0.2s;
+  margin-top: 1.5rem;
+}
+
+.btn-mentor-cta-v2:hover {
+  transform: scale(1.05);
+  background: #334155;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
 /* --- Mentor CTA V2 --- */
 /* --- Mentor CTA V2 --- */
 /* Gradient Border Effect - Flowing */

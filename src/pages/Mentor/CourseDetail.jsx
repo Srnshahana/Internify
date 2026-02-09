@@ -52,15 +52,13 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   return (
     <div className="course-detail-page-elegant">
       {/* Header */}
-      <div className="course-detail-header-elegant">
-        <button className="back-btn-elegant" onClick={onBack}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Back
+      {/* Header - V2 Glass Style */}
+      <header className="live-classroom-header-v2" style={{ position: 'sticky', top: 0, zIndex: 50, marginBottom: '24px', background: 'linear-gradient(to right, #eff6ff, #dbeafe)' }}>
+        <button className="live-back-btn-v2" onClick={onBack}>
+          <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 className="course-detail-page-title">Course Management</h1>
-      </div>
+        <div className="live-header-title-v2">Course Management</div>
+      </header>
 
       <div className="course-detail-content-wrapper">
         {/* Hero Section */}
