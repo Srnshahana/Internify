@@ -12,7 +12,8 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   // Current user ID from local storage
   const currentUserId = localStorage.getItem('auth_id')
   const userid = localStorage.getItem('auth_user_id')
-
+  console.log(userid)
+  console.log(currentUserId)
   // Use course.sessions (new) or course.classes (legacy)
   const initialSessions = course?.sessions || course?.classes || [
     { id: 1, title: 'Introduction & Setup', status: 'completed' },
@@ -783,7 +784,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     }
 
     const assessmentMessage = {
-      id: messages.length + 1,
+      id: currentUserId,
       from: 'mentor',
       type: 'assessment',
       assessmentTitle: newAssessment.title,

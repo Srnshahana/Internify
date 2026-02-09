@@ -105,12 +105,15 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
           </nav>
 
           {/* Top Header */}
-          {activePage !== 'Profile' && <StudentAppBar onLogout={onLogout} />}
+          {activePage !== 'Profile' && activePage !== 'Home' && activePage !== 'Classrooms' && <StudentAppBar onLogout={onLogout} />}
         </>
       )}
 
       <main className="dashboard-main-new">
-        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}>
+        <div
+          className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}
+          style={(activePage === 'Home' || activePage === 'Classrooms') ? { padding: 0, maxWidth: '100%' } : {}}
+        >
           {renderPage(activePage)}
         </div>
       </main>

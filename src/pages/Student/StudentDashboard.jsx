@@ -77,7 +77,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
       case 'Notification':
         return <Notification />
       case 'Assessments':
-        return <Assessments />
+        return <Assessments onBack={() => setActivePage('Home')} />
       default:
         return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
     }

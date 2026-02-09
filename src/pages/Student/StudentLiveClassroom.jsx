@@ -3,6 +3,7 @@ import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
+
 function StudentLiveClassroom({ course, onBack }) {
   const userRole = 'student'
   const { refetch } = useDashboardData()
@@ -91,6 +92,12 @@ function StudentLiveClassroom({ course, onBack }) {
               inferredType = 'link'
             }
 
+            if (m.type === 'assessment') {
+              try {
+                const details = JSON.parse(m.content)
+                Object.assign(m, details)
+              } catch (e) { }
+            }
             return {
               ...m,
               from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
@@ -139,6 +146,15 @@ function StudentLiveClassroom({ course, onBack }) {
 
           // Infer type from file_url or content if type is missing from DB
           let inferredType = newMessage.type || 'text'
+
+          if (newMessage.type === 'assessment') {
+            try {
+              const details = JSON.parse(newMessage.content)
+              Object.assign(newMessage, details)
+            } catch (e) { }
+            inferredType = 'assessment'
+          }
+
           if (!newMessage.type && newMessage.file_url) {
             const ext = newMessage.file_url.split('.').pop().toLowerCase()
             if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) inferredType = 'image'
@@ -198,8 +214,8 @@ function StudentLiveClassroom({ course, onBack }) {
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [assessmentSubmission, setAssessmentSubmission] = useState({
     textSubmission: '',
-    attachments: [],
   })
+
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -391,11 +407,11 @@ function StudentLiveClassroom({ course, onBack }) {
       // Get course ID safely
       const courseId = course?.course_id || course?.id
 
-      console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', userid)
+      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
       console.log('📦 Attachment payload to insert:', {
         course_id: courseId,
         session_id: activeSessionId,
-        uploaded_by: userid,
+        uploaded_by: currentUserId,
         type: 'file',
         file_name: file.name,
         file_url: publicUrl,
@@ -408,7 +424,7 @@ function StudentLiveClassroom({ course, onBack }) {
         .insert({
           course_id: courseId,
           session_id: activeSessionId,
-          uploaded_by: userid,
+          uploaded_by: currentUserId,
           type: 'file', // Standard document type
           file_name: file.name,
           file_url: publicUrl,
@@ -501,11 +517,11 @@ function StudentLiveClassroom({ course, onBack }) {
 
       const courseId = course?.course_id || course?.id
 
-      console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', userid)
+      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
       console.log('📦 Attachment payload:', {
         course_id: courseId,
         session_id: activeSessionId,
-        uploaded_by: userid,
+        uploaded_by: currentUserId,
         type: 'image',
         file_name: file.name,
         file_url: publicUrl,
@@ -517,7 +533,7 @@ function StudentLiveClassroom({ course, onBack }) {
         .insert({
           course_id: courseId,
           session_id: activeSessionId,
-          uploaded_by: userid,
+          uploaded_by: currentUserId,
           type: 'image',
           file_name: file.name,
           file_url: publicUrl,
@@ -578,20 +594,6 @@ function StudentLiveClassroom({ course, onBack }) {
     }
   }
 
-  const handleAttachVoice = () => {
-    const newMessage = {
-      id: messages.length + 1,
-      from: userRole === 'mentor' ? 'mentor' : 'learner',
-      type: 'voice',
-      duration: '0:15',
-      time: getCurrentTime(),
-      session_id: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
-    }
-    setMessages((prev) => [...prev, newMessage])
-    setShowAttachOptions(false)
-  }
 
   const handleAttachLink = async () => {
     const url = window.prompt('Paste a link to share:')
@@ -897,10 +899,7 @@ function StudentLiveClassroom({ course, onBack }) {
                     </a>
                   )}
                   {message.type === 'voice' && (
-                    <div className="live-voice-card">
-                      <div className="voice-icon">●</div>
-                      <div className="voice-meta">Voice note • {message.duration}</div>
-                    </div>
+                    <VoiceMessage src={message.file_url || message.fileUrl} duration={message.duration || '0:00'} />
                   )}
                   {message.type === 'study_material' && (
                     <div className="live-study-material-card">
@@ -1042,15 +1041,6 @@ function StudentLiveClassroom({ course, onBack }) {
               onClick={() => setShowAttachOptions((prev) => !prev)}
             >
               +
-            </button>
-            <button
-              type="button"
-              className="live-attach-btn"
-              aria-label="Send audio"
-              onClick={handleAttachVoice}
-              style={{ marginLeft: '8px', color: '#f97316' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>mic</span>
             </button>
             {replyTo && (
               <div className="live-reply-indicator">
@@ -1317,6 +1307,7 @@ function StudentLiveClassroom({ course, onBack }) {
             style={{ display: 'none' }}
             onChange={handleImageSelected}
           />
+          {/* Recording Overlay UI */}
         </div>
 
         {/* Bottom sessions bar */}

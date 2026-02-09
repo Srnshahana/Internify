@@ -7,66 +7,25 @@ import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
 
+  // Use global dashboard data from context
+  // Aliasing enrolledCourses to taughtCourses for semantic clarity in Mentor context
+  const { enrolledCourses: taughtCourses, loading, userProfile } = useDashboardData()
+
+  // Unique the taught courses to avoid duplicates if multiple students are enrolled
+  const uniqueTaughtCourses = taughtCourses ? Array.from(new Map(taughtCourses.map(c => [c.id, c])).values()) : []
+
   useEffect(() => {
     if (setIsCourseDetailActive) {
       setIsCourseDetailActive(!!selectedCourse)
     }
   }, [selectedCourse, setIsCourseDetailActive])
 
-  // Use global dashboard data from context
-  const { enrolledCourses: taughtCourses, loading } = useDashboardData()
-
-  // Unique the taught courses to avoid duplicates if multiple students are enrolled
-  const uniqueTaughtCourses = taughtCourses ? Array.from(new Map(taughtCourses.map(c => [c.id, c])).values()) : []
-
-  // Home Drawer state (reused logic for consistant design)
-  const [isHomeDrawerExpanded, setIsHomeDrawerExpanded] = useState(false)
-  const [dragY, setDragY] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startY, setStartY] = useState(0)
-
-  const EXPAND_DISTANCE = 80
-
-  const handleDrawerDragStart = (e) => {
-    setIsDragging(true)
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY
-    setStartY(clientY)
-  }
-
-  const handleDrawerDragMove = (e) => {
-    if (!isDragging) return
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY
-    const deltaY = clientY - startY
-
-    if (!isHomeDrawerExpanded) {
-      setDragY(Math.max(-EXPAND_DISTANCE, Math.min(0, deltaY)))
-    } else {
-      setDragY(Math.min(EXPAND_DISTANCE, Math.max(0, deltaY)))
-    }
-  }
-
-  const handleDrawerDragEnd = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-    const threshold = EXPAND_DISTANCE / 3
-
-    if (!isHomeDrawerExpanded) {
-      if (dragY < -threshold) setIsHomeDrawerExpanded(true)
-    } else {
-      if (dragY > threshold) setIsHomeDrawerExpanded(false)
-    }
-    setDragY(0)
-  }
-
-  const toggleHomeDrawer = () => setIsHomeDrawerExpanded(!isHomeDrawerExpanded)
-
-  if (loading) {
-    return (
-      <div className="dashboard-page-new" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <p style={{ color: '#0ea5e9', fontWeight: '500' }}>Loading courses...</p>
-      </div>
-    )
-  }
+  // Format current date
+  const currentDateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  })
 
   if (selectedCourse) {
     return (
@@ -81,112 +40,89 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
     )
   }
 
-
   return (
-    <div className="dashboard-page-new">
-      {/* Top Section matching Home design */}
-      <div className="home-top-section">
-        <div className="welcome-header-new">
-          <div className="welcome-text-container">
-            <h1 className="welcome-title-new" style={{ marginTop: 0 }}>My Courses</h1>
-            <p className="welcome-date-new">Manage and monitor your classrooms</p>
-          </div>
-        </div>
-        <div className="home-search-section">
-          <div className="home-search-bar">
-            <SearchIcon className="search-icon-home" />
-            <input
-              type="text"
-              placeholder="Search your courses..."
-              className="home-search-input"
-            />
-          </div>
-        </div>
+    <div className="dashboard-page-v2 font-sans">
+      <div className="dashboard-background-v2">
+        <div className="grain-texture absolute inset-0"></div>
+        <div className="dashboard-blob-1"></div>
+        <div className="dashboard-blob-2"></div>
       </div>
 
-      {/* Main Content Drawer */}
-      <div
-        className={`home-main-content ${isHomeDrawerExpanded ? 'is-expanded' : ''} ${isDragging ? 'is-dragging' : ''}`}
-        style={{
-          transform: isDragging ? `translateY(${isHomeDrawerExpanded ? -EXPAND_DISTANCE + dragY : dragY}px)` : '',
-          marginTop: '-35px' // Ensure overlap matches Home
-        }}
-        onMouseMove={handleDrawerDragMove}
-        onMouseUp={handleDrawerDragEnd}
-        onMouseLeave={handleDrawerDragEnd}
-        onTouchMove={handleDrawerDragMove}
-        onTouchEnd={handleDrawerDragEnd}
-      >
-        <div
-          className="home-drawer-handle"
-          onMouseDown={handleDrawerDragStart}
-          onTouchStart={handleDrawerDragStart}
-          onClick={(e) => {
-            if (Math.abs(dragY) < 5) toggleHomeDrawer()
-          }}
-        >
-          <div className="handle-line"></div>
+      {/* Header V2 */}
+      <header className="dashboard-header-v2">
+        <div className="dashboard-profile-group">
+          <img
+            src={userProfile?.profile_image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop"}
+            alt="Profile"
+            className="dashboard-profile-img-v2"
+          />
+          <div className="dashboard-welcome-text-v2">
+            <h1>My Classrooms</h1>
+            <p className="dashboard-date-v2">Manage your teaching journey</p>
+          </div>
         </div>
+      </header>
 
-        <div className="classroom-container" style={{ padding: '0', marginTop: '20px' }}>
-          {uniqueTaughtCourses.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
-              <p style={{ fontSize: '18px', marginBottom: '10px' }}>You aren't teaching any courses yet.</p>
-            </div>
-          ) : (
-            <div className="courses-grid-elegant" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {uniqueTaughtCourses.map((course, index) => {
-                return (
-                  <div
-                    key={course.id}
-                    className="program-card"
-                    onClick={() => setSelectedCourse(course)}
-                    style={{ cursor: 'pointer', height: 'auto' }}
-                  >
-                    <div className="program-card-image-wrapper">
-                      <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'} alt={course.title} className="program-card-image" />
-                      <div className="program-card-gradient-overlay"></div>
-                    </div>
+      {/* Search V2 */}
+      <section className="dashboard-search-container-v2">
+        <div className="dashboard-search-pill-v2">
+          <SearchIcon className="dashboard-search-icon-v2" />
+          <input
+            type="text"
+            className="dashboard-search-input-v2"
+            placeholder="Search your courses..."
+          />
+        </div>
+      </section>
 
-                    <div className="program-card-content" style={{ flex: 1 }}>
-                      <h3 className="program-card-title">{course.title}</h3>
-                      <span className="program-card-mentor-name">{course.category} • {course.level || 'Expert'}</span>
+      {/* Course Grid V2 */}
+      <section className="dashboard-course-grid-v2">
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', gridColumn: '1 / -1' }}>
+            Loading your courses...
+          </div>
+        ) : uniqueTaughtCourses.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px', color: '#64748b', gridColumn: '1 / -1' }}>
+            <p style={{ fontSize: '18px', marginBottom: '10px' }}>You aren't teaching any courses yet.</p>
+            <p style={{ fontSize: '14px' }}>Once assigned, your courses will appear here.</p>
+          </div>
+        ) : (
+          uniqueTaughtCourses.map((course) => (
+            <div
+              key={course.id}
+              className="dashboard-course-card-wrapper-v2"
+              onClick={() => setSelectedCourse(course)}
+            >
+              <div className="course-card-image-v2">
+                <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'} alt={course.title} />
+                <div className="course-card-overlay-v2"></div>
+                <div className="course-card-badges-v2">
+                  <span className="course-badge-v2">{course.level || 'Course'}</span>
+                </div>
+              </div>
 
-                      <div className="program-card-details">
-                        <div className="program-card-rating">
-                          <span className="program-rating-star">★</span>
-                          <span className="program-rating-value">{course.rating || 4.8}</span>
-                        </div>
-                        <div className="program-card-meta">
-                          <span className="program-card-level">Active</span>
-                          <span className="program-card-separator">•</span>
-                          <span className="program-card-duration">
-                            Sessions: {course.sessions?.length || 0}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+              <div className="course-card-content-v2">
+                <h3 className="course-card-title-v2">{course.title}</h3>
+                <div className="course-card-instructor-v2">
+                  {/* For mentors, maybe show category or student count instead of mentor name (which is them) */}
+                  <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>category</span>
+                  {course.category || 'Development'}
+                </div>
 
-                    {/* Attached Mentor Action Footer */}
-                    <div className="program-card-footer-coming-soon">
-                      <span className="label">Status</span>
-                      <span className="content">
-                        {course.status || 'Active'}
-                      </span>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="compact-action-btn-small" style={{ background: 'transparent', border: 'none', color: '#0ca5e9', fontWeight: 'bold' }}>View</button>
-                      </div>
-                    </div>
+                <div className="course-card-footer-v2">
+                  <div className="course-rating-v2">
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>star</span>
+                    {course.rating || '4.8'}
                   </div>
-                )
-              })}
+                  <span className="course-progress-text-v2">Active</span>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+          ))
+        )}
+      </section>
     </div>
   )
 }
 
 export default MyCourses
-

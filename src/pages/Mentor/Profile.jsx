@@ -1,10 +1,49 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import '../../App.css'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+
+const useDragScroll = () => {
+  const ref = useRef(null)
+  const isDown = useRef(false)
+  const startX = useRef(0)
+  const scrollLeft = useRef(0)
+
+  const onMouseDown = (e) => {
+    isDown.current = true
+    ref.current.classList.add('is-dragging')
+    startX.current = e.pageX - ref.current.offsetLeft
+    scrollLeft.current = ref.current.scrollLeft
+  }
+  const onMouseLeave = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseUp = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseMove = (e) => {
+    if (!isDown.current) return
+    e.preventDefault()
+    const x = e.pageX - ref.current.offsetLeft
+    const walk = (x - startX.current) * 2
+    ref.current.scrollLeft = scrollLeft.current - walk
+  }
+
+  const scroll = (direction) => {
+    if (ref.current) {
+      const amount = direction === 'left' ? -320 : 320
+      ref.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
+
+  return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
+}
 
 function MentorProfile() {
   const { userProfile, enrolledCourses: taughtCourses, loading } = useDashboardData()
   const [isEditing, setIsEditing] = useState(false)
+  const coursesDrag = useDragScroll()
 
   if (loading) {
     return (
@@ -269,35 +308,61 @@ function MentorProfile() {
           </div>
         )}
 
-        {/* Courses Offered Section */}
+        {/* Courses Offered Section (Carousel) */}
         <div className="profile-section-elegant">
           <div className="profile-section-header-elegant">
             <h2 className="profile-section-title-elegant">Courses Offered</h2>
           </div>
-          <div className="courses-grid-elegant" style={{ marginTop: '20px' }}>
-            {uniqueTaughtCourses.length > 0 ? uniqueTaughtCourses.map((course) => (
-              <div key={course.id} className="course-card-elegant">
-                <div className="course-image-wrapper-elegant">
-                  <img src={course.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"} alt={course.title} className="course-image-elegant" />
-                  <div className="course-status-pill-elegant" style={{ backgroundColor: '#0ca5e9' }}>
-                    Active
-                  </div>
-                </div>
-                <div className="course-content-elegant">
-                  <div className="course-header-elegant">
-                    <span className="course-category-elegant">{course.category || 'Professional'}</span>
-                    <div className="course-rating-box">
-                      <span className="star-icon">★</span>
-                      <span>{course.rating || 4.8}</span>
+          <div className="carousel-container">
+            <button
+              className="carousel-nav-btn prev"
+              onClick={() => coursesDrag.scroll('left')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <div
+              className="draggable-carousel"
+              ref={coursesDrag.ref}
+              {...coursesDrag.events}
+            >
+              {uniqueTaughtCourses.length > 0 ? (
+                uniqueTaughtCourses.map((course) => (
+                  <div key={course.id} className="carousel-slide">
+                    <div className="program-card">
+                      <div className="program-card-image-wrapper">
+                        <img src={course.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"} alt={course.title} className="program-card-image" draggable="false" />
+                        <div className="program-card-gradient-overlay"></div>
+                      </div>
+                      <div className="program-card-content">
+                        <h3 className="program-card-title">{course.title}</h3>
+                        <div className="program-card-mentor">
+                          {/* Display role or category instead of mentor name since they ARE the mentor */}
+                          <span>{course.category || 'Professional Course'}</span>
+                        </div>
+                        <div className="program-card-meta">
+                          <span className="program-card-rating">
+                            ⭐ {course.rating || 4.8}
+                          </span>
+                          <span className="program-card-level">{course.level || 'Expert'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <h3 className="course-title-elegant">{course.title}</h3>
-                  <p className="course-mentor-elegant">{course.level || 'Expert'}</p>
-                </div>
-              </div>
-            )) : (
-              <div style={{ padding: '20px', color: '#64748b' }}>No courses listed yet.</div>
-            )}
+                ))
+              ) : (
+                <div style={{ padding: '20px', color: '#64748b' }}>No courses listed yet.</div>
+              )}
+            </div>
+            <button
+              className="carousel-nav-btn next"
+              onClick={() => coursesDrag.scroll('right')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
         </div>
 

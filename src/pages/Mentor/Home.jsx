@@ -11,7 +11,7 @@ import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
-import bannerImage from '../../assets/images/banner.png'
+import landingIllustration from '../../assets/images/landingpage-illlustration.png'
 import adds1 from '../../assets/images/adds1.png'
 import adds2 from '../../assets/images/adds2.png'
 import adds3 from '../../assets/images/adds3.png'
@@ -30,6 +30,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   const [showCourseDetail, setShowCourseDetail] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [activeCourse, setActiveCourse] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     if (setIsCourseDetailActive) {
@@ -88,7 +89,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
 
   if (loading) {
     return (
-      <div className="dashboard-page-new" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <div className="dashboard-page-v2" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
         <p style={{ color: '#0ea5e9', fontWeight: '500' }}>Loading dashboard...</p>
       </div>
     )
@@ -136,159 +137,154 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
     )
   }
 
+  // Format current date for the header
+  const currentDateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  })
+
   // Ad Banner handlers
   const handleNextAd = () => {
     setCurrentAdIndex((prev) => (prev + 1) % ads.length)
   }
 
-  const handleAdTransitionEnd = () => {
-    // Basic cyclic transition for now to keep it simple and fix vertical stack
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      // Implement search logic if needed
+      console.log('Search:', searchTerm)
+    }
   }
 
   return (
-    <div className="dashboard-page-new">
-      <div
-        className="home-main-content"
-        style={{ paddingTop: '32px' }}
-      >
-        <div className="welcome-calendar-row">
-          <div className="welcome-left-column">
-            <section className="ad-banner-section dashboard-ads-new">
-              <div className="ad-carousel-container" style={{ borderRadius: '16px' }}>
-                <div
-                  className="ad-track"
-                  style={{
-                    transform: `translateX(-${currentAdIndex * 100}%)`,
-                    display: 'flex',
-                    transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
-                    width: '100%'
-                  }}
-                >
-                  {ads.map((ad, index) => (
-                    <div key={`${ad.id}-${index}`} className="ad-slide" style={{ flex: '0 0 100%' }}>
-                      <img src={ad.image} alt={ad.title} draggable="false" style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '16px' }} />
-                    </div>
-                  ))}
-                </div>
+    <div className="dashboard-page-v2 font-sans">
+      <div className="dashboard-background-v2">
+        <div className="grain-texture absolute inset-0"></div>
+        <div className="dashboard-blob-1"></div>
+        <div className="dashboard-blob-2"></div>
+      </div>
+
+      <header className="dashboard-header-v2">
+        <div className="dashboard-profile-group">
+          <img
+            src={userProfile?.profile_image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop"}
+            alt="Profile"
+            className="dashboard-profile-img-v2"
+          />
+          <div className="dashboard-welcome-text-v2">
+            <h1>Hi, {userProfile?.name?.split(' ')[0] || 'Mentor'}</h1>
+            <p className="dashboard-date-v2">{currentDateFormatted}</p>
+          </div>
+        </div>
+      </header>
+
+      <section className="dashboard-search-container-v2">
+        <div className="dashboard-search-pill-v2">
+          <SearchIcon className="dashboard-search-icon-v2" />
+          <input
+            type="text"
+            className="dashboard-search-input-v2"
+            placeholder="Search students, courses..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
+          />
+        </div>
+      </section>
+
+      <section className="dashboard-ad-section-v2">
+        <div className="dashboard-ad-card-v2">
+          <div className="ad-code-banner">
+            <div className="ad-content-side">
+              <div className="ad-text-group">
+                <h2 className="ad-banner-text">Provide Mentorship to aspiring developers</h2>
+                <button className="ad-banner-cta">View Requets</button>
               </div>
-            </section>
-
-            <div className="home-modal-triggers" style={{ marginTop: '24px' }}>
-              <button className="home-full-width-btn" onClick={() => setShowUpcomingSessionsModal(true)}>
-                <div className="btn-left">
-                  <div className="btn-icon-wrapper blue">
-                    <CalendarIcon className="btn-icon-svg" />
-                  </div>
-                  <span>Your Schedule</span>
-                </div>
-                <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
-
-              <button className="home-full-width-btn" onClick={() => setShowStudentRequests(true)}>
-                <div className="btn-left">
-                  <div className="btn-icon-wrapper green">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="8.5" cy="7" r="4"></circle>
-                      <line x1="20" y1="8" x2="20" y2="14"></line>
-                      <line x1="23" y1="11" x2="17" y2="11"></line>
-                    </svg>
-                  </div>
-                  <span>Student Requests</span>
-                </div>
-                <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
             </div>
-
-            <div className="my-classes-section">
-              <div className="section-header-with-button">
-                <p className="section-title">my Courses</p>
-                <button className="view-all-btn-arrow" onClick={() => setShowMyCourses(true)} aria-label="View All">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-              </div>
-
-              <div className="classroom-carousel">
-                {uniqueTaughtCourses && uniqueTaughtCourses.length > 0 ? (
-                  uniqueTaughtCourses.map((course) => (
-                    <div key={course.id} className="classroom-carousel-card program-card" onClick={() => { setSelectedCourse(course); setShowCourseDetail(true); }}>
-                      <div className="program-card-image-wrapper">
-                        <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'} alt={course.title} className="program-card-image" />
-                      </div>
-                      <div className="program-card-content">
-                        <h3 className="program-card-title">{course.title}</h3>
-                        <div className="program-card-details">
-                          <div className="program-card-rating">
-                            <span className="program-rating-star">★</span>
-                            <span className="program-rating-value">{course.rating || 4.8}</span>
-                          </div>
-                          <div className="program-card-meta">
-                            <span className="program-card-level">{course.level || 'Expert'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ padding: '20px', color: '#64748b' }}>No courses taught yet.</div>
-                )}
-              </div>
-
-              <div className="fresher-jobs-banner" style={{ backgroundImage: `url(${bannerImage})`, marginTop: '32px' }}>
-                <div className="fresher-jobs-text"></div>
-                <div className="fresher-jobs-lottie">
-                  <Lottie animationData={educationJson} loop={true} style={{ height: 150, paddingTop: '5px' }} />
-                </div>
-              </div>
-
-              <div className="my-classes-actions">
-                <button className="compact-action-btn" onClick={() => setShowPendingWork(true)}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                  </svg>
-                  <span>Pending Work</span>
-                </button>
-                <button className="compact-action-btn" onClick={() => setShowMessages(true)}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  <span>Messages</span>
-                </button>
-              </div>
+            <div className="ad-image-side">
+              <img src={landingIllustration} alt="Opportunity" />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="dashboard-section featured-sessions-section">
-        <h2 className="featured-sessions-title" style={{ paddingLeft: '16px' }}>Mentor Resources</h2>
-        <div className="featured-sessions-carousel" ref={featuredRef}>
-          <div className="featured-session-card">
+      <section className="dashboard-actions-grid-v2">
+        <div className="dashboard-glass-card-v2" onClick={() => setShowUpcomingSessionsModal(true)}>
+          <div className="dashboard-card-icon-wrapper icon-blue-v2">
+            <CalendarIcon />
+          </div>
+          <h3 className="dashboard-card-title-v2">Your<br />Schedule</h3>
+          <span className="material-symbols-outlined dashboard-card-arrow">arrow_outward</span>
+        </div>
+
+        <div className="dashboard-glass-card-v2" onClick={() => setShowStudentRequests(true)}>
+          <div className="dashboard-card-icon-wrapper icon-green-v2">
+            <span className="material-symbols-outlined">group_add</span>
+          </div>
+          <h3 className="dashboard-card-title-v2">Student<br />Requests</h3>
+          <span className="material-symbols-outlined dashboard-card-arrow">arrow_outward</span>
+        </div>
+
+        <div className="dashboard-glass-card-v2" onClick={() => setShowPendingWork(true)}>
+          <div className="dashboard-card-icon-wrapper icon-orange-v2" style={{ background: '#fff7ed', color: '#ea580c' }}>
+            <span className="material-symbols-outlined">assignment_turned_in</span>
+          </div>
+          <h3 className="dashboard-card-title-v2">Pending<br />Work</h3>
+          <span className="material-symbols-outlined dashboard-card-arrow">arrow_outward</span>
+        </div>
+      </section>
+
+      <section className="dashboard-courses-section-v2">
+        <div className="dashboard-section-header-v2">
+          <h2 className="dashboard-section-title-v2">Taught Courses</h2>
+          <span className="dashboard-view-all-v2" onClick={() => setShowMyCourses(true)}>View All</span>
+        </div>
+
+        <div className="dashboard-carousel-v2">
+          {uniqueTaughtCourses && uniqueTaughtCourses.length > 0 ? (
+            uniqueTaughtCourses.map((course) => (
+              <div
+                key={course.id}
+                className="dashboard-course-card-v2"
+                onClick={() => { setSelectedCourse(course); setShowCourseDetail(true); }}
+              >
+                <div className="course-card-v2" style={{ cursor: 'pointer' }}>
+                  <div className="course-thumb-v2" style={{ height: '160px' }}>
+                    <img src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'} alt={course.title} />
+                    <div className="course-tag-v2">{course.level || 'Expert'}</div>
+                  </div>
+                  <div className="course-content-v2">
+                    <h3 className="course-name-v2" style={{ fontSize: '1.1rem' }}>{course.title}</h3>
+                    <div className="course-meta-v2">
+                      <span style={{ fontSize: '0.9rem', color: '#64748b' }}>★ {course.rating || 4.8} Rating</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ padding: '0 20px', color: '#64748b' }}>No courses taught yet.</div>
+          )}
+        </div>
+      </section>
+
+      <div className="dashboard-section dashboard-featured-section-v2">
+        <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Mentor Resources</h2>
+        <div className="featured-sessions-carousel" ref={featuredRef} style={{ background: 'transparent' }}>
+          <div className="featured-session-card" style={{ background: 'white' }}>
             <h3 className="featured-session-title">Teaching Guide</h3>
             <p className="featured-session-description">Best practices for hosting engaging live sessions and providing effective feedback.</p>
             <div className="featured-session-footer">
               <span className="featured-session-duration">PDF • 2MB</span>
             </div>
           </div>
-          <div className="featured-session-card">
+          <div className="featured-session-card" style={{ background: 'white' }}>
             <h3 className="featured-session-title">Platform Updates</h3>
             <p className="featured-session-description">New features for mentors to track student progress and manage attendance.</p>
             <div className="featured-session-footer">
               <span className="featured-session-duration">Article • 5m read</span>
             </div>
           </div>
-        </div>
-        <div className="carousel-dots" style={{ marginTop: '16px' }}>
-          {[0, 1].map((index) => (
-            <div key={index} className={`carousel-dot ${index === currentFeaturedIndex ? 'active' : ''}`}></div>
-          ))}
         </div>
       </div>
 

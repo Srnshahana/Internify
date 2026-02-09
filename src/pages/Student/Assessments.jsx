@@ -1,56 +1,77 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
-
-// Sample assessments assigned to student
-const studentAssessments = [
-  {
-    id: 1,
-    title: 'React Hooks Implementation',
-    description: 'Create a custom hook for managing form state with validation. Submit your code and a brief explanation.',
-    course: 'React Advanced Patterns',
-    dueDate: '2024-03-25',
-    assignedDate: '2024-03-15',
-    status: 'pending',
-    submission: null,
-  },
-  {
-    id: 2,
-    title: 'Design System Components',
-    description: 'Design and implement 5 reusable UI components for a design system. Include documentation.',
-    course: 'UI/UX Design Principles',
-    dueDate: '2024-03-28',
-    assignedDate: '2024-03-18',
-    status: 'submitted',
-    submission: {
-      submittedDate: '2024-03-24T09:20:00',
-      textSubmission: 'I designed Button, Input, Card, Modal, and Dropdown components with proper documentation.',
-      attachments: [
-        { name: 'components.figma', type: 'figma', size: '12.5 MB' },
-        { name: 'documentation.pdf', type: 'pdf', size: '2.1 MB' },
-      ],
-      status: 'submitted',
-    },
-  },
-  {
-    id: 3,
-    title: 'Algorithm Problem Set',
-    description: 'Solve the following problems: Binary Tree Traversal, Graph DFS, and Dynamic Programming basics.',
-    course: 'DSA Mastery',
-    dueDate: '2024-03-30',
-    assignedDate: '2024-03-20',
-    status: 'pending',
-    submission: null,
-  },
-]
+import supabase from '../../supabaseClient'
 
 function StudentAssessments({ onBack }) {
-  const [assessments, setAssessments] = useState(studentAssessments)
+  const [assessments, setAssessments] = useState([])
+  const [loading, setLoading] = useState(true)
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [showSubmitForm, setShowSubmitForm] = useState(false)
   const [submissionData, setSubmissionData] = useState({
     textSubmission: '',
     attachments: [],
   })
+
+  // Student ID
+  const studentId = localStorage.getItem('auth_id')
+
+  useEffect(() => {
+    fetchAssessments()
+  }, [])
+
+  const fetchAssessments = async () => {
+    try {
+      setLoading(true)
+
+      // 1. Get enrolled courses
+      const { data: enrollments, error: enrollError } = await supabase
+        .from('enrollments')
+        .select('course_id')
+        .eq('student_id', studentId)
+
+      if (enrollError) throw enrollError
+
+      const courseIds = enrollments.map(e => e.course_id)
+
+      if (courseIds.length === 0) {
+        setAssessments([])
+        return
+      }
+
+      // 2. Get assessments for these courses
+      const { data: assessmentsData, error: assessError } = await supabase
+        .from('assessments')
+        .select(`
+          *,
+          courses (title),
+          assessment_submissions (*)
+        `)
+        .in('course_id', courseIds)
+        .order('created_at', { ascending: false })
+
+      if (assessError) throw assessError
+
+      // 3. Process to find MY submission
+      const processed = assessmentsData.map(a => {
+        // Safe check for studentId
+        const mySubmission = studentId && a.assessment_submissions?.find(s => s.student_id?.toString() === studentId.toString())
+        return {
+          ...a,
+          submission: mySubmission || null, // Attach my submission if exists
+          status: mySubmission ? mySubmission.status : 'pending'
+        }
+      })
+
+      console.log('✅ Processed assessments:', processed)
+
+      setAssessments(processed)
+
+    } catch (error) {
+      console.error('Error fetching student assessments:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files)
@@ -73,362 +94,255 @@ function StudentAssessments({ onBack }) {
     })
   }
 
-  const handleSubmitAssessment = () => {
+  const handleSubmitAssessment = async () => {
     if (!submissionData.textSubmission && submissionData.attachments.length === 0) {
       alert('Please provide either text submission or attach files')
       return
     }
 
-    const updatedAssessments = assessments.map(assessment => {
-      if (assessment.id === selectedAssessment) {
-        return {
-          ...assessment,
+    try {
+      // 1. Create Submission Record
+      const { data: submission, error: subError } = await supabase
+        .from('assessment_submissions')
+        .insert({
+          assessment_id: selectedAssessment,
+          student_id: studentId,
+          text_submission: submissionData.textSubmission,
           status: 'submitted',
-          submission: {
-            submittedDate: new Date().toISOString(),
-            textSubmission: submissionData.textSubmission,
-            attachments: submissionData.attachments.map(a => ({
-              name: a.name,
-              type: a.type,
-              size: a.size,
-            })),
-            status: 'submitted',
-          },
+          submitted_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (subError) throw subError
+
+      // 2. Upload and Link Attachments
+      if (submissionData.attachments.length > 0) {
+        for (const att of submissionData.attachments) {
+          const fileName = `${submission.id}/${Date.now()}_${att.name.replace(/\s+/g, '_')}`
+
+          // Upload
+          const { error: uploadError } = await supabase.storage
+            .from('course-files') // Reusing course-files bucket
+            .upload(fileName, att.file)
+
+          if (uploadError) {
+            console.error('Upload failed for', att.name, uploadError)
+            continue
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('course-files')
+            .getPublicUrl(fileName)
+
+          // Insert Attachment Record
+          await supabase
+            .from('assessment_attachments')
+            .insert({
+              assessment_id: selectedAssessment,
+              submission_id: submission.id,
+              uploaded_by: studentId,
+              file_name: att.name,
+              file_url: publicUrl,
+              file_type: att.type,
+              created_at: new Date().toISOString()
+            })
         }
       }
-      return assessment
-    })
 
-    setAssessments(updatedAssessments)
-    setSubmissionData({ textSubmission: '', attachments: [] })
-    setShowSubmitForm(false)
-    setSelectedAssessment(null)
+      alert('Assessment Submitted Successfully!')
+      setSubmissionData({ textSubmission: '', attachments: [] })
+      setShowSubmitForm(false)
+      fetchAssessments() // Refresh to show submitted status
+
+    } catch (error) {
+      console.error('Error submitting assessment:', error)
+      alert('Submission failed: ' + error.message)
+    }
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    } catch (e) {
+      console.error('Error formatting date:', dateString, e)
+      return 'Invalid Date'
+    }
   }
 
-  if (showSubmitForm && selectedAssessment) {
+  // --- Views ---
+
+  // --- Helper to clear selection ---
+  const closeAssessmentModal = () => {
+    setSelectedAssessment(null)
+    setSubmissionData({ textSubmission: '', attachments: [] })
+  }
+
+  // --- Render Modal Content ---
+  const renderModalContent = () => {
+    if (!selectedAssessment) return null
     const assessment = assessments.find(a => a.id === selectedAssessment)
-    if (!assessment) {
-      setShowSubmitForm(false)
-      setSelectedAssessment(null)
-      return null
-    }
+    if (!assessment) return null
+
+    const safeTitle = String(assessment.title || 'Untitled Assessment')
+    const safeDesc = String(assessment.description || 'No description provided.')
+    const safeCourse = assessment.courses
+      ? (Array.isArray(assessment.courses) ? assessment.courses[0]?.title : assessment.courses.title)
+      : 'Course'
+    const safeStatus = String(assessment.status || 'pending')
+
+    const isSubmitted = safeStatus === 'submitted'
 
     return (
-      <div className="dashboard-page">
-        <div className="course-detail-header">
-          <button className="back-button" onClick={() => {
-            setShowSubmitForm(false)
-            setSubmissionData({ textSubmission: '', attachments: [] })
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Back
+      <div className="live-assessment-modal-overlay" onClick={closeAssessmentModal} style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+      }}>
+        <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()} style={{
+          background: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '600px',
+          maxHeight: '90vh', overflowY: 'auto', position: 'relative'
+        }}>
+          <button
+            onClick={closeAssessmentModal}
+            style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}
+          >
+            ✕
           </button>
-          <h1 className="page-title">Submit Assessment</h1>
-        </div>
 
-        <div className="work-review-container">
-          <div className="work-review-card">
-            <div className="work-review-header">
-              <div>
-                <h2 className="work-title">{assessment.title}</h2>
-                <p className="work-course">{assessment.course}</p>
+          <div className="assessment-header" style={{ marginBottom: '16px' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b' }}>{safeTitle}</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', color: '#64748b' }}>{String(safeCourse)}</span>
+              <span className={`assessment-status ${safeStatus}`} style={{ fontSize: '12px' }}>{safeStatus}</span>
+            </div>
+            <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>Due: {formatDate(assessment.due_date)}</div>
+          </div>
+
+          <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', color: '#334155', whiteSpace: 'pre-wrap' }}>
+            {safeDesc}
+          </div>
+
+          {isSubmitted ? (
+            <div className="work-description-section" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+              <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Your Submission</h3>
+              <div style={{ background: '#f0f9ff', padding: '12px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                <p style={{ whiteSpace: 'pre-wrap', margin: 0, fontSize: '14px' }}>
+                  {typeof assessment.submission.text_submission === 'string'
+                    ? assessment.submission.text_submission
+                    : (assessment.submission.text_submission ? JSON.stringify(assessment.submission.text_submission) : 'No text submission')}
+                </p>
               </div>
+              <p className="submission-date" style={{ marginTop: '8px', fontSize: '12px', color: '#64748b' }}>
+                Submitted on {formatDate(assessment.submission.submitted_at)}
+              </p>
             </div>
+          ) : (
+            <div className="submission-form">
+              <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Submit Your Work</h3>
 
-            <div className="work-description-section">
-              <h3 className="section-title">Instructions</h3>
-              <p className="work-description">{assessment.description}</p>
-            </div>
-
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Due Date:</span>
-                <span className="info-value">{formatDate(assessment.dueDate)}</span>
-              </div>
-            </div>
-
-            <div className="work-description-section">
-              <h3 className="section-title">Your Submission</h3>
-              
-              <div className="form-group">
-                <label className="form-label">Text Response / Description</label>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500 }}>Text Response</label>
                 <textarea
                   className="form-textarea"
-                  rows="8"
-                  placeholder="Describe your work, explain your approach, or provide any additional context..."
+                  rows="4"
+                  placeholder="Type your answer here..."
                   value={submissionData.textSubmission}
                   onChange={(e) => setSubmissionData({ ...submissionData, textSubmission: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Attach Files / Documents</label>
-                <div className="file-upload-area">
-                  <input
-                    type="file"
-                    id="file-upload"
-                    multiple
-                    className="file-input"
-                    onChange={handleFileUpload}
-                  />
-                  <label htmlFor="file-upload" className="file-upload-label">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="17 8 12 3 7 8"></polyline>
-                      <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    Click to upload files or drag and drop
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500 }}>Attachments</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <label htmlFor="file-upload" className="btn-secondary" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 12px',
+                    background: '#e2e8f0', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
+                  }}>
+                    <span style={{ fontSize: '16px' }}>📎</span> Attach Files
                   </label>
+                  <input id="file-upload" type="file" multiple onChange={handleFileUpload} style={{ display: 'none' }} />
                 </div>
 
-                {submissionData.attachments.length > 0 && (
-                  <div className="attachments-list">
-                    {submissionData.attachments.map((attachment, idx) => (
-                      <div key={idx} className="attachment-item">
-                        <div className="attachment-icon">
-                          {attachment.type === 'pdf' && '📄'}
-                          {attachment.type === 'js' && '📜'}
-                          {attachment.type === 'ts' && '📘'}
-                          {attachment.type === 'figma' && '🎨'}
-                          {attachment.type === 'zip' && '📦'}
-                          {!['pdf', 'js', 'ts', 'figma', 'zip'].includes(attachment.type) && '📎'}
-                        </div>
-                        <div className="attachment-info">
-                          <span className="attachment-name">{attachment.name}</span>
-                          <span className="attachment-size">{attachment.size}</span>
-                        </div>
-                        <button 
-                          className="btn-danger btn-small"
-                          onClick={() => handleRemoveAttachment(idx)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="attachments-list">
+                  {submissionData.attachments.map((att, i) => (
+                    <div key={i} className="attachment-item" style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      background: '#f1f5f9', padding: '6px 10px', borderRadius: '4px', marginBottom: '4px', fontSize: '13px'
+                    }}>
+                      <span>{att.name} <span style={{ color: '#94a3b8' }}>({att.size})</span></span>
+                      <button onClick={() => handleRemoveAttachment(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>✕</button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="work-review-actions">
-                <button 
-                  className="btn-primary btn-full"
-                  onClick={handleSubmitAssessment}
-                >
-                  Submit Assessment
-                </button>
-                <button 
-                  className="btn-secondary btn-full"
-                  onClick={() => {
-                    setShowSubmitForm(false)
-                    setSubmissionData({ textSubmission: '', attachments: [] })
-                  }}
-                >
-                  Cancel
-                </button>
+              <div className="work-review-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button className="btn-secondary" onClick={closeAssessmentModal} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer' }}>Cancel</button>
+                <button className="btn-primary" onClick={handleSubmitAssessment}>Submit Assignment</button>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     )
   }
 
-  if (selectedAssessment && !showSubmitForm) {
-    const assessment = assessments.find(a => a.id === selectedAssessment)
-    if (!assessment) {
-      setSelectedAssessment(null)
-      return null
-    }
-
-    return (
-      <div className="dashboard-page">
+  return (
+    <div className="dashboard-page-new">
+      <div className="dashboard-section">
         <div className="course-detail-header">
-          <button className="back-button" onClick={() => setSelectedAssessment(null)}>
+          <button className="back-button" onClick={onBack}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             Back
           </button>
-          <h1 className="page-title">Assessment Details</h1>
+          <h1 className="page-title">My Assessments</h1>
         </div>
 
-        <div className="work-review-container">
-          <div className="work-review-card">
-            <div className="work-review-header">
-              <div>
-                <h2 className="work-title">{assessment.title}</h2>
-                <p className="work-course">{assessment.course}</p>
-              </div>
-              <span className={`assessment-status ${assessment.status}`}>
-                {assessment.status === 'submitted' ? 'Submitted' : 'Pending'}
-              </span>
-            </div>
-
-            <div className="work-description-section">
-              <h3 className="section-title">Instructions</h3>
-              <p className="work-description">{assessment.description}</p>
-            </div>
-
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Assigned:</span>
-                <span className="info-value">{formatDate(assessment.assignedDate)}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Due Date:</span>
-                <span className="info-value">{formatDate(assessment.dueDate)}</span>
-              </div>
-            </div>
-
-            {assessment.submission && (
-              <div className="work-description-section">
-                <h3 className="section-title">Your Submission</h3>
-                <div className="submission-text">
-                  {assessment.submission.textSubmission}
-                </div>
-                {assessment.submission.attachments && assessment.submission.attachments.length > 0 && (
-                  <div className="work-attachments-section">
-                    <h4 className="section-subtitle">Attachments</h4>
-                    <div className="attachments-list">
-                      {assessment.submission.attachments.map((attachment, idx) => (
-                        <div key={idx} className="attachment-item">
-                          <div className="attachment-icon">
-                            {attachment.type === 'pdf' && '📄'}
-                            {attachment.type === 'figma' && '🎨'}
-                          </div>
-                          <div className="attachment-info">
-                            <span className="attachment-name">{attachment.name}</span>
-                            <span className="attachment-size">{attachment.size}</span>
-                          </div>
-                          <button className="btn-secondary btn-small">View</button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="submission-status-info">
-                  <p>Submitted on: {formatDate(assessment.submission.submittedDate)}</p>
-                  <p>Status: {assessment.submission.status === 'completed' ? '✓ Completed by Mentor' : 'Pending Review'}</p>
-                </div>
-              </div>
-            )}
-
-            {!assessment.submission && (
-              <div className="work-review-actions">
-                <button 
-                  className="btn-primary btn-full"
-                  onClick={() => setShowSubmitForm(true)}
-                >
-                  Submit Assessment
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const pendingCount = assessments.filter(a => a.status === 'pending').length
-  const submittedCount = assessments.filter(a => a.status === 'submitted').length
-
-  return (
-    <div className="dashboard-page">
-      <div className="course-detail-header">
-        <button className="back-button" onClick={onBack}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Back
-        </button>
-        <h1 className="page-title">My Assessments</h1>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="dashboard-section progress-overview-section">
-        <div className="progress-overview-cards">
+        {/* Stats */}
+        <div className="progress-overview-cards" style={{ marginBottom: '24px' }}>
           <div className="progress-overview-card" style={{ borderTop: '4px solid #f59e0b' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>📝</div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Pending</h3>
-              <p className="progress-card-value" style={{ color: '#f59e0b', fontSize: '28px', fontWeight: '700' }}>
-                {pendingCount}
-              </p>
-            </div>
+            <h3>Pending</h3>
+            <p className="progress-card-value" style={{ color: '#f59e0b' }}>{assessments.filter(a => a.status === 'pending').length}</p>
           </div>
           <div className="progress-overview-card" style={{ borderTop: '4px solid #22c55e' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>✅</div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Submitted</h3>
-              <p className="progress-card-value" style={{ color: '#22c55e', fontSize: '28px', fontWeight: '700' }}>
-                {submittedCount}
-              </p>
-            </div>
+            <h3>Submitted</h3>
+            <p className="progress-card-value" style={{ color: '#22c55e' }}>{assessments.filter(a => a.status === 'submitted').length}</p>
           </div>
         </div>
-      </div>
 
-      <div className="dashboard-section">
-        <h2 className="section-title">All Assessments</h2>
         <div className="assessments-list">
-          {assessments.length === 0 ? (
-            <div className="empty-state">
-              <p>No assessments assigned yet.</p>
-            </div>
-          ) : (
-            assessments.map((assessment) => (
-              <div key={assessment.id} className="assessment-card">
-                <div className="assessment-header">
-                  <div>
-                    <h3 className="assessment-title">{assessment.title}</h3>
-                    <p className="assessment-course">{assessment.course}</p>
-                  </div>
-                  <span className={`assessment-status ${assessment.status}`}>
-                    {assessment.status === 'submitted' ? 'Submitted' : 'Pending'}
-                  </span>
+          {loading ? <p>Loading...</p> : assessments.length === 0 ? <p>No assessments assigned.</p> : assessments.map(assessment => (
+            <div key={assessment.id} className="assessment-card">
+              <div className="assessment-header">
+                <div>
+                  <h3 className="assessment-title">{assessment.title}</h3>
+                  <p className="assessment-course">{assessment.courses?.title}</p>
                 </div>
-                
-                <p className="assessment-description">{assessment.description}</p>
-                
-                <div className="assessment-meta">
-                  <div className="meta-item">
-                    <span className="meta-label">Due:</span>
-                    <span className="meta-value">{formatDate(assessment.dueDate)}</span>
-                  </div>
-                  {assessment.submission && (
-                    <div className="meta-item">
-                      <span className="meta-label">Submitted:</span>
-                      <span className="meta-value">{formatDate(assessment.submission.submittedDate)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="assessment-actions">
-                  <button 
-                    className="btn-primary"
-                    onClick={() => setSelectedAssessment(assessment.id)}
-                  >
-                    {assessment.submission ? 'View Submission' : 'Start Assessment'}
-                  </button>
-                </div>
+                <span className={`assessment-status ${assessment.status}`}>{assessment.status}</span>
               </div>
-            ))
-          )}
+              <div className="assessment-actions">
+                <button className="btn-primary" onClick={() => setSelectedAssessment(assessment.id)}>
+                  {assessment.status === 'submitted' ? 'View Submission' : 'Start Assessment'}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Modal Render */}
+        {renderModalContent()}
+
       </div>
     </div>
   )
 }
 
 export default StudentAssessments
-

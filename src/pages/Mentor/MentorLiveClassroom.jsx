@@ -42,6 +42,29 @@ function MentorLiveClassroom({ course, onBack }) {
   const studyMaterialInputRef = useRef(null)
   const assessmentFileInputRef = useRef(null)
 
+  const [dbAssessments, setDbAssessments] = useState([])
+
+  useEffect(() => {
+    if (showAssessmentListModal) {
+      fetchDbAssessments()
+    }
+  }, [showAssessmentListModal])
+
+  const fetchDbAssessments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('assessments')
+        .select('*, assessment_submissions(count)')
+        .eq('course_id', course?.course_id || course?.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbAssessments(data || [])
+    } catch (err) {
+      console.error('Error fetching assessments:', err)
+    }
+  }
+
   const classroom = course || {
     title: 'React App Development – Batch 1',
     mentor: 'Sarah Chen',
@@ -86,6 +109,14 @@ function MentorLiveClassroom({ course, onBack }) {
           const mapped = data.map(m => {
             let inferredType = m.type || 'text'
             // Infer type logic
+            if (m.type === 'assessment') {
+              try {
+                const details = JSON.parse(m.content)
+                Object.assign(m, details)
+              } catch (e) {
+                // Fallback if content is just text or invalid JSON
+              }
+            }
             if (!m.type && m.file_url) {
               const ext = m.file_url.split('.').pop().toLowerCase()
               if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) inferredType = 'image'
@@ -141,6 +172,12 @@ function MentorLiveClassroom({ course, onBack }) {
           )
 
           // Infer type from file_url or content if type is missing from DB
+          if (newMessage.type === 'assessment') {
+            try {
+              const details = JSON.parse(newMessage.content)
+              Object.assign(newMessage, details)
+            } catch (e) { }
+          }
           let inferredType = newMessage.type || 'text'
           if (!newMessage.type && newMessage.file_url) {
             const ext = newMessage.file_url.split('.').pop().toLowerCase()
@@ -390,11 +427,11 @@ function MentorLiveClassroom({ course, onBack }) {
       // Get course ID safely
       const courseId = course?.course_id || course?.id
 
-      console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', userid)
+      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
       console.log('📦 Attachment payload to insert:', {
         course_id: courseId,
         session_id: activeSessionId,
-        uploaded_by: userid,
+        uploaded_by: currentUserId,
         type: 'file',
         file_name: file.name,
         file_url: publicUrl,
@@ -407,7 +444,7 @@ function MentorLiveClassroom({ course, onBack }) {
         .insert({
           course_id: courseId,
           session_id: activeSessionId,
-          uploaded_by: userid,
+          uploaded_by: currentUserId,
           type: 'file', // Standard document type
           file_name: file.name,
           file_url: publicUrl,
@@ -500,11 +537,11 @@ function MentorLiveClassroom({ course, onBack }) {
 
       const courseId = course?.course_id || course?.id
 
-      console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', userid)
+      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
       console.log('📦 Attachment payload:', {
         course_id: courseId,
         session_id: activeSessionId,
-        uploaded_by: userid,
+        uploaded_by: currentUserId,
         type: 'image',
         file_name: file.name,
         file_url: publicUrl,
@@ -516,7 +553,7 @@ function MentorLiveClassroom({ course, onBack }) {
         .insert({
           course_id: courseId,
           session_id: activeSessionId,
-          uploaded_by: userid,
+          uploaded_by: currentUserId,
           type: 'image',
           file_name: file.name,
           file_url: publicUrl,
@@ -773,31 +810,91 @@ function MentorLiveClassroom({ course, onBack }) {
     }
   }
 
-  const handleSendAssessment = () => {
+  const handleSendAssessment = async () => {
     if (!newAssessment.title || !newAssessment.description || !newAssessment.dueDate) {
       alert('Please fill in all fields')
       return
     }
 
-    const assessmentMessage = {
-      id: messages.length + 1,
-      from: 'mentor',
-      type: 'assessment',
-      assessmentTitle: newAssessment.title,
-      assessmentDescription: newAssessment.description,
-      assessmentDueDate: newAssessment.dueDate,
-      assessmentId: Date.now(), // Simple ID generation
-      assessmentId: Date.now(), // Simple ID generation
-      time: getCurrentTime(),
-      session_id: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
-    }
+    try {
+      console.log('📝 Creating Assessment in Table...')
+      const courseId = course?.course_id || course?.id
 
-    setMessages((prev) => [...prev, assessmentMessage])
-    setNewAssessment({ title: '', description: '', dueDate: '' })
-    setShowAssessmentForm(false)
-    setShowAttachOptions(false)
+      const { error } = await supabase
+        .from('assessments')
+        .insert({
+          title: newAssessment.title,
+          description: newAssessment.description,
+          due_date: newAssessment.dueDate,
+          course_id: courseId,
+          mentor_id: currentUserId,
+          created_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      console.log('✅ Assessment Created Successfully')
+      alert('Assessment created and stored in the specific table successfully!')
+
+      // Clear form but DO NOT add to chat messages
+      setNewAssessment({ title: '', description: '', dueDate: '' })
+      setShowAssessmentForm(false)
+      setShowAttachOptions(false)
+
+    } catch (err) {
+      console.error('❌ Error creating assessment:', err)
+      alert('Failed to create assessment: ' + err.message)
+    }
+  }
+
+
+
+  const handlePostAssessmentToChat = async (assessment) => {
+    try {
+      console.log('📤 Posting assessment to chat:', assessment.title)
+
+      const contentJson = JSON.stringify({
+        assessmentId: assessment.id,
+        assessmentTitle: assessment.title,
+        assessmentDescription: assessment.description,
+        assessmentDueDate: assessment.due_date
+      })
+
+      const messagePayload = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: 'mentor',
+        sender_id: Number(currentUserId),
+        type: 'assessment',
+        content: contentJson,
+        read: false
+      }
+
+      const { error } = await supabase
+        .from('messages')
+        .insert([messagePayload])
+
+      if (error) throw error
+
+      console.log('✅ Assessment Posted')
+      setShowAssessmentListModal(false)
+
+      // Optimistic update
+      const newMessage = {
+        ...messagePayload,
+        id: Date.now(),
+        from: 'mentor',
+        time: getCurrentTime(),
+        assessmentTitle: assessment.title,
+        assessmentDescription: assessment.description,
+        assessmentDueDate: assessment.due_date
+      }
+      setMessages(prev => [...prev, newMessage])
+
+    } catch (err) {
+      console.error('❌ Error posting assessment:', err)
+      alert('Failed to post assessment to chat')
+    }
   }
 
   const handleViewAssessment = (assessmentMessage) => {
@@ -835,10 +932,8 @@ function MentorLiveClassroom({ course, onBack }) {
 
     // Create a submission confirmation message
     const submissionMessage = {
-      id: messages.length + 1,
+      id: 1,
       from: 'learner',
-      type: 'text',
-      content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
       type: 'text',
       content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
       time: getCurrentTime(),
@@ -1362,9 +1457,9 @@ function MentorLiveClassroom({ course, onBack }) {
                   </div>
                 </div>
                 <div className="assessment-modal-content">
-                  {messages.filter(m => m.type === 'assessment').length > 0 ? (
+                  {dbAssessments.length > 0 ? (
                     <div className="assessment-list-container">
-                      {messages.filter(m => m.type === 'assessment').map((assessment, idx) => (
+                      {dbAssessments.map((assessment, idx) => (
                         <div
                           key={assessment.id || idx}
                           className="assessment-list-item"
@@ -1373,18 +1468,24 @@ function MentorLiveClassroom({ course, onBack }) {
                             border: '1px solid #e2e8f0',
                             borderRadius: '12px',
                             marginBottom: '12px',
-                            background: '#fff'
+                            background: '#fff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px'
                           }}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.assessmentTitle}</h4>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.title}</h4>
                             <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#f1f5f9', color: '#64748b' }}>
-                              Due: {new Date(assessment.assessmentDueDate).toLocaleDateString()}
+                              Due: {new Date(assessment.due_date).toLocaleDateString()}
                             </span>
                           </div>
                           <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            {assessment.assessmentDescription}
+                            {assessment.description}
                           </p>
+                          <div style={{ alignSelf: 'flex-end', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                            Submissions: {assessment.assessment_submissions?.[0]?.count || 0}
+                          </div>
                         </div>
                       ))}
                     </div>
