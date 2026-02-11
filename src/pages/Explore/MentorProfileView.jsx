@@ -16,6 +16,25 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   const [touchEnd, setTouchEnd] = useState(0)
 
   useEffect(() => {
+    // Self-healing: Check for inconsistent auth state
+    const validateSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const authId = localStorage.getItem('auth_id')
+
+      // If Supabase has a session but our app doesn't have auth_id, it's a mismatch
+      // Force logout to clean slate
+      if (session && !authId) {
+        console.warn('⚠️ Auth Mismatch detected: Session exists but auth_id missing. Forcing cleanup.')
+        await supabase.auth.signOut()
+        localStorage.removeItem('sb-zupzvpepzkjeaelxczlz-auth-token')
+        // We don't navigate here to avoid jarring redirects on simple view, 
+        // but the next interaction will correctly see "no session"
+      }
+    }
+    validateSession()
+  }, [])
+
+  useEffect(() => {
     window.scrollTo(0, 0)
     // Always fetch latest full details from API to ensure all sections (Expx, Edu, etc.) are populated
     fetchMentorDetails()
@@ -227,7 +246,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               <div className="modal-actions">
                 <button
                   className="btn-buy-course"
-                  onClick={() => {
+                  onClick={async () => {
                     const mId = mentor.id;
                     const cId = selectedCourse.id;
                     const course = {
@@ -239,10 +258,15 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                     console.log('Booking course:', course)
 
                     // Check if user is logged in
-                    const storedAuth = getStoredAuthData()
-                    if (!storedAuth) {
+                    const { data: { session } } = await supabase.auth.getSession()
+                    const authId = localStorage.getItem('auth_id')
+
+                    console.log('DEBUG: Session Check:', session)
+                    console.log('DEBUG: Auth ID Check:', authId)
+
+                    if (!session || !authId) {
                       // Not logged in - save course data and redirect to login
-                      console.log('User not logged in - saving course to sessionStorage')
+                      console.log('User not logged in (no session or no auth_id) - saving course to sessionStorage')
                       sessionStorage.setItem('pendingCourse', JSON.stringify(course))
                       navigate('/login', { state: { returnTo: '/payment' } })
                     } else {

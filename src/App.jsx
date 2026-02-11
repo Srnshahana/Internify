@@ -365,9 +365,16 @@ function StudentDashboardPage() {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    clearAuthData()
-    navigate('/')
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    } finally {
+      clearAuthData()
+      // Force clear Supabase tokens from localStorage
+      localStorage.removeItem('sb-zupzvpepzkjeaelxczlz-auth-token')
+      navigate('/')
+    }
   }
 
   const openProfile = () => {
@@ -388,9 +395,16 @@ function MentorDashboardPage() {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    clearAuthData()
-    navigate('/')
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    } finally {
+      clearAuthData()
+      // Force clear Supabase tokens from localStorage
+      localStorage.removeItem('sb-zupzvpepzkjeaelxczlz-auth-token')
+      navigate('/')
+    }
   }
 
   return <MentorDashboard onLogout={handleLogout} />

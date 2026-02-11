@@ -288,6 +288,7 @@ export const mentors = [
     certifications: ['Google UX Design Certificate', 'Figma Advanced Certification'],
     image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80',
     courses: [2, 6],
+    coursesOffered: [2, 6],
   },
   {
     id: 2,
@@ -307,6 +308,7 @@ export const mentors = [
     certifications: ['AWS Certified Solutions Architect', 'React Advanced Patterns'],
     image: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=320&q=80',
     courses: [1, 5, 7],
+    coursesOffered: [1, 5, 7],
   },
   {
     id: 3,
@@ -327,6 +329,7 @@ export const mentors = [
     certifications: ['TensorFlow Developer Certificate', 'Google Data Analytics Certificate'],
     image: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=320&q=80',
     courses: [3, 8],
+    coursesOffered: [3, 8],
   },
   {
     id: 4,
@@ -346,6 +349,7 @@ export const mentors = [
     certifications: ['Google Analytics Certified', 'HubSpot Content Marketing'],
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=320&q=80',
     courses: [4, 12],
+    coursesOffered: [4, 12],
   },
   {
     id: 5,
@@ -365,6 +369,7 @@ export const mentors = [
     certifications: ['AWS Solutions Architect Professional', 'Kubernetes Administrator'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [5, 10],
+    coursesOffered: [5, 10],
   },
   {
     id: 6,
@@ -384,6 +389,7 @@ export const mentors = [
     certifications: ['Apple Developer Certification', 'React Native Advanced'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [7],
+    coursesOffered: [7],
   },
   {
     id: 7,
@@ -404,6 +410,8 @@ export const mentors = [
     certifications: ['Certified Scrum Product Owner', 'Google Analytics'],
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=320&q=80',
     courses: [6, 11],
+    coursesOffered: [6, 11],
+    coursesOffered: [6, 11],
   },
   {
     id: 8,
@@ -423,6 +431,7 @@ export const mentors = [
     certifications: ['CEH', 'CISSP', 'Security+'],
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80',
     courses: [10],
+    coursesOffered: [10],
   },
   {
     id: 9,
@@ -442,6 +451,8 @@ export const mentors = [
     certifications: ['Content Marketing Institute Certification'],
     image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=320&q=80',
     courses: [9],
+    coursesOffered: [9],
+    coursesOffered: [9],
   },
   {
     id: 10,
@@ -462,6 +473,7 @@ export const mentors = [
     certifications: ['TensorFlow Developer Certificate', 'Deep Learning Specialization'],
     image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=320&q=80',
     courses: [8],
+    coursesOffered: [8],
   },
   {
     id: 11,
@@ -482,6 +494,8 @@ export const mentors = [
     certifications: ['PMP', 'Certified Scrum Master', 'Agile Certified Practitioner'],
     image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=320&q=80',
     courses: [11],
+    coursesOffered: [11],
+    coursesOffered: [11],
   },
   {
     id: 12,
@@ -501,6 +515,7 @@ export const mentors = [
     certifications: ['Salesforce Certified Administrator', 'Salesforce Sales Cloud'],
     image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=320&q=80',
     courses: [12],
+    coursesOffered: [12],
   },
   {
     id: 13,
@@ -520,6 +535,11 @@ export const mentors = [
     certifications: ['React Developer Certification'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
   },
   {
     id: 14,
@@ -539,6 +559,7 @@ export const mentors = [
     certifications: ['AWS Certified Developer'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [1, 5],
+    coursesOffered: [1, 5],
   },
   {
     id: 15,
@@ -558,6 +579,8 @@ export const mentors = [
     certifications: ['Google UX Research Certificate'],
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=320&q=80',
     courses: [2],
+    coursesOffered: [2],
+    coursesOffered: [2],
   },
   {
     id: 16,
@@ -577,6 +600,8 @@ export const mentors = [
     certifications: ['Kubernetes Administrator', 'Terraform Associate'],
     image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=320&q=80',
     courses: [5],
+    coursesOffered: [5],
+    coursesOffered: [5],
   },
   {
     id: 17,
@@ -596,6 +621,9 @@ export const mentors = [
     certifications: ['Google Data Analytics Certificate'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [3],
+    coursesOffered: [3],
+    coursesOffered: [3],
+    coursesOffered: [3],
   },
   {
     id: 18,
@@ -615,6 +643,11 @@ export const mentors = [
     certifications: ['MongoDB Certified Developer'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
   },
   {
     id: 19,
@@ -634,6 +667,8 @@ export const mentors = [
     certifications: ['Adobe Certified Expert'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [2],
+    coursesOffered: [2],
+    coursesOffered: [2],
   },
   {
     id: 20,
@@ -653,6 +688,11 @@ export const mentors = [
     certifications: ['ISTQB Certified Tester'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
   },
   {
     id: 21,
@@ -672,6 +712,8 @@ export const mentors = [
     certifications: ['Hootsuite Social Media Marketing'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [4],
+    coursesOffered: [4],
+    coursesOffered: [4],
   },
   {
     id: 22,
@@ -691,6 +733,11 @@ export const mentors = [
     certifications: ['Ethereum Developer Certification'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
   },
   {
     id: 23,
@@ -710,6 +757,8 @@ export const mentors = [
     certifications: ['Google SEO Certification', 'Moz SEO Certification'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [4],
+    coursesOffered: [4],
+    coursesOffered: [4],
   },
   {
     id: 24,
@@ -729,6 +778,11 @@ export const mentors = [
     certifications: ['Unity Certified Developer'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
+    coursesOffered: [1],
   },
   {
     id: 25,
@@ -748,6 +802,8 @@ export const mentors = [
     certifications: ['CBAP', 'Agile Business Analysis'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [6, 11],
+    coursesOffered: [6, 11],
+    coursesOffered: [6, 11],
   },
   {
     id: 26,
@@ -767,6 +823,7 @@ export const mentors = [
     certifications: ['Technical Writing Certificate'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=320&q=80',
     courses: [9],
+    coursesOffered: [9],
   },
   {
     id: 27,
@@ -786,6 +843,7 @@ export const mentors = [
     certifications: ['CFA Level 1', 'Financial Modeling Certification'],
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80',
     courses: [11],
+    coursesOffered: [11],
   },
   {
     id: 28,

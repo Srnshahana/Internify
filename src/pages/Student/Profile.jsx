@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import '../../App.css'
 import { studentProfileData } from '../../data/staticData.js'
 import { courses } from '../../data/staticData.js'
-import { CertificateIcon } from '../../components/Icons.jsx'
+import { CertificateIcon, SettingsIcon, LogoutIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
 const useDragScroll = () => {
@@ -43,8 +43,9 @@ const useDragScroll = () => {
   return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
 }
 
-function Profile() {
+function Profile({ onLogout }) {
   const [isEditing, setIsEditing] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const coursesDrag = useDragScroll()
   const certDrag = useDragScroll()
@@ -141,12 +142,80 @@ function Profile() {
             <div className="profile-avatar-linkedin">
               {profile.avatar}
             </div>
-            <button className="profile-edit-btn-icon" onClick={() => setIsEditing(!isEditing)}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
+            <div className="profile-edit-btn-group" style={{
+              display: 'flex',
+              gap: '8px',
+              position: 'absolute',
+              top: '24px',
+              right: '25px',
+              zIndex: 10
+            }}>
+              <button
+                className="profile-edit-btn-icon"
+                onClick={() => setIsEditing(!isEditing)}
+                style={{ position: 'relative', top: 'auto', right: 'auto' }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="profile-edit-btn-icon"
+                  onClick={() => setShowSettings(!showSettings)}
+                  style={{
+                    backgroundColor: showSettings ? '#f3f4f6' : 'transparent',
+                    position: 'relative',
+                    top: 'auto',
+                    right: 'auto'
+                  }}
+                >
+                  <SettingsIcon />
+                </button>
+
+                {showSettings && (
+                  <div className="settings-dropdown-menu" style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '8px',
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    padding: '8px',
+                    minWidth: '150px',
+                    zIndex: 100,
+                    border: '1px solid rgba(0,0,0,0.05)'
+                  }}>
+                    <button
+                      onClick={onLogout}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = '#fef2f2'}
+                      onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    >
+                      <LogoutIcon size={18} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="profile-intro-info">

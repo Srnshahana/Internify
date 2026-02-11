@@ -25098,6 +25098,298 @@ h1 span {
   animation: fadeIn 0.2s ease;
 }
 
+/* Global Home Modals (Bottom Sheet Style) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  /* Changed from flex-end to center */
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+  padding: 20px;
+}
+
+.modal-content-bottom-sheet {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 32px 32px 0 0;
+  padding: 24px 24px 40px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+  animation: slideUpBottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-content-centered {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+  animation: modalZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.modal-stats-summary {
+  background: rgba(14, 165, 233, 0.05);
+  border: 1px solid rgba(14, 165, 233, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.mini-stat-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 4px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #0ea5e9;
+  position: relative;
+}
+
+.mini-stat-circular-progress {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #0ea5e9;
+  border-right-color: #0ea5e9;
+  transform: rotate(-45deg);
+}
+
+.modal-summary-text h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.modal-summary-text p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.session-card-elegant {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.session-card-elegant:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  border-color: #0ea5e9;
+}
+
+.session-card-elegant::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #0ea5e9;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.session-card-elegant:hover::before {
+  opacity: 1;
+}
+
+/* Comparison Chart Styles */
+.comparison-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+  margin-bottom: 24px;
+}
+
+.chart-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.chart-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0ea5e9;
+}
+
+.chart-bar-wrapper {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.chart-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* SVG Graph Styles */
+.svg-graph-container {
+  width: 100%;
+  height: 160px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 16px rgba(14, 165, 233, 0.15));
+}
+
+.graph-path {
+  fill: none;
+  stroke: #0ea5e9;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 2s ease-out forwards;
+}
+
+.graph-area {
+  fill: url(#graphGradient);
+  opacity: 0;
+  animation: fadeIn 1s ease-out 1s forwards;
+}
+
+.graph-point {
+  fill: #0ea5e9;
+  stroke: white;
+  stroke-width: 2;
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+  opacity: 0;
+  transform: scale(0);
+  animation: popPoint 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 0.15;
+  }
+}
+
+@keyframes popPoint {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-handle-bar {
+  width: 40px;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+@keyframes slideUpBottom {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -29694,7 +29986,6 @@ h1 span {
 }
 
 .calendar-glass-card {
-  max-width: 1000px;
   width: 100%;
   background: rgba(255, 255, 255, 0.4);
   /* Replaced black with white glass */
@@ -29835,7 +30126,6 @@ h1 span {
 /* Sessions Section */
 .sessions-section-elegant {
   width: 100%;
-  max-width: 1000px;
   margin-top: 0;
   padding-top: 0;
   border-top: none;

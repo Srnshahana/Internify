@@ -98,6 +98,32 @@ export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) 
         setIsProcessing(false);
         return;
       }
+
+      // 🔍 Check if student record exists to avoid foreign key violation
+      const { data: studentRecord } = await supabase
+        .from('students')
+        .select('id')
+        .eq('id', studentId)
+        .maybeSingle();
+
+      if (!studentRecord) {
+        console.log('Student record missing. Creating one...');
+        const { error: createStudentError } = await supabase
+          .from('students')
+          .insert([
+            {
+              id: studentId,
+              email: authData.user.email,
+              full_name: authData.user.user_metadata?.full_name || 'Student',
+              username: authData.user.email?.split('@')[0] || 'student'
+            }
+          ]);
+
+        if (createStudentError) {
+          console.error('Error creating student record:', createStudentError);
+          // We continue, aiming that maybe the trigger handles it or it was a race condition
+        }
+      }
       // 2. Call API to send data to classes_enrolled table
       const { error } = await supabase
         .from('classes_enrolled')
@@ -106,7 +132,7 @@ export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) 
             student_id: studentId,
             mentor_id: finalMentorId,
             course_id: courseId,
-            status: 'active'
+            status: 'pending'
           }
         ]);
 

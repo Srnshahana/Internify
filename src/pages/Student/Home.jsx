@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom' // Added this import for useNavig
 
 function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQuery }) {
   const [activeTab, setActiveTab] = useState('My Classes')
-  const { userProfile, studentProfile, enrolledCourses: liveEnrolledCourses, loading } = useDashboardData()
+  const { userProfile, studentProfile, enrolledCourses: liveEnrolledCourses, scheduledSessions, loading } = useDashboardData()
   const navigate = useNavigate()
 
   // Search state
@@ -194,6 +194,33 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   const [showUpcomingSessionsModal, setShowUpcomingSessionsModal] = useState(false)
   const [showProgressGraphModal, setShowProgressGraphModal] = useState(false)
 
+  // Drawer state
+  const [isDrawerExpanded, setIsDrawerExpanded] = useState(false)
+  const [drawerTouchStart, setDrawerTouchStart] = useState(null)
+
+  const handleDrawerTouchStart = (e) => {
+    setDrawerTouchStart(e.touches[0].clientY)
+  }
+
+  const handleDrawerTouchEnd = (e) => {
+    if (!drawerTouchStart) return
+    const touchEnd = e.changedTouches[0].clientY
+    const diff = drawerTouchStart - touchEnd
+
+    // Dragged up -> Expand
+    if (diff > 50) {
+      setIsDrawerExpanded(true)
+    }
+    // Dragged down -> Collapse
+    else if (diff < -50) {
+      setIsDrawerExpanded(false)
+    }
+    setDrawerTouchStart(null)
+  }
+
+  const toggleDrawer = () => {
+    setIsDrawerExpanded(!isDrawerExpanded)
+  }
   const EXPAND_DISTANCE = 80 // Reduced to ensure handle stays reachable
 
   const handleDrawerDragStart = (e) => {
@@ -254,9 +281,24 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   })
 
   const enrolledCourses = liveCourses.length > 0 ? liveCourses : staticEnrolledCourses
-  const registeredCoursesCount = enrolledCourses.length
+
+  // Get scheduled sessions from context and filter out completed ones
+  const allScheduled = scheduledSessions || []
+  const liveUpcomingSessions = allScheduled
+    .filter(s => !s.completed)
+    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+    .slice(0, 10)
+
+  // Calculate session completion progress
+  const completedCount = allScheduled.filter(s => s.completed).length
+  const totalCount = allScheduled.length
+  const sessionProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
   // Calculate metrics for overview cards
+  const activeCourses = enrolledCourses.filter(c => c.status === 'active')
+  const overallLearningProgress = activeCourses.length > 0
+    ? Math.round(activeCourses.reduce((acc, c) => acc + (c.progress || 0), 0) / activeCourses.length)
+    : 0
   const learningHours = enrolledCourses.reduce((total, course) => {
     const hours = (course.classes || []).filter(c => c.completed).reduce((sum, cls) => {
       const match = cls.duration && typeof cls.duration === 'string' ? cls.duration.match(/(\d+)/) : null
@@ -536,34 +578,6 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
     month: 'long'
   })
 
-  // Drawer state
-  const [isDrawerExpanded, setIsDrawerExpanded] = useState(false)
-  const [drawerTouchStart, setDrawerTouchStart] = useState(null)
-
-  const handleDrawerTouchStart = (e) => {
-    setDrawerTouchStart(e.touches[0].clientY)
-  }
-
-  const handleDrawerTouchEnd = (e) => {
-    if (!drawerTouchStart) return
-    const touchEnd = e.changedTouches[0].clientY
-    const diff = drawerTouchStart - touchEnd
-
-    // Dragged up -> Expand
-    if (diff > 50) {
-      setIsDrawerExpanded(true)
-    }
-    // Dragged down -> Collapse
-    else if (diff < -50) {
-      setIsDrawerExpanded(false)
-    }
-    setDrawerTouchStart(null)
-  }
-
-  const toggleDrawer = () => {
-    setIsDrawerExpanded(!isDrawerExpanded)
-  }
-
   return (
     <div className="dashboard-page-v2 font-sans">
       <div className="dashboard-background-v2">
@@ -656,6 +670,24 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                 <div className="course-thumb-v2" style={{ height: '160px' }}>
                   <img src={course.image} alt={course.title} />
                   <div className="course-tag-v2">{course.level || 'Course'}</div>
+                  {course.status && (course.status === 'pending' || course.status === 'rejected') && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: course.status === 'pending' ? 'rgba(245, 158, 11, 0.9)' : 'rgba(239, 68, 68, 0.9)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      zIndex: 2,
+                      backdropFilter: 'blur(4px)',
+                      textTransform: 'capitalize'
+                    }}>
+                      {course.status}
+                    </div>
+                  )}
                 </div>
                 <div className="course-content-v2">
                   <h3 className="course-name-v2" style={{ fontSize: '1.1rem' }}>{course.title}</h3>
@@ -735,25 +767,74 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       {/* Modals */}
       {showUpcomingSessionsModal && (
         <div className="modal-overlay" onClick={() => setShowUpcomingSessionsModal(false)}>
-          <div className="modal-content-bottom-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-handle-bar"></div>
-            <h2 className="modal-title">Upcoming Sessions</h2>
-            <div className="upcoming-sessions-list-modal">
-              {homeUpcomingSessions.map((session) => (
-                <div key={session.id} className="upcoming-session-card-modal">
-                  <div className="session-time-badge">
-                    <span className="session-time">{session.time}</span>
-                    <span className="session-period">{session.period}</span>
+          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 className="modal-title" style={{ margin: 0 }}>Upcoming Sessions</h2>
+              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            {/* Progress Graph Section */}
+            <div className="modal-stats-summary">
+              <div className="mini-stat-circle">
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#0ea5e9' }}>calendar_today</span>
+              </div>
+              <div className="modal-summary-text">
+                <h4>{liveUpcomingSessions.length} sessions upcoming</h4>
+                <p>Scheduled for the next few days</p>
+              </div>
+            </div>
+
+            <div className="sessions-list-elegant">
+              {liveUpcomingSessions.length > 0 ? (
+                liveUpcomingSessions.map((session) => (
+                  <div key={session.id} className="session-card-elegant">
+                    <div className="session-main-content">
+                      <div className="session-time-box">
+                        <span className="time-main">
+                          {session.scheduled_date
+                            ? new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : 'TBA'}
+                        </span>
+                        <span className="time-sub">
+                          {session.scheduled_date
+                            ? new Date(session.scheduled_date).toLocaleDateString([], { month: 'short', day: 'numeric' })
+                            : ''}
+                        </span>
+                      </div>
+
+                      <div className="session-info-elegant">
+                        <h4 style={{ margin: 0 }}>{session.title}</h4>
+                        <div className="session-meta-elegant">
+                          <span>{session.courses?.title || session.course}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="session-actions-buttons" style={{ marginTop: '12px', width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                      {session.meeting_link ? (
+                        <button
+                          className="session-btn session-btn-primary"
+                          onClick={() => window.open(session.meeting_link, '_blank')}
+                          style={{ padding: '8px 16px', fontSize: '14px' }}
+                        >
+                          Join
+                        </button>
+                      ) : (
+                        <button className="session-btn session-btn-secondary" disabled style={{ opacity: 0.5, padding: '8px 16px', fontSize: '14px' }}>
+                          TBA
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="session-info">
-                    <h3 className="session-title">{session.title}</h3>
-                    <p className="session-mentor">with {session.mentor}</p>
-                  </div>
-                  <button className="join-btn-small" onClick={() => handleJoinUpcomingSession(session)}>
-                    Join
-                  </button>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', marginBottom: '12px', opacity: 0.5 }}>event_busy</span>
+                  <p>No upcoming sessions found.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -761,18 +842,109 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
       {showProgressGraphModal && (
         <div className="modal-overlay" onClick={() => setShowProgressGraphModal(false)}>
-          <div className="modal-content-bottom-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-handle-bar"></div>
-            <h2 className="modal-title">Learning Progress</h2>
-            <div className="graph-container">
-              <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8' }}>Progress Visualization</p>
+          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 className="modal-title" style={{ margin: 0 }}>Learning Progress</h2>
+              <button className="progress-modal-close" onClick={() => setShowProgressGraphModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            {/* Actual Visual Graph Section */}
+            <div className="svg-graph-container">
+              <svg className="graph-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="graphGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Stylized Progress Curve */}
+                <path
+                  className="graph-area"
+                  d={`M 0 120 L 0 100 C 100 90, 200 ${110 - (overallLearningProgress * 0.8)}, 400 ${100 - (overallLearningProgress * 0.9)} L 400 120 Z`}
+                />
+                <path
+                  className="graph-path"
+                  d={`M 0 100 C 100 90, 200 ${110 - (overallLearningProgress * 0.8)}, 400 ${100 - (overallLearningProgress * 0.9)}`}
+                />
+
+                {/* Data Points */}
+                <circle className="graph-point" cx="0" cy="100" r="4" style={{ animationDelay: '0.1s' }} />
+                <circle className="graph-point" cx="200" cy={110 - (overallLearningProgress * 0.8)} r="4" style={{ animationDelay: '0.3s' }} />
+                <circle className="graph-point" cx="400" cy={100 - (overallLearningProgress * 0.9)} r="4" style={{ animationDelay: '0.5s' }} />
+              </svg>
+
+              <div style={{ position: 'absolute', top: '15px', right: '20px', textAlign: 'right' }}>
+                <span style={{ fontSize: '24px', fontWeight: '800', color: '#0ea5e9', display: 'block' }}>{overallLearningProgress}%</span>
+                <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Velocity</span>
+              </div>
+            </div>
+
+            {/* Overall Progress List Section */}
+            <div className="comparison-chart-container">
+              <div className="modal-summary-text" style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '18px', fontWeight: '700' }}>Overall Progress</h4>
+                <p>Average {overallLearningProgress}% completion across active courses</p>
+              </div>
+              {activeCourses.map((course, idx) => (
+                <div key={course.id || idx} className="chart-row">
+                  <div className="chart-info">
+                    <span className="chart-label">{course.title}</span>
+                    <span className="chart-value">{course.progress || 0}%</span>
+                  </div>
+                  <div className="chart-bar-wrapper">
+                    <div className="chart-fill" style={{ width: `${course.progress || 0}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="graph-container" style={{ padding: '0 0 20px' }}>
+              <h4 style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', fontWeight: '600' }}>Detailed Session View</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {enrolledCourses.filter(c => c.status === 'active').map((course, idx) => (
+                  <div key={course.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{course.title}</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0ea5e9' }}>{course.progress || 0}%</span>
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '3px',
+                      width: '100%',
+                      height: '24px',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      {[...Array(40)].map((_, i) => {
+                        const isFilled = (course.progress || 0) >= ((i + 1) / 40) * 100;
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              flex: 1,
+                              maxWidth: '6px',
+                              height: '100%',
+                              background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
+                              borderRadius: '3px',
+                              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                              transform: isFilled ? 'scaleY(1)' : 'scaleY(0.6)',
+                              boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                              opacity: isFilled ? 1 : 0.4
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       )}
-
     </div>
   )
 }

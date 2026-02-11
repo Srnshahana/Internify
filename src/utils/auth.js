@@ -75,6 +75,7 @@ export function getStoredAuthData() {
 export function clearAuthData() {
   localStorage.removeItem('auth_user_id')
   localStorage.removeItem('auth_user_role')
+  localStorage.removeItem('auth_id')
 }
 
 /**

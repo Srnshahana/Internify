@@ -62,7 +62,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
       case 'Calendar':
         return <Calendar />
       case 'Profile':
-        return <Profile />
+        return <Profile onLogout={onLogout} />
       case 'Notification':
         return <Notification />
       default:
@@ -105,7 +105,9 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
           </nav>
 
           {/* Top Header */}
-          {activePage !== 'Profile' && activePage !== 'Home' && activePage !== 'Classrooms' && <StudentAppBar onLogout={onLogout} />}
+          {activePage !== 'Profile' && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Calendar' && (
+            <StudentAppBar onLogout={onLogout} />
+          )}
         </>
       )}
 

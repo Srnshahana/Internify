@@ -1,95 +1,76 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
-import { mentors, calendarSessions } from '../../data/staticData.js'
-
-// Adapt student calendar sessions to mentor view (show as mentee sessions)
-const mentorCalendarSessions = calendarSessions.map((s, index) => ({
-  ...s,
-  id: s.id || index + 1,
-  title: s.title || 'Mentorship session',
-  mentee: s.mentor || 'Student',
-  joinLink: `https://meet.google.com/session-${s.id || index + 1}`,
-}))
+import supabase from '../../supabaseClient'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [showAddListForm, setShowAddListForm] = useState(false)
   const [clickedDate, setClickedDate] = useState(null)
+  const [sessions, setSessions] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const sessions = mentorCalendarSessions
+  const currentUserId = localStorage.getItem('auth_id')
+
+  useEffect(() => {
+    const fetchScheduledClasses = async () => {
+      try {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from('scheduled_classes')
+          .select('*, courses(title)')
+          .eq('mentor_id', currentUserId)
+          .order('scheduled_date', { ascending: true })
+
+        if (error) throw error
+
+        if (data) {
+          const mappedSessions = data.map(session => ({
+            id: session.id,
+            title: session.title,
+            course: session.courses?.title || 'Live Class',
+            date: new Date(session.scheduled_date).toLocaleDateString(),
+            time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            mentee: 'Batch',
+            type: 'upcoming',
+            joinLink: session.meeting_link
+          }))
+          setSessions(mappedSessions)
+        }
+      } catch (error) {
+        console.error('Error fetching scheduled classes:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (currentUserId) {
+      fetchScheduledClasses()
+    } else {
+      setLoading(false)
+    }
+  }, [currentUserId])
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const weekDaysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
-  // Get current week dates
-  const getCurrentWeekDates = () => {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-
-    const weekDates = []
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek)
-      date.setDate(startOfWeek.getDate() + i)
-      weekDates.push(date)
-    }
-    return weekDates
-  }
-
-  const weekDates = getCurrentWeekDates()
-  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 8) // 8 AM to 7 PM
-  const timelineDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] // Full week for timeline
-
-  // Sample data for timeline tasks
-  const timelineTasks = [
-    { id: 1, day: 'Monday', timeSlot: 14, title: 'React Advanced Patterns - Review', type: 'mentorship', mentee: 'Sherin', color: 'purple' },
-    { id: 2, day: 'Tuesday', timeSlot: 10, title: 'UI/UX Design Feedback', type: 'review', mentee: 'Rahul', color: 'orange' },
-    { id: 3, day: 'Wednesday', timeSlot: 13, title: 'DSA Practice Session', type: 'mentorship', mentee: 'Fatima', color: 'blue' },
-    { id: 4, day: 'Thursday', timeSlot: 16, title: 'Portfolio Review', type: 'review', mentee: 'Priya', color: 'purple' },
-    { id: 5, day: 'Friday', timeSlot: 14, title: 'Career Guidance', type: 'mentorship', mentee: 'Amit', color: 'purple' },
-  ]
-
-  // Map sessions to timeline grid
-  const getSessionForSlot = (dayIndex, timeSlot) => {
-    const dayName = timelineDays[dayIndex]
-    const task = timelineTasks.find(t => t.day === dayName && t.timeSlot === timeSlot)
-    return task ? { ...task, title: task.title, mentee: task.mentee } : null
-  }
-
-  const handleReschedule = (sessionId) => {
-    console.log('Reschedule session:', sessionId)
-  }
-
-  const handleCancel = (sessionId) => {
-    if (window.confirm('Are you sure you want to cancel this class?')) {
-      console.log('Cancel session:', sessionId)
-    }
-  }
-
-  const handleJoin = (sessionId) => {
-    console.log('Join session:', sessionId)
+  const handleJoin = (link) => {
+    if (link) window.open(link, '_blank')
   }
 
   return (
     <div className="calendar-dashboard-wrapper" >
       <div className="calendar-glass-card">
-        <div className="calendar-header-elegant">
-          <h2 className="calendar-month-title">{currentMonth}</h2>
+        {/* Header - V2 Glass Style */}
+        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px' }}>
+          <div className="live-header-title-v2" style={{ fontSize: '18px' }}>{currentMonth}</div>
           <div className="calendar-nav-actions">
-            <button className="calendar-nav-btn-elegant" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
+            <button className="live-back-btn-v2" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>
+              <span className="material-symbols-outlined">chevron_left</span>
             </button>
-            <button className="calendar-nav-btn-elegant" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
+            <button className="live-back-btn-v2" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}>
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
-        </div>
+        </header>
 
         <div className="calendar-grid-section">
           <div className="calendar-weekdays-elegant">
@@ -115,7 +96,13 @@ function Calendar() {
                 const isToday = date === new Date().getDate() &&
                   month === new Date().getMonth() &&
                   year === new Date().getFullYear()
-                const hasEvent = [15, 16, 22, 23, 27].includes(date)
+
+                // Check if any session falls on this day
+                const hasEvent = sessions.some(s => {
+                  const sDate = new Date(s.date)
+                  return sDate.getDate() === date && sDate.getMonth() === month && sDate.getFullYear() === year
+                })
+
                 const isSelected = clickedDate && date === clickedDate.getDate() &&
                   month === clickedDate.getMonth() &&
                   year === clickedDate.getFullYear()
@@ -137,44 +124,57 @@ function Calendar() {
 
       <div className="sessions-section-elegant">
         <h3 className="sessions-title-elegant">Upcoming Mentorship Sessions</h3>
-        <div className="sessions-list-elegant">
-          {sessions.map((session) => (
-            <div key={session.id} className="session-card-elegant">
-              <div className="session-main-content">
-                <div className="session-time-box">
-                  <span className="time-main">{session.time.split(' - ')[0]}</span>
-                  <span className="time-sub">{session.time.split(' - ')[1]}</span>
-                </div>
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
+            <p style={{ marginTop: '10px' }}>Loading schedule...</p>
+          </div>
+        ) : sessions.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
+            <p style={{ fontSize: '16px', fontWeight: '500' }}>No upcoming sessions</p>
+            <p style={{ fontSize: '14px', marginTop: '4px' }}>Schedule a class from the Live Classroom</p>
+          </div>
+        ) : (
+          <div className="sessions-list-elegant">
+            {sessions.map((session) => (
+              <div key={session.id} className="session-card-elegant">
+                <div className="session-main-content">
+                  <div className="session-time-box">
+                    <span className="time-main">{session.time}</span>
+                    <span className="time-sub">{session.date}</span>
+                  </div>
 
-                <div className="session-info-elegant">
-                  <h4>{session.course}</h4>
-                  <div className="session-meta-elegant">
-                    <span>{session.date}</span>
-                    <span>• Mentee: {session.mentee}</span>
+                  <div className="session-info-elegant">
+                    <h4>{session.title}</h4>
+                    <div className="session-meta-elegant">
+                      <span>{session.course}</span>
+                    </div>
+                  </div>
+
+                  <div className="session-badge-wrapper">
+                    <span className={`session-badge-elegant badge-${session.type}`}>
+                      {session.type}
+                    </span>
                   </div>
                 </div>
 
-                <div className="session-badge-wrapper">
-                  <span className={`session-badge-elegant badge-${session.type}`}>
-                    {session.type}
-                  </span>
+                <div className="session-actions-buttons">
+                  <button
+                    className="session-btn session-btn-secondary"
+                    onClick={() => console.log('Reschedule requested for:', session.id)}
+                    style={{ marginRight: '8px' }}
+                  >
+                    Reschedule Request
+                  </button>
+                  <button className="session-btn session-btn-primary" onClick={() => handleJoin(session.joinLink)}>
+                    Join
+                  </button>
                 </div>
               </div>
-
-              <div className="session-actions-buttons">
-                <button className="session-btn session-btn-secondary" onClick={() => handleReschedule(session.id)}>
-                  Reschedule
-                </button>
-                <button className="session-btn session-btn-danger" onClick={() => handleCancel(session.id)}>
-                  Cancel
-                </button>
-                <button className="session-btn session-btn-primary" onClick={() => handleJoin(session.id)}>
-                  Join
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

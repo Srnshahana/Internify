@@ -911,7 +911,7 @@ export default function LandingPage({
               <span className="stat-value-large">98%</span>
             </div>
             <div className="hero-stat-card liquid-glass">
-              <span className="stat-label-small">GLOBAL MENTEES</span>
+              <span className="stat-label-small">SESSION SCHEDULED</span>
               <span className="stat-value-large">10k+</span>
             </div>
           </div>

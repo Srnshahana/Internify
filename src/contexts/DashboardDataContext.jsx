@@ -14,6 +14,7 @@ export const useDashboardData = () => {
 export const DashboardDataProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null) // Generic profile
     const [enrolledCourses, setEnrolledCourses] = useState([])
+    const [scheduledSessions, setScheduledSessions] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -62,8 +63,16 @@ export const DashboardDataProvider = ({ children }) => {
                     .from('course_session_progress')
                     .select('session_id, is_completed, course_id, student_id')
                     .eq('mentor_id', authId)
-
                 if (progressError) console.error('Error fetching mentor session progress:', progressError)
+
+                const { data: mentorScheduled, error: scheduledError } = await supabase
+                    .from('scheduled_classes')
+                    .select('*, courses(title)')
+                    .eq('mentor_id', authId)
+                    .order('scheduled_date', { ascending: true })
+
+                if (scheduledError) console.error('Error fetching mentor scheduled classes:', scheduledError)
+                setScheduledSessions(mentorScheduled || [])
 
                 // Transform mentor courses with student context
                 const transformed = (enrollments || []).map((enrollment, idx) => {
@@ -87,6 +96,7 @@ export const DashboardDataProvider = ({ children }) => {
                         student_image: student.profile_image,
                         mentor_id: enrollment.mentor_id,
                         course_id: enrollment.course_id,
+                        status: enrollment.status || 'active',
 
                         // Course data
                         title: course.title || 'Unknown Course',
@@ -117,7 +127,10 @@ export const DashboardDataProvider = ({ children }) => {
                                     completed: isCompleted,
                                     status: isCompleted ? 'completed' : 'pending'
                                 }
-                            })
+                            }),
+                        progress: sessionsFromDb.length > 0
+                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(s.id)).length / sessionsFromDb.length) * 100)
+                            : (enrollment.progress || 0)
                     }
                 })
 
@@ -153,8 +166,22 @@ export const DashboardDataProvider = ({ children }) => {
                     .from('course_session_progress')
                     .select('session_id, is_completed, course_id')
                     .eq('student_id', authId)
-
                 if (progressError) console.error('Error fetching student session progress:', progressError)
+
+                // 4. Fetch scheduled classes for student
+                const courseIds = (enrollments || []).map(c => c.course_id)
+                if (courseIds.length > 0) {
+                    const { data: studentScheduled, error: scheduledError } = await supabase
+                        .from('scheduled_classes')
+                        .select('*, courses(title), mentors_details(name)')
+                        .in('course_id', courseIds)
+                        .order('scheduled_date', { ascending: true })
+
+                    if (scheduledError) console.error('Error fetching student scheduled classes:', scheduledError)
+                    setScheduledSessions(studentScheduled || [])
+                } else {
+                    setScheduledSessions([])
+                }
 
                 const transformedCourses = (enrollments || []).map((enrollment, idx) => {
                     const course = enrollment.courses || {}
@@ -178,7 +205,9 @@ export const DashboardDataProvider = ({ children }) => {
                         level: course.level || 'Beginner',
                         mentor: mentor.name || 'Expert Mentor',
                         mentorImage: mentor.profile_image,
-                        progress: enrollment.progress || 0,
+                        progress: sessionsFromDb.length > 0
+                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(s.id)).length / sessionsFromDb.length) * 100)
+                            : (enrollment.progress || 0),
                         status: enrollment.status || 'active',
                         sessions: sessionsFromDb
                             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
@@ -217,6 +246,7 @@ export const DashboardDataProvider = ({ children }) => {
         userProfile, // Replaces studentProfile to be generic
         studentProfile: userProfile, // Legacy support
         enrolledCourses,
+        scheduledSessions,
         loading,
         error,
         refetch: fetchDashboardData

@@ -73,7 +73,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
           />
         )
       case 'Profile':
-        return <Profile />
+        return <Profile onLogout={onLogout} />
       case 'Notification':
         return <Notification />
       case 'Assessments':

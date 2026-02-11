@@ -121,19 +121,59 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
                 </div>
               </div>
 
-              <div className="hero-progress-group">
-                <div className="progress-info-v2">
-                  <span className="progress-label-v2">Your Progress</span>
-                  <span className="progress-percent-v2">{courseDetails.progress}%</span>
+              <div className="hero-progress-group" style={{ width: '100%', maxWidth: '400px' }}>
+                <div className="progress-info-v2" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span className="progress-label-v2" style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>Your Progress</span>
+                  <span className="progress-percent-v2" style={{ fontSize: '12px', fontWeight: '700', color: '#0ea5e9' }}>{courseDetails.progress}%</span>
                 </div>
-                <div className="progress-bar-v2-container">
-                  <div className="progress-bar-v2-fill" style={{ width: `${courseDetails.progress}%` }}></div>
+                <div style={{
+                  display: 'flex',
+                  gap: '3px',
+                  width: '100%',
+                  height: '18px',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  {[...Array(30)].map((_, i) => {
+                    const isFilled = (courseDetails.progress || 0) >= ((i + 1) / 30) * 100;
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          flex: 1,
+                          maxWidth: '8px',
+                          height: '100%',
+                          background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : 'rgba(15, 23, 42, 0.05)',
+                          borderRadius: '3px',
+                          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                          transform: isFilled ? 'scaleY(1)' : 'scaleY(0.7)',
+                          boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                          opacity: isFilled ? 1 : 0.4
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
-              <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
-                Enter Classroom
-              </button>
+              {courseDetails.status === 'pending' ? (
+                <button
+                  className="enter-classroom-btn-v2"
+                  disabled
+                  style={{
+                    cursor: 'not-allowed',
+                    opacity: 0.7,
+                    background: '#f59e0b',
+                    border: 'none'
+                  }}
+                >
+                  Pending Approval
+                </button>
+              ) : (
+                <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
+                  Enter Classroom
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -164,7 +204,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
         {/* Course Information Grid */}
         <div className="course-grid-elegant">
           <div className="course-section-elegant">
-            <h3 className="section-title-elegant">Upcoming Session</h3>
+            <h3 className="section-title-elegant">Upcoming Section</h3>
             <div className="info-card-elegant">
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Next Session:</span>
@@ -196,7 +236,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
         {/* All Sessions List (Support both 'sessions' and legacy 'classes') */}
         {(courseDetails.sessions || courseDetails.classes) && (
           <div className="course-section-elegant">
-            <h3 className="section-title-elegant">All Sessions</h3>
+            <h3 className="section-title-elegant">All Sections</h3>
             {(courseDetails.sessions || courseDetails.classes).map((session, index) => (
               <div key={session.sessionId || session.id || index} className={`session-item-elegant ${session.completed ? 'completed' : ''}`}>
                 <div className="session-header-elegant">
