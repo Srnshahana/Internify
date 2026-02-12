@@ -272,7 +272,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
 
       <section className="dashboard-actions-grid-v2">
         <div className="dashboard-glass-card-v2" onClick={() => setShowUpcomingSessionsModal(true)}>
-          <div className="dashboard-card-icon-wrapper icon-blue-v2">
+          <div className="dashboard-card-icon-wrapper icon-sky-v2">
             <CalendarIcon />
           </div>
           <h3 className="dashboard-card-title-v2">Your<br />Schedule</h3>
@@ -634,7 +634,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             </div>
             {loadingProfile ? (
               <div style={{ background: 'white', padding: '40px', borderRadius: '16px', textAlign: 'center' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #0ea5e9', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 <p style={{ color: '#64748b' }}>Loading student profile...</p>
               </div>

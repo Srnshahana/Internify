@@ -153,7 +153,7 @@ const careerGuidanceTestimonials = [
     quote: 'My career guidance sessions helped me transition from a non-tech background to landing my dream job at Google. The personalized guidance and real-world projects made all the difference.',
     studentName: 'Alex Johnson',
     studentRating: 5,
-    bgColor: 'blue'
+    bgColor: 'sky'
   },
   {
     id: 2,
@@ -163,7 +163,7 @@ const careerGuidanceTestimonials = [
     quote: 'The career guidance program exceeded my expectations. I built a portfolio that got me multiple job offers within 3 months of completing the program.',
     studentName: 'Emma Williams',
     studentRating: 5,
-    bgColor: 'blue'
+    bgColor: 'sky'
   },
   {
     id: 3,
@@ -173,7 +173,7 @@ const careerGuidanceTestimonials = [
     quote: 'I was stuck in my career, but my advisor provided clarity and direction. Now I\'m working on exciting ML projects and loving every moment.',
     studentName: 'James Brown',
     studentRating: 5,
-    bgColor: 'blue'
+    bgColor: 'sky'
   },
   {
     id: 4,
@@ -183,7 +183,7 @@ const careerGuidanceTestimonials = [
     quote: 'The weekly sessions kept me accountable and motivated. My advisor\'s feedback on my career path was invaluable in improving my approach.',
     studentName: 'Sophia Martinez',
     studentRating: 5,
-    bgColor: 'blue'
+    bgColor: 'sky'
   }
 ]
 
@@ -460,7 +460,7 @@ export default function LandingPage({
         const { data, error } = await supabase
           .from('mentors_details')
           .select('*')
-          .limit(4)
+          .limit(5)
 
         if (error) {
           console.error('Error fetching mentors:', error)
@@ -561,6 +561,8 @@ export default function LandingPage({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
+          } else {
+            entry.target.classList.remove('visible')
           }
         })
       },
@@ -876,7 +878,7 @@ export default function LandingPage({
           <div className="hero-glass-card">
             <h1 className="hero-title-new">
               Master your <br />
-              <span className="italic-blue">perfect craft</span>
+              <span className="italic-sky">perfect craft</span>
             </h1>
             <p className="hero-subtitle-new">
               Learn from industry veterans through <br />
@@ -917,49 +919,60 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="mission-section landing-section reveal reveal-up">
-          <div className="mission-container">
-            <div className="mission-content">
-              <h2 className="section-title-v2">About <span>Our Mission</span></h2>
-              <p className="mission-text">
-                We bridge the gap between aspiration and achievement by providing a seamless platform
-                for high-impact mentorship and professional networking. Our goal is to make expert
-                knowledge accessible to everyone, everywhere.
-              </p>
+        <section className="mission-section landing-section reveal reveal-blur-pop">
+          <div className="mission-centered-header reveal reveal-blur-pop">
+            <h2 className="section-title-v2">Are You <span>Running Into These Problems?</span></h2>
+            <p className="mission-subtitle-v2">Internify bridges the gap between where you are and where you want to be.</p>
+          </div>
+
+          <div className="mission-problems-grid">
+            <div className="problem-card-v2 reveal reveal-perspective-in stagger-1">
+              <span className="problem-number">01</span>
+              <h3 className="problem-title">Career Stagnation?</h3>
+              <p className="problem-text">Stop feeling stuck in your current role. Get a personalized roadmap and 1-on-1 guidance to accelerate your growth.</p>
             </div>
-            <div className="mission-visual">
-              <Lottie animationData={bannerJson} loop={true} className="mission-lottie" />
+
+            <div className="problem-card-v2 reveal reveal-perspective-in stagger-2">
+              <span className="problem-number">02</span>
+              <h3 className="problem-title">Lack of Connections?</h3>
+              <p className="problem-text">Directly connect with top mentors from Google, Microsoft, and Amazon who can provide insider referrals.</p>
+            </div>
+
+            <div className="problem-card-v2 reveal reveal-perspective-in stagger-3">
+              <span className="problem-number">03</span>
+              <h3 className="problem-title">Interview Hurdles?</h3>
+              <p className="problem-text">Master your technical and behavioral rounds with mock interviews and feedback from those who've been there.</p>
             </div>
           </div>
         </section>
 
-        <section className="benefits-section landing-section reveal reveal-up">
+        <section className="benefits-section landing-section reveal reveal-blur-pop">
           <div className="benefits-header">
             <h2 className="Benefits-title-v2">Why Choose Us</h2>
           </div>
           <div className="benefits-grid-v2">
-            <div className="benefit-card-v2">
-              <div className="benefit-icon-v2 icon-blue">
+            <div className="benefit-card-v2 reveal reveal-zoom-spin stagger-1">
+              <div className="benefit-icon-v2 icon-sky">
                 <span className="material-symbols-outlined">verified_user</span>
               </div>
               <h3 className="benefit-name-v2">Vetted Mentors</h3>
               <p className="benefit-desc-v2">Top 1% industry experts globally.</p>
             </div>
-            <div className="benefit-card-v2">
+            <div className="benefit-card-v2 reveal reveal-zoom-spin stagger-2">
               <div className="benefit-icon-v2 icon-sky">
                 <span className="material-symbols-outlined">videocam</span>
               </div>
               <h3 className="benefit-name-v2">1-on-1 Calls</h3>
               <p className="benefit-desc-v2">Schedule focused video sessions.</p>
             </div>
-            <div className="benefit-card-v2">
+            <div className="benefit-card-v2 reveal reveal-zoom-spin stagger-3">
               <div className="benefit-icon-v2 icon-purple">
                 <span className="material-symbols-outlined">school</span>
               </div>
               <h3 className="benefit-name-v2">Curated Courses</h3>
               <p className="benefit-desc-v2">High impact tracks for institutions.</p>
             </div>
-            <div className="benefit-card-v2">
+            <div className="benefit-card-v2 reveal reveal-zoom-spin stagger-4">
               <div className="benefit-icon-v2 icon-ocean">
                 <span className="material-symbols-outlined">map</span>
               </div>
@@ -969,8 +982,8 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="top-courses-section-v2 landing-section reveal">
-          <div className="tracks-header reveal reveal-up">
+        <section className="top-courses-section-v2 landing-section reveal reveal-blur-pop">
+          <div className="tracks-header reveal reveal-blur-pop">
             <h2 className="section-title-v2">Top <span>Courses</span></h2>
             <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
           </div>
@@ -1024,30 +1037,16 @@ export default function LandingPage({
 
 
 
-        <section className="disciplines-section landing-section reveal">
-          <h2 className="font-serif text-3xl text-deep-charcoal mb-8 reveal reveal-up">Rising<br />Disciplines</h2>
-          <div className="flex overflow-x-auto gap-8 pb-10 no-scrollbar reveal reveal-up stagger-1" style={{ scrollSnapType: 'x mandatory', display: 'flex', WebkitOverflowScrolling: 'touch' }}>
-            {/* Platform Features with Organic Design */}
-            {platformFeatures.map((feat, index) => (
-              <div key={feat.id} className={`discipline-item reveal reveal-right stagger-${index + 1}`}>
-                <div className="feature-tag">Featured</div>
-                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${index % 2 === 0 ? 'rotate-6' : '-rotate-6'}`} style={{ borderColor: 'var(--primary-sky)' }}>
-                  <div className="w-full h-full bg-sky-50 flex items-center justify-center organic-card">
-                    <feat.icon className="text-sky-500" size={40} />
-                  </div>
-                </div>
-                <div className="discipline-info">
-                  <p className="discipline-name" style={{ fontWeight: '800' }}>{feat.name}</p>
-                  <p className="discipline-count" style={{ fontSize: '11px', opacity: 0.8 }}>{feat.desc}</p>
-                </div>
-              </div>
-            ))}
+        <section className="disciplines-section landing-section reveal reveal-blur-pop">
+          <h2 className="font-serif text-3xl text-deep-charcoal mb-4 reveal reveal-blur-pop">Rising<br />Disciplines</h2>
+          <div className="flex overflow-x-auto gap-8 pb-4 no-scrollbar reveal reveal-up stagger-1" style={{ scrollSnapType: 'x mandatory', display: 'flex', WebkitOverflowScrolling: 'touch' }}>
+            {/* Removed platformFeatures from here as requested to focus on career fields */}
 
             {/* Existing Categories */}
             {categories.map((cat, index) => (
               <div key={cat.id} className={`discipline-item reveal reveal-right stagger-${((index + platformFeatures.length) % 4) + 1}`}>
-                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${(index + platformFeatures.length) % 2 === 0 ? 'rotate-6' : '-rotate-6'}`}>
-                  <div className="w-full h-full bg-slate-100 flex items-center justify-center organic-card">
+                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${index % 2 === 0 ? 'rotate-[8deg]' : '-rotate-[8deg]'}`} style={{ border: '2px solid rgba(14, 165, 233, 0.2)' }}>
+                  <div className="w-full h-full bg-sky-50/30 flex items-center justify-center organic-card">
                     <cat.icon className="text-sky-500" size={40} />
                   </div>
                 </div>
@@ -1061,14 +1060,14 @@ export default function LandingPage({
         </section>
 
 
-        <section className="top-mentors-section-v2 landing-section reveal">
-          <div className="tracks-header reveal reveal-up">
+        <section className="top-mentors-section-v2 landing-section reveal reveal-blur-pop">
+          <div className="tracks-header reveal reveal-blur-pop">
             <h2 className="section-title-v2">Top <span>Mentors</span></h2>
             <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
           </div>
           <div className="mentors-grid-v2">
-            {topMentors.slice(0, 4).map((mentor, index) => (
-              <div key={mentor.id} className={`mentor-card-horizontal-v2 reveal reveal-up stagger-${index + 1}`}>
+            {topMentors.slice(0, 5).map((mentor, index) => (
+              <div key={mentor.id} className={`mentor-card-horizontal-v2 reveal reveal-perspective-in stagger-${index + 1}`}>
                 <div className="mentor-card-header-v2">
                   <img src={mentor.image} alt={mentor.name} className="mentor-avatar-large-v2" />
                   <div className="mentor-company-tag-v2">{mentor.company}</div>
@@ -1091,9 +1090,9 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="cta-side-by-side landing-section reveal">
+        <section className="cta-side-by-side landing-section reveal reveal-blur-pop">
           <div className="cta-split-container">
-            <div className="referral-banner-v2 reveal reveal-up">
+            <div className="referral-banner-v2 reveal reveal-left reveal-blur-pop stagger-1">
               <div className="referral-icon-v2">
                 <span className="material-symbols-outlined">rocket</span>
               </div>
@@ -1104,7 +1103,7 @@ export default function LandingPage({
               <button className="btn-referral-v2" onClick={() => navigate('/explore')}>Apply for Referrals</button>
             </div>
 
-            <div className="mentor-cta-card-v2 reveal reveal-up">
+            <div className="mentor-cta-card-v2 reveal reveal-right reveal-blur-pop stagger-2">
               <div className="mentor-cta-icon-v2">
                 <span className="material-symbols-outlined">campaign</span>
               </div>
@@ -1116,29 +1115,30 @@ export default function LandingPage({
             </div>
           </div>
 
-          <div className="success-stories-section-v2 internal-section reveal reveal-up">
-            <div className="section-header-v2">
-              <h2 className="section-title-v2">Success <span>Stories</span></h2>
-            </div>
-            <div className="success-stories-grid">
-              {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
-                <div key={story.id} className={`success-story-card-small reveal reveal-up stagger-${idx + 1}`}>
-                  <div className="story-header-small">
-                    <img src={story.mentorImage} alt={story.mentorName} className="story-avatar-small" />
-                    <div className="story-meta-small">
-                      <span className="story-name-small">{story.mentorName}</span>
-                      <span className="story-role-small">{story.mentorRole}</span>
-                    </div>
+        </section>
+
+        <section className="success-stories-section-v2 landing-section reveal reveal-blur-pop">
+          <div className="section-header-v2 reveal reveal-blur-pop">
+            <h2 className="section-title-v2">Success <span>Stories</span></h2>
+          </div>
+          <div className="success-stories-scroll-frame no-scrollbar">
+            {careerGuidanceTestimonials.map((story, idx) => (
+              <div key={story.id} className={`success-story-card-small reveal reveal-story-pop stagger-${(idx % 4) + 1}`}>
+                <div className="story-header-small">
+                  <img src={story.mentorImage} alt={story.mentorName} className="story-avatar-small" />
+                  <div className="story-meta-small">
+                    <span className="story-name-small">{story.mentorName}</span>
+                    <span className="story-role-small">{story.mentorRole}</span>
                   </div>
-                  <div className="story-rating-small">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="material-symbols-outlined icon-filled">star</span>
-                    ))}
-                  </div>
-                  <p className="story-quote-small">"{story.quote}"</p>
                 </div>
-              ))}
-            </div>
+                <div className="story-rating-small">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="material-symbols-outlined icon-filled">star</span>
+                  ))}
+                </div>
+                <p className="story-quote-small">"{story.quote}"</p>
+              </div>
+            ))}
           </div>
         </section>
 

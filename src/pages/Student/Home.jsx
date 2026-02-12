@@ -635,7 +635,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
       <section className="dashboard-actions-grid-v2">
         <div className="dashboard-glass-card-v2" onClick={() => setShowUpcomingSessionsModal(true)}>
-          <div className="dashboard-card-icon-wrapper icon-blue-v2">
+          <div className="dashboard-card-icon-wrapper icon-sky-v2">
             <CalendarIcon />
           </div>
           <h3 className="dashboard-card-title-v2">Upcoming<br />Sessions</h3>
