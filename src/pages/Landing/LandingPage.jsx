@@ -566,7 +566,7 @@ export default function LandingPage({
           }
         })
       },
-      { threshold: 0.1 }
+      { threshold: 0.3 }
     )
 
     const revealElements = document.querySelectorAll('.reveal')
@@ -926,19 +926,19 @@ export default function LandingPage({
           </div>
 
           <div className="mission-problems-grid">
-            <div className="problem-card-v2 reveal reveal-up stagger-slow-1">
+            <div className="problem-card-v2 reveal reveal-slow reveal-right stagger-slow-1">
               <span className="problem-number">01</span>
               <h3 className="problem-title">No Real-World Experience ?</h3>
               <p className="problem-text">You’ve learned so much in theory, but when it comes to applying it, it feels like there’s a huge gap between what you know and what the real world expects.</p>
             </div>
 
-            <div className="problem-card-v2 reveal reveal-up stagger-slow-2">
+            <div className="problem-card-v2 reveal reveal-slow reveal-up stagger-slow-2">
               <span className="problem-number">02</span>
               <h3 className="problem-title">No Internship Opportunities ?</h3>
               <p className="problem-text">You’re ready to work, but opportunities are scarce, and it feels like doors keep closing before you even get a chance to show your potential.</p>
             </div>
 
-            <div className="problem-card-v2 reveal reveal-up stagger-slow-3">
+            <div className="problem-card-v2 reveal reveal-slow reveal-left stagger-slow-3">
               <span className="problem-number">03</span>
               <h3 className="problem-title">Unprepared for Job Market ?</h3>
               <p className="problem-text">You dream of starting your career, but without guidance, a strong portfolio, or interview practice, the path ahead feels overwhelming and uncertain.</p>
