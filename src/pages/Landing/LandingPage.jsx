@@ -25,8 +25,34 @@ import testimonial4 from '../../assets/images/testimonial4.png'
 import topmentor from '../../assets/images/topmentor.mp4'
 import supabase from '../../supabaseClient'
 import '../../App.css'
+import heroImg from '../../assets/images/hero.jpg' // Keep as fallback if needed
+import heroVideo from '../../assets/images/hero.mp4'
 
 // Map courses to skills format
+// Featured Programs Data
+const featuredPrograms = [
+  {
+    id: 'fp-1',
+    title: 'FTF App',
+    category: 'UI/UX Design • Case Study',
+    image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=1000', // Fitness App placeholder
+    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+  },
+  {
+    id: 'fp-2',
+    title: 'Fashion App',
+    category: 'UI/UX Design • E-commerce',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=1000', // Fashion App placeholder
+    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+  },
+  {
+    id: 'fp-3',
+    title: 'AI-Assessment',
+    category: 'UI/UX Design • Saas Website',
+    image: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=1000', // Dashboard placeholder
+    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+  }
+]
 // Smart Careers for 2027 Data
 const latestSkills = [
   {
@@ -562,11 +588,12 @@ export default function LandingPage({
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
           } else {
+            // Re-trigger animation by removing class when out of view
             entry.target.classList.remove('visible')
           }
         })
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 } // Reduced threshold for better triggering
     )
 
     const revealElements = document.querySelectorAll('.reveal')
@@ -841,342 +868,453 @@ export default function LandingPage({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Slider State
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const aboutSlides = [
+    {
+      title: "Who We Are",
+      text: "Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We are a community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent."
+    },
+    {
+      title: "What We Do",
+      text: "We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters. Our platform empowers students and early-career professionals to build practical skills and launch their careers with confidence."
+    },
+    {
+      title: "Who We're For",
+      text: "Whether you're a student looking for your first break, a career switcher seeking new opportunities, or a lifelong learner aiming to upskill, Internify is built for you. We support ambitious individuals ready to take charge of their professional journey."
+    }
+  ];
+
+  // Auto-slide Effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % aboutSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [aboutSlides.length]);
+
   return (
     <div className="landing-page-new font-sans">
-      <div className="background-effects">
-        <div className="grain-texture absolute inset-0"></div>
-        <div className="floating-shape w-64 h-64 bg-sky-400 opacity-10 top-[-10%] left-[-10%] animate-pulse" style={{ width: '16rem', height: '16rem', background: 'rgba(14, 165, 233, 0.1)' }}></div>
-        <div className="floating-shape w-80 h-80 bg-purple-200 opacity-20 bottom-[-10%] right-[-10%]" style={{ width: '20rem', height: '20rem', background: 'rgba(233, 213, 255, 0.2)' }}></div>
-        <div className="absolute top-1/4 left-1/2 w-4 h-4 rounded-full bg-sky-400 opacity-40 shadow-[0_0_20px_rgba(14,165,233,0.5)]" style={{ width: '1rem', height: '1rem', background: 'rgba(14, 165, 233, 0.4)' }}></div>
-      </div>
 
-      <nav className="nav-pill-wrapper reveal reveal-down">
-        <div className="nav-pill">
-          <div className="nav-logo-group">
-            <div className="nav-logo-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
-            </div>
-            <h2 className="nav-logo-text">Internify</h2>
-          </div>
-          <div className="nav-btn-group">
-            <button className="nav-login-btn" onClick={() => navigate('/login')}>
-              Login
-            </button>
-            <button className="nav-join-btn" onClick={() => isLoggedIn ? navigate('/dashboard') : navigate('/signup')}>
-              {isLoggedIn ? 'Enter Dashboard' : 'Join'}
-            </button>
+      <nav className="simple-navbar">
+        <div className="nav-container">
+          <div className="nav-logo">Internify</div>
+          <div className="nav-links">
+            <a href="#search">Search</a>
+            <a href="#courses">courses</a>
+            <a href="#mentors">mentors</a>
+            <a href="#testimonials">testimonials</a>
+            <button className="nav-login-simple" onClick={() => navigate('/login')}>login</button>
           </div>
         </div>
       </nav>
 
       <main className="landing-main-content">
-        <section className="elegant-hero">
-          <div className="hero-lottie-bg">
-            <Lottie animationData={techBgJson} loop={true} />
-          </div>
+        <section className="hero-section-v3">
+          <div className="hero-dark-card" style={{ position: 'relative', overflow: 'hidden' }}>
+            <video
+              className="hero-video-bg"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls={false}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                zIndex: 0,
+                opacity: 0.6 // Adjust opacity to match previous dark overlay feel
+              }}
+            >
+              <source src={heroVideo} type="video/mp4" />
+            </video>
 
-          <div className="hero-glass-card">
-            <h1 className="hero-title-new">
-              Master your <br />
-              <span className="italic-sky">perfect craft</span>
-            </h1>
-            <p className="hero-subtitle-new">
-              Learn from industry veterans through <br />
-              personalized mentorship and guided paths.
-            </p>
+            {/* Overlay to ensure text readability if video is bright */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 1
+            }}></div>
 
-            <div className="hero-search-pill">
-              <input
-                type="text"
-                className="hero-search-input"
-                placeholder="Search mentors, skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              <button className="hero-search-btn" onClick={handleSearch}>Search</button>
-            </div>
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <h1 className="hero-title-v3">Master your perfect craft</h1>
+              <p className="hero-subtitle-v3">
+                Let industrial experts train you. Learn from industry veterans <br />
+                through personalized mentorship and guided paths
+              </p>
 
-            <div className="hero-mentors-badge">
-              <div className="avatar-stack">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
-                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
-                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&auto=format&fit=crop" alt="Mentor" className="avatar-small" />
+              <div className="hero-search-v3">
+                <input
+                  type="text"
+                  placeholder="Search mentors , skills ..."
+                  className="hero-input-v3"
+                />
+                <span className="search-icon-v3">
+                  <span className="material-symbols-outlined">search</span>
+                </span>
               </div>
-              <span className="mentors-count">582+ Active Mentors</span>
-            </div>
-          </div>
 
-          <div className="hero-stats-row">
-            <div className="hero-stat-card liquid-glass">
-              <span className="stat-label-small">SUCCESS RATE</span>
-              <span className="stat-value-large">98%</span>
-            </div>
-            <div className="hero-stat-card liquid-glass">
-              <span className="stat-label-small">SESSION SCHEDULED</span>
-              <span className="stat-value-large">10k+</span>
+              <div className="hero-actions-v3">
+                <button className="btn-v3-primary" onClick={() => navigate('/mentors')}>
+                  View Mentors
+                  <span className="material-symbols-outlined icon-right">arrow_forward</span>
+                </button>
+                <button className="btn-v3-outline">Let's Talk</button>
+              </div>
+
+              {/* <div className="hero-stats-row-v3">
+                <div className="stat-item-v3">
+                  <span className="stat-val-v3">3500+</span>
+                  <span className="stat-lbl-v3">Students</span>
+                </div>
+                <div className="stat-divider-v3"></div>
+                <div className="stat-item-v3">
+                  <span className="stat-val-v3">500+</span>
+                  <span className="stat-lbl-v3">Mentors</span>
+                </div>
+                <div className="stat-divider-v3"></div>
+                <div className="stat-item-v3">
+                  <span className="stat-val-v3">1200+</span>
+                  <span className="stat-lbl-v3">Hired</span>
+                </div>
+              </div> */}
             </div>
           </div>
         </section>
+
+        <section className="featured-programs-section landing-section">
+          <div className="featured-header">
+            <div className="featured-text-group">
+              <h2 className="section-title-start">Featured Programs</h2>
+              <div className="title-underline-blue"></div>
+              <p className="featured-desc">
+                Explore the top programs built on skills that remain relevant <br />
+                for decades. Future-proof your career with knowledge that <br />
+                stands the test of time.
+              </p>
+            </div>
+            <div className="view-all-container">
+              <span className="view-all-text" onClick={() => navigate('/explore')}>
+                View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="featured-grid">
+            {featuredPrograms.map((program, index) => (
+              <div key={program.id} className={`program-card reveal reveal-up stagger-${(index % 3) + 1}`}>
+                <img src={program.image} alt={program.title} className="program-bg" />
+                <div className="program-overlay"></div>
+                <div className="program-content">
+                  <span className="program-category">{program.category}</span>
+                  <h3 className="program-title">{program.title}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
 
         <section className="mission-section landing-section">
           <div className="mission-centered-header reveal reveal-blur-pop">
-            <h2 className="section-title-v2">Are You Running Into <span>These Problems?</span></h2>
-            {/* <p className="mission-subtitle-v2">Internify bridges the gap between where you are and where you want to be.</p> */}
+            <h2 className="section-title-v3">What’s Holding You Back</h2>
+            <p className="mission-subtitle-v3">
+              Every early-career professional faces the struggle of having no clear direction. Without
+              guidance, it’s easy to feel lost, overwhelmed, and unsure of the next steps.
+            </p>
           </div>
 
           <div className="mission-problems-grid">
-            <div className="problem-card-v2 reveal reveal-slow reveal-right stagger-slow-1">
-              <span className="problem-number">01</span>
-              <h3 className="problem-title">No Real-World Experience ?</h3>
-              <p className="problem-text">You’ve learned so much in theory, but when it comes to applying it, it feels like there’s a huge gap between what you know and what the real world expects.</p>
+            <div className="problem-card-v3 reveal reveal-slow reveal-right stagger-slow-1">
+              <div className="problem-icon-v3">
+                <span className="material-symbols-outlined icon-large-blue">laptop_mac</span>
+              </div>
+              <h3 className="problem-title-v3">No Real-World Experience ?</h3>
+              <p className="problem-text-v3">
+                You’ve learned a lot in theory, but when applying it, there’s a big gap
+                between what you know and what the real world expects
+              </p>
             </div>
 
-            <div className="problem-card-v2 reveal reveal-slow reveal-up stagger-slow-2">
-              <span className="problem-number">02</span>
-              <h3 className="problem-title">No Internship Opportunities ?</h3>
-              <p className="problem-text">You’re ready to work, but opportunities are scarce, and it feels like doors keep closing before you even get a chance to show your potential.</p>
+            <div className="problem-card-v3 reveal reveal-slow reveal-up stagger-slow-2">
+              <div className="problem-icon-v3">
+                <span className="material-symbols-outlined icon-large-blue">person</span>
+              </div>
+              <h3 className="problem-title-v3">No Internship Opportunities ?</h3>
+              <p className="problem-text-v3">
+                You’re ready to work, but opportunities are scarce, and doors close before you
+                can show your potential
+              </p>
             </div>
 
-            <div className="problem-card-v2 reveal reveal-slow reveal-left stagger-slow-3">
-              <span className="problem-number">03</span>
-              <h3 className="problem-title">Unprepared for Job Market ?</h3>
-              <p className="problem-text">You dream of starting your career, but without guidance, a strong portfolio, or interview practice, the path ahead feels overwhelming and uncertain.</p>
+            <div className="problem-card-v3 reveal reveal-slow reveal-left stagger-slow-3">
+              <div className="problem-icon-v3">
+                <span className="material-symbols-outlined icon-large-blue">design_services</span>
+              </div>
+              <h3 className="problem-title-v3">Unprepared for Job Market ?</h3>
+              <p className="problem-text-v3">
+                You dream of starting your career, but without guidance or a strong portfolio,
+                the path feels uncertain.
+              </p>
             </div>
           </div>
         </section>
 
+        <section className="about-us-section landing-section">
+          {/* Static About Us Content Restored */}
+          <div className="about-content reveal reveal-blur-pop">
+            <h2 className="section-title-v3">About Us</h2>
+            <p className="about-text">
+              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters, empowering students and early-career professionals to confidently launch their careers
+            </p>
+          </div>
 
-
-        <section className="disciplines-section landing-section reveal reveal-blur-pop">
-          <h2 className="font-serif text-3xl text-deep-charcoal mb-4 reveal reveal-blur-pop"> </h2>
-          <div className="career-carousel-container no-scrollbar reveal reveal-up stagger-1">
-            {/* Removed platformFeatures from here as requested to focus on career fields */}
-
-            {/* Existing Categories */}
-            {categories.map((cat, index) => (
-              <div key={cat.id} className={`discipline-item reveal reveal-right stagger-${((index + platformFeatures.length) % 4) + 1}`}>
-                <div className={`organic-card discipline-card liquid-glass p-1 overflow-hidden ${index % 2 === 0 ? 'rotate-[8deg]' : '-rotate-[8deg]'}`} style={{ border: '2px solid rgba(14, 165, 233, 0.2)' }}>
-                  <div className="w-full h-full bg-sky-50/30 flex items-center justify-center organic-card">
-                    <cat.icon className="text-sky-500" size={40} />
-                  </div>
+          {/* Slider Moved to "Box" (Image Container area) */}
+          <div className="about-slider-box reveal reveal-up stagger-1">
+            {aboutSlides.map((slide, index) => (
+              <div
+                key={index}
+                className={`about-slide-card ${index === currentSlide ? 'active' : ''}`}
+              >
+                <div className="about-card-content">
+                  <h3 className="about-card-title">{slide.title}</h3>
+                  <p className="about-card-text">{slide.text}</p>
                 </div>
-                <div className="discipline-info">
-                  <p className="discipline-name">{cat.name}</p>
-                  <p className="discipline-count">100+ Mentors</p>
+              </div>
+            ))}
+
+            <div className="about-dots-box">
+              {aboutSlides.map((_, index) => (
+                <span
+                  key={index}
+                  className={`about-dot ${index === currentSlide ? 'active' : ''}`}
+                  onClick={() => setCurrentSlide(index)}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="offer-section landing-section">
+          <div className="offer-header reveal reveal-up">
+            <h2 className="section-title-v3">What we offer</h2>
+            <p className="offer-subtitle">
+              Our goal is to equip you with the skills, guidance, and connections to launch<br />
+              your career."
+            </p>
+          </div>
+
+          <div className="offer-grid">
+            {/* Card 1 */}
+            <div className="offer-card reveal reveal-up stagger-1">
+              <span className="material-symbols-outlined offer-icon-blue">lightbulb</span>
+              <span className="offer-number">01</span>
+              <h3 className="offer-card-title">1-on-1 Mentorship</h3>
+              <p className="offer-card-text">
+                Personalized guidance from industry experts to help you navigate your career path.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="offer-card reveal reveal-up stagger-2">
+              <span className="material-symbols-outlined offer-icon-blue">edit_square</span>
+              <span className="offer-number">02</span>
+              <h3 className="offer-card-title">Real-World Projects</h3>
+              <p className="offer-card-text">
+                Hands-on projects that build practical skills and strengthen your portfolio.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="offer-card reveal reveal-up stagger-3">
+              <span className="material-symbols-outlined offer-icon-blue">verified</span>
+              <span className="offer-number">03</span>
+              <h3 className="offer-card-title">Verified Certificates</h3>
+              <p className="offer-card-text">
+                Skill-backed certificates to showcase your achievements to employers.
+              </p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="offer-card reveal reveal-up stagger-4">
+              <span className="material-symbols-outlined offer-icon-blue">computer</span>
+              <span className="offer-number">04</span>
+              <h3 className="offer-card-title">Referral Letters</h3>
+              <p className="offer-card-text">
+                Mentor-issued recommendations to support internship and job applications.
+              </p>
+            </div>
+
+            {/* Card 5 */}
+            <div className="offer-card reveal reveal-up stagger-5">
+              <span className="material-symbols-outlined offer-icon-blue">description</span>
+              <span className="offer-number">05</span>
+              <h3 className="offer-card-title">Career Guidance & Interview Prep</h3>
+              <p className="offer-card-text">
+                Resume reviews, mock interviews, and advice aligned with recruiter expectations.
+              </p>
+            </div>
+
+            {/* Card 6 */}
+            <div className="offer-card reveal reveal-up stagger-6">
+              <span className="material-symbols-outlined offer-icon-blue">forum</span>
+              <span className="offer-number">06</span>
+              <h3 className="offer-card-title">Recruitments & Opportunities</h3>
+              <p className="offer-card-text">
+                Connect with top companies and apply for internships and entry-level roles.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mentors-section landing-section">
+          <div className="mentors-header reveal reveal-up">
+            <div className="mentors-text-content">
+              <h2 className="section-title-start">Professional Mentors</h2>
+              <div className="title-underline-blue"></div>
+              <p className="mentors-desc">
+                Our mentors are industry experts with 5+ years of real-world
+                experience, providing practical guidance and insights to help
+                you succeed in your career.
+              </p>
+            </div>
+            <a href="/mentors" className="view-all-link">
+              View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
+            </a>
+          </div>
+
+          <div className="mentors-grid">
+            {topMentors.slice(0, 4).map((mentor, index) => (
+              <div key={mentor.id} className={`mentor-card-compact reveal reveal-up stagger-${(index % 4) + 1}`}>
+                <div className="mentor-image-container">
+                  <img src={mentor.image} alt={mentor.name} className="mentor-image" />
+                </div>
+                <div className="mentor-info">
+                  <h3 className="mentor-name">{mentor.name}</h3>
+                  <p className="mentor-role">{mentor.role}</p>
+                  <p className="mentor-company">{mentor.company}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-
-        <section className="benefits-section landing-section">
-          <div className="benefits-header">
-            <h2 className="Benefits-title-v2">We Provide You <span>Mentor-Led Internship Opportunities</span></h2>
-          </div>
-          <div className="benefits-grid-v2">
-            <div className="reveal reveal-up stagger-slow-1">
-              <div className="benefit-card-v2">
-                <div className="benefit-icon-v2 icon-sky">
-                  <span className="material-symbols-outlined">videocam</span>
-                </div>
-                <h3 className="benefit-name-v2">1-on-1 Classes with Experts</h3>
-                <p className="benefit-desc-v2"> industry professionals who guide you step-by-step</p>
+        {/* New Get Hired & Mentor Section */}
+        <section className="get-hired-section landing-section reveal reveal-up">
+          <div className="get-hired-grid">
+            <div className="feature-card reveal reveal-up stagger-1">
+              <div className="feature-icon-wrapper icon-hired">
+                <span className="material-symbols-outlined">rocket_launch</span>
               </div>
-            </div>
-            <div className="reveal reveal-up stagger-slow-2">
-              <div className="benefit-card-v2">
-                <div className="benefit-icon-v2 icon-sky">
-                  <span className="material-symbols-outlined">verified_user</span>
-                </div>
-                <h3 className="benefit-name-v2">Real-World Projects</h3>
-                <p className="benefit-desc-v2">Gain hands-on experience working on projects that prepare you for actual industry challenges.</p>
-              </div>
-            </div>
-            <div className="reveal reveal-up stagger-slow-3">
-              <div className="benefit-card-v2">
-                <div className="benefit-icon-v2 icon-purple">
-                  <span className="material-symbols-outlined">school</span>
-                </div>
-                <h3 className="benefit-name-v2">Referral Letters & Certificates</h3>
-                <p className="benefit-desc-v2">Showcase your skills and get mentor-backed recommendations to strengthen your profile.</p>
-              </div>
-            </div>
-            <div className="reveal reveal-up stagger-slow-4">
-              <div className="benefit-card-v2">
-                <div className="benefit-icon-v2 icon-ocean">
-                  <span className="material-symbols-outlined">map</span>
-                </div>
-                <h3 className="benefit-name-v2">Access to Recruiters</h3>
-                <p className="benefit-desc-v2">Connect with top companies and get opportunities to kickstart your career..</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-
-
-
-        <section className="top-mentors-section-v2 landing-section reveal reveal-blur-pop">
-          <div className="tracks-header reveal reveal-blur-pop">
-            <h2 className="section-title-v2">Top <span>Mentors</span></h2>
-            <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
-          </div>
-          <div className="mentors-grid-v2">
-            {topMentors.slice(0, 5).map((mentor, index) => (
-              <div key={mentor.id} className={`mentor-card-horizontal-v2 reveal reveal-perspective-in stagger-${index + 1}`}>
-                <div className="mentor-card-header-v2">
-                  <img src={mentor.image} alt={mentor.name} className="mentor-avatar-large-v2" />
-                  <div className="mentor-company-tag-v2">{mentor.company}</div>
-                </div>
-                <div className="mentor-card-body-v2">
-                  <h3 className="mentor-name-v2">{mentor.name}</h3>
-                  <p className="mentor-role-v2">{mentor.role}</p>
-                  <div className="mentor-stats-row-v2">
-                    <div className="mentor-stat-v2">
-                      <span className="material-symbols-outlined">star</span> {mentor.rating}
-                    </div>
-                    <div className="mentor-stat-v2">
-                      <span className="material-symbols-outlined">group</span> {mentor.reviews}
-                    </div>
-                  </div>
-                  <button className="btn-connect-card-v2" onClick={() => onMentorClick(mentor)}>Connect</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-
-        <section className="top-courses-section-v2 landing-section reveal reveal-blur-pop">
-          <div className="tracks-header reveal reveal-blur-pop">
-            <h2 className="section-title-v2">Top <span>Courses</span></h2>
-            <span className="view-all-link-v2" onClick={() => navigate('/explore')}>See all <span className="material-symbols-outlined">arrow_forward</span></span>
-          </div>
-          <div className="courses-marquee-container">
-            {/* Row 1: First half of courses, duplicated for loop */}
-            <div className="marquee-row marquee-left-1">
-              {[...topCourses.slice(0, 6), ...topCourses.slice(0, 6)].map((course, idx) => (
-                <div key={`${course.id}-r1-${idx}`} className="course-card-marquee">
-                  <div className="course-thumb-v2">
-                    <img src={course.image} alt={course.title} />
-                    <div className="course-tag-v2">{course.category || 'Design'}</div>
-                  </div>
-                  <div className="course-content-v2">
-                    <h3 className="course-name-v2">{course.title}</h3>
-                    <div className="course-meta-v2">
-                      <div className="course-rating-v2">
-                        <span className="material-symbols-outlined">star</span>
-                        <span>{course.rating}</span>
-                      </div>
-                      <div className="course-reviews-v2">({course.reviews || 24} reviews)</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Row 2: Second half (or mixed), duplicated for loop */}
-            <div className="marquee-row marquee-right">
-              {[...topCourses.slice(6, 12), ...topCourses.slice(6, 12)].map((course, idx) => (
-                <div key={`${course.id}-r2-${idx}`} className="course-card-marquee">
-                  <div className="course-thumb-v2">
-                    <img src={course.image} alt={course.title} />
-                    <div className="course-tag-v2">{course.category || 'Tech'}</div>
-                  </div>
-                  <div className="course-content-v2">
-                    <h3 className="course-name-v2">{course.title}</h3>
-                    <div className="course-meta-v2">
-                      <div className="course-rating-v2">
-                        <span className="material-symbols-outlined">star</span>
-                        <span>{course.rating}</span>
-                      </div>
-                      <div className="course-reviews-v2">({course.reviews || 85} reviews)</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-
-
-
-
-        <section className="cta-side-by-side landing-section reveal reveal-blur-pop">
-          <div className="cta-split-container">
-            <div className="referral-banner-v2 reveal reveal-left reveal-blur-pop stagger-1">
-              <div className="referral-icon-v2">
-                <span className="material-symbols-outlined">rocket</span>
-              </div>
-              <h2 className="referral-title-v2">Get Hired Instantly</h2>
-              <p className="referral-text-v2">
-                Join our exclusive placement program and get direct referrals to top tech firms.
+              <h3 className="feature-title">Get Hired Instantly</h3>
+              <p className="feature-desc">
+                Join our exclusive placement program and get direct referrals to top tech firms. Fast-track your career with our network.
               </p>
-              <button className="btn-referral-v2" onClick={() => navigate('/explore')}>Apply for Referrals</button>
+              <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
             </div>
 
-            <div className="mentor-cta-card-v2 reveal reveal-right reveal-blur-pop stagger-2">
-              <div className="mentor-cta-icon-v2">
-                <span className="material-symbols-outlined">campaign</span>
+            <div className="feature-card reveal reveal-up stagger-2">
+              <div className="feature-icon-wrapper icon-mentor">
+                <span className="material-symbols-outlined">school</span>
               </div>
-              <h2 className="mentor-cta-title-v2">Become a Mentor</h2>
-              <p className="mentor-cta-text-v2">
-                Share your knowledge and help shape the next generation of professionals.
+              <h3 className="feature-title">Become a Mentor</h3>
+              <p className="feature-desc">
+                Share your expertise, guide aspiring developers, and shape the future of tech. Join our community of industry leaders.
               </p>
-              <button className="btn-mentor-cta-v2" onClick={() => navigate('/apply-mentor')}>Start Teaching</button>
+              <button className="feature-btn btn-mentor" onClick={() => navigate('/mentors')}>Start Mentoring</button>
             </div>
           </div>
-
         </section>
+
+
+
+
+
+
+
+        {/* ... navbar ... */}
+
+        {/* ... hero section ... */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         <section className="unified-footer-frame landing-section landing-section-v2 reveal">
 
 
 
           {/* Success Stories Component */}
-          <div className="section-header-v2 reveal reveal-blur-pop">
-            <h2 className="section-title-v2">Success <span>Stories</span></h2>
+          <div className="mentors-header reveal reveal-blur-pop">
+            <div className="mentors-text-content">
+              <h2 className="section-title-start">Success <span>Stories</span></h2>
+              <div className="title-underline-blue"></div>
+              <p className="mentors-desc">
+                Hear from our community of learners who have transformed their careers.<br />
+                Their journeys from beginners to professionals inspire everything we do.
+              </p>
+            </div>
           </div>
-          <div className="success-stories-scroll-frame no-scrollbar">
-            {careerGuidanceTestimonials.map((story, idx) => (
-              <div key={story.id} className={`success-story-card-small reveal reveal-story-pop stagger-${(idx % 4) + 1}`}>
-                <div className="story-header-small">
-                  <img src={story.mentorImage} alt={story.mentorName} className="story-avatar-small" />
-                  <div className="story-meta-small">
-                    <span className="story-name-small">{story.mentorName}</span>
-                    <span className="story-role-small">{story.mentorRole}</span>
+          <div className="success-stories-grid">
+            {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
+              <div key={story.id} className={`testimonial-card reveal reveal-up stagger-${(idx % 3) + 1}`}>
+                <div className="testimonial-header">
+                  <img src={story.mentorImage} alt={story.mentorName} className="testimonial-avatar" />
+                  <div className="testimonial-meta">
+                    <span className="testimonial-name">{story.mentorName}</span>
+                    <span className="testimonial-role">{story.mentorRole}</span>
                   </div>
                 </div>
-                <div className="story-rating-small">
+                <div className="testimonial-rating">
                   {[...Array(5)].map((_, i) => (
                     <span key={i} className="material-symbols-outlined icon-filled">star</span>
                   ))}
                 </div>
-                <p className="story-quote-small">"{story.quote}"</p>
+                <p className="testimonial-quote">"{story.quote}"</p>
               </div>
             ))}
           </div>
 
-          {/* Spacer between components */}
-          <div style={{ height: '6rem' }}></div>
-          {/* Get in Touch Component */}
-          <div className="get-in-touch-container-new liquid-glass glow-edge reveal reveal-up">
-            <h2 className="get-in-touch-title-new">Get in Touch</h2>
-            <p className="get-in-touch-desc-new">
+          {/* Get in Touch Section */}
+        </section>
+
+        <section className="get-in-touch-section landing-section">
+          <div className="feature-card get-in-touch-card reveal reveal-up">
+            <div className="feature-icon-wrapper icon-contact">
+              <span className="material-symbols-outlined">mail</span>
+            </div>
+            <h2 className="feature-title">Get in Touch</h2>
+            <p className="feature-desc">
               Have questions or need guidance? Our team is here to help you navigate your career journey.
             </p>
             <div className="get-in-touch-form-new">
               <input type="email" placeholder="Enter your email" className="get-in-touch-input-new" />
-              <button className="get-in-touch-btn-new">Send Message</button>
+              <button className="feature-btn btn-contact">Send Message</button>
             </div>
           </div>
 
         </section>
-      </main>
+      </main >
 
       <footer className="footer-redesign reveal">
         <div className="footer-content-new">
@@ -1197,6 +1335,7 @@ export default function LandingPage({
             </div>
             <div className="footer-column reveal reveal-up stagger-2">
               <h4 className="footer-column-title">Company</h4>
+
               <ul className="footer-links-list">
                 <li className="footer-link-item">About</li>
                 <li className="footer-link-item">Terms</li>
