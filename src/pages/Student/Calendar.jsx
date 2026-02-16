@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Loading from '../../components/Loading'
 import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
@@ -86,6 +87,10 @@ function Calendar() {
 
   const handleMonthChange = (direction) => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + direction))
+  }
+
+  if (loading) {
+    return <Loading fullScreen={true} />
   }
 
   return (

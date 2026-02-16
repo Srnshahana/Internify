@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Loading from '../../components/Loading'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
 import '../../App.css'
@@ -74,6 +75,10 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
 
   if (showLiveClassroom) {
     return <StudentLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} />
+  }
+
+  if (loading) {
+    return <Loading fullScreen={true} />
   }
 
   if (!courseDetails) {

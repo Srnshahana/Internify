@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Loading from '../../components/Loading'
 import '../../App.css'
 import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
@@ -129,11 +130,9 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
         gap: '24px'
       }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#64748b', gridColumn: '1 / -1' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 2s linear infinite' }}>sync</span>
-            </div>
-            <p>Gathering your curriculum...</p>
+          <div style={{ textAlign: 'center', padding: '60px', gridColumn: '1 / -1' }}>
+            <Loading size="100px" />
+            <p style={{ color: '#64748b', marginTop: '1rem' }}>Gathering your curriculum...</p>
           </div>
         ) : enrolledCourses.filter(c => (c.status || 'active') === activeTab).length === 0 ? (
           <div style={{

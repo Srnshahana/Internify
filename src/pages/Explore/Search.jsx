@@ -1,5 +1,6 @@
 import supabase from '../../supabaseClient'
 import { useEffect, useMemo, useState } from 'react'
+import Loading from '../../components/Loading'
 import { searchCourses, searchMentors, getMentorsByCourse } from '../../data/staticData.js'
 import { Mentor } from '../../models/Mentor.js'
 import '../../App.css'
@@ -479,7 +480,8 @@ export default function Explore({
           // console.log(course.Image),
           <div className="explore-courses-grid">
             {loading ? (
-              <div className="loading-state">
+              <div className="loading-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px' }}>
+                <Loading size="100px" />
                 <p>Loading courses...</p>
               </div>
             ) : filteredCourses.length === 0 ? (
@@ -594,7 +596,8 @@ export default function Explore({
         ) : (
           <div className="explore-grid">
             {isLoading ? (
-              <div className="loading-state">
+              <div className="loading-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px' }}>
+                <Loading size="100px" />
                 <p>Loading mentors...</p>
               </div>
             ) : filteredMentors.length > 0 ? (

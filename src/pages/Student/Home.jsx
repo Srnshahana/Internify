@@ -20,6 +20,7 @@ import landingIllustration from '../../assets/images/landingpage-illlustration.p
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import { useNavigate } from 'react-router-dom' // Added this import for useNavigate
+import Loading from '../../components/Loading'
 
 function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQuery }) {
   const [activeTab, setActiveTab] = useState('My Classes')
@@ -577,6 +578,10 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
     day: 'numeric',
     month: 'long'
   })
+
+  if (loading) {
+    return <Loading fullScreen={true} />
+  }
 
   return (
     <div className="dashboard-page-v2 font-sans">

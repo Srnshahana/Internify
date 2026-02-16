@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Loading from '../../components/Loading'
 import '../../App.css'
 import supabase from '../../supabaseClient'
 
@@ -319,7 +320,14 @@ function StudentAssessments({ onBack }) {
         </div>
 
         <div className="assessments-list">
-          {loading ? <p>Loading...</p> : assessments.length === 0 ? <p>No assessments assigned.</p> : assessments.map(assessment => (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <Loading size="100px" />
+              <p style={{ color: '#64748b' }}>Loading assessments...</p>
+            </div>
+          ) : assessments.length === 0 ? (
+            <p>No assessments assigned.</p>
+          ) : assessments.map(assessment => (
             <div key={assessment.id} className="assessment-card">
               <div className="assessment-header">
                 <div>

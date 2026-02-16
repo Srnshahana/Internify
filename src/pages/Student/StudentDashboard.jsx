@@ -1,4 +1,5 @@
 
+import Loading from '../../components/Loading'
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import { useState, useEffect } from 'react'
 import Home from './Home.jsx'
@@ -19,28 +20,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
   const { loading, enrolledCourses } = useDashboardData()
 
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        background: '#eff9ff'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '50px',
-            height: '50px',
-            border: '4px solid #e0f2fe',
-            borderTop: '4px solid #0ea5e9',
-            borderRadius: '50%',
-            animation: 'spinner 1s linear infinite',
-            margin: '0 auto 16px'
-          }}></div>
-          <p style={{ color: '#0ea5e9', fontSize: '16px', fontWeight: 500 }}>Loading dashboard...</p>
-        </div>
-      </div>
-    )
+    return <Loading fullScreen={true} />
   }
 
   const renderPage = (page) => {

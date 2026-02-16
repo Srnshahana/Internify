@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import Loading from '../../components/Loading'
 import '../../App.css'
 import MyCourses from './MyCourses.jsx'
 import CourseDetail from './CourseDetail.jsx'
@@ -150,11 +151,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   }, [])
 
   if (loading) {
-    return (
-      <div className="dashboard-page-v2" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <p style={{ color: '#0ea5e9', fontWeight: '500' }}>Loading dashboard...</p>
-      </div>
-    )
+    return <Loading fullScreen={true} />
   }
 
   if (showStudentRequests) return <StudentRequests onBack={() => setShowStudentRequests(false)} />

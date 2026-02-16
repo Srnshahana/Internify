@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import supabase from '../supabaseClient'
+import Loading from '../components/Loading'
 
 const DashboardDataContext = createContext(null)
 
