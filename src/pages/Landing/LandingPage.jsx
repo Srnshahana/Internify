@@ -25,31 +25,42 @@ import testimonial4 from '../../assets/images/testimonial4.png'
 import topmentor from '../../assets/images/topmentor.mp4'
 import supabase from '../../supabaseClient'
 import '../../App.css'
-import heroImg from '../../assets/images/hero.jpg' // Keep as fallback if needed
 import heroVideo from '../../assets/images/hero.mp4'
+import heroImg from '../../assets/images/hero.jpg'
+import topProgram3 from '../../assets/images/topprogram3.jpg'
+import backgroundImg from '../../assets/images/background.png'
+import settingsImg from '../../assets/images/settings.png'
+import shadowImg from '../../assets/images/shadow.png'
+import searchVectorImg from '../../assets/images/searchvector.png'
+import aiCourseImg from '../../assets/images/ai.jpg'
+import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
+import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
 
 // Map courses to skills format
 // Featured Programs Data
 const featuredPrograms = [
   {
     id: 'fp-1',
-    title: 'FTF App',
-    category: 'UI/UX Design • Case Study',
-    image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=1000', // Fitness App placeholder
+    title: 'Artificial Intelligence & Machine Learning',
+    category: 'Future Tech',
+    growthStat: '7x job growth',
+    image: aiCourseImg,
     overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
   },
   {
     id: 'fp-2',
-    title: 'Fashion App',
-    category: 'UI/UX Design • E-commerce',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=1000', // Fashion App placeholder
+    title: 'Digital Marketing',
+    category: 'AI Strategy',
+    growthStat: '443% skill demand growth',
+    image: digitalMarketingImg,
     overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
   },
   {
     id: 'fp-3',
-    title: 'AI-Assessment',
-    category: 'UI/UX Design • Saas Website',
-    image: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=1000', // Dashboard placeholder
+    title: 'Ethical Hacking and Cyber Security',
+    category: 'Digital Security',
+    growthStat: '4M+ job shortage',
+    image: ethicalHackingImg,
     overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
   }
 ]
@@ -870,29 +881,66 @@ export default function LandingPage({
 
   // Slider State
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
 
   const aboutSlides = [
     {
       title: "Who We Are",
-      text: "Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We are a community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent."
+      text: "Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We are a community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent.",
+      image: backgroundImg
     },
     {
       title: "What We Do",
-      text: "We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters. Our platform empowers students and early-career professionals to build practical skills and launch their careers with confidence."
+      text: "We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters. Our platform empowers students and early-career professionals to build practical skills and launch their careers with confidence.",
+      image: topProgram3
     },
     {
       title: "Who We're For",
-      text: "Whether you're a student looking for your first break, a career switcher seeking new opportunities, or a lifelong learner aiming to upskill, Internify is built for you. We support ambitious individuals ready to take charge of their professional journey."
+      text: "Whether you're a student looking for your first break, a career switcher seeking new opportunities, or a lifelong learner aiming to upskill, Internify is built for you. We support ambitious individuals ready to take charge of their professional journey.",
+      image: heroImg
     }
   ];
 
   // Auto-slide Effect
   useEffect(() => {
+    if (isDragging) return; // Pause auto-slide while dragging
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % aboutSlides.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [aboutSlides.length]);
+  }, [aboutSlides.length, isDragging]);
+
+  // Drag/Swipe Handlers
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.type.includes('mouse') ? e.pageX : e.touches[0].clientX);
+    setDragOffset(0);
+  };
+
+  const handleDragMove = (e) => {
+    if (!isDragging) return;
+    const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+    const diff = currentX - startX;
+    setDragOffset(diff);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    // Snap to slide if drag distance is significant
+    if (Math.abs(dragOffset) > 50) {
+      if (dragOffset > 0 && currentSlide > 0) {
+        setCurrentSlide(currentSlide - 1);
+      } else if (dragOffset < 0 && currentSlide < aboutSlides.length - 1) {
+        setCurrentSlide(currentSlide + 1);
+      }
+    }
+    setDragOffset(0);
+  };
 
   return (
     <div className="landing-page-new font-sans">
@@ -946,8 +994,8 @@ export default function LandingPage({
             }}></div>
 
             <div style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="hero-title-v3">Master your perfect craft</h1>
-              <p className="hero-subtitle-v3">
+              <h1 className="hero-title-v3 reveal reveal-left">Master your perfect craft</h1>
+              <p className="hero-subtitle-v3 reveal reveal-right">
                 Let industrial experts train you. Learn from industry veterans <br />
                 through personalized mentorship and guided paths
               </p>
@@ -963,7 +1011,7 @@ export default function LandingPage({
                 </span>
               </div>
 
-              <div className="hero-actions-v3">
+              <div className="hero-actions-v3 reveal reveal-up">
                 <button className="btn-v3-primary" onClick={() => navigate('/mentors')}>
                   View Mentors
                   <span className="material-symbols-outlined icon-right">arrow_forward</span>
@@ -992,12 +1040,13 @@ export default function LandingPage({
         </section>
 
         <section className="featured-programs-section landing-section">
-          <div className="featured-header">
+          <img src={settingsImg} alt="" className="bg-deco-settings" />
+          <div className="featured-header reveal reveal-down">
             <div className="featured-text-group">
-              <h2 className="section-title-start">Featured Programs</h2>
+              <h2 className="section-title-start">Featured Courses</h2>
               <div className="title-underline-blue"></div>
               <p className="featured-desc">
-                Explore the top programs built on skills that remain relevant <br />
+                Explore the top courses built on skills that remain relevant <br />
                 for decades. Future-proof your career with knowledge that <br />
                 stands the test of time.
               </p>
@@ -1015,7 +1064,9 @@ export default function LandingPage({
                 <img src={program.image} alt={program.title} className="program-bg" />
                 <div className="program-overlay"></div>
                 <div className="program-content">
-                  <span className="program-category">{program.category}</span>
+                  <div className="program-top-meta">
+                    <span className="program-category">{program.growthStat}</span>
+                  </div>
                   <h3 className="program-title">{program.title}</h3>
                 </div>
               </div>
@@ -1025,7 +1076,8 @@ export default function LandingPage({
 
 
         <section className="mission-section landing-section">
-          <div className="mission-centered-header reveal reveal-blur-pop">
+          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
+          <div className="mission-centered-header reveal reveal-pop">
             <h2 className="section-title-v3">What’s Holding You Back</h2>
             <p className="mission-subtitle-v3">
               Every early-career professional faces the struggle of having no clear direction. Without
@@ -1070,27 +1122,46 @@ export default function LandingPage({
         </section>
 
         <section className="about-us-section landing-section">
+          <img src={settingsImg} alt="" className="bg-deco-settings" />
           {/* Static About Us Content Restored */}
-          <div className="about-content reveal reveal-blur-pop">
+          <div className="about-content reveal reveal-left">
             <h2 className="section-title-v3">About Us</h2>
             <p className="about-text">
-              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters, empowering students and early-career professionals to confidently launch their careers
+              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience.
+              {/* We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters,  */}
+              empowering students and early-career professionals to confidently launch their careers
             </p>
           </div>
 
           {/* Slider Moved to "Box" (Image Container area) */}
-          <div className="about-slider-box reveal reveal-up stagger-1">
-            {aboutSlides.map((slide, index) => (
-              <div
-                key={index}
-                className={`about-slide-card ${index === currentSlide ? 'active' : ''}`}
-              >
-                <div className="about-card-content">
-                  <h3 className="about-card-title">{slide.title}</h3>
-                  <p className="about-card-text">{slide.text}</p>
+          <div className="about-slider-box reveal reveal-right stagger-1">
+            <div
+              className={`about-carousel-track ${isDragging ? 'dragging' : ''}`}
+              style={{
+                transform: `translateX(calc(-${currentSlide * 100}% + ${dragOffset}px))`,
+                transition: isDragging ? 'none' : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseDown={handleDragStart}
+              onMouseMove={handleDragMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+              onTouchStart={handleDragStart}
+              onTouchMove={handleDragMove}
+              onTouchEnd={handleDragEnd}
+            >
+              {aboutSlides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`about-slide-card ${index === currentSlide ? 'active' : ''}`}
+                  style={{ backgroundImage: `url(${slide.image})` }}
+                >
+                  <div className="about-card-content">
+                    <h3 className="about-card-title">{slide.title}</h3>
+                    <p className="about-card-text">{slide.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
             <div className="about-dots-box">
               {aboutSlides.map((_, index) => (
@@ -1105,7 +1176,7 @@ export default function LandingPage({
         </section>
 
         <section className="offer-section landing-section">
-          <div className="offer-header reveal reveal-up">
+          <div className="offer-header reveal reveal-pop">
             <h2 className="section-title-v3">What we offer</h2>
             <p className="offer-subtitle">
               Our goal is to equip you with the skills, guidance, and connections to launch<br />
@@ -1115,7 +1186,7 @@ export default function LandingPage({
 
           <div className="offer-grid">
             {/* Card 1 */}
-            <div className="offer-card reveal reveal-up stagger-1">
+            <div className="offer-card reveal reveal-backflip stagger-1">
               <span className="material-symbols-outlined offer-icon-blue">lightbulb</span>
               <span className="offer-number">01</span>
               <h3 className="offer-card-title">1-on-1 Mentorship</h3>
@@ -1125,7 +1196,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 2 */}
-            <div className="offer-card reveal reveal-up stagger-2">
+            <div className="offer-card reveal reveal-backflip stagger-2">
               <span className="material-symbols-outlined offer-icon-blue">edit_square</span>
               <span className="offer-number">02</span>
               <h3 className="offer-card-title">Real-World Projects</h3>
@@ -1135,7 +1206,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 3 */}
-            <div className="offer-card reveal reveal-up stagger-3">
+            <div className="offer-card reveal reveal-backflip stagger-3">
               <span className="material-symbols-outlined offer-icon-blue">verified</span>
               <span className="offer-number">03</span>
               <h3 className="offer-card-title">Verified Certificates</h3>
@@ -1145,7 +1216,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 4 */}
-            <div className="offer-card reveal reveal-up stagger-4">
+            <div className="offer-card reveal reveal-backflip stagger-4">
               <span className="material-symbols-outlined offer-icon-blue">computer</span>
               <span className="offer-number">04</span>
               <h3 className="offer-card-title">Referral Letters</h3>
@@ -1155,7 +1226,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 5 */}
-            <div className="offer-card reveal reveal-up stagger-5">
+            <div className="offer-card reveal reveal-backflip stagger-5">
               <span className="material-symbols-outlined offer-icon-blue">description</span>
               <span className="offer-number">05</span>
               <h3 className="offer-card-title">Career Guidance & Interview Prep</h3>
@@ -1165,7 +1236,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 6 */}
-            <div className="offer-card reveal reveal-up stagger-6">
+            <div className="offer-card reveal reveal-backflip stagger-6">
               <span className="material-symbols-outlined offer-icon-blue">forum</span>
               <span className="offer-number">06</span>
               <h3 className="offer-card-title">Recruitments & Opportunities</h3>
@@ -1177,7 +1248,9 @@ export default function LandingPage({
         </section>
 
         <section className="mentors-section landing-section">
-          <div className="mentors-header reveal reveal-up">
+          <img src={settingsImg} alt="" className="bg-deco-settings" />
+          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
+          <div className="mentors-header reveal reveal-left">
             <div className="mentors-text-content">
               <h2 className="section-title-start">Professional Mentors</h2>
               <div className="title-underline-blue"></div>
@@ -1188,20 +1261,78 @@ export default function LandingPage({
               </p>
             </div>
             <a href="/mentors" className="view-all-link">
-              View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
+              View All mentors <span className="material-symbols-outlined icon-inline">arrow_forward</span>
             </a>
           </div>
 
           <div className="mentors-grid">
-            {topMentors.slice(0, 4).map((mentor, index) => (
+            {/* Hardcoded Mentors Data */}
+            {[
+              {
+                id: 1,
+                name: "Sarah Jenkins",
+                role: "Senior UX Designer",
+                company: "Google",
+                experience: "8+ Years",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+                skills: ["UI/UX", "Figma", "Research"]
+              },
+              {
+                id: 2,
+                name: "David Chen",
+                role: "Staff Engineer",
+                company: "Netflix",
+                experience: "10+ Years",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80",
+                skills: ["System Design", "Java"]
+              },
+              {
+                id: 3,
+                name: "Emily Rodriguez",
+                role: "Product Manager",
+                company: "Airbnb",
+                experience: "7+ Years",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
+                skills: ["Strategy", "Agile", "Data"]
+              },
+              {
+                id: 4,
+                name: "Michael Chang",
+                role: "Frontend Lead",
+                company: "Meta",
+                experience: "9+ Years",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80",
+                skills: ["React", "GraphQL", "Web"]
+              }
+            ].map((mentor, index) => (
               <div key={mentor.id} className={`mentor-card-compact reveal reveal-up stagger-${(index % 4) + 1}`}>
                 <div className="mentor-image-container">
                   <img src={mentor.image} alt={mentor.name} className="mentor-image" />
                 </div>
                 <div className="mentor-info">
                   <h3 className="mentor-name">{mentor.name}</h3>
-                  <p className="mentor-role">{mentor.role}</p>
-                  <p className="mentor-company">{mentor.company}</p>
+                  <div className="mentor-role-company">
+                    {mentor.role} <span className="text-highlight">@ {mentor.company}</span>
+                  </div>
+                  <div className="mentor-experience-text">
+                    {mentor.experience} Exp
+                  </div>
+                  <div className="mentor-rating-stars">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={`material-symbols-outlined ${i < Math.floor(mentor.rating) ? 'star-filled' : 'star-outline'}`}>
+                        star
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mentor-skills-container">
+                    {mentor.skills.map((skill, i) => (
+                      <span key={i} className="mentor-skill-tag">{skill}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -1209,9 +1340,15 @@ export default function LandingPage({
         </section>
 
         {/* New Get Hired & Mentor Section */}
-        <section className="get-hired-section landing-section reveal reveal-up">
+        {/* New Get Hired & Mentor Section */}
+        <section className="get-hired-section landing-section reveal reveal-slow reveal-up">
+          <img src={searchVectorImg} alt="" className="bg-deco-search-vector" />
+          <div className="section-header-v3">
+            <h2 className="section-title-v3">Career Growth Opportunities</h2>
+            <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
+          </div>
           <div className="get-hired-grid">
-            <div className="feature-card reveal reveal-up stagger-1">
+            <div className="feature-card reveal reveal-slow reveal-left stagger-1">
               <div className="feature-icon-wrapper icon-hired">
                 <span className="material-symbols-outlined">rocket_launch</span>
               </div>
@@ -1222,7 +1359,7 @@ export default function LandingPage({
               <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
             </div>
 
-            <div className="feature-card reveal reveal-up stagger-2">
+            <div className="feature-card reveal reveal-slow reveal-right stagger-2">
               <div className="feature-icon-wrapper icon-mentor">
                 <span className="material-symbols-outlined">school</span>
               </div>
@@ -1265,7 +1402,7 @@ export default function LandingPage({
 
 
           {/* Success Stories Component */}
-          <div className="mentors-header reveal reveal-blur-pop">
+          <div className="mentors-header reveal reveal-story-pop">
             <div className="mentors-text-content">
               <h2 className="section-title-start">Success <span>Stories</span></h2>
               <div className="title-underline-blue"></div>
@@ -1277,7 +1414,7 @@ export default function LandingPage({
           </div>
           <div className="success-stories-grid">
             {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
-              <div key={story.id} className={`testimonial-card reveal reveal-up stagger-${(idx % 3) + 1}`}>
+              <div key={story.id} className={`testimonial-card reveal reveal-flip-up stagger-${(idx % 3) + 1}`}>
                 <div className="testimonial-header">
                   <img src={story.mentorImage} alt={story.mentorName} className="testimonial-avatar" />
                   <div className="testimonial-meta">
@@ -1295,52 +1432,54 @@ export default function LandingPage({
             ))}
           </div>
 
-          {/* Get in Touch Section */}
-        </section>
-
-        <section className="get-in-touch-section landing-section">
-          <div className="feature-card get-in-touch-card reveal reveal-up">
-            <div className="feature-icon-wrapper icon-contact">
-              <span className="material-symbols-outlined">mail</span>
-            </div>
-            <h2 className="feature-title">Get in Touch</h2>
-            <p className="feature-desc">
-              Have questions or need guidance? Our team is here to help you navigate your career journey.
-            </p>
-            <div className="get-in-touch-form-new">
-              <input type="email" placeholder="Enter your email" className="get-in-touch-input-new" />
-              <button className="feature-btn btn-contact">Send Message</button>
-            </div>
-          </div>
-
+          {/* Get in Touch Section Removed - Integrated into Footer */}
         </section>
       </main >
 
       <footer className="footer-redesign reveal">
         <div className="footer-content-new">
-          <div className="footer-logo-row reveal reveal-up">
-            <div className="footer-logo-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
+          <div className="footer-main-row">
+            <div className="footer-left-col">
+              <div className="footer-logo-row reveal reveal-up">
+                <div className="footer-logo-icon">
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
+                </div>
+                <h2 className="footer-logo-text">Internify</h2>
+              </div>
+              <div className="footer-links-grid">
+                <div className="footer-column reveal reveal-up stagger-1">
+                  <h4 className="footer-column-title">Platform</h4>
+                  <ul className="footer-links-list">
+                    <li className="footer-link-item" onClick={() => navigate('/explore')}>Mentorship</li>
+                    <li className="footer-link-item" onClick={() => navigate('/explore')}>Courses</li>
+                    <li className="footer-link-item" onClick={() => navigate('/jobs')}>Careers</li>
+                  </ul>
+                </div>
+                <div className="footer-column reveal reveal-up stagger-2">
+                  <h4 className="footer-column-title">Company</h4>
+                  <ul className="footer-links-list">
+                    <li className="footer-link-item">About</li>
+                    <li className="footer-link-item">Terms</li>
+                    <li className="footer-link-item">Privacy</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <h2 className="footer-logo-text">Internify</h2>
-          </div>
-          <div className="footer-links-grid">
-            <div className="footer-column reveal reveal-up stagger-1">
-              <h4 className="footer-column-title">Platform</h4>
-              <ul className="footer-links-list">
-                <li className="footer-link-item" onClick={() => navigate('/explore')}>Mentorship</li>
-                <li className="footer-link-item" onClick={() => navigate('/explore')}>Courses</li>
-                <li className="footer-link-item" onClick={() => navigate('/jobs')}>Careers</li>
-              </ul>
-            </div>
-            <div className="footer-column reveal reveal-up stagger-2">
-              <h4 className="footer-column-title">Company</h4>
 
-              <ul className="footer-links-list">
-                <li className="footer-link-item">About</li>
-                <li className="footer-link-item">Terms</li>
-                <li className="footer-link-item">Privacy</li>
-              </ul>
+            <div className="footer-right-col reveal reveal-up stagger-3">
+              <div className="feature-card get-in-touch-card footer-contact-card">
+                <div className="feature-icon-wrapper icon-contact">
+                  <span className="material-symbols-outlined">mail</span>
+                </div>
+                <h2 className="feature-title">Get in Touch</h2>
+                <p className="feature-desc">
+                  Have questions or need guidance? Our team is available to help.
+                </p>
+                <div className="get-in-touch-form-new">
+                  <input type="email" placeholder="Enter your email" className="get-in-touch-input-new" />
+                  <button className="feature-btn btn-contact">Send Message</button>
+                </div>
+              </div>
             </div>
           </div>
           <div className="footer-bottom-new reveal reveal-up stagger-3">

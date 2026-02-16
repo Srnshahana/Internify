@@ -56,8 +56,8 @@ export default function SplashScreen({ onDone }) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    color: '#020617',
+    backgroundColor: '#020617',
+    color: '#ffffff',
     overflow: 'hidden',
     position: 'relative',
     fontFamily:
@@ -118,7 +118,7 @@ export default function SplashScreen({ onDone }) {
     width: 14,
     height: 14,
     borderRadius: '999px',
-    backgroundColor: '#020617',
+    backgroundColor: '#ffffff',
     transform: dotTransform,
     transformOrigin: 'center',
     transition:

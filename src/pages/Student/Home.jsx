@@ -621,6 +621,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
             <div className="ad-content-side">
               <div className="ad-text-group">
                 <h2 className="ad-banner-text">Let Internify match you with the right opportunity</h2>
+                <p className="ad-banner-subtext">Unlock exclusive internships and job roles tailored to your unique skills and career goals.</p>
                 <button className="ad-banner-cta">Explore Now</button>
               </div>
             </div>
