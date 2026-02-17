@@ -23,12 +23,15 @@ import testimonial2 from '../../assets/images/testimonial2.png'
 import testimonial3 from '../../assets/images/testimonial3.png'
 import testimonial4 from '../../assets/images/testimonial4.png'
 import topmentor from '../../assets/images/topmentor.mp4'
+import Loading from '../../components/Loading';
+import CourseModal from '../../components/CourseModal';
 import supabase from '../../supabaseClient'
 import '../../App.css'
 import heroVideo from '../../assets/images/hero.mp4'
 import heroImg from '../../assets/images/hero.jpg'
 import topProgram3 from '../../assets/images/topprogram3.jpg'
 import backgroundImg from '../../assets/images/background.png'
+import image1 from '../../assets/images/njk.jpg'
 import settingsImg from '../../assets/images/settings.png'
 import shadowImg from '../../assets/images/shadow.png'
 import searchVectorImg from '../../assets/images/searchvector.png'
@@ -562,6 +565,7 @@ export default function LandingPage({
   const careerGuidanceRightRef = useRef(null)
   const careerGuidanceTrackRef = useRef(null)
   const [roadmapStep, setRoadmapStep] = useState(0)
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false)
 
   const roadmapContainerRef = useRef(null)
 
@@ -894,12 +898,12 @@ export default function LandingPage({
     {
       title: "What We Do",
       text: "We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters. Our platform empowers students and early-career professionals to build practical skills and launch their careers with confidence.",
-      image: topProgram3
+      image: backgroundImg
     },
     {
       title: "Who We're For",
       text: "Whether you're a student looking for your first break, a career switcher seeking new opportunities, or a lifelong learner aiming to upskill, Internify is built for you. We support ambitious individuals ready to take charge of their professional journey.",
-      image: heroImg
+      image: backgroundImg
     }
   ];
 
@@ -994,10 +998,9 @@ export default function LandingPage({
             }}></div>
 
             <div style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="hero-title-v3 reveal reveal-left">Master your perfect craft</h1>
+              <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Stept</h1>
               <p className="hero-subtitle-v3 reveal reveal-right">
-                Let industrial experts train you. Learn from industry veterans <br />
-                through personalized mentorship and guided paths
+                A career mentorship ecosystem that connects students with experienced mentors to provide clarity, direction, and real-world guidance.
               </p>
 
               <div className="hero-search-v3">
@@ -1012,8 +1015,8 @@ export default function LandingPage({
               </div>
 
               <div className="hero-actions-v3 reveal reveal-up">
-                <button className="btn-v3-primary" onClick={() => navigate('/mentors')}>
-                  View Mentors
+                <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
+                  View Courses
                   <span className="material-symbols-outlined icon-right">arrow_forward</span>
                 </button>
                 <button className="btn-v3-outline">Let's Talk</button>
@@ -1075,8 +1078,17 @@ export default function LandingPage({
         </section>
 
 
-        <section className="mission-section landing-section">
-          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
+        <section
+          className="mission-section landing-section"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${image1})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed'
+          }}
+        >
+          {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> Removed as requested */}
+          <img src={shadowImg} alt="" className="bg-deco-shadow top-right" />
           <div className="mission-centered-header reveal reveal-pop">
             <h2 className="section-title-v3">What’s Holding You Back</h2>
             <p className="mission-subtitle-v3">
@@ -1119,10 +1131,11 @@ export default function LandingPage({
               </p>
             </div>
           </div>
+          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
         </section>
 
         <section className="about-us-section landing-section">
-          <img src={settingsImg} alt="" className="bg-deco-settings" />
+          {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> */}
           {/* Static About Us Content Restored */}
           <div className="about-content reveal reveal-left">
             <h2 className="section-title-v3">About Us</h2>
@@ -1176,6 +1189,9 @@ export default function LandingPage({
         </section>
 
         <section className="offer-section landing-section">
+          <img src={settingsImg} alt="" className="bg-deco-settings" />
+          <img src={shadowImg} alt="" className="bg-deco-shadow top-left" />
+          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-right" />
           <div className="offer-header reveal reveal-pop">
             <h2 className="section-title-v3">What we offer</h2>
             <p className="offer-subtitle">
@@ -1248,8 +1264,6 @@ export default function LandingPage({
         </section>
 
         <section className="mentors-section landing-section">
-          <img src={settingsImg} alt="" className="bg-deco-settings" />
-          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
           <div className="mentors-header reveal reveal-left">
             <div className="mentors-text-content">
               <h2 className="section-title-start">Professional Mentors</h2>
@@ -1328,11 +1342,7 @@ export default function LandingPage({
                       </span>
                     ))}
                   </div>
-                  <div className="mentor-skills-container">
-                    {mentor.skills.map((skill, i) => (
-                      <span key={i} className="mentor-skill-tag">{skill}</span>
-                    ))}
-                  </div>
+
                 </div>
               </div>
             ))}
@@ -1341,8 +1351,13 @@ export default function LandingPage({
 
         {/* New Get Hired & Mentor Section */}
         {/* New Get Hired & Mentor Section */}
-        <section className="get-hired-section landing-section reveal reveal-slow reveal-up">
-          <img src={searchVectorImg} alt="" className="bg-deco-search-vector" />
+        <section
+          className="get-hired-section landing-section reveal reveal-slow reveal-up"
+          style={{
+            backgroundImage: `url(${image1})`
+          }}
+        >
+          {/* <img src={searchVectorImg} alt="" className="bg-deco-search-vector" /> */}
           <div className="section-header-v3">
             <h2 className="section-title-v3">Career Growth Opportunities</h2>
             <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
@@ -1495,6 +1510,7 @@ export default function LandingPage({
           </div>
         </div>
       </footer>
+      <CourseModal isOpen={isCourseModalOpen} onClose={() => setIsCourseModalOpen(false)} />
     </div >
   )
 }

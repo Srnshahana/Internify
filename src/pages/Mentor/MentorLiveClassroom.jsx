@@ -49,6 +49,9 @@ function MentorLiveClassroom({ course, onBack }) {
   const assessmentFileInputRef = useRef(null)
 
   const [dbAssessments, setDbAssessments] = useState([])
+  const [selectedAssessment, setSelectedAssessment] = useState(null)
+  const [submissions, setSubmissions] = useState([])
+  const [selectedSubmission, setSelectedSubmission] = useState(null)
 
   useEffect(() => {
     if (showAssessmentListModal) {
@@ -985,58 +988,74 @@ function MentorLiveClassroom({ course, onBack }) {
     }
   }
 
-  const handleViewAssessment = (assessmentMessage) => {
-    setSelectedAssessment(assessmentMessage)
-    // Reset submission form when opening assessment
-    setAssessmentSubmission({ textSubmission: '', attachments: [] })
+
+
+  // --- Mentor Assessment Review Logic ---
+
+  const handleViewAssessment = (assessment) => {
+    console.log('👀 handleViewAssessment called with:', assessment)
+    // If it's a message object, normalize it
+    const assessmentData = assessment.assessmentId ? {
+      id: assessment.assessmentId,
+      title: assessment.assessmentTitle,
+      description: assessment.assessmentDescription,
+      due_date: assessment.assessmentDueDate,
+      course_id: course?.course_id || course?.id
+    } : assessment
+
+    console.log('✅ Normalized assessmentData:', assessmentData)
+    setSelectedAssessment(assessmentData)
+    fetchSubmissions(assessmentData.id)
+    setShowAssessmentListModal(false) // Close list modal if open
   }
 
-  const handleAssessmentFileUpload = (e) => {
-    const files = Array.from(e.target.files)
-    const newAttachments = files.map(file => ({
-      name: file.name,
-      type: file.name.split('.').pop(),
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-      file: file,
-    }))
-    setAssessmentSubmission({
-      ...assessmentSubmission,
-      attachments: [...assessmentSubmission.attachments, ...newAttachments],
-    })
-  }
+  const fetchSubmissions = async (assessmentId) => {
+    console.log('🔄 fetching submissions for assessmentId:', assessmentId)
+    try {
+      const { data, error } = await supabase
+        .from('assessment_submissions')
+        .select(`
+            *,
+            student:student_id (name, email), 
+            assessment_attachments (*)
+          `)
+        .eq('assessment_id', assessmentId)
 
-  const handleRemoveAssessmentAttachment = (index) => {
-    setAssessmentSubmission({
-      ...assessmentSubmission,
-      attachments: assessmentSubmission.attachments.filter((_, i) => i !== index),
-    })
-  }
-
-  const handleSubmitAssessment = () => {
-    if (!assessmentSubmission.textSubmission && assessmentSubmission.attachments.length === 0) {
-      alert('Please provide either text submission or attach files')
-      return
+      if (error) {
+        console.error('❌ Error fetching submissions:', error)
+        throw error
+      }
+      console.log('📥 fetched submissions:', data)
+      setSubmissions(data || [])
+    } catch (error) {
+      console.error('Error fetching submissions (catch):', error)
+      setSubmissions([])
     }
+  }
 
-    // Create a submission confirmation message
-    const submissionMessage = {
-      id: 1,
-      from: 'learner',
-      type: 'text',
-      content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission || 'Files attached: ' + assessmentSubmission.attachments.map(a => a.name).join(', ')}`,
-      time: getCurrentTime(),
-      session_id: activeSessionId,
-      highlightColor: null,
-      selfNote: '',
+  const handleMarkComplete = async (submissionId) => {
+    try {
+      const { error } = await supabase
+        .from('assessment_submissions')
+        .update({ status: 'completed', reviewed_at: new Date().toISOString() })
+        .eq('id', submissionId)
+
+      if (error) throw error
+
+      setSubmissions(prev => prev.map(s => s.id === submissionId ? { ...s, status: 'completed' } : s))
+      alert('Marked as complete!')
+    } catch (error) {
+      console.error('Error marking submission complete:', error)
     }
+  }
 
-    setMessages((prev) => [...prev, submissionMessage])
-
-    // Mark assessment as submitted (you could add a submitted flag to the assessment)
-    alert('Assessment submitted successfully!')
-
-    setSelectedAssessment(null)
-    setAssessmentSubmission({ textSubmission: '', attachments: [] })
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
   }
 
   const handleCompleteSession = async () => {
@@ -1103,7 +1122,7 @@ function MentorLiveClassroom({ course, onBack }) {
   }
 
   return (
-    <div className="live-classroom-page">
+    <><div className="live-classroom-page">
       {/* Minimal top bar like inspo */}
       {/* V2 Glass Header */}
       <header className="live-classroom-header-v2">
@@ -1130,7 +1149,7 @@ function MentorLiveClassroom({ course, onBack }) {
                   setShowAssessmentListModal(true)
                   setShowAttachOptions(false)
                 }}
-                title="Create Assessment"
+                title="Assessments"
                 style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)' }}
               >
                 <span className="material-symbols-outlined">assignment</span>
@@ -1244,7 +1263,14 @@ function MentorLiveClassroom({ course, onBack }) {
                       <p className="assessment-card-description">{message.assessmentDescription}</p>
                       <div className="assessment-card-footer">
                         <span className="assessment-due-date">Due: {new Date(message.assessmentDueDate).toLocaleDateString()}</span>
-                        {userRole === 'student' && (
+                        {userRole === 'mentor' ? (
+                          <button
+                            className="assessment-view-btn"
+                            onClick={() => handleViewAssessment(message)}
+                          >
+                            Review Submissions
+                          </button>
+                        ) : (
                           <button className="assessment-view-btn">View & Submit</button>
                         )}
                       </div>
@@ -1567,7 +1593,8 @@ function MentorLiveClassroom({ course, onBack }) {
                       {dbAssessments.map((assessment, idx) => (
                         <div
                           key={assessment.id || idx}
-                          className="assessment-list-item"
+                          className="assessment-list-item hover:border-blue-400 transition-colors"
+                          onClick={() => handleViewAssessment(assessment)}
                           style={{
                             padding: '16px',
                             border: '1px solid #e2e8f0',
@@ -1576,7 +1603,8 @@ function MentorLiveClassroom({ course, onBack }) {
                             background: '#fff',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '8px'
+                            gap: '8px',
+                            cursor: 'pointer'
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1588,8 +1616,17 @@ function MentorLiveClassroom({ course, onBack }) {
                           <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {assessment.description}
                           </p>
-                          <div style={{ alignSelf: 'flex-end', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
-                            Submissions: {assessment.assessment_submissions?.[0]?.count || 0}
+                          <div style={{ alignSelf: 'flex-end', fontSize: '12px', color: '#64748b', fontWeight: '500', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span>Submissions: {assessment.assessment_submissions?.[0]?.count || 0}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleViewAssessment(assessment)
+                              }}
+                              className="text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md text-xs transition-colors"
+                            >
+                              Review
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -1693,99 +1730,260 @@ function MentorLiveClassroom({ course, onBack }) {
             onChange={handleImageSelected}
           />
         </div>
+      </div>
 
-        {/* Bottom sessions bar */}
-        <div className="live-sessions-bar">
-          {sessions.map((session) => (
-            <button
-              key={session.id}
-              type="button"
-              className={`live-session-chip ${session.status} ${session.id === activeSessionId ? 'current' : ''
-                }`}
-              onClick={() => setActiveSessionId(session.id)}
-            >
-              <span className="live-session-title">{session.title}</span>
-              <span className="live-session-status">
-                {session.status === 'current'
-                  ? 'Now'
-                  : session.status === 'completed'
-                    ? 'Completed'
-                    : 'Upcoming'}
-              </span>
-            </button>
-          ))}
+      {/* Bottom sessions bar */}
+      <div className="live-sessions-bar">
+        {sessions.map((session) => (
           <button
+            key={session.id}
             type="button"
-            className="live-course-complete-btn"
-            onClick={() => setShowCompletionModal(true)}
+            className={`live-session-chip ${session.status} ${session.id === activeSessionId ? 'current' : ''
+              }`}
+            onClick={() => setActiveSessionId(session.id)}
           >
-            <span className="live-session-title">Course Complete</span>
+            <span className="live-session-title">{session.title}</span>
+            <span className="live-session-status">
+              {session.status === 'current'
+                ? 'Now'
+                : session.status === 'completed'
+                  ? 'Completed'
+                  : 'Upcoming'}
+            </span>
           </button>
+        ))}
+        <button
+          type="button"
+          className="live-course-complete-btn"
+          onClick={() => setShowCompletionModal(true)}
+        >
+          <span className="live-session-title">Course Complete</span>
+        </button>
 
-          {userRole === 'mentor' && (
-            <>
-              <button
-                type="button"
-                className="live-course-complete-btn" // Reuse style or add new class
-                style={{ backgroundColor: '#22c55e', marginLeft: '12px' }}
-                onClick={() => {
-                  setShowAssessmentListModal(true)
-                  setShowAttachOptions(false)
-                }}
-              >
-                <span className="live-session-title">Create Poll</span>
-              </button>
-              <button
-                type="button"
-                className="live-course-complete-btn"
-                style={{ backgroundColor: '#eab308', marginLeft: '12px' }}
-                onClick={handleAttachStudyMaterial}
-              >
-                <span className="live-session-title">Study Material</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Course Completion Modal */}
-        {showCompletionModal && (
-          <div className="live-completion-modal-overlay" onClick={() => setShowCompletionModal(false)}>
-            <div className="live-completion-modal" onClick={(e) => e.stopPropagation()}>
-              <h2 className="live-completion-modal-title">Course Completed!</h2>
-              <p className="live-completion-modal-description">
-                Great job on completing this course. You've taken an important step forward in your learning journey.
-                <br /><br />
-                You can now close this classroom and access your progress and next steps from your dashboard.
-              </p>
-              <div className="live-completion-modal-info">
-                <p>• Your completion will be recorded</p>
-                <p>• You can revisit course materials anytime</p>
-              </div>
-              <div className="live-completion-modal-actions">
-                <button
-                  type="button"
-                  className="live-completion-modal-primary"
-                  onClick={onBack}
-                >
-                  ✅ Close Classroom
-                </button>
-                <button
-                  type="button"
-                  className="live-completion-modal-secondary"
-                  onClick={() => {
-                    setShowCompletionModal(false)
-                    // Navigate to dashboard - you may need to adjust this based on your routing
-                    if (onBack) onBack()
-                  }}
-                >
-                  ⬅️ Go to Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
+        {userRole === 'mentor' && (
+          <>
+            <button
+              type="button"
+              className="live-course-complete-btn" // Reuse style or add new class
+              style={{ backgroundColor: '#22c55e', marginLeft: '12px' }}
+              onClick={() => {
+                setShowAssessmentListModal(true)
+                setShowAttachOptions(false)
+              }}
+            >
+              <span className="live-session-title">Create Poll</span>
+            </button>
+            <button
+              type="button"
+              className="live-course-complete-btn"
+              style={{ backgroundColor: '#eab308', marginLeft: '12px' }}
+              onClick={handleAttachStudyMaterial}
+            >
+              <span className="live-session-title">Study Material</span>
+            </button>
+          </>
         )}
       </div>
+
+      {/* Course Completion Modal */}
+      {showCompletionModal && (
+        <div className="live-completion-modal-overlay" onClick={() => setShowCompletionModal(false)}>
+          <div className="live-completion-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="live-completion-modal-title">Course Completed!</h2>
+            <p className="live-completion-modal-description">
+              Great job on completing this course. You've taken an important step forward in your learning journey.
+              <br /><br />
+              You can now close this classroom and access your progress and next steps from your dashboard.
+            </p>
+            <div className="live-completion-modal-info">
+              <p>• Your completion will be recorded</p>
+              <p>• You can revisit course materials anytime</p>
+            </div>
+            <div className="live-completion-modal-actions">
+              <button
+                type="button"
+                className="live-completion-modal-primary"
+                onClick={onBack}
+              >
+                ✅ Close Classroom
+              </button>
+              <button
+                type="button"
+                className="live-completion-modal-secondary"
+                onClick={() => {
+                  setShowCompletionModal(false)
+                  // Navigate to dashboard - you may need to adjust this based on your routing
+                  if (onBack) onBack()
+                }}
+              >
+                ⬅️ Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+      {/* Mentor Assessment Review Modal */}
+      {selectedAssessment && (
+        <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl relative">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-800">
+                {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
+              </h2>
+              <button
+                onClick={() => {
+                  if (selectedSubmission) setSelectedSubmission(null)
+                  else setSelectedAssessment(null)
+                }}
+                className="text-gray-500 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              {selectedSubmission ? (
+                // Single Submission View
+                <div className="space-y-6 max-w-3xl mx-auto">
+                  <div className="flex items-center gap-4 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl">
+                      {selectedSubmission.student?.name?.charAt(0) || 'S'}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xl text-gray-900">{selectedSubmission.student?.name || 'Student'}</h3>
+                      <p className="text-gray-600">{selectedSubmission.student?.email}</p>
+                      <p className="text-sm text-gray-500 mt-1">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
+                    </div>
+                    <div className="ml-auto flex flex-col items-end gap-2">
+                      <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${selectedSubmission.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {selectedSubmission.status === 'completed' ? 'Completed' : 'Pending Review'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                      <h3 className="font-bold text-gray-800">Text Submission</h3>
+                    </div>
+                    <div className="p-6 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                      {selectedSubmission.text_submission || <span className="text-gray-400 italic">No text provided.</span>}
+                    </div>
+                  </div>
+
+                  {selectedSubmission.assessment_attachments?.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                        <h3 className="font-bold text-gray-800">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        {selectedSubmission.assessment_attachments.map(att => (
+                          <div key={att.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 hover:border-blue-200 transition-all group">
+                            <span className="text-2xl">📎</span>
+                            <div className="flex-1">
+                              <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="text-gray-900 font-medium hover:text-blue-600 hover:underline block">
+                                {att.file_name}
+                              </a>
+                              <span className="text-xs text-gray-500">Document</span>
+                            </div>
+                            <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                              ⬇️
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedSubmission.status !== 'completed' && (
+                    <div className="pt-6 border-t mt-8">
+                      <button
+                        onClick={() => handleMarkComplete(selectedSubmission.id)}
+                        className="w-full py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        ✓ Mark as Complete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Assessment Details & Submissions List View
+                <div className="space-y-8 max-w-5xl mx-auto">
+                  {/* Assessment Details Card */}
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                      <div className="md:col-span-2 space-y-4">
+                        <div>
+                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedAssessment.title}</h3>
+                          <p className="text-gray-600 leading-relaxed text-base">{selectedAssessment.description}</p>
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 p-4 rounded-lg space-y-3 h-fit">
+                        <div>
+                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Course ID</span>
+                          <span className="font-medium text-gray-900">{selectedAssessment.course_id}</span>
+                        </div>
+                        <div>
+                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Due Date</span>
+                          <span className="font-medium text-gray-900">{formatDate(selectedAssessment.due_date)}</span>
+                        </div>
+                        <div>
+                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Status</span>
+                          <span className="font-medium text-gray-900">Active</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-xl text-gray-900">Student Submissions</h3>
+                      <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">{submissions.length} Total</span>
+                    </div>
+
+                    {submissions.length === 0 ? (
+                      <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+                        <span className="text-4xl block mb-4">📂</span>
+                        <p className="text-gray-500 text-lg font-medium">No submissions yet.</p>
+                        <p className="text-gray-400 text-sm mt-1">When students submit their work, it will appear here.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {submissions.map(sub => (
+                          <div key={sub.id} className="bg-white p-5 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group flex flex-col" onClick={() => setSelectedSubmission(sub)}>
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                                {sub.student?.name?.charAt(0) || 'S'}
+                              </div>
+                              <div className="overflow-hidden">
+                                <p className="font-bold text-gray-900 truncate">{sub.student?.name || 'Student'}</p>
+                                <p className="text-xs text-gray-500">{formatDate(sub.submitted_at)}</p>
+                              </div>
+                            </div>
+
+                            <div className="mt-auto flex justify-between items-center pt-3 border-t border-gray-100">
+                              <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${sub.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
+                                }`}>
+                                {sub.status}
+                              </span>
+                              <span className="text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                Review ➔
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
