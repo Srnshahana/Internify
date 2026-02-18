@@ -98,6 +98,7 @@ export const DashboardDataProvider = ({ children }) => {
                         mentor_id: enrollment.mentor_id,
                         course_id: enrollment.course_id,
                         status: enrollment.status || 'active',
+                        classroom_name: enrollment.classroom_name,
 
                         // Course data
                         title: course.title || 'Unknown Course',

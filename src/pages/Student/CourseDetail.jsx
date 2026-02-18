@@ -25,17 +25,54 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
 
       try {
         setLoading(true)
-        const { data, error } = await supabase
+        const currentUserId = localStorage.getItem('auth_id')
+        const courseId = course.id // or course.course_id
+
+        // 1. Fetch Basic Course Details
+        const { data: detailsData, error: detailsError } = await supabase
           .from('course_details')
           .select('*')
-          .eq('course_id', course.id)
+          .eq('course_id', courseId)
           .single()
 
-        if (error) {
+        // 2. Fetch Sessions Count (Total)
+        const { count: totalSessions, error: sessError } = await supabase
+          .from('course_sessions')
+          .select('*', { count: 'exact', head: true })
+          .eq('course_id', courseId)
+
+        // 3. Fetch Completed Sessions Count (For this student)
+        const { count: completedSessions, error: progError } = await supabase
+          .from('course_session_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('course_id', courseId)
+          .eq('student_id', currentUserId)
+          .eq('is_completed', true)
+
+        // 4. Fetch Assessments Count (Total)
+        const { count: totalAssessments, error: asmError } = await supabase
+          .from('assessments')
+          .select('*', { count: 'exact', head: true })
+          .eq('course_id', courseId)
+
+        // 5. Fetch Submitted Assessments Count (For this student)
+        // (Optional: if we want to show "X/Y Completed" or just total assignments)
+        // For now, let's just use total assessments for the stats card as per UI (Assignments: 5)
+
+        if (detailsError) {
           console.log('Fetching detailed info from Supabase (optional)...')
-        } else if (data) {
-          setCourseDetails(prev => ({ ...prev, ...data }))
         }
+
+        const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0
+
+        setCourseDetails(prev => ({
+          ...prev,
+          ...(detailsData || {}),
+          progress: progress,
+          assignmentsCount: totalAssessments || 0,
+          classesCount: totalSessions || 0
+        }))
+
       } catch (err) {
         console.error('Fetch error:', err)
       } finally {
@@ -228,11 +265,11 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
             <div className="info-card-elegant">
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Assignments:</span>
-                <span className="info-value-elegant">{courseDetails.assignmentsCount || courseDetails.assignments?.length || 0}</span>
+                <span className="info-value-elegant">{courseDetails.assignmentsCount || 0}</span>
               </div>
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Classes:</span>
-                <span className="info-value-elegant">{courseDetails.classes?.length || 0}</span>
+                <span className="info-value-elegant">{courseDetails.classesCount || 0}</span>
               </div>
             </div>
           </div>

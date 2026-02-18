@@ -254,7 +254,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                   marginBottom: '12px',
                   border: '1px solid #bae6fd'
                 }}>
-                  {course.category || 'Development'}
+                  {course.classroom_name || course.category || 'Classroom'}
                 </div>
 
                 <h3 style={{

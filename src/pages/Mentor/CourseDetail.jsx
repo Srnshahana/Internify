@@ -147,8 +147,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
             <h3 className="section-title-elegant">Course Analytics</h3>
             <div className="info-card-elegant">
               <div className="info-item-elegant">
-                <span className="info-label-elegant">Active Students:</span>
-                <span className="info-value-elegant">{studentCount}</span>
+                <span className="info-label-elegant">Student:</span>
+                <span className="info-value-elegant">{courseDetails.student_name || 'Enrolled Student'}</span>
               </div>
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Modules:</span>

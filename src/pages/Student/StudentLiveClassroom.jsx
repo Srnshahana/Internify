@@ -50,14 +50,41 @@ function StudentLiveClassroom({ course, onBack }) {
 
   const fetchDbAssessments = async () => {
     try {
-      const { data, error } = await supabase
+      // 1. Fetch Assessments
+      const { data: assessments, error: asmError } = await supabase
         .from('assessments')
         .select('*')
         .eq('course_id', course?.course_id || course?.id)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setDbAssessments(data || [])
+      if (asmError) throw asmError
+
+      // 2. Fetch User's Submissions for these assessments
+      if (assessments?.length > 0) {
+        console.log('🔍 Fetching submissions for student:', currentUserId)
+        const { data: submissions, error: subError } = await supabase
+          .from('assessment_submissions')
+          .select('*') // Select all to see what we get
+          .eq('student_id', currentUserId)
+          .in('assessment_id', assessments.map(a => a.id))
+
+        if (subError) console.warn('Error fetching submissions:', subError)
+        console.log('📥 Fetched Submissions:', submissions)
+
+        // 3. Merge Data
+        const merged = assessments.map(assessment => {
+          // Robust comparison: String() ensures we match mismatching types (number vs string)
+          const mySub = submissions?.find(s => String(s.assessment_id) === String(assessment.id))
+          return {
+            ...assessment,
+            mySubmission: mySub || null
+          }
+        })
+        console.log('✨ Merged Assessments with robust match:', merged)
+        setDbAssessments(merged)
+      } else {
+        setDbAssessments([])
+      }
     } catch (err) {
       console.error('Error fetching assessments:', err)
     }
@@ -219,6 +246,43 @@ function StudentLiveClassroom({ course, onBack }) {
       supabase.removeChannel(channel)
     }
   }, [chatId])
+
+
+  // Subscription for assessment status changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('assessment-status-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'assessment_submissions',
+          filter: `student_id=eq.${currentUserId}`
+        },
+        (payload) => {
+          console.log('🔄 Assessment status updated/inserted:', payload.new)
+          setDbAssessments(prev => prev.map(assessment => {
+            // Robust comparison
+            if (String(assessment.id) === String(payload.new.assessment_id)) {
+              return {
+                ...assessment,
+                mySubmission: {
+                  ...(assessment.mySubmission || {}),
+                  ...payload.new
+                }
+              }
+            }
+            return assessment
+          }))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [currentUserId])
 
   const [sessions, setSessions] = useState(initialSessions)
 
@@ -1269,95 +1333,173 @@ function StudentLiveClassroom({ course, onBack }) {
                     <p style={{ whiteSpace: 'pre-wrap' }}>{selectedAssessment.assessmentDescription}</p>
                   </div>
 
-                  {/* Submission Form */}
-                  <div className="assessment-submission-form">
-                    <h4>Your Submission</h4>
-
-                    <div className="form-group">
-                      <label className="form-label">Write your response / description</label>
-                      <textarea
-                        className="form-textarea"
-                        rows="8"
-                        placeholder="Describe your work, explain your approach, or provide any additional context..."
-                        value={assessmentSubmission.textSubmission}
-                        onChange={(e) => setAssessmentSubmission({ ...assessmentSubmission, textSubmission: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Attach Files / Documents</label>
-                      <div className="file-upload-area">
-                        <input
-                          type="file"
-                          id="assessment-file-upload"
-                          multiple
-                          className="file-input"
-                          ref={assessmentFileInputRef}
-                          onChange={handleAssessmentFileUpload}
-                          style={{ display: 'none' }}
-                        />
-                        <label htmlFor="assessment-file-upload" className="file-upload-label">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                          </svg>
-                          Click to upload files or drag and drop
-                        </label>
+                  {/* Submission Form OR Status View */}
+                  {selectedAssessment.mySubmission && (selectedAssessment.mySubmission.status === 'submitted' || selectedAssessment.mySubmission.status === 'completed') ? (
+                    <div className="assessment-submission-form disabled-submission" style={{ opacity: 0.6, pointerEvents: 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <h4 style={{ margin: 0 }}>Your Submission</h4>
+                        <span style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: selectedAssessment.mySubmission.status === 'completed' ? '#166534' : '#1e40af',
+                          background: selectedAssessment.mySubmission.status === 'completed' ? '#dcfce7' : '#dbeafe',
+                          padding: '4px 12px',
+                          borderRadius: '12px'
+                        }}>
+                          {selectedAssessment.mySubmission.status === 'completed' ? '✓ Completed' : '✓ Submitted'}
+                        </span>
                       </div>
 
-                      {assessmentSubmission.attachments.length > 0 && (
-                        <div className="attachments-list" style={{ marginTop: '12px' }}>
-                          {assessmentSubmission.attachments.map((attachment, idx) => (
-                            <div key={idx} className="attachment-item">
-                              <div className="attachment-icon">
-                                {attachment.type === 'pdf' && '📄'}
-                                {attachment.type === 'js' && '📜'}
-                                {attachment.type === 'ts' && '📘'}
-                                {attachment.type === 'figma' && '🎨'}
-                                {attachment.type === 'zip' && '📦'}
-                                {!['pdf', 'js', 'ts', 'figma', 'zip'].includes(attachment.type) && '📎'}
+                      <div className="form-group">
+                        <label className="form-label">Write your response / description</label>
+                        <textarea
+                          className="form-textarea"
+                          rows="8"
+                          placeholder="Describe your work, explain your approach, or provide any additional context..."
+                          value={selectedAssessment.mySubmission.text_submission || selectedAssessment.mySubmission.submission_text || ''}
+                          readOnly
+                          style={{ background: '#f8fafc', color: '#64748b' }}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Attach Files / Documents</label>
+
+                        {/* If attachments exist, show them */}
+                        {selectedAssessment.mySubmission.attachments && selectedAssessment.mySubmission.attachments.length > 0 ? (
+                          <div className="attachments-list" style={{ marginTop: '12px' }}>
+                            {selectedAssessment.mySubmission.attachments.map((attachment, idx) => (
+                              <div key={idx} className="attachment-item">
+                                <div className="attachment-icon">📎</div>
+                                <div className="attachment-info">
+                                  <span className="attachment-name">{attachment.name || `Attachment ${idx + 1}`}</span>
+                                </div>
                               </div>
-                              <div className="attachment-info">
-                                <span className="attachment-name">{attachment.name}</span>
-                                <span className="attachment-size">{attachment.size}</span>
-                              </div>
-                              <button
-                                className="btn-danger btn-small"
-                                onClick={() => handleRemoveAssessmentAttachment(idx)}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed #cbd5e1', borderRadius: '8px', color: '#94a3b8', fontSize: '13px' }}>
+                            No files attached
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="assessment-view-actions">
+                        <button
+                          className="btn-secondary btn-full"
+                          disabled
+                          style={{
+                            opacity: 1,
+                            background: '#e2e8f0',
+                            color: '#475569',
+                            cursor: 'not-allowed',
+                            fontWeight: '600',
+                            border: '1px solid #cbd5e1',
+                            height: '44px' // Ensure normal height
+                          }}
+                        >
+                          Already Submitted
+                        </button>
+                        <button
+                          className="btn-secondary btn-full"
+                          style={{ pointerEvents: 'auto', opacity: 1, cursor: 'pointer' }}
+                          onClick={() => {
+                            setSelectedAssessment(null)
+                            setAssessmentSubmission({ textSubmission: '', attachments: [] })
+                          }}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="assessment-submission-form">
+                      <h4>Your Submission</h4>
+
+                      <div className="form-group">
+                        <label className="form-label">Write your response / description</label>
+                        <textarea
+                          className="form-textarea"
+                          rows="8"
+                          placeholder="Describe your work, explain your approach, or provide any additional context..."
+                          value={assessmentSubmission.textSubmission}
+                          onChange={(e) => setAssessmentSubmission({ ...assessmentSubmission, textSubmission: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Attach Files / Documents</label>
+                        <div className="file-upload-area">
+                          <input
+                            type="file"
+                            id="assessment-file-upload"
+                            multiple
+                            className="file-input"
+                            ref={assessmentFileInputRef}
+                            onChange={handleAssessmentFileUpload}
+                            style={{ display: 'none' }}
+                          />
+                          <label htmlFor="assessment-file-upload" className="file-upload-label">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="17 8 12 3 7 8"></polyline>
+                              <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Click to upload files or drag and drop
+                          </label>
                         </div>
-                      )}
 
-                      {/* Assessment List Moved Out */}
-                    </div>
+                        {assessmentSubmission.attachments.length > 0 && (
+                          <div className="attachments-list" style={{ marginTop: '12px' }}>
+                            {assessmentSubmission.attachments.map((attachment, idx) => (
+                              <div key={idx} className="attachment-item">
+                                <div className="attachment-icon">
+                                  {attachment.type === 'pdf' && '📄'}
+                                  {attachment.type === 'js' && '📜'}
+                                  {attachment.type === 'ts' && '📘'}
+                                  {attachment.type === 'figma' && '🎨'}
+                                  {attachment.type === 'zip' && '📦'}
+                                  {!['pdf', 'js', 'ts', 'figma', 'zip'].includes(attachment.type) && '📎'}
+                                </div>
+                                <div className="attachment-info">
+                                  <span className="attachment-name">{attachment.name}</span>
+                                  <span className="attachment-size">{attachment.size}</span>
+                                </div>
+                                <button
+                                  className="btn-danger btn-small"
+                                  onClick={() => handleRemoveAssessmentAttachment(idx)}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="assessment-view-actions">
-                      <button
-                        className="btn-primary btn-full"
-                        onClick={handleSubmitAssessment}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="22" y1="2" x2="11" y2="13"></line>
-                          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
-                        Submit Assessment
-                      </button>
-                      <button
-                        className="btn-secondary btn-full"
-                        onClick={() => {
-                          setSelectedAssessment(null)
-                          setAssessmentSubmission({ textSubmission: '', attachments: [] })
-                        }}
-                      >
-                        Cancel
-                      </button>
+                      <div className="assessment-view-actions">
+                        <button
+                          className="btn-primary btn-full"
+                          onClick={handleSubmitAssessment}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                          </svg>
+                          Submit Assessment
+                        </button>
+                        <button
+                          className="btn-secondary btn-full"
+                          onClick={() => {
+                            setSelectedAssessment(null)
+                            setAssessmentSubmission({ textSubmission: '', attachments: [] })
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1394,7 +1536,8 @@ function StudentLiveClassroom({ course, onBack }) {
                               id: assessment.id,
                               assessmentTitle: assessment.title || 'Untitled Assessment',
                               assessmentDescription: assessment.description || '',
-                              assessmentDueDate: assessment.due_date || assessment.created_at
+                              assessmentDueDate: assessment.due_date || assessment.created_at,
+                              mySubmission: assessment.mySubmission // Critical: Pass submission status
                             }
                             console.log('✨ [DEBUG] Setting selectedAssessment:', mapped)
 
@@ -1418,7 +1561,15 @@ function StudentLiveClassroom({ course, onBack }) {
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.title}</h4>
-                            <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', background: '#ecfdf5', color: '#047857' }}>Pending</span>
+                            <span style={{
+                              fontSize: '12px',
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              background: assessment.mySubmission?.status === 'completed' ? '#dcfce7' : assessment.mySubmission?.status === 'submitted' ? '#dbeafe' : '#f1f5f9',
+                              color: assessment.mySubmission?.status === 'completed' ? '#166534' : assessment.mySubmission?.status === 'submitted' ? '#1e40af' : '#64748b'
+                            }}>
+                              {assessment.mySubmission?.status ? (assessment.mySubmission.status.charAt(0).toUpperCase() + assessment.mySubmission.status.slice(1)) : 'Pending'}
+                            </span>
                           </div>
                           <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {assessment.description}

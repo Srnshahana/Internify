@@ -1014,7 +1014,7 @@ export default function LandingPage({
                 </span>
               </div>
 
-              <div className="hero-actions-v3 reveal reveal-up">
+              <div className="hero-actions-v3">
                 <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
                   View Courses
                   <span className="material-symbols-outlined icon-right">arrow_forward</span>

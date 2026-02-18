@@ -52,6 +52,7 @@ function MentorLiveClassroom({ course, onBack }) {
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [submissions, setSubmissions] = useState([])
   const [selectedSubmission, setSelectedSubmission] = useState(null)
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false)
 
   useEffect(() => {
     if (showAssessmentListModal) {
@@ -1011,29 +1012,84 @@ function MentorLiveClassroom({ course, onBack }) {
 
   const fetchSubmissions = async (assessmentId) => {
     console.log('🔄 fetching submissions for assessmentId:', assessmentId)
+    if (!assessmentId) return
+
     try {
-      const { data, error } = await supabase
+      // 1. Fetch submissions first (WITHOUT JOINS to avoid FK errors)
+      const { data: submissionsData, error: subError } = await supabase
         .from('assessment_submissions')
-        .select(`
-            *,
-            student:student_id (name, email), 
-            assessment_attachments (*)
-          `)
+        .select('*')
         .eq('assessment_id', assessmentId)
 
-      if (error) {
-        console.error('❌ Error fetching submissions:', error)
-        throw error
+      if (subError) {
+        console.error('❌ Error fetching submissions:', subError)
+        throw subError
       }
-      console.log('📥 fetched submissions:', data)
-      setSubmissions(data || [])
+
+      let processedSubmissions = submissionsData || []
+      console.log('📄 Raw submissions count:', processedSubmissions.length)
+
+      // 2. Manually fetch Student Profiles & Attachments
+      if (processedSubmissions.length > 0) {
+        const studentIds = [...new Set(processedSubmissions.map(s => s.student_id).filter(Boolean))]
+        const submissionIds = processedSubmissions.map(s => s.id)
+
+        let studentsData = []
+        let attachmentsData = []
+
+        // A. Fetch Student Profiles
+        if (studentIds.length > 0) {
+          const { data, error } = await supabase
+            .from('student_details')
+            .select('student_id, name, profile_image')
+            .in('student_id', studentIds)
+
+          if (error) console.warn('⚠️ Could not fetch student profiles:', error)
+          else studentsData = data || []
+        }
+
+        // B. Fetch Attachments
+        if (submissionIds.length > 0) {
+          const { data, error } = await supabase
+            .from('assessment_attachments')
+            .select('*')
+            .in('submission_id', submissionIds)
+
+          if (error) console.warn('⚠️ Could not fetch attachments:', error)
+          else attachmentsData = data || []
+        }
+
+        // C. Merge everything back
+        processedSubmissions = processedSubmissions.map(sub => {
+          // Robust ID comparison (String conversion)
+          const studentProfile = studentsData.find(u => String(u.student_id) === String(sub.student_id))
+
+          const subAttachments = attachmentsData.filter(att => String(att.submission_id) === String(sub.id))
+
+          return {
+            ...sub,
+            student: {
+              name: studentProfile?.name || 'Unknown Student',
+              email: '',
+              profile_image: studentProfile?.profile_image
+            },
+            assessment_attachments: subAttachments
+          }
+        })
+      }
+
+      console.log('📥 Final processed submissions:', processedSubmissions)
+      setSubmissions(processedSubmissions)
     } catch (error) {
       console.error('Error fetching submissions (catch):', error)
+      // Do not clear submissions on error if you want to inspect, but here we want to avoid stale state.
+      // Maybe show empty or previous state? Let's show specific error message in UI if possible, but for now empty.
       setSubmissions([])
     }
   }
 
   const handleMarkComplete = async (submissionId) => {
+    setIsMarkingComplete(true)
     try {
       const { error } = await supabase
         .from('assessment_submissions')
@@ -1043,9 +1099,14 @@ function MentorLiveClassroom({ course, onBack }) {
       if (error) throw error
 
       setSubmissions(prev => prev.map(s => s.id === submissionId ? { ...s, status: 'completed' } : s))
-      alert('Marked as complete!')
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'completed' }))
+      }
     } catch (error) {
       console.error('Error marking submission complete:', error)
+      alert('Failed to mark as complete')
+    } finally {
+      setIsMarkingComplete(false)
     }
   }
 
@@ -1825,10 +1886,16 @@ function MentorLiveClassroom({ course, onBack }) {
     </div>
       {/* Mentor Assessment Review Modal */}
       {selectedAssessment && (
-        <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl relative">
-            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-              <h2 className="text-xl font-bold text-gray-800">
+        <div className="mentor-assessment-modal-overlay" onClick={() => {
+          setSelectedAssessment(null)
+          setSelectedSubmission(null)
+        }}>
+          <div
+            className="mentor-assessment-modal-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mentor-modal-header">
+              <h2 className="mentor-modal-title">
                 {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
               </h2>
               <button
@@ -1836,139 +1903,184 @@ function MentorLiveClassroom({ course, onBack }) {
                   if (selectedSubmission) setSelectedSubmission(null)
                   else setSelectedAssessment(null)
                 }}
-                className="text-gray-500 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+                className="mentor-modal-close-btn"
                 title="Close"
               >
                 ✕
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <div className="mentor-modal-body">
               {selectedSubmission ? (
                 // Single Submission View
-                <div className="space-y-6 max-w-3xl mx-auto">
-                  <div className="flex items-center gap-4 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl">
+                <div className="mentor-submission-view">
+                  <div className="mentor-student-submission-header">
+                    <div className="student-avatar-large">
                       {selectedSubmission.student?.name?.charAt(0) || 'S'}
                     </div>
                     <div>
-                      <h3 className="font-bold text-xl text-gray-900">{selectedSubmission.student?.name || 'Student'}</h3>
-                      <p className="text-gray-600">{selectedSubmission.student?.email}</p>
-                      <p className="text-sm text-gray-500 mt-1">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
+                      <h3 className="student-name-large">{selectedSubmission.student?.name || 'Student'}</h3>
+                      <p className="student-email">{selectedSubmission.student?.email}</p>
+                      <p className="submission-meta">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
                     </div>
-                    <div className="ml-auto flex flex-col items-end gap-2">
-                      <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${selectedSubmission.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    <div className="submission-status-badge-wrapper">
+                      <span className={`status-badge-large ${selectedSubmission.status === 'completed' ? 'badge-completed' : 'badge-pending'
                         }`}>
                         {selectedSubmission.status === 'completed' ? 'Completed' : 'Pending Review'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                      <h3 className="font-bold text-gray-800">Text Submission</h3>
+                  <div className="mentor-text-submission-card">
+                    <div className="card-header">
+                      <h3 className="card-title">Text Submission</h3>
                     </div>
-                    <div className="p-6 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                      {selectedSubmission.text_submission || <span className="text-gray-400 italic">No text provided.</span>}
-                    </div>
+                    {(() => {
+                      const text = selectedSubmission.text_submission
+                      if (!text) return <div className="card-body text-content"><span className="no-content">No text provided.</span></div>
+
+                      const parts = text.split(/(\!\[.*?\]\(.*?\)|\[.*?\]\(.*?\))/)
+                      return (
+                        <div className="card-body text-content">
+                          {parts.map((part, index) => {
+                            const imageMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
+                            if (imageMatch) {
+                              const [_, alt, url] = imageMatch
+                              const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+                              if (isImage) {
+                                return (
+                                  <div key={index} style={{ margin: '12px 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                    <img
+                                      src={url}
+                                      alt={alt}
+                                      style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
+                                    />
+                                  </div>
+                                )
+                              }
+                              return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>{alt || url}</a>
+                            }
+                            return <span key={index}>{part}</span>
+                          })}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {selectedSubmission.assessment_attachments?.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                        <h3 className="font-bold text-gray-800">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
+                    <div className="mentor-attachments-card">
+                      <div className="card-header">
+                        <h3 className="card-title">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
                       </div>
-                      <div className="p-4 space-y-3">
-                        {selectedSubmission.assessment_attachments.map(att => (
-                          <div key={att.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 hover:border-blue-200 transition-all group">
-                            <span className="text-2xl">📎</span>
-                            <div className="flex-1">
-                              <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="text-gray-900 font-medium hover:text-blue-600 hover:underline block">
-                                {att.file_name}
-                              </a>
-                              <span className="text-xs text-gray-500">Document</span>
+                      <div className="card-body attachments-list">
+                        {selectedSubmission.assessment_attachments.map(att => {
+                          const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(att.file_name)
+                          return (
+                            <div key={att.id} className="attachment-item" style={{ flexDirection: isImage ? 'column' : 'row', alignItems: isImage ? 'flex-start' : 'center' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <span className="icon">{isImage ? '�️' : '�📎'}</span>
+                                <div className="file-info">
+                                  <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="file-name">
+                                    {att.file_name}
+                                  </a>
+                                  <span className="file-type">{isImage ? 'Image' : 'Document'}</span>
+                                </div>
+                                <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="download-btn">
+                                  ⬇️
+                                </a>
+                              </div>
+                              {isImage && (
+                                <div style={{ marginTop: '12px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                  <img
+                                    src={att.file_url}
+                                    alt={att.file_name}
+                                    style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
+                                  />
+                                </div>
+                              )}
                             </div>
-                            <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                              ⬇️
-                            </a>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   )}
 
                   {selectedSubmission.status !== 'completed' && (
-                    <div className="pt-6 border-t mt-8">
+                    <div className="mentor-action-footer">
                       <button
                         onClick={() => handleMarkComplete(selectedSubmission.id)}
-                        className="w-full py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="mark-complete-btn"
+                        disabled={isMarkingComplete}
+                        style={{
+                          opacity: isMarkingComplete ? 0.7 : 1,
+                          cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
+                        }}
                       >
-                        ✓ Mark as Complete
+                        {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
                 // Assessment Details & Submissions List View
-                <div className="space-y-8 max-w-5xl mx-auto">
+                <div className="mentor-assessment-details-view">
                   {/* Assessment Details Card */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-                      <div className="md:col-span-2 space-y-4">
+                  <div className="mentor-details-card">
+                    <div className="mentor-details-grid">
+                      <div className="mentor-main-info">
                         <div>
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedAssessment.title}</h3>
-                          <p className="text-gray-600 leading-relaxed text-base">{selectedAssessment.description}</p>
+                          <h3 className="mentor-assessment-title">{selectedAssessment.title}</h3>
+                          <p className="mentor-assessment-description">{selectedAssessment.description}</p>
                         </div>
                       </div>
-                      <div className="bg-blue-50 p-4 rounded-lg space-y-3 h-fit">
-                        <div>
-                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Course ID</span>
-                          <span className="font-medium text-gray-900">{selectedAssessment.course_id}</span>
+                      <div className="mentor-meta-info">
+                        <div className="meta-item">
+                          <span className="meta-label">Course ID</span>
+                          <span className="meta-value">{selectedAssessment.course_id}</span>
                         </div>
-                        <div>
-                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Due Date</span>
-                          <span className="font-medium text-gray-900">{formatDate(selectedAssessment.due_date)}</span>
+                        <div className="meta-item">
+                          <span className="meta-label">Due Date</span>
+                          <span className="meta-value">{formatDate(selectedAssessment.due_date)}</span>
                         </div>
-                        <div>
-                          <span className="text-blue-600 text-xs font-bold uppercase tracking-wide block mb-1">Status</span>
-                          <span className="font-medium text-gray-900">Active</span>
+                        <div className="meta-item">
+                          <span className="meta-label">Status</span>
+                          <span className="meta-value">Active</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-xl text-gray-900">Student Submissions</h3>
-                      <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">{submissions.length} Total</span>
+                    <div className="mentor-submissions-header">
+                      <h3>Student Submissions</h3>
+                      <span className="submission-count">{submissions.length} Total</span>
                     </div>
 
                     {submissions.length === 0 ? (
-                      <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-                        <span className="text-4xl block mb-4">📂</span>
-                        <p className="text-gray-500 text-lg font-medium">No submissions yet.</p>
-                        <p className="text-gray-400 text-sm mt-1">When students submit their work, it will appear here.</p>
+                      <div className="mentor-no-submissions">
+                        <span className="icon">📂</span>
+                        <p className="main-text">No submissions yet.</p>
+                        <p className="sub-text">When students submit their work, it will appear here.</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="mentor-submissions-grid">
                         {submissions.map(sub => (
-                          <div key={sub.id} className="bg-white p-5 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group flex flex-col" onClick={() => setSelectedSubmission(sub)}>
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                          <div key={sub.id} className="mentor-submission-card" onClick={() => setSelectedSubmission(sub)}>
+                            <div className="submission-card-header">
+                              <div className="student-avatar-small">
                                 {sub.student?.name?.charAt(0) || 'S'}
                               </div>
-                              <div className="overflow-hidden">
-                                <p className="font-bold text-gray-900 truncate">{sub.student?.name || 'Student'}</p>
-                                <p className="text-xs text-gray-500">{formatDate(sub.submitted_at)}</p>
+                              <div className="student-info-small">
+                                <p className="student-name">{sub.student?.name || 'Student'}</p>
+                                <p className="submission-date">{formatDate(sub.submitted_at)}</p>
                               </div>
                             </div>
 
-                            <div className="mt-auto flex justify-between items-center pt-3 border-t border-gray-100">
-                              <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${sub.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
-                                }`}>
+                            <div className="submission-card-footer">
+                              <span className={`mini-status ${sub.status === 'completed' ? 'status-completed' : 'status-pending'}`}>
                                 {sub.status}
                               </span>
-                              <span className="text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                              <span className="review-link">
                                 Review ➔
                               </span>
                             </div>
@@ -1981,8 +2093,9 @@ function MentorLiveClassroom({ course, onBack }) {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </div >
+      )
+      }
     </>
   )
 }
