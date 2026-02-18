@@ -39397,7 +39397,8 @@ html {
 
 /* Hero Section V3 */
 .hero-section-v3 {
-  /* padding: 5rem 1.5rem 0; */
+  /* padding: 5rem 1.5rem; */
+  min-height: 100vh;
   /* Remove top/bottom padding as flex centers it */
   background: #ffffff;
   display: flex;
@@ -39408,15 +39409,15 @@ html {
 }
 
 .hero-dark-card {
-  max-width: 1550px;
-  width: 92%;
+  max-width: none;
+  width: 90%;
   background: linear-gradient(135deg, #0f3d46 0%, #062329 100%);
   /* Deep Teal/Dark Blue Gradient */
   border-radius: 2.5rem;
   /* padding: clamp(2rem, 5vh, 6rem) clamp(1.5rem, 5vw, 5rem); */
   padding: 3rem;
   height: auto;
-  min-height: 0;
+  min-height: calc(100vh - 8rem);
   /* Let content dictate height */
   display: flex;
   flex-direction: column;
@@ -39427,6 +39428,18 @@ html {
   position: relative;
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 1200px) {
+  .hero-dark-card {
+    min-height: 550px;
+    padding-top: 8%;
+    padding-bottom: 8rem;
+  }
+
+  .hero-title-v3 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+  }
 }
 
 /* Add a subtle overlay image or gradient if needed to match the 'cloudy' look in reference */
@@ -39443,7 +39456,7 @@ html {
 
 .hero-title-v3 {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
   color: #ffffff;
   line-height: 1.05;
