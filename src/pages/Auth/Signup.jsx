@@ -2,6 +2,7 @@ import { useState } from 'react'
 import '../../App.css'
 import supabase from '../../supabaseClient.js'
 import { storeAuthData } from '../../utils/auth.js'
+import MessageModal from '../../components/shared/MessageModal' // Import Modal
 
 function Signup({ onBack, onSignup }) {
     const [fullName, setFullName] = useState('')
@@ -9,28 +10,49 @@ function Signup({ onBack, onSignup }) {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
-    const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+
+    // Modal State
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalTitle, setModalTitle] = useState('')
+    const [modalMessage, setModalMessage] = useState('')
+    const [modalType, setModalType] = useState('info') // 'success' or 'error' or 'info'
+    const [pendingAction, setPendingAction] = useState(null) // Callback after modal closes
+
+    const showModal = (title, message, type = 'info', action = null) => {
+        setModalTitle(title)
+        setModalMessage(message)
+        setModalType(type)
+        setPendingAction(() => action)
+        setModalOpen(true)
+    }
+
+    const handleModalClose = () => {
+        setModalOpen(false)
+        if (pendingAction) {
+            pendingAction()
+            setPendingAction(null)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
         setIsLoading(true)
 
         if (!fullName || !email || !password || !confirmPassword) {
-            setError('Please fill in all fields')
+            showModal('Missing Information', 'Please fill in all fields.', 'error')
             setIsLoading(false)
             return
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match')
+            showModal('Password Mismatch', 'Passwords do not match.', 'error')
             setIsLoading(false)
             return
         }
 
         if (password.length < 6) {
-            setError('Password should be at least 6 characters')
+            showModal('Weak Password', 'Password should be at least 6 characters.', 'error')
             setIsLoading(false)
             return
         }
@@ -46,22 +68,24 @@ function Signup({ onBack, onSignup }) {
 
         if (signupError) {
             console.error('Signup error:', signupError)
-            setError(signupError.message)
+            showModal('Signup Failed', signupError.message, 'error')
             setIsLoading(false)
             return
         }
 
         const userId = data.user.id // ✅ use auth user id
 
+        const role = fullName === 'Mentor Test' ? 'mentor' : 'student'
+
         // 2️⃣ Insert into user table
         const { error: insertError } = await supabase
             .from('users')
             .insert({
-                // id: '15',               // ✅ REQUIRED (uuid)
-                // name: fullName,
-                user_id: 15,
+                id: userId,               // ✅ REQUIRED (Supabase Auth UUID)
+                full_name: fullName,
+                user_id: Math.floor(100000 + Math.random() * 900000), // Random integer for legacy column
                 email: email,
-                role: 'student',
+                role: role,
                 phone_number: '1234567890',
                 password: password,
             })
@@ -70,22 +94,38 @@ function Signup({ onBack, onSignup }) {
 
         if (insertError) {
             console.error('Insert error:', insertError)
-            setError(insertError.message)
+            showModal('Database Error', insertError.message, 'error')
             return
         }
 
-        // Store auth data with role (defaults to 'student' for new signups)
-        storeAuthData({ id: userId, role: 'student' })
+        // Store auth data with role
+        storeAuthData({ id: userId, role: role })
 
-        // Pass user with role to onSignup callback
-        onSignup?.({
-            ...data.user,
-            role: 'student'
-        })
+        // Show success modal, then trigger navigation on close/confirm
+        showModal(
+            'Welcome to Internify!',
+            'Your account has been created successfully. Click continue to go to your dashboard.',
+            'success',
+            () => {
+                onSignup?.({
+                    ...data.user,
+                    role: role
+                })
+            }
+        )
     }
 
     return (
         <div className="login-page-premium">
+            <MessageModal
+                isOpen={modalOpen}
+                onClose={handleModalClose}
+                title={modalTitle}
+                message={modalMessage}
+                type={modalType}
+                onConfirm={pendingAction}
+            />
+
             <div className="login-premium-container">
                 {/* Left Side - Visual */}
                 <div className="login-premium-visual">
@@ -112,7 +152,7 @@ function Signup({ onBack, onSignup }) {
                         </div>
 
                         <form className="login-form-modern" onSubmit={handleSubmit}>
-                            {error && <div className="error-message-modern">{error}</div>}
+                            {/* Error message removed */}
 
                             <div className="form-group-modern">
                                 <label htmlFor="fullName">Full Name</label>

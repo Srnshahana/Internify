@@ -64,6 +64,13 @@ export default function Payment({ onBack, onPaymentSuccess, course, mentorId }) 
         return;
       }
 
+      // NEW: Double check role
+      if (authData.role === 'mentor') {
+        alert("Mentors cannot purchase courses.");
+        setIsProcessing(false);
+        return;
+      }
+
 
       // Get the database user_id (int8) from the user object
       const userId = authData.user?.id || authData.user;

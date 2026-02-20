@@ -9,17 +9,17 @@ function Login({ onBack, onShowSignup }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
+  // const [error, setError] = useState('') // Removed
   const [isLoading, setIsLoading] = useState(false)
 
   const theme = 'light'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    // setError(''); // Removed
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      showModal('Missing Information', 'Please fill in all fields.', 'error')
       return;
     }
 
@@ -37,12 +37,12 @@ function Login({ onBack, onShowSignup }) {
     console.log('Supabase Auth Error:', authError);
 
     if (authError) {
-      setError(authError.message);
+      showModal('Login Failed', authError.message, 'error')
       return;
     }
 
     if (!authData.user) {
-      setError('User not found');
+      showModal('User Not Found', 'No user found with these credentials.', 'error')
       return;
     }
 
@@ -51,7 +51,7 @@ function Login({ onBack, onShowSignup }) {
     const role = await fetchUserRole(authData.user.email);
 
     if (!role) {
-      setError('Failed to fetch user role');
+      showModal('Role Error', 'Failed to fetch user role. Please contact support.', 'error')
       return;
     }
 
@@ -63,6 +63,20 @@ function Login({ onBack, onShowSignup }) {
     console.log('Checking for pending course:', pendingCourse)
 
     if (pendingCourse) {
+      // Security Check: If user is a mentor, they cannot buy courses per business logic
+      if (role === 'mentor') {
+        showModal(
+          'Action Restricted',
+          "Mentors cannot enroll in courses. You have been redirected to your dashboard.",
+          'error',
+          () => {
+            sessionStorage.removeItem('pendingCourse')
+            navigate('/mentor-dashboard')
+          }
+        )
+        return
+      }
+
       // Clear the pending course and navigate to payment
       const course = JSON.parse(pendingCourse)
       console.log('Found pending course, navigating to payment:', course)
@@ -80,6 +94,14 @@ function Login({ onBack, onShowSignup }) {
   };
   return (
     <div className="login-page-premium">
+      <MessageModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        title={modalTitle}
+        message={modalMessage}
+        type={modalType}
+        onConfirm={pendingAction}
+      />
       <div className="login-premium-container">
         {/* Left Side - Image/Brand */}
         <div className="login-premium-visual">
@@ -106,11 +128,7 @@ function Login({ onBack, onShowSignup }) {
             </div>
 
             <form className="login-form-modern" onSubmit={handleSubmit}>
-              {error && (
-                <div className="error-message-modern">
-                  {error}
-                </div>
-              )}
+              {/* Error message removed */}
 
               <div className="form-group-modern">
                 <label htmlFor="email">Email Address</label>

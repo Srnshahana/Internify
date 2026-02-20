@@ -486,6 +486,38 @@ export default function LandingPage({
 }) {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    // Force play on mount to handle browser autoplay policies
+    const video = videoRef.current;
+    if (video) {
+      console.log("Attempting to force autoplay...");
+      // Explicitly set muted property on the DOM element
+      video.muted = true;
+      video.playsInline = true;
+
+      const playPromise = video.play();
+
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log("Video playing successfully");
+        }).catch(error => {
+          console.error("Video autoplay failed:", error);
+          // Retry on user interaction if needed, but for now just log
+        });
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && videoRef.current) {
+        videoRef.current.play().catch(console.error);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
   /* State for dynamic data */
   /* State for dynamic data */
   const [topCourses, setTopCourses] = useState(courses)
@@ -966,7 +998,13 @@ export default function LandingPage({
         <section className="hero-section-v3">
           <div className="hero-dark-card" style={{ position: 'relative', overflow: 'hidden' }}>
             <video
+              ref={videoRef}
               className="hero-video-bg"
+              onCanPlay={() => {
+                if (videoRef.current) {
+                  videoRef.current.play().catch(console.error);
+                }
+              }}
               autoPlay
               loop
               muted
@@ -1008,8 +1046,11 @@ export default function LandingPage({
                   type="text"
                   placeholder="Search mentors , skills ..."
                   className="hero-input-v3"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <span className="search-icon-v3">
+                <span className="search-icon-v3" onClick={handleSearch} style={{ cursor: 'pointer' }}>
                   <span className="material-symbols-outlined">search</span>
                 </span>
               </div>
@@ -1137,7 +1178,7 @@ export default function LandingPage({
         <section className="about-us-section landing-section">
           {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> */}
           {/* Static About Us Content Restored */}
-          <div className="about-content reveal reveal-left">
+          <div className="about-content">
             <h2 className="section-title-v3">About Us</h2>
             <p className="about-text">
               Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience.
@@ -1147,7 +1188,7 @@ export default function LandingPage({
           </div>
 
           {/* Slider Moved to "Box" (Image Container area) */}
-          <div className="about-slider-box reveal reveal-right stagger-1">
+          <div className="about-slider-box">
             <div
               className={`about-carousel-track ${isDragging ? 'dragging' : ''}`}
               style={{
@@ -1363,7 +1404,7 @@ export default function LandingPage({
             <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
           </div>
           <div className="get-hired-grid">
-            <div className="feature-card reveal reveal-slow reveal-left stagger-1">
+            <div className="feature-card reveal reveal-backflip stagger-1">
               <div className="feature-icon-wrapper icon-hired">
                 <span className="material-symbols-outlined">rocket_launch</span>
               </div>
@@ -1374,7 +1415,7 @@ export default function LandingPage({
               <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
             </div>
 
-            <div className="feature-card reveal reveal-slow reveal-right stagger-2">
+            <div className="feature-card reveal reveal-backflip stagger-2">
               <div className="feature-icon-wrapper icon-mentor">
                 <span className="material-symbols-outlined">school</span>
               </div>

@@ -292,7 +292,7 @@ function SignupPage() {
     console.log('Signup success:', user)
     setUserRole('student')
     setIsLoggedIn(true)
-    navigate('/payment')
+    navigate('/dashboard')
   }
 
   if (isLoggedIn) {
@@ -326,6 +326,12 @@ function PaymentPage() {
       if (storedAuth) {
         const authUser = await getAuthenticatedUser()
         if (authUser) {
+          // Security Check: Mentors cannot be here
+          if (authUser.role === 'mentor') {
+            alert("Mentors cannot access the payment page.")
+            navigate('/mentor-dashboard')
+            return
+          }
           setIsLoggedIn(true)
           setUserRole(authUser.role)
         } else {
@@ -340,11 +346,7 @@ function PaymentPage() {
 
   const handlePaymentSuccess = () => {
     setIsLoggedIn(true)
-    if (userRole === 'mentor') {
-      navigate('/mentor-dashboard')
-    } else {
-      navigate('/dashboard')
-    }
+    navigate('/dashboard')
   }
 
   if (!isLoggedIn) {

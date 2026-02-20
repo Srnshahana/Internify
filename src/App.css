@@ -1353,16 +1353,16 @@ body {
 }
 
 .landing-page-new {
-  height: 100vh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: visible;
+  /* Removed scroll-snap to fix scrolling issues  */
 }
 
 .landing-section,
 .hero-section-v3,
 .footer-redesign {
-  scroll-snap-align: start;
+  /* scroll-snap-align: start; Removed */
   min-height: 100vh;
   /* Ensure sections don't collapse if content is short, but grow if long */
   display: flex;
@@ -1376,7 +1376,7 @@ body {
 .footer-redesign {
   min-height: auto;
   /* Footer might be shorter, let it snap to end/start depending on preference */
-  scroll-snap-align: end;
+  /* scroll-snap-align: end; Removed */
   /* Snap to bottom of footer */
 }
 
@@ -1435,16 +1435,16 @@ body {
 }
 
 .landing-page-new {
-  height: 100vh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: visible;
+  /* Removed scroll-snap to fix scrolling issues  */
 }
 
 .landing-section,
 .hero-section-v3,
 .footer-redesign {
-  scroll-snap-align: start;
+  /* scroll-snap-align: start; Removed */
   min-height: 100vh;
   /* Ensure sections don't collapse if content is short, but grow if long */
   display: flex;
@@ -19642,7 +19642,7 @@ h1 span {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.6) 0%, rgba(139, 92, 246, 0.6) 100%);
+  background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -19779,7 +19779,7 @@ h1 span {
 }
 
 .featured-session-title {
-  font-size: 15px;
+  font-size: 1.2rem;
   /* Reduced from 17px */
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
@@ -26946,14 +26946,21 @@ h1 span {
 }
 
 .error-message-modern {
-  background: #fef2f2;
-  border: 1px solid #fee2e2;
-  color: #ef4444;
-  padding: 12px;
-  border-radius: 8px;
+  background: #fee2e2;
+  border: 1px solid #f87171;
+  border-left: 4px solid #dc2626;
+  /* Left accent for alert look */
+  color: #b91c1c;
+  padding: 12px 16px;
+  border-radius: 4px;
   font-size: 14px;
+  font-weight: 500;
   margin-bottom: 24px;
-  text-align: center;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Form Styles */
@@ -37890,7 +37897,7 @@ html {
 }
 
 .dashboard-welcome-text-v2 h1 {
-  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   /* Responsive scaling */
   font-weight: 800;
   color: #0f172a;
@@ -37999,8 +38006,8 @@ html {
 }
 
 .dashboard-card-title-v2 {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #1e293b;
   margin: 0;
 }
@@ -38028,8 +38035,8 @@ html {
 }
 
 .dashboard-section-title-v2 {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #0f172a;
   margin: 0;
 }
@@ -38136,7 +38143,7 @@ html {
   overflow: hidden;
   flex-direction: row;
   justify-content: space-between;
-  padding: 0 1.5rem;
+  padding: 0 4rem;
   border-radius: 12px;
   /* Subtle radius for mobile */
   box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
@@ -38187,6 +38194,8 @@ html {
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .ad-image-side {
@@ -38227,7 +38236,7 @@ html {
 .ad-banner-text {
   color: white;
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(1rem, 4vw, 1.8rem);
+  font-size: clamp(1rem, 4vw, 1.5rem);
   /* Slightly reduced max size for better fit with subtext */
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -38251,7 +38260,7 @@ html {
   font-size: clamp(0.75rem, 2vw, 0.95rem);
   line-height: 1.4;
   margin: 0 0 1rem 0;
-  max-width: 450px;
+  max-width: 80%;
   font-weight: 500;
 }
 
@@ -38289,6 +38298,11 @@ html {
     max-width: 65%;
   }
 
+  .ad-text-group {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
   .ad-image-side {
     flex: 0 0 35%;
   }
@@ -38315,7 +38329,7 @@ html {
   }
 
   .ad-banner-text {
-    font-size: 1rem;
+    /* Font size handled by base clamp */
   }
 
   .ad-banner-cta {
@@ -38348,8 +38362,7 @@ html {
   }
 
   .ad-banner-text {
-    font-size: 2.5rem;
-    /* Massive text for large screens */
+    /* Font size handled by base clamp */
     margin-bottom: 2rem;
     line-height: 1.1;
   }
@@ -39312,7 +39325,7 @@ html {
 }
 
 .course-name-v2 {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 0.5rem 0;

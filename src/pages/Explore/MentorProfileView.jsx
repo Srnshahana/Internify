@@ -261,6 +261,13 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                     const { data: { session } } = await supabase.auth.getSession()
                     const authId = localStorage.getItem('auth_id')
 
+                    // NEW: Check for mentor role
+                    const storedAuth = getStoredAuthData()
+                    if (storedAuth && storedAuth.role === 'mentor') {
+                      alert("Mentors cannot book courses. Please login as a student account to enroll.")
+                      return
+                    }
+
                     console.log('DEBUG: Session Check:', session)
                     console.log('DEBUG: Auth ID Check:', authId)
 
@@ -346,11 +353,11 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               </div>
             </div>
 
-            <div className="profile-actions-linkedin">
+            {/* <div className="profile-actions-linkedin">
               <button className="btn-linkedin-primary" onClick={() => onBookSession && onBookSession()}>Book Session</button>
               <button className="btn-linkedin-secondary">Send Message</button>
               <button className="btn-linkedin-tertiary">More</button>
-            </div>
+            </div> */}
           </div>
         </div>
 

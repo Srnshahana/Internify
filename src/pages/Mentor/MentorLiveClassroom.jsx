@@ -121,10 +121,12 @@ function MentorLiveClassroom({ course, onBack }) {
             // Infer type logic
             if (m.type === 'assessment') {
               try {
-                const details = JSON.parse(m.content)
+                const details = typeof m.content === 'string' && m.content.startsWith('{')
+                  ? JSON.parse(m.content)
+                  : m.content
                 Object.assign(m, details)
               } catch (e) {
-                // Fallback if content is just text or invalid JSON
+                console.warn('Failed to parse assessment content:', e)
               }
             }
             if (!m.type && m.file_url) {
@@ -1612,7 +1614,7 @@ function MentorLiveClassroom({ course, onBack }) {
 
           {/* Assessment List Modal for Mentors */}
           {showAssessmentListModal && (
-            <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentListModal(false)}>
+            <div className="live-assessment-modal-overlay" style={{ zIndex: 10001 }} onClick={() => setShowAssessmentListModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
                   <h2>Assessments</h2>

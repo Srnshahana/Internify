@@ -137,6 +137,26 @@ export const DashboardDataProvider = ({ children }) => {
                 })
 
                 console.log("transformed", transformed)
+
+                // DEBUG: Inject dummy course for testing if empty
+                if (transformed.length === 0) {
+                    transformed.push({
+                        id: 99999, // Integer to avoid Number() NaN crash
+                        enrollment_id: 99999,
+                        student_id: 'dummy-student',
+                        student_name: 'Test Student',
+                        mentor_id: authId,
+                        course_id: 88888, // Integer
+                        status: 'active',
+                        title: 'Debug React Course',
+                        description: 'A temporary course for debugging.',
+                        category: 'Development',
+                        mentor: 'Test Mentor',
+                        sessions: [],
+                        progress: 0
+                    })
+                }
+
                 setEnrolledCourses(transformed)
 
             } else {
