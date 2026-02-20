@@ -11,13 +11,23 @@ import Notification from './Notification.jsx'
 import Assessments from './Assessments.jsx'
 import MentorProfile from '../Explore/MentorProfileView.jsx'
 import { HomeIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon, GridIcon, FolderIcon, SettingsIcon, SearchIcon, CalendarIcon, ClassroomIcon } from '../../components/Icons.jsx'
+import OnboardingModal from '../../components/shared/OnboardingModal.jsx'
 import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 // import Sidebar from '../../components/shared/Sidebar.jsx' // Removed
 import '../../App.css'
 
 function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) {
-  const { loading, enrolledCourses } = useDashboardData()
+  const { loading, enrolledCourses, studentProfile, refetch } = useDashboardData()
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    if (!loading && (!studentProfile || !studentProfile.onboarding_completed)) {
+      setShowOnboarding(true)
+    } else {
+      setShowOnboarding(false)
+    }
+  }, [loading, studentProfile])
 
   if (loading) {
     return <Loading fullScreen={true} />
@@ -53,7 +63,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
           />
         )
       case 'Profile':
-        return <Profile onLogout={onLogout} />
+        return <Profile onLogout={onLogout} onNavigate={setActivePage} />
       case 'Notification':
         return <Notification />
       case 'Assessments':
@@ -65,10 +75,20 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
+      {showOnboarding && (
+        <OnboardingModal
+          profile={studentProfile}
+          onComplete={async () => {
+            await refetch()
+            setShowOnboarding(false)
+          }}
+          onClose={() => setShowOnboarding(false)}
+        />
+      )}
       {/* Top Header - Restored */}
       {/* Top Header - Restored */}
       {/* Top Header - Restored */}
-      {!isLiveClassroomActive && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Profile' && activePage !== 'Calendar' && (
+      {!isLiveClassroomActive && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Profile' && activePage !== 'Calendar' && activePage !== 'Explore' && (
         <StudentAppBar
           onLogout={onLogout}
           isTransparent={false} // Traditional opaque bar

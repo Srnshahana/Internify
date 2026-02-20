@@ -16,7 +16,7 @@ import adds3 from '../../assets/images/adds3.png'
 import bannerImage from '../../assets/images/banner.png'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
-import landingIllustration from '../../assets/images/landingpage-illlustration.png'
+import landingIllustration from '../../assets/images/landingpage-illlustration.svg'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import { useNavigate } from 'react-router-dom' // Added this import for useNavigate
@@ -65,9 +65,27 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       setIsCourseDetailActive(showCourseDetail)
     }
   }, [showCourseDetail, setIsCourseDetailActive])
+  // Map live enrolled courses via context data
+  const liveCourses = liveEnrolledCourses.map((enrollment, idx) => {
+    return {
+      ...enrollment,
+      id: enrollment.id || idx,
+      classes: enrollment.sessions || [], // Alias sessions to classes for components expecting both
+      assignmentsCount: enrollment.assignments?.length || 0
+    }
+  })
+
+  const enrolledCourses = liveCourses
+
+  // Get scheduled sessions from context and filter out completed ones
+  const allScheduled = scheduledSessions || []
+  const liveUpcomingSessions = allScheduled
+    .filter(s => !s.completed)
+    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+    .slice(0, 10)
+
   // Upcoming sessions data
-  // Upcoming sessions data
-  const upcomingSessions = homeUpcomingSessions
+  const upcomingSessions = liveUpcomingSessions.length > 0 ? liveUpcomingSessions : []
 
   // MERGED DATA for Stacked Cards:
   const allCombinedSessions = [
@@ -269,26 +287,6 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
   const toggleHomeDrawer = () => setIsHomeDrawerExpanded(!isHomeDrawerExpanded)
 
-  // Map live enrolled courses via context data
-
-  // Map live enrolled courses for display (context already provides transformed data)
-  const liveCourses = liveEnrolledCourses.map((enrollment, idx) => {
-    return {
-      ...enrollment,
-      id: enrollment.id || idx,
-      classes: enrollment.sessions || [], // Alias sessions to classes for components expecting both
-      assignmentsCount: enrollment.assignments?.length || 0
-    }
-  })
-
-  const enrolledCourses = liveCourses.length > 0 ? liveCourses : staticEnrolledCourses
-
-  // Get scheduled sessions from context and filter out completed ones
-  const allScheduled = scheduledSessions || []
-  const liveUpcomingSessions = allScheduled
-    .filter(s => !s.completed)
-    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
-    .slice(0, 10)
 
   // Calculate session completion progress
   const completedCount = allScheduled.filter(s => s.completed).length
@@ -594,7 +592,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       <header className="dashboard-header-v2">
         <div className="dashboard-profile-group">
           <img
-            src={studentProfile?.profile_image || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
+            src={studentProfile?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(studentProfile?.name || 'User')}&background=0D0D0D&color=fff`}
             alt="Profile"
             className="dashboard-profile-img-v2"
           />
@@ -666,44 +664,90 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
         </div>
 
         <div className="dashboard-carousel-v2">
-          {enrolledCourses.map((course, index) => (
-            <div
-              key={course.id}
-              className="dashboard-course-card-v2"
-              onClick={() => { setSelectedCourse(course); setShowCourseDetail(true); }}
-            >
-              <div className="course-card-v2" style={{ cursor: 'pointer' }}>
-                <div className="course-thumb-v2" style={{ height: '160px' }}>
-                  <img src={course.image} alt={course.title} />
-                  <div className="course-tag-v2">{course.level || 'Course'}</div>
-                  {course.status && (course.status === 'pending' || course.status === 'rejected') && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      background: course.status === 'pending' ? 'rgba(245, 158, 11, 0.9)' : 'rgba(239, 68, 68, 0.9)',
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      zIndex: 2,
-                      backdropFilter: 'blur(4px)',
-                      textTransform: 'capitalize'
-                    }}>
-                      {course.status}
+          {enrolledCourses.length > 0 ? (
+            enrolledCourses.map((course, index) => (
+              <div
+                key={course.id}
+                className="dashboard-course-card-v2"
+                onClick={() => { setSelectedCourse(course); setShowCourseDetail(true); }}
+              >
+                <div className="course-card-v2" style={{ cursor: 'pointer' }}>
+                  <div className="course-thumb-v2" style={{ height: '160px' }}>
+                    <img src={course.image} alt={course.title} />
+                    <div className="course-tag-v2">{course.level || 'Course'}</div>
+                    {course.status && (course.status === 'pending' || course.status === 'rejected') && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: course.status === 'pending' ? 'rgba(245, 158, 11, 0.9)' : 'rgba(239, 68, 68, 0.9)',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        zIndex: 2,
+                        backdropFilter: 'blur(4px)',
+                        textTransform: 'capitalize'
+                      }}>
+                        {course.status}
+                      </div>
+                    )}
+                  </div>
+                  <div className="course-content-v2">
+                    <h3 className="course-name-v2" style={{ fontSize: '1.1rem' }}>{course.title}</h3>
+                    <div className="course-meta-v2">
+                      <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{course.progress}% Complete</span>
                     </div>
-                  )}
-                </div>
-                <div className="course-content-v2">
-                  <h3 className="course-name-v2" style={{ fontSize: '1.1rem' }}>{course.title}</h3>
-                  <div className="course-meta-v2">
-                    <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{course.progress}% Complete</span>
                   </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="empty-state-card-v2" style={{
+              width: '100%',
+              padding: '3rem 2rem',
+              textAlign: 'center',
+              background: 'rgba(255, 255, 255, 0.5)',
+              borderRadius: '24px',
+              border: '2px dashed #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: '#f1f5f9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#64748b' }}>school</span>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '0.5rem' }}>No classes yet</h3>
+                <p style={{ color: '#64748b', maxWidth: '300px', margin: '0 auto' }}>Enroll in a course to start your learning journey with our expert mentors.</p>
+              </div>
+              <button
+                onClick={() => onNavigate('Explore')}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem 1.5rem',
+                  background: '#09090b',
+                  color: 'white',
+                  borderRadius: '12px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Browse Courses
+              </button>
             </div>
-          ))}
+          )}
         </div>
       </section>
 

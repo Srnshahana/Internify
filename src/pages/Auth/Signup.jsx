@@ -62,7 +62,7 @@ function Signup({ onBack, onSignup }) {
             email,
             password,
             options: {
-                data: { full_name: fullName },
+                data: { name: fullName },
             },
         })
 
@@ -82,7 +82,7 @@ function Signup({ onBack, onSignup }) {
             .from('users')
             .insert({
                 id: userId,               // ✅ REQUIRED (Supabase Auth UUID)
-                full_name: fullName,
+                // name: fullName,
                 user_id: Math.floor(100000 + Math.random() * 900000), // Random integer for legacy column
                 email: email,
                 role: role,

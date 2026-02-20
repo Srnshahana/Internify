@@ -350,7 +350,7 @@ const apiMentors = [
     role: 'Backend lead',
     company: 'Spotify',
     experience: '15 years exp',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2670&auto=format&fit=crop',
+    image: 'https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff',
     rating: 5.0,
     reviews: 210
   },
@@ -1360,7 +1360,7 @@ export default function LandingPage({
                 company: "Meta",
                 experience: "9+ Years",
                 rating: 5,
-                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80",
+                image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff",
                 skills: ["React", "GraphQL", "Web"]
               }
             ].map((mentor, index) => (

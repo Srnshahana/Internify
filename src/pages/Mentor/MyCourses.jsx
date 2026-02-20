@@ -266,7 +266,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                 }}>{course.title}</h3>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                  <img src={course.student_image || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
+                  <img src={course.student_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(course.student_name || 'Student')}&background=0D0D0D&color=fff`}
                     alt={course.student_name}
                     style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
                   />

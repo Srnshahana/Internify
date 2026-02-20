@@ -3,14 +3,37 @@ import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import supabase from '../../supabaseClient.js'
 import { fetchUserRole, storeAuthData } from '../../utils/auth.js'
+import MessageModal from '../../components/shared/MessageModal'
 
-function Login({ onBack, onShowSignup }) {
+function Login({ onBack, onShowSignup, onLogin }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  // const [error, setError] = useState('') // Removed
   const [isLoading, setIsLoading] = useState(false)
+
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalMessage, setModalMessage] = useState('')
+  const [modalType, setModalType] = useState('info') // 'success' or 'error' or 'info'
+  const [pendingAction, setPendingAction] = useState(null) // Callback after modal closes
+
+  const showModal = (title, message, type = 'info', action = null) => {
+    setModalTitle(title)
+    setModalMessage(message)
+    setModalType(type)
+    setPendingAction(() => action)
+    setModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setModalOpen(false)
+    if (pendingAction) {
+      pendingAction()
+      setPendingAction(null)
+    }
+  }
 
   const theme = 'light'
 

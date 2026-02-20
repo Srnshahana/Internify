@@ -429,7 +429,7 @@ export const mentors = [
       { degree: 'MS in Cybersecurity', institution: 'Johns Hopkins', year: 2014 },
     ],
     certifications: ['CEH', 'CISSP', 'Security+'],
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80',
+    image: 'https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff',
     courses: [10],
     coursesOffered: [10],
   },
@@ -1298,7 +1298,7 @@ export const homeMentorShowcase = [
     experience: '13 years experience',
     role: 'Mobile Application developer',
     rating: 4,
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=faces',
+    image: 'https://ui-avatars.com/api/?name=User&background=0D0D0D&color=fff',
   },
   {
     name: 'Sarah Chen',

@@ -43,7 +43,7 @@ const useDragScroll = () => {
   return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
 }
 
-function Profile({ onLogout }) {
+function Profile({ onLogout, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -51,7 +51,12 @@ function Profile({ onLogout }) {
   const certDrag = useDragScroll()
 
   // Use global dashboard data from context
-  const { studentProfile, enrolledCourses, loading } = useDashboardData()
+  const { studentProfile, enrolledCourses, scheduledSessions, loading } = useDashboardData()
+
+  // Calculate dynamic stats
+  const completedCount = enrolledCourses?.filter(c => c.is_complete).length || 0
+  const inProgressCount = enrolledCourses?.filter(c => !c.is_complete).length || 0
+  const upcomingSessionsCount = scheduledSessions?.length || 0
 
   // Helper function to ensure data is an array
   const ensureArray = (value) => {
@@ -123,10 +128,10 @@ function Profile({ onLogout }) {
   }
 
   const stats = [
-    { label: 'Courses Completed', value: '2' },
-    { label: 'Courses In Progress', value: '2' },
-    { label: 'Mentorship Sessions', value: '45' },
-    { label: 'Certificates', value: profile.certifications?.length || '5' },
+    { label: 'Courses Completed', value: completedCount },
+    { label: 'Courses In Progress', value: inProgressCount },
+    { label: 'Upcoming Sessions', value: upcomingSessionsCount },
+    { label: 'Certificates', value: profile.certifications?.length || '0' },
   ]
 
   return (
@@ -435,8 +440,15 @@ function Profile({ onLogout }) {
                     <div className="program-card">
                       <div className="program-card-image-wrapper">
                         <img src={course.image} alt={course.title} className="program-card-image" draggable="false" />
+                        <div className="program-card-progress-overlay">
+                          <div className="progress-bar-small">
+                            <div className="progress-fill" style={{ width: `${course.progress || 0}%` }}></div>
+                          </div>
+                          <span>{course.progress || 0}% Complete</span>
+                        </div>
                       </div>
                       <div className="program-card-content">
+                        <div className="program-card-category">{course.category}</div>
                         <h3 className="program-card-title">{course.title}</h3>
                         <div className="program-card-mentor">
                           <span>{course.mentor || 'Expert Mentor'}</span>
@@ -447,32 +459,20 @@ function Profile({ onLogout }) {
                           </span>
                           <span className="program-card-level">{course.level || 'Beginner'}</span>
                         </div>
+                        <button className="btn-continue-learning" onClick={() => onNavigate?.('Classroom')}>
+                          Continue Learning
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                studentProfileData.enrolledCourses.map((course) => (
-                  <div key={course.id} className="carousel-slide">
-                    <div className="program-card">
-                      <div className="program-card-image-wrapper">
-                        <img src={course.image} alt={course.name} className="program-card-image" draggable="false" />
-                      </div>
-                      <div className="program-card-content">
-                        <h3 className="program-card-title">{course.name}</h3>
-                        <div className="program-card-mentor">
-                          <span>Expert Mentor</span>
-                        </div>
-                        <div className="program-card-meta">
-                          <span className="program-card-rating">
-                            ⭐ 4.8
-                          </span>
-                          <span className="program-card-level">Beginner</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                <div className="profile-empty-state">
+                  <p>No courses enrolled yet.</p>
+                  <button className="btn-browse-courses" onClick={() => onNavigate?.('Explore')}>
+                    Browse courses
+                  </button>
+                </div>
               )}
             </div>
             <button
@@ -506,32 +506,62 @@ function Profile({ onLogout }) {
               ref={certDrag.ref}
               {...certDrag.events}
             >
-              {studentProfileData.certificates.map((cert) => (
-                <div key={cert.id} className="carousel-slide">
-                  <div className="certificate-card-elegant">
-                    <div className="certificate-header-elegant">
-                      <div className="certificate-icon-elegant">
-                        <CertificateIcon />
-                      </div>
-                      <div className="certificate-verified-badge">Verified</div>
-                    </div>
-                    <h3 className="certificate-title-elegant">{cert.name}</h3>
-                    <div className="certificate-divider"></div>
-                    <p className="certificate-issuer-label">Issued by</p>
-                    <p className="certificate-issuer-name">{cert.issuer}</p>
-                    <div className="certificate-footer-elegant">
-                      <div className="certificate-info-row">
-                        <span className="certificate-label">Issued</span>
-                        <span className="certificate-value">{cert.issueDate}</span>
-                      </div>
-                      <div className="certificate-info-row">
-                        <span className="certificate-label">Credential ID</span>
-                        <span className="certificate-value">{cert.credentialId}</span>
+              {profile.certifications && profile.certifications.length > 0 ? (
+                profile.certifications.map((cert) => (
+                  <div key={cert.id} className="carousel-slide certification-slide">
+                    <div className="certificate-card-formal">
+                      <div className="certificate-inner-border">
+                        <div className="certificate-header-formal">
+                          <div className="certificate-seal">
+                            <CertificateIcon className="seal-svg" />
+                          </div>
+                          <div className="certificate-header-content">
+                            <h4 className="certificate-subtitle">Official Certificate</h4>
+                            <div className="cert-header-ornament"></div>
+                          </div>
+                        </div>
+
+                        <div className="certificate-body-formal">
+                          <p className="cert-intro">This is to certify that</p>
+                          <h2 className="cert-recipient-name">{studentProfile?.name || 'Student Member'}</h2>
+                          <p className="cert-completion-text">has successfully completed the professional program in</p>
+                          <h3 className="cert-program-name">{cert.name}</h3>
+                        </div>
+
+                        <div className="certificate-footer-formal">
+                          <div className="cert-signature-block">
+                            <div className="cert-signature-line">{cert.issuer}</div>
+                            <span className="cert-signature-label">Authorized Signature</span>
+                          </div>
+                          <div className="cert-meta-formal">
+                            <div className="cert-meta-item">
+                              <span className="cert-meta-label">Issued on:</span>
+                              <span className="cert-meta-value">{cert.date}</span>
+                            </div>
+                            <div className="cert-meta-item">
+                              <span className="cert-meta-label">Credential:</span>
+                              <span className="cert-meta-value">#{cert.id.toString().slice(0, 8).toUpperCase()}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="certificate-watermark">Internify</div>
+                        <div className="certificate-verified-seal">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M12 2L3 7v9c0 5 9 8 9 8s9-3 9-8V7l-9-5z" />
+                            <polyline points="9 11 11 13 15 9" />
+                          </svg>
+                          <span>VERIFIED</span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="profile-empty-state">
+                  <p>No certifications earned yet.</p>
                 </div>
-              ))}
+              )}
             </div>
             <button
               className="carousel-nav-btn next"

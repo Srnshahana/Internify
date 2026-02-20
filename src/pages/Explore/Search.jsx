@@ -618,11 +618,11 @@ export default function Explore({
                     <div className="soft-card-header">
                       <div className="soft-avatar-wrapper">
                         <img
-                          src={mentorData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'}
+                          src={mentorData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentorData.name || 'Mentor')}&background=0D0D0D&color=fff`}
                           alt={mentorData.name}
                           className="soft-avatar"
                           onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80'
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mentorData.name || 'Mentor')}&background=0D0D0D&color=fff`
                           }}
                         />
                         {mentorData.assured && (

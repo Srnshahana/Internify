@@ -8,7 +8,7 @@ const StudentAppBar = ({ onLogout, userImage, isTransparent, hideLogout, hidePro
             {!hideProfile && (
                 <div className="user-profile-left">
                     <img
-                        src={userImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
+                        src={userImage || "https://ui-avatars.com/api/?name=User&background=0D0D0D&color=fff"}
                         alt="User Profile"
                     />
                 </div>

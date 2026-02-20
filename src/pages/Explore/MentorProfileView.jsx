@@ -14,6 +14,16 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   const [showCourseModal, setShowCourseModal] = useState(false)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
+  const [itemsPerView, setItemsPerView] = useState(2)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerView(window.innerWidth <= 640 ? 1 : 2)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     // Self-healing: Check for inconsistent auth state
@@ -99,7 +109,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
         category: Array.isArray(data.category) ? data.category[0] : (data.category || ""),
         skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || s.skill_name || "")),
         location: data.address || "Remote",
-        profileImage: data.profile_image || "https://via.placeholder.com/150",
+        profileImage: data.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || propMentor?.name || 'Mentor')}&background=0D0D0D&color=fff`,
         isVerified: data.is_verified || false,
         platformVerified: data.is_platformAssured || false,
         rating: data.rating || 5.0,
@@ -154,7 +164,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   ]
 
   const handleNextCourse = () => {
-    if (coursesIndex < mentor.courses_offered.length - 2) {
+    if (coursesIndex < mentor.courses_offered.length - itemsPerView) {
       setCoursesIndex(coursesIndex + 1)
     }
   }
@@ -313,7 +323,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                 src={mentor.profileImage}
                 alt={mentor.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=320&q=80' }}
+                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || 'Mentor')}&background=0D0D0D&color=fff` }}
               />
             </div>
           </div>
@@ -469,7 +479,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               onTouchEnd={handleTouchEnd}
               style={{ position: 'relative', touchAction: 'pan-y' }}
             >
-              {mentor.courses_offered.length > 2 && (
+              {mentor.courses_offered.length > itemsPerView && (
                 <>
                   <button
                     className="carousel-nav-btn prev"
@@ -485,7 +495,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   <button
                     className="carousel-nav-btn next"
                     onClick={handleNextCourse}
-                    disabled={coursesIndex >= mentor.courses_offered.length - 2}
+                    disabled={coursesIndex >= mentor.courses_offered.length - itemsPerView}
                     style={{ zIndex: 20 }}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -496,40 +506,36 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               )}
 
               <div className="carousel-wrapper" style={{
-                transform: `translateX(-${coursesIndex * 51}%)`,
-                transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                display: 'flex',
-                gap: '20px'
+                transform: `translateX(-${coursesIndex * (itemsPerView === 1 ? 70 : 50)}%)`,
               }}>
                 {mentor.courses_offered.map((course) => (
                   <div
                     key={course.id}
                     className="carousel-slide"
-                    style={{ minWidth: mentor.courses_offered.length > 1 ? 'calc(50% - 10px)' : '100%', cursor: 'pointer' }}
+                    style={{ cursor: 'pointer' }}
                     onClick={() => handleCourseClick(course)}
                   >
-                    <div className="course-card-elegant" style={{ margin: 0, height: '100%' }}>
-                      <div className="course-image-elegant" style={{ height: '180px' }}>
+                    <div className="course-card-elegant">
+                      <div className="course-image-elegant">
                         <img
                           src={course.image}
                           alt={course.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       </div>
-                      <div className="course-body-elegant" style={{ padding: '16px' }}>
-                        <div className="course-header-elegant" style={{ marginBottom: '8px' }}>
+                      <div className="course-body-elegant">
+                        <div className="course-header-elegant">
                           <span className="course-category-elegant">{course.category}</span>
                           <div className="course-rating-box">
                             <span className="star-icon">★</span>
                             <span>{course.rating}</span>
                           </div>
                         </div>
-                        <h3 className="course-name-elegant" style={{ fontSize: '16px' }}>{course.title}</h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                          <span className="course-status-badge-elegant" data-status="enrolled" style={{ fontSize: '12px' }}>
+                        <h3 className="course-name-elegant">{course.title}</h3>
+                        <div className="course-footer-elegant">
+                          <span className="course-status-badge-elegant" data-status="enrolled">
                             {course.students} Mentees
                           </span>
-                          <span style={{ fontSize: '13px', color: '#64748b' }}>{course.level}</span>
+                          <span className="course-level-elegant">{course.level}</span>
                         </div>
                       </div>
                     </div>

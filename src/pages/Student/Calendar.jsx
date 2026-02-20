@@ -164,63 +164,72 @@ function Calendar() {
         </h3>
 
         <div className="sessions-list-elegant">
-          {sessions.map((session) => (
-            <div key={session.id} className="session-card-elegant">
-              <div className="session-main-content">
-                <div className="session-time-box">
-                  <span className="time-main">
-                    {session.time}
-                  </span>
-                  <span className="time-sub">
-                    {session.date}
-                  </span>
-                </div>
+          {sessions.length > 0 ? (
+            sessions.map((session) => (
+              <div key={session.id} className="session-card-elegant">
+                <div className="session-main-content">
+                  <div className="session-time-box">
+                    <span className="time-main">
+                      {session.time}
+                    </span>
+                    <span className="time-sub">
+                      {session.date}
+                    </span>
+                  </div>
 
-                <div className="session-info-elegant">
-                  <h4>{session.title}</h4>
-                  <div className="session-meta-elegant">
-                    <span>{session.course}</span>
-                    <span>• with {session.mentor}</span>
+                  <div className="session-info-elegant">
+                    <h4>{session.title}</h4>
+                    <div className="session-meta-elegant">
+                      <span>{session.course}</span>
+                      <span>• with {session.mentor}</span>
+                    </div>
+                  </div>
+
+                  <div className="session-badge-wrapper">
+                    <span className={`session-badge-elegant badge-${session.type}`}>
+                      {session.type}
+                    </span>
                   </div>
                 </div>
 
-                <div className="session-badge-wrapper">
-                  <span className={`session-badge-elegant badge-${session.type}`}>
-                    {session.type}
-                  </span>
+                {/* Action Buttons */}
+                <div className="session-actions-buttons">
+                  {session.type !== 'deadline' && (
+                    <>
+                      <button
+                        className="session-btn session-btn-secondary"
+                        onClick={() => console.log('Reschedule requested for:', session.id)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="23 4 23 10 17 10"></polyline>
+                          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Reschedule
+                      </button>
+                      <button
+                        className="session-btn session-btn-primary"
+                        onClick={() => handleJoin(session.joinLink)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                          <polyline points="10 17 15 12 10 7"></polyline>
+                          <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        Join
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="session-actions-buttons">
-                {session.type !== 'deadline' && (
-                  <>
-                    <button
-                      className="session-btn session-btn-secondary"
-                      onClick={() => console.log('Reschedule requested for:', session.id)}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                      </svg>
-                      Reschedule
-                    </button>
-                    <button
-                      className="session-btn session-btn-primary"
-                      onClick={() => handleJoin(session.joinLink)}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                        <polyline points="10 17 15 12 10 7"></polyline>
-                        <line x1="15" y1="12" x2="3" y2="12"></line>
-                      </svg>
-                      Join
-                    </button>
-                  </>
-                )}
+            ))
+          ) : (
+            <div className="calendar-empty-state">
+              <div className="empty-state-icon">
+                <span className="material-symbols-outlined">event_busy</span>
               </div>
+              <p>No upcoming sessions.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 

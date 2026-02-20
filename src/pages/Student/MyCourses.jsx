@@ -250,7 +250,7 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
                   }}>{course.title}</h3>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                    <img src={course.mentorImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
+                    <img src={course.mentorImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(course.mentor || 'Mentor')}&background=0D0D0D&color=fff`}
                       alt={course.mentor}
                       style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
                     />
