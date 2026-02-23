@@ -120,22 +120,12 @@ function MentorProfile({ onLogout }) {
         {/* LinkedIn-style Intro Card */}
         <div className="profile-intro-card">
           <div className="profile-intro-header">
-            <div className="profile-avatar-linkedin" style={{ background: '#f1f5f9', position: 'relative' }}>
-              {mentorDisplayData.profilePicture ? (
-                <div style={{ width: '100%', height: '100%', overflow: 'hidden', borderRadius: '50%' }}>
-                  <img
-                    src={mentorDisplayData.profilePicture}
-                    alt={mentorDisplayData.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                  <span style={{ fontSize: '32px', fontWeight: '700', color: '#0ea5e9' }}>
-                    {mentorDisplayData.name.split(' ').map(n => n[0]).join('')}
-                  </span>
-                </div>
-              )}
+            <div className="profile-avatar-linkedin">
+              <img
+                src={mentorDisplayData.profilePicture}
+                alt={mentorDisplayData.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
 
               {(userProfile?.is_verified || userProfile?.is_platformAssured) && (
                 <div style={{

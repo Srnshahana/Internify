@@ -3,12 +3,16 @@ import Loading from '../../components/Loading'
 import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import RescheduleModal from '../../components/RescheduleModal'
+import { v4 as uuidv4 } from 'uuid'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [clickedDate, setClickedDate] = useState(null)
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [selectedSession, setSelectedSession] = useState(null)
   const { enrolledCourses } = useDashboardData()
 
   useEffect(() => {
@@ -36,6 +40,8 @@ function Calendar() {
             title: session.title,
             course: session.courses?.title || 'Live Class',
             mentor: session.mentors_details?.name || 'Mentor',
+            mentor_id: session.mentor_id,
+            course_id: session.course_id,
             date: new Date(session.scheduled_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
             time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             type: 'upcoming',
@@ -55,6 +61,53 @@ function Calendar() {
 
   const handleJoin = (link) => {
     if (link) window.open(link, '_blank')
+  }
+
+  const handleRescheduleClick = (session) => {
+    setSelectedSession(session)
+    setShowRescheduleModal(true)
+  }
+
+  const handleRescheduleConfirm = async ({ newDate, newTime, reason }) => {
+    if (!selectedSession) return
+
+    try {
+      const currentUserId = localStorage.getItem('auth_id')
+      const scheduledDateTime = new Date(`${newDate}T${newTime}`)
+
+      // Find the enrollment to get the chat_id
+      const enrollment = enrolledCourses.find(c => c.course_id === selectedSession.course_id)
+      const chatId = enrollment?.id || selectedSession.course_id // Fallback to course_id if enrollment matching is loose
+
+      const rescheduleData = {
+        original_session_id: selectedSession.id,
+        new_date: newDate,
+        new_time: newTime,
+        reason: reason,
+        status: 'pending',
+        proposed_by: 'student'
+      }
+
+      // Send a message of type 'reschedule_request'
+      const { error } = await supabase
+        .from('messages')
+        .insert([{
+          chat_id: Number(chatId),
+          session_id: selectedSession.id,
+          role: 'student',
+          sender_id: Number(currentUserId),
+          content: JSON.stringify(rescheduleData),
+          type: 'reschedule_request',
+          read: false
+        }])
+
+      if (error) throw error
+
+      alert('Reschedule request sent to mentor!')
+    } catch (err) {
+      console.error('Error sending reschedule request:', err)
+      alert('Failed to send reschedule request. Please try again.')
+    }
   }
 
   // Restore Clean data-driven arrays
@@ -198,7 +251,7 @@ function Calendar() {
                     <>
                       <button
                         className="session-btn session-btn-secondary"
-                        onClick={() => console.log('Reschedule requested for:', session.id)}
+                        onClick={() => handleRescheduleClick(session)}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <polyline points="23 4 23 10 17 10"></polyline>
@@ -232,6 +285,13 @@ function Calendar() {
           )}
         </div>
       </div>
+
+      <RescheduleModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        onConfirm={handleRescheduleConfirm}
+        sessionDetails={selectedSession}
+      />
 
     </div>
   )

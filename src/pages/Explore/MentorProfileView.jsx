@@ -318,7 +318,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
         {/* LinkedIn-style Intro Card */}
         <div className="profile-intro-card">
           <div className="profile-intro-header">
-            <div className="profile-avatar-linkedin" style={{ background: '#f1f5f9', overflow: 'hidden' }}>
+            <div className="profile-avatar-linkedin">
               <img
                 src={mentor.profileImage}
                 alt={mentor.name}

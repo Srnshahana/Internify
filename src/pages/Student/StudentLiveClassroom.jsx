@@ -358,6 +358,65 @@ function StudentLiveClassroom({ course, onBack }) {
     fetchProgress()
   }, [course, userRole])
 
+  const handleRescheduleAction = async (message, action) => {
+    try {
+      const data = JSON.parse(message.content);
+      const isApproved = action === 'approve';
+
+      // 1. Update the message content to reflect the new status
+      const updatedData = { ...data, status: isApproved ? 'approved' : 'rejected' };
+
+      const { error: msgError } = await supabase
+        .from('messages')
+        .update({ content: JSON.stringify(updatedData) })
+        .eq('id', message.id);
+
+      if (msgError) throw msgError;
+
+      // 2. If approved, update the scheduled_classes table
+      if (isApproved) {
+        const { error: schedError } = await supabase
+          .from('scheduled_classes')
+          .update({
+            scheduled_date: `${data.new_date}T${data.new_time}`
+          })
+          .eq('id', data.original_session_id);
+
+        if (schedError) throw schedError;
+
+        // 3. Send a confirmation message
+        const confirmationMsg = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: 'student',
+          sender_id: Number(currentUserId),
+          content: `Reschedule ${action}d. The session is now set for ${new Date(data.new_date).toLocaleDateString()} at ${data.new_time}.`,
+          type: 'text',
+          read: false
+        }
+
+        await supabase.from('messages').insert([confirmationMsg]);
+      } else {
+        // Send rejection message
+        const rejectionMsg = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: 'student',
+          sender_id: Number(currentUserId),
+          content: `Reschedule request rejected.`,
+          type: 'text',
+          read: false
+        }
+        await supabase.from('messages').insert([rejectionMsg]);
+      }
+
+      alert(`Reschedule ${action}d successfully!`);
+    } catch (err) {
+      console.error('Error handling reschedule action:', err);
+      alert('Failed to process reschedule action.');
+    }
+  }
+
   const getCurrentTime = () => {
     const now = new Date()
     return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
@@ -1125,6 +1184,68 @@ function StudentLiveClassroom({ course, onBack }) {
                           Join Class
                         </a>
                       </div>
+                    </div>
+                  )}
+                  {message.type === 'reschedule_request' && (
+                    <div className="live-assessment-card" style={{ borderLeft: '4px solid #f59e0b', background: '#fffef3', minWidth: '240px' }}>
+                      <div className="assessment-card-header">
+                        <div className="assessment-icon">⏳</div>
+                        <div className="assessment-badge" style={{ background: '#fef3c7', color: '#92400e' }}>Reschedule Request</div>
+                      </div>
+                      {(() => {
+                        try {
+                          const data = JSON.parse(message.content);
+                          return (
+                            <>
+                              <h4 className="assessment-card-title">New Proposed Time</h4>
+                              <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                <div style={{ fontSize: '14px', color: '#475569' }}>
+                                  <strong>Date:</strong> {new Date(data.new_date).toLocaleDateString()}
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#475569' }}>
+                                  <strong>Time:</strong> {data.new_time}
+                                </div>
+                                {data.reason && (
+                                  <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '6px', borderRadius: '4px', width: '100%' }}>
+                                    "{data.reason}"
+                                  </div>
+                                )}
+
+                                <div style={{ fontSize: '13px', marginTop: '4px', fontWeight: '600', color: data.status === 'approved' ? '#22c55e' : data.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>
+                                  Status: {data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                                </div>
+
+                                {data.status === 'pending' && (
+                                  <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
+                                    {((data.proposed_by === 'student' && userRole === 'mentor') || (data.proposed_by === 'mentor' && userRole === 'student')) ? (
+                                      <>
+                                        <button
+                                          className="btn-primary"
+                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#22c55e', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
+                                          onClick={() => handleRescheduleAction(message, 'approve')}
+                                        >
+                                          Approve
+                                        </button>
+                                        <button
+                                          className="btn-secondary"
+                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#ef4444', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
+                                          onClick={() => handleRescheduleAction(message, 'reject')}
+                                        >
+                                          Reject
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>Waiting for response...</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        } catch (e) {
+                          return <p>Invalid reschedule data</p>;
+                        }
+                      })()}
                     </div>
                   )}
                   {noteEditingId === message.id ? (

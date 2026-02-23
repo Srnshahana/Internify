@@ -14,6 +14,7 @@ export const useDashboardData = () => {
 
 export const DashboardDataProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null) // Generic profile
+    const [authUser, setAuthUser] = useState(null) // Auth user object
     const [enrolledCourses, setEnrolledCourses] = useState([])
     const [scheduledSessions, setScheduledSessions] = useState([])
     const [loading, setLoading] = useState(true)
@@ -24,11 +25,16 @@ export const DashboardDataProvider = ({ children }) => {
             setLoading(true)
             setError(null)
 
-            const authId = localStorage.getItem('auth_id')
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+            const user = session?.user || null
+            setAuthUser(user)
+
+            const authId = localStorage.getItem('auth_id') // Numeric ID from our 'users' table
             const role = localStorage.getItem('auth_user_role')
 
             if (!authId) {
-                console.error('No auth ID found in localStorage')
+                console.error('No numeric auth ID found in localStorage. Checking if we can fetch it...')
+                // fallback logic if needed
                 setLoading(false)
                 return
             }
@@ -36,6 +42,7 @@ export const DashboardDataProvider = ({ children }) => {
             if (role === 'mentor') {
                 // --- MENTOR FLOW ---
                 // 1. Fetch mentor profile
+                console.log('🔍 Fetching mentor profile with authId:', authId)
                 const { data: profileData, error: profileError } = await supabase
                     .from('mentors_details')
                     .select('*')
@@ -162,6 +169,7 @@ export const DashboardDataProvider = ({ children }) => {
             } else {
                 // --- STUDENT FLOW ---
                 // 1. Fetch student profile
+                console.log('🔍 Fetching student profile with authId (numeric):', authId)
                 const { data: profileData, error: profileError } = await supabase
                     .from('student_details')
                     .select('*')
@@ -265,6 +273,7 @@ export const DashboardDataProvider = ({ children }) => {
     }, [])
 
     const value = {
+        authUser,
         userProfile, // Replaces studentProfile to be generic
         studentProfile: userProfile, // Legacy support
         enrolledCourses,

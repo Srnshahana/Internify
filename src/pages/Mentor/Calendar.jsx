@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import '../../App.css'
 import supabase from '../../supabaseClient'
+import RescheduleModal from '../../components/RescheduleModal'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [clickedDate, setClickedDate] = useState(null)
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [selectedSession, setSelectedSession] = useState(null)
 
   const currentUserId = localStorage.getItem('auth_id')
 
@@ -30,6 +33,8 @@ function Calendar() {
             date: new Date(session.scheduled_date).toLocaleDateString(),
             time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             mentee: 'Batch',
+            course_id: session.course_id,
+            session_id: session.session_id,
             type: 'upcoming',
             joinLink: session.meeting_link
           }))
@@ -54,6 +59,67 @@ function Calendar() {
 
   const handleJoin = (link) => {
     if (link) window.open(link, '_blank')
+  }
+
+  const handleRescheduleClick = (session) => {
+    setSelectedSession(session)
+    setShowRescheduleModal(true)
+  }
+
+  const handleRescheduleConfirm = async ({ newDate, newTime, reason }) => {
+    if (!selectedSession) return
+
+    try {
+      const currentUserId = localStorage.getItem('auth_id')
+
+      // For mentors, we need to find which chat to post this to.
+      // If it's a batch class, we might need to post to all enrollments or a course-wide chat.
+      // Given the implementation of StudentLiveClassroom, we'll try to find an enrollment for this course.
+      const { data: enrollments, error: enrollError } = await supabase
+        .from('classes_enrolled')
+        .select('id')
+        .eq('course_id', selectedSession.course_id)
+        .eq('mentor_id', currentUserId)
+
+      if (enrollError) throw enrollError
+
+      if (!enrollments || enrollments.length === 0) {
+        alert('No students found for this course to send the request to.')
+        return
+      }
+
+      const rescheduleData = {
+        original_session_id: selectedSession.id,
+        new_date: newDate,
+        new_time: newTime,
+        reason: reason,
+        status: 'pending',
+        proposed_by: 'mentor'
+      }
+
+      // Propose to the first enrollment found (assuming 1-on-1 or batch leader?)
+      // Implementation detail: we'll send it to ALL enrolled chats if it's a batch class.
+      const insertPromises = enrollments.map(enroll => (
+        supabase
+          .from('messages')
+          .insert([{
+            chat_id: enroll.id,
+            session_id: selectedSession.session_id || null,
+            role: 'mentor',
+            sender_id: Number(currentUserId),
+            content: JSON.stringify(rescheduleData),
+            type: 'reschedule_request',
+            read: false
+          }])
+      ))
+
+      await Promise.all(insertPromises)
+
+      alert('Reschedule request sent to students!')
+    } catch (err) {
+      console.error('Error sending reschedule request:', err)
+      alert('Failed to send reschedule request. Please try again.')
+    }
   }
 
   return (
@@ -162,7 +228,7 @@ function Calendar() {
                 <div className="session-actions-buttons">
                   <button
                     className="session-btn session-btn-secondary"
-                    onClick={() => console.log('Reschedule requested for:', session.id)}
+                    onClick={() => handleRescheduleClick(session)}
                     style={{ marginRight: '8px' }}
                   >
                     Reschedule Request
@@ -176,6 +242,13 @@ function Calendar() {
           </div>
         )}
       </div>
+
+      <RescheduleModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        onConfirm={handleRescheduleConfirm}
+        sessionDetails={selectedSession}
+      />
     </div>
   )
 }

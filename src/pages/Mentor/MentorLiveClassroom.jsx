@@ -1104,11 +1104,67 @@ function MentorLiveClassroom({ course, onBack }) {
       if (selectedSubmission?.id === submissionId) {
         setSelectedSubmission(prev => ({ ...prev, status: 'completed' }))
       }
-    } catch (error) {
-      console.error('Error marking submission complete:', error)
-      alert('Failed to mark as complete')
     } finally {
       setIsMarkingComplete(false)
+    }
+  }
+
+  const handleRescheduleAction = async (message, action) => {
+    try {
+      const data = JSON.parse(message.content);
+      const isApproved = action === 'approve';
+
+      // 1. Update the message content to reflect the new status
+      const updatedData = { ...data, status: isApproved ? 'approved' : 'rejected' };
+
+      const { error: msgError } = await supabase
+        .from('messages')
+        .update({ content: JSON.stringify(updatedData) })
+        .eq('id', message.id);
+
+      if (msgError) throw msgError;
+
+      // 2. If approved, update the scheduled_classes table
+      if (isApproved) {
+        const { error: schedError } = await supabase
+          .from('scheduled_classes')
+          .update({
+            scheduled_date: `${data.new_date}T${data.new_time}`
+          })
+          .eq('id', data.original_session_id);
+
+        if (schedError) throw schedError;
+
+        // 3. Send a confirmation message
+        const confirmationMsg = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: 'mentor',
+          sender_id: Number(currentUserId),
+          content: `Reschedule ${action}d. The session is now set for ${new Date(data.new_date).toLocaleDateString()} at ${data.new_time}.`,
+          type: 'text',
+          read: false
+        }
+
+        await supabase.from('messages').insert([confirmationMsg]);
+      } else {
+        // Send rejection message
+        const rejectionMsg = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: 'mentor',
+          sender_id: Number(currentUserId),
+          content: `Reschedule request rejected.`,
+          type: 'text',
+          read: false
+        }
+        await supabase.from('messages').insert([rejectionMsg]);
+      }
+
+      alert(`Reschedule ${action}d successfully!`);
+    } catch (err) {
+      console.error('Error handling reschedule action:', err);
+      alert('Failed to process reschedule action.');
     }
   }
 
@@ -1361,6 +1417,68 @@ function MentorLiveClassroom({ course, onBack }) {
                           Join Class
                         </a>
                       </div>
+                    </div>
+                  )}
+                  {message.type === 'reschedule_request' && (
+                    <div className="live-assessment-card" style={{ borderLeft: '4px solid #f59e0b', background: '#fffef3', minWidth: '240px' }}>
+                      <div className="assessment-card-header">
+                        <div className="assessment-icon">⏳</div>
+                        <div className="assessment-badge" style={{ background: '#fef3c7', color: '#92400e' }}>Reschedule Request</div>
+                      </div>
+                      {(() => {
+                        try {
+                          const data = JSON.parse(message.content);
+                          return (
+                            <>
+                              <h4 className="assessment-card-title">New Proposed Time</h4>
+                              <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                <div style={{ fontSize: '14px', color: '#475569' }}>
+                                  <strong>Date:</strong> {new Date(data.new_date).toLocaleDateString()}
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#475569' }}>
+                                  <strong>Time:</strong> {data.new_time}
+                                </div>
+                                {data.reason && (
+                                  <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '6px', borderRadius: '4px', width: '100%' }}>
+                                    "{data.reason}"
+                                  </div>
+                                )}
+
+                                <div style={{ fontSize: '13px', marginTop: '4px', fontWeight: '600', color: data.status === 'approved' ? '#22c55e' : data.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>
+                                  Status: {data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                                </div>
+
+                                {data.status === 'pending' && (
+                                  <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
+                                    {((data.proposed_by === 'student' && userRole === 'mentor') || (data.proposed_by === 'mentor' && userRole === 'student')) ? (
+                                      <>
+                                        <button
+                                          className="btn-primary"
+                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#22c55e', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
+                                          onClick={() => handleRescheduleAction(message, 'approve')}
+                                        >
+                                          Approve
+                                        </button>
+                                        <button
+                                          className="btn-secondary"
+                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#ef4444', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
+                                          onClick={() => handleRescheduleAction(message, 'reject')}
+                                        >
+                                          Reject
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>Waiting for response...</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        } catch (e) {
+                          return <p>Invalid reschedule data</p>;
+                        }
+                      })()}
                     </div>
                   )}
                   {noteEditingId === message.id ? (
@@ -1885,218 +2003,219 @@ function MentorLiveClassroom({ course, onBack }) {
           </div>
         </div>
       )}
-    </div>
+    </div >
       {/* Mentor Assessment Review Modal */}
-      {selectedAssessment && (
-        <div className="mentor-assessment-modal-overlay" onClick={() => {
-          setSelectedAssessment(null)
-          setSelectedSubmission(null)
-        }}>
-          <div
-            className="mentor-assessment-modal-container"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mentor-modal-header">
-              <h2 className="mentor-modal-title">
-                {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
-              </h2>
-              <button
-                onClick={() => {
-                  if (selectedSubmission) setSelectedSubmission(null)
-                  else setSelectedAssessment(null)
-                }}
-                className="mentor-modal-close-btn"
-                title="Close"
-              >
-                ✕
-              </button>
-            </div>
+      {
+        selectedAssessment && (
+          <div className="mentor-assessment-modal-overlay" onClick={() => {
+            setSelectedAssessment(null)
+            setSelectedSubmission(null)
+          }}>
+            <div
+              className="mentor-assessment-modal-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mentor-modal-header">
+                <h2 className="mentor-modal-title">
+                  {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
+                </h2>
+                <button
+                  onClick={() => {
+                    if (selectedSubmission) setSelectedSubmission(null)
+                    else setSelectedAssessment(null)
+                  }}
+                  className="mentor-modal-close-btn"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <div className="mentor-modal-body">
-              {selectedSubmission ? (
-                // Single Submission View
-                <div className="mentor-submission-view">
-                  <div className="mentor-student-submission-header">
-                    <div className="student-avatar-large">
-                      {selectedSubmission.student?.name?.charAt(0) || 'S'}
+              <div className="mentor-modal-body">
+                {selectedSubmission ? (
+                  // Single Submission View
+                  <div className="mentor-submission-view">
+                    <div className="mentor-student-submission-header">
+                      <div className="student-avatar-large">
+                        {selectedSubmission.student?.name?.charAt(0) || 'S'}
+                      </div>
+                      <div>
+                        <h3 className="student-name-large">{selectedSubmission.student?.name || 'Student'}</h3>
+                        <p className="student-email">{selectedSubmission.student?.email}</p>
+                        <p className="submission-meta">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
+                      </div>
+                      <div className="submission-status-badge-wrapper">
+                        <span className={`status-badge-large ${selectedSubmission.status === 'completed' ? 'badge-completed' : 'badge-pending'
+                          }`}>
+                          {selectedSubmission.status === 'completed' ? 'Completed' : 'Pending Review'}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="student-name-large">{selectedSubmission.student?.name || 'Student'}</h3>
-                      <p className="student-email">{selectedSubmission.student?.email}</p>
-                      <p className="submission-meta">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
-                    </div>
-                    <div className="submission-status-badge-wrapper">
-                      <span className={`status-badge-large ${selectedSubmission.status === 'completed' ? 'badge-completed' : 'badge-pending'
-                        }`}>
-                        {selectedSubmission.status === 'completed' ? 'Completed' : 'Pending Review'}
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="mentor-text-submission-card">
-                    <div className="card-header">
-                      <h3 className="card-title">Text Submission</h3>
-                    </div>
-                    {(() => {
-                      const text = selectedSubmission.text_submission
-                      if (!text) return <div className="card-body text-content"><span className="no-content">No text provided.</span></div>
+                    <div className="mentor-text-submission-card">
+                      <div className="card-header">
+                        <h3 className="card-title">Text Submission</h3>
+                      </div>
+                      {(() => {
+                        const text = selectedSubmission.text_submission
+                        if (!text) return <div className="card-body text-content"><span className="no-content">No text provided.</span></div>
 
-                      const parts = text.split(/(\!\[.*?\]\(.*?\)|\[.*?\]\(.*?\))/)
-                      return (
-                        <div className="card-body text-content">
-                          {parts.map((part, index) => {
-                            const imageMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
-                            if (imageMatch) {
-                              const [_, alt, url] = imageMatch
-                              const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
-                              if (isImage) {
-                                return (
-                                  <div key={index} style={{ margin: '12px 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                        const parts = text.split(/(\!\[.*?\]\(.*?\)|\[.*?\]\(.*?\))/)
+                        return (
+                          <div className="card-body text-content">
+                            {parts.map((part, index) => {
+                              const imageMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
+                              if (imageMatch) {
+                                const [_, alt, url] = imageMatch
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+                                if (isImage) {
+                                  return (
+                                    <div key={index} style={{ margin: '12px 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                      <img
+                                        src={url}
+                                        alt={alt}
+                                        style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
+                                      />
+                                    </div>
+                                  )
+                                }
+                                return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>{alt || url}</a>
+                              }
+                              return <span key={index}>{part}</span>
+                            })}
+                          </div>
+                        )
+                      })()}
+                    </div>
+
+                    {selectedSubmission.assessment_attachments?.length > 0 && (
+                      <div className="mentor-attachments-card">
+                        <div className="card-header">
+                          <h3 className="card-title">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
+                        </div>
+                        <div className="card-body attachments-list">
+                          {selectedSubmission.assessment_attachments.map(att => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(att.file_name)
+                            return (
+                              <div key={att.id} className="attachment-item" style={{ flexDirection: isImage ? 'column' : 'row', alignItems: isImage ? 'flex-start' : 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                  <span className="icon">{isImage ? '�️' : '�📎'}</span>
+                                  <div className="file-info">
+                                    <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="file-name">
+                                      {att.file_name}
+                                    </a>
+                                    <span className="file-type">{isImage ? 'Image' : 'Document'}</span>
+                                  </div>
+                                  <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="download-btn">
+                                    ⬇️
+                                  </a>
+                                </div>
+                                {isImage && (
+                                  <div style={{ marginTop: '12px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                                     <img
-                                      src={url}
-                                      alt={alt}
+                                      src={att.file_url}
+                                      alt={att.file_name}
                                       style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
                                     />
                                   </div>
-                                )
-                              }
-                              return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>{alt || url}</a>
-                            }
-                            return <span key={index}>{part}</span>
+                                )}
+                              </div>
+                            )
                           })}
                         </div>
-                      )
-                    })()}
-                  </div>
-
-                  {selectedSubmission.assessment_attachments?.length > 0 && (
-                    <div className="mentor-attachments-card">
-                      <div className="card-header">
-                        <h3 className="card-title">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
                       </div>
-                      <div className="card-body attachments-list">
-                        {selectedSubmission.assessment_attachments.map(att => {
-                          const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(att.file_name)
-                          return (
-                            <div key={att.id} className="attachment-item" style={{ flexDirection: isImage ? 'column' : 'row', alignItems: isImage ? 'flex-start' : 'center' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <span className="icon">{isImage ? '�️' : '�📎'}</span>
-                                <div className="file-info">
-                                  <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="file-name">
-                                    {att.file_name}
-                                  </a>
-                                  <span className="file-type">{isImage ? 'Image' : 'Document'}</span>
-                                </div>
-                                <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="download-btn">
-                                  ⬇️
-                                </a>
-                              </div>
-                              {isImage && (
-                                <div style={{ marginTop: '12px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                  <img
-                                    src={att.file_url}
-                                    alt={att.file_name}
-                                    style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedSubmission.status !== 'completed' && (
-                    <div className="mentor-action-footer">
-                      <button
-                        onClick={() => handleMarkComplete(selectedSubmission.id)}
-                        className="mark-complete-btn"
-                        disabled={isMarkingComplete}
-                        style={{
-                          opacity: isMarkingComplete ? 0.7 : 1,
-                          cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Assessment Details & Submissions List View
-                <div className="mentor-assessment-details-view">
-                  {/* Assessment Details Card */}
-                  <div className="mentor-details-card">
-                    <div className="mentor-details-grid">
-                      <div className="mentor-main-info">
-                        <div>
-                          <h3 className="mentor-assessment-title">{selectedAssessment.title}</h3>
-                          <p className="mentor-assessment-description">{selectedAssessment.description}</p>
-                        </div>
-                      </div>
-                      <div className="mentor-meta-info">
-                        <div className="meta-item">
-                          <span className="meta-label">Course ID</span>
-                          <span className="meta-value">{selectedAssessment.course_id}</span>
-                        </div>
-                        <div className="meta-item">
-                          <span className="meta-label">Due Date</span>
-                          <span className="meta-value">{formatDate(selectedAssessment.due_date)}</span>
-                        </div>
-                        <div className="meta-item">
-                          <span className="meta-label">Status</span>
-                          <span className="meta-value">Active</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="mentor-submissions-header">
-                      <h3>Student Submissions</h3>
-                      <span className="submission-count">{submissions.length} Total</span>
-                    </div>
-
-                    {submissions.length === 0 ? (
-                      <div className="mentor-no-submissions">
-                        <span className="icon">📂</span>
-                        <p className="main-text">No submissions yet.</p>
-                        <p className="sub-text">When students submit their work, it will appear here.</p>
-                      </div>
-                    ) : (
-                      <div className="mentor-submissions-grid">
-                        {submissions.map(sub => (
-                          <div key={sub.id} className="mentor-submission-card" onClick={() => setSelectedSubmission(sub)}>
-                            <div className="submission-card-header">
-                              <div className="student-avatar-small">
-                                {sub.student?.name?.charAt(0) || 'S'}
-                              </div>
-                              <div className="student-info-small">
-                                <p className="student-name">{sub.student?.name || 'Student'}</p>
-                                <p className="submission-date">{formatDate(sub.submitted_at)}</p>
-                              </div>
-                            </div>
-
-                            <div className="submission-card-footer">
-                              <span className={`mini-status ${sub.status === 'completed' ? 'status-completed' : 'status-pending'}`}>
-                                {sub.status}
-                              </span>
-                              <span className="review-link">
-                                Review ➔
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                    {selectedSubmission.status !== 'completed' && (
+                      <div className="mentor-action-footer">
+                        <button
+                          onClick={() => handleMarkComplete(selectedSubmission.id)}
+                          className="mark-complete-btn"
+                          disabled={isMarkingComplete}
+                          style={{
+                            opacity: isMarkingComplete ? 0.7 : 1,
+                            cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
+                        </button>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  // Assessment Details & Submissions List View
+                  <div className="mentor-assessment-details-view">
+                    {/* Assessment Details Card */}
+                    <div className="mentor-details-card">
+                      <div className="mentor-details-grid">
+                        <div className="mentor-main-info">
+                          <div>
+                            <h3 className="mentor-assessment-title">{selectedAssessment.title}</h3>
+                            <p className="mentor-assessment-description">{selectedAssessment.description}</p>
+                          </div>
+                        </div>
+                        <div className="mentor-meta-info">
+                          <div className="meta-item">
+                            <span className="meta-label">Course ID</span>
+                            <span className="meta-value">{selectedAssessment.course_id}</span>
+                          </div>
+                          <div className="meta-item">
+                            <span className="meta-label">Due Date</span>
+                            <span className="meta-value">{formatDate(selectedAssessment.due_date)}</span>
+                          </div>
+                          <div className="meta-item">
+                            <span className="meta-label">Status</span>
+                            <span className="meta-value">Active</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="mentor-submissions-header">
+                        <h3>Student Submissions</h3>
+                        <span className="submission-count">{submissions.length} Total</span>
+                      </div>
+
+                      {submissions.length === 0 ? (
+                        <div className="mentor-no-submissions">
+                          <span className="icon">📂</span>
+                          <p className="main-text">No submissions yet.</p>
+                          <p className="sub-text">When students submit their work, it will appear here.</p>
+                        </div>
+                      ) : (
+                        <div className="mentor-submissions-grid">
+                          {submissions.map(sub => (
+                            <div key={sub.id} className="mentor-submission-card" onClick={() => setSelectedSubmission(sub)}>
+                              <div className="submission-card-header">
+                                <div className="student-avatar-small">
+                                  {sub.student?.name?.charAt(0) || 'S'}
+                                </div>
+                                <div className="student-info-small">
+                                  <p className="student-name">{sub.student?.name || 'Student'}</p>
+                                  <p className="submission-date">{formatDate(sub.submitted_at)}</p>
+                                </div>
+                              </div>
+
+                              <div className="submission-card-footer">
+                                <span className={`mini-status ${sub.status === 'completed' ? 'status-completed' : 'status-pending'}`}>
+                                  {sub.status}
+                                </span>
+                                <span className="review-link">
+                                  Review ➔
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div >
-      )
+          </div >
+        )
       }
     </>
   )

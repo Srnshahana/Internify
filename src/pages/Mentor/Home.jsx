@@ -14,7 +14,7 @@ import supabase from '../../supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
-import landingIllustration from '../../assets/images/landingpage-illlustration.png'
+import landingIllustration from '../../assets/images/landingpage-illlustration.svg'
 import adds1 from '../../assets/images/adds1.png'
 import adds2 from '../../assets/images/adds2.png'
 import adds3 from '../../assets/images/adds3.png'
@@ -257,7 +257,8 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             <div className="ad-content-side">
               <div className="ad-text-group">
                 <h2 className="ad-banner-text">Provide Mentorship to aspiring developers</h2>
-                <button className="ad-banner-cta">View Requets</button>
+                <p className="ad-banner-subtext">Guide the next generation of talent and share your industry expertise with eager learners.</p>
+                <button className="ad-banner-cta" onClick={() => setShowStudentRequests(true)}>View Requests</button>
               </div>
             </div>
             <div className="ad-image-side">

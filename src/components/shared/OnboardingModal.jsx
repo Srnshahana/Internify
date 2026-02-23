@@ -39,25 +39,39 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
         if (!file) return
 
         try {
+            console.log('📸 Starting image upload process...')
+            if (!user?.id) {
+                console.error('❌ User ID missing in OnboardingModal')
+                throw new Error('User session not found. Please log in again.')
+            }
+
             setUploadingImage(true)
             const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}-${Math.random()}.${fileExt}`
-            const filePath = `profile-avatars/${fileName}`
+            const fileName = `profile-avatars/${user.id}-${Math.random()}.${fileExt}`
+            const filePath = fileName // The path within the bucket
+
+            console.log('📁 File details:', { name: file.name, size: file.size, type: file.type })
+            console.log('🚀 Uploading to bucket: "course-files"', { filePath })
 
             const { error: uploadError, data } = await supabase.storage
-                .from('avatars')
+                .from('course-files')
                 .upload(filePath, file)
 
-            if (uploadError) throw uploadError
+            if (uploadError) {
+                console.error('❌ Supabase upload error:', uploadError)
+                throw new Error(`Upload failed: ${uploadError.message}`)
+            }
 
+            console.log('✅ Upload successful, getting public URL...')
             const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
+                .from('course-files')
                 .getPublicUrl(filePath)
 
+            console.log('🔗 Public URL:', publicUrl)
             setFormData(prev => ({ ...prev, profile_image: publicUrl }))
         } catch (error) {
-            console.error('Error uploading image:', error.message)
-            alert('Error uploading image!')
+            console.error('🔥 Error uploading image:', error)
+            alert(error.message || 'Error uploading image!')
         } finally {
             setUploadingImage(false)
         }
@@ -104,7 +118,7 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
             const { error } = await supabase
                 .from('student_details')
                 .upsert({
-                    student_id: user.id,
+                    student_id: authId,
                     name: formData.name,
                     profile_image: formData.profile_image,
                     address: formData.address,

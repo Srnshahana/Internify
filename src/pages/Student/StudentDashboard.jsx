@@ -17,8 +17,8 @@ import { DashboardDataProvider, useDashboardData } from '../../contexts/Dashboar
 // import Sidebar from '../../components/shared/Sidebar.jsx' // Removed
 import '../../App.css'
 
-function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) {
-  const { loading, enrolledCourses, studentProfile, refetch } = useDashboardData()
+const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) => {
+  const { loading, enrolledCourses, studentProfile, authUser, refetch } = useDashboardData()
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
@@ -77,6 +77,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
       {showOnboarding && (
         <OnboardingModal
+          user={authUser}
           profile={studentProfile}
           onComplete={async () => {
             await refetch()

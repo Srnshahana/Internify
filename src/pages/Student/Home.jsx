@@ -212,6 +212,10 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   // New Modal states
   const [showUpcomingSessionsModal, setShowUpcomingSessionsModal] = useState(false)
   const [showProgressGraphModal, setShowProgressGraphModal] = useState(false)
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false)
+  const [showRejectedModal, setShowRejectedModal] = useState(false)
+  const [rejectedCourseName, setRejectedCourseName] = useState('')
+  const [comingSoonData, setComingSoonData] = useState({ title: '', description: '' })
 
   // Drawer state
   const [isDrawerExpanded, setIsDrawerExpanded] = useState(false)
@@ -619,7 +623,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
 
       <section className="dashboard-ad-section-v2">
-        <div className="dashboard-ad-card-v2">
+        <div className="dashboard-ad-card-v2" onClick={() => window.open('https://internify.online/', '_blank')} style={{ cursor: 'pointer' }}>
           <div className="ad-code-banner">
             <div className="ad-content-side">
               <div className="ad-text-group">
@@ -669,7 +673,15 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
               <div
                 key={course.id}
                 className="dashboard-course-card-v2"
-                onClick={() => { setSelectedCourse(course); setShowCourseDetail(true); }}
+                onClick={() => {
+                  if (course.status === 'rejected') {
+                    setRejectedCourseName(course.title)
+                    setShowRejectedModal(true)
+                    return
+                  }
+                  setSelectedCourse(course)
+                  setShowCourseDetail(true)
+                }}
               >
                 <div className="course-card-v2" style={{ cursor: 'pointer' }}>
                   <div className="course-thumb-v2" style={{ height: '160px' }}>
@@ -787,23 +799,50 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       <div className="dashboard-section dashboard-featured-section-v2">
         <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Featured Sessions</h2>
         <div className="featured-sessions-carousel" ref={featuredSessionsRef} style={{ background: 'transparent' }}>
-          <div className="featured-session-card" style={{ background: 'white' }}>
+          <div
+            className="featured-session-card"
+            style={{ background: 'white', cursor: 'pointer' }}
+            onClick={() => {
+              setComingSoonData({
+                title: 'Free Consultation',
+                description: 'Get consultation on which career field to choose, which mentor to go with. Our experts will help you navigate your career path and find the perfect mentor to match your goals.'
+              })
+              setShowComingSoonModal(true)
+            }}
+          >
             <h3 className="featured-session-title">Free Consultation</h3>
-            <p className="featured-session-description">Get a free consultation with Internify on any confusion about the platform.</p>
+            <p className="featured-session-description">Get consultation on which career field to choose, which mentor to go with.</p>
             <div className="featured-session-footer">
               <span className="featured-session-duration">30 min</span>
               <span className="featured-session-price">Free</span>
             </div>
           </div>
-          <div className="featured-session-card" style={{ background: 'white' }}>
+          <div
+            className="featured-session-card"
+            style={{ background: 'white', cursor: 'pointer' }}
+            onClick={() => {
+              setComingSoonData({
+                title: 'Work Review',
+                description: 'Expert look and give you review and feedback on your work. Whether it\'s a design portfolio, a coding project, or a professional document, get insights to excel.'
+              })
+              setShowComingSoonModal(true)
+            }}
+          >
             <h3 className="featured-session-title">Work Review</h3>
-            <p className="featured-session-description">Get inputs to make your work better, be it a review or design inspiration.</p>
+            <p className="featured-session-description">Expert look and give you review and feedback on your work.</p>
             <div className="featured-session-footer">
               <span className="featured-session-duration">45 min</span>
               <span className="featured-session-price">$89</span>
             </div>
           </div>
-          <div className="featured-session-card" style={{ background: 'white' }}>
+          <div
+            className="featured-session-card"
+            style={{ background: 'white', cursor: 'pointer' }}
+            onClick={() => {
+              if (setSearchQuery) setSearchQuery('recruiter')
+              if (onNavigate) onNavigate('Explore')
+            }}
+          >
             <h3 className="featured-session-title">Interview Prep</h3>
             <p className="featured-session-description">A mentor with hiring experience will act as a technical interviewer.</p>
             <div className="featured-session-footer">
@@ -817,11 +856,11 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       {/* Modals */}
       {showUpcomingSessionsModal && (
         <div className="modal-overlay" onClick={() => setShowUpcomingSessionsModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-centered shadow-lg ring-1 ring-black/5" style={{ borderRadius: '24px', border: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
             <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h2 className="modal-title" style={{ margin: 0 }}>Upcoming Sessions</h2>
-              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
 
@@ -892,11 +931,11 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
       {showProgressGraphModal && (
         <div className="modal-overlay" onClick={() => setShowProgressGraphModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-centered shadow-xl ring-1 ring-black/10" style={{ borderRadius: '24px', border: '2px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
             <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h2 className="modal-title" style={{ margin: 0 }}>Learning Progress</h2>
-              <button className="progress-modal-close" onClick={() => setShowProgressGraphModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button className="progress-modal-close" onClick={() => setShowProgressGraphModal(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
 
@@ -992,6 +1031,71 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {showComingSoonModal && (
+        <div className="modal-overlay" onClick={() => setShowComingSoonModal(false)}>
+          <div className="modal-content-centered shadow-xl ring-1 ring-black/10" style={{ borderRadius: '24px', border: '1px solid #e2e8f0', maxWidth: '400px', padding: '40px 30px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              boxShadow: '0 10px 20px rgba(14, 165, 233, 0.2)'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '40px', color: 'white' }}>rocket_launch</span>
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>{comingSoonData.title}</h2>
+            <p style={{ color: '#64748b', fontSize: '16px', lineHeight: '1.6', marginBottom: '32px' }}>
+              {comingSoonData.description}
+            </p>
+            <button
+              className="btn-primary"
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '16px', fontWeight: '700', background: '#94a3b8', cursor: 'default' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              Coming Soon
+            </button>
+            <button
+              style={{ marginTop: '16px', background: 'none', border: 'none', color: '#64748b', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={() => setShowComingSoonModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+      {showRejectedModal && (
+        <div className="modal-overlay" onClick={() => setShowRejectedModal(false)}>
+          <div className="modal-content-centered shadow-xl ring-1 ring-black/10" style={{ borderRadius: '24px', border: '1px solid #e2e8f0', maxWidth: '400px', padding: '40px 30px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '40px', color: '#ef4444' }}>dangerous</span>
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', marginBottom: '12px' }}>Enrollment Rejected</h2>
+            <p style={{ color: '#64748b', fontSize: '16px', lineHeight: '1.6', marginBottom: '32px' }}>
+              Your enrollment for <strong>{rejectedCourseName}</strong> has been rejected by the mentor. This could be due to prerequisites not being met or limited availability.
+            </p>
+            <button
+              className="btn-danger"
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '16px', fontWeight: '700' }}
+              onClick={() => setShowRejectedModal(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

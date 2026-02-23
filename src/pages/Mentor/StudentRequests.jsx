@@ -1,100 +1,66 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
-
-const studentRequests = [
-  {
-    id: 1,
-    studentName: 'John Doe',
-    studentEmail: 'john@example.com',
-    course: 'React Advanced Patterns',
-    requestedDate: '2024-03-25',
-    requestedTime: '10:00 AM',
-    sessionType: '1:1',
-    topic: 'Code review and best practices',
-    status: 'Pending',
-    requestedAt: '2024-03-15T10:30:00',
-    studentProgress: 65,
-    previousSessions: 3,
-  },
-  {
-    id: 2,
-    studentName: 'Jane Smith',
-    studentEmail: 'jane@example.com',
-    course: 'UI/UX Design Principles',
-    requestedDate: '2024-03-26',
-    requestedTime: '2:00 PM',
-    sessionType: 'Career',
-    topic: 'Portfolio review and feedback',
-    status: 'Pending',
-    requestedAt: '2024-03-15T14:20:00',
-    studentProgress: 40,
-    previousSessions: 1,
-  },
-  {
-    id: 3,
-    studentName: 'Mike Johnson',
-    studentEmail: 'mike@example.com',
-    course: 'DSA Mastery',
-    requestedDate: '2024-03-27',
-    requestedTime: '4:00 PM',
-    sessionType: 'Mock interview',
-    topic: 'Algorithm problem solving',
-    status: 'Pending',
-    requestedAt: '2024-03-16T09:15:00',
-    studentProgress: 85,
-    previousSessions: 5,
-  },
-  {
-    id: 4,
-    studentName: 'Sarah Williams',
-    studentEmail: 'sarah@example.com',
-    course: 'System Design Fundamentals',
-    requestedDate: '2024-03-28',
-    requestedTime: '11:00 AM',
-    sessionType: '1:1',
-    topic: 'System architecture discussion',
-    status: 'Pending',
-    requestedAt: '2024-03-16T11:45:00',
-    studentProgress: 30,
-    previousSessions: 0,
-  },
-  {
-    id: 5,
-    studentName: 'David Brown',
-    studentEmail: 'david@example.com',
-    course: 'React Advanced Patterns',
-    requestedDate: '2024-03-29',
-    requestedTime: '3:30 PM',
-    sessionType: '1:1',
-    topic: 'Performance optimization',
-    status: 'Approved',
-    requestedAt: '2024-03-14T16:00:00',
-    approvedAt: '2024-03-14T18:30:00',
-    studentProgress: 75,
-    previousSessions: 4,
-  },
-  {
-    id: 6,
-    studentName: 'Emily Davis',
-    studentEmail: 'emily@example.com',
-    course: 'UI/UX Design Principles',
-    requestedDate: '2024-03-30',
-    requestedTime: '1:00 PM',
-    sessionType: 'Career',
-    topic: 'Design system implementation',
-    status: 'Rejected',
-    requestedAt: '2024-03-13T10:20:00',
-    rejectedAt: '2024-03-13T15:00:00',
-    rejectionReason: 'Time slot not available',
-    studentProgress: 50,
-    previousSessions: 2,
-  },
-]
+import supabase from '../../supabaseClient'
+import Loading from '../../components/Loading'
 
 function StudentRequests({ onBack }) {
   const [filter, setFilter] = useState('all') // all, pending, approved, rejected
   const [selectedRequest, setSelectedRequest] = useState(null)
-  const [requests, setRequests] = useState(studentRequests)
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true)
+      const authId = localStorage.getItem('auth_id')
+      if (!authId) return
+
+      // Fetch classes_enrolled for this mentor
+      const { data, error } = await supabase
+        .from('classes_enrolled')
+        .select(`
+          *,
+          courses(title),
+          student_details(name, profile_image)
+        `)
+        .eq('mentor_id', authId)
+
+      if (error) throw error
+
+      const mappedRequests = data.map(req => {
+        // Map DB status to UI status
+        let uiStatus = 'Pending'
+        if (req.status === 'active') uiStatus = 'Approved'
+        if (req.status === 'rejected') uiStatus = 'Rejected'
+
+        return {
+          id: req.id,
+          studentName: req.student_details?.name || 'Unknown Student',
+          studentEmail: '', // Email not in student_details schema
+          course: req.courses?.title || 'Unknown Course',
+          requestedDate: new Date().toISOString().split('T')[0], // Enrollment date not currently in schema
+          requestedTime: 'Enrolling',
+          sessionType: 'Enrollment',
+          topic: 'New Course Enrollment',
+          status: uiStatus,
+          requestedAt: new Date().toISOString(),
+          studentProgress: 0,
+          previousSessions: 0,
+          profile_image: req.student_details?.profile_image
+        }
+      })
+
+      setRequests(mappedRequests)
+    } catch (err) {
+      console.error('Error fetching requests:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRequests()
+  }, [])
 
   const filteredRequests = requests.filter((request) => {
     if (filter === 'all') return true
@@ -105,25 +71,50 @@ function StudentRequests({ onBack }) {
   const approvedCount = requests.filter(r => r.status === 'Approved').length
   const rejectedCount = requests.filter(r => r.status === 'Rejected').length
 
-  const handleApprove = (requestId) => {
-    setRequests(prev => prev.map(req =>
-      req.id === requestId
-        ? { ...req, status: 'Approved', approvedAt: new Date().toISOString() }
-        : req
-    ))
-    setSelectedRequest(null)
+  const handleApprove = async (requestId) => {
+    try {
+      const { error } = await supabase
+        .from('classes_enrolled')
+        .update({ status: 'active' })
+        .eq('id', requestId)
+
+      if (error) throw error
+
+      setRequests(prev => prev.map(req =>
+        req.id === requestId
+          ? { ...req, status: 'Approved', approvedAt: new Date().toISOString() }
+          : req
+      ))
+      setSelectedRequest(null)
+    } catch (err) {
+      console.error('Error approving request:', err)
+      alert('Failed to approve request. Please try again.')
+    }
   }
 
-  const handleReject = (requestId, reason) => {
-    setRequests(prev => prev.map(req =>
-      req.id === requestId
-        ? { ...req, status: 'Rejected', rejectedAt: new Date().toISOString(), rejectionReason: reason }
-        : req
-    ))
-    setSelectedRequest(null)
+  const handleReject = async (requestId, reason) => {
+    try {
+      const { error } = await supabase
+        .from('classes_enrolled')
+        .update({ status: 'rejected' })
+        .eq('id', requestId)
+
+      if (error) throw error
+
+      setRequests(prev => prev.map(req =>
+        req.id === requestId
+          ? { ...req, status: 'Rejected', rejectedAt: new Date().toISOString(), rejectionReason: reason }
+          : req
+      ))
+      setSelectedRequest(null)
+    } catch (err) {
+      console.error('Error rejecting request:', err)
+      alert('Failed to reject request. Please try again.')
+    }
   }
 
   const handleReschedule = (requestId, newDate, newTime) => {
+    // Note: Enrollment requests don't strictly have scheduling, but keeping UI parity
     setRequests(prev => prev.map(req =>
       req.id === requestId
         ? { ...req, requestedDate: newDate, requestedTime: newTime }
@@ -162,6 +153,10 @@ function StudentRequests({ onBack }) {
     })
   }
 
+  if (loading) {
+    return <Loading fullScreen={true} />
+  }
+
   if (selectedRequest) {
     const request = requests.find(r => r.id === selectedRequest)
     if (!request) {
@@ -184,9 +179,18 @@ function StudentRequests({ onBack }) {
         <div className="request-detail-container">
           <div className="request-detail-card">
             <div className="request-detail-header">
-              <div>
-                <h2 className="request-student-name">{request.studentName}</h2>
-                <p className="request-student-email">{request.studentEmail}</p>
+              <div className="request-student-info">
+                <div className="student-avatar" style={{ width: '48px', height: '48px', marginRight: '16px' }}>
+                  {request.profile_image ? (
+                    <img src={request.profile_image} alt={request.studentName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <span>{request.studentName.charAt(0)}</span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="request-student-name">{request.studentName}</h2>
+                  <p className="request-student-email">{request.studentEmail || 'No email provided'}</p>
+                </div>
               </div>
               <span
                 className="request-status-badge"
@@ -201,45 +205,41 @@ function StudentRequests({ onBack }) {
             </div>
 
             <div className="request-detail-section">
-              <h3 className="section-title">Session Information</h3>
+              <h3 className="section-title">Request Information</h3>
               <div className="info-grid">
                 <div className="info-item">
                   <span className="info-label">Course</span>
                   <span className="info-value">{request.course}</span>
                 </div>
                 <div className="info-item">
-                  <span className="info-label">Session Type</span>
+                  <span className="info-label">Request Type</span>
                   <span className="info-value">{request.sessionType}</span>
                 </div>
                 <div className="info-item">
-                  <span className="info-label">Requested Date</span>
+                  <span className="info-label">Date Submitted</span>
                   <span className="info-value">{formatDate(request.requestedDate)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="info-label">Requested Time</span>
+                  <span className="info-label">Time</span>
                   <span className="info-value">{request.requestedTime}</span>
                 </div>
                 <div className="info-item">
                   <span className="info-label">Topic</span>
                   <span className="info-value">{request.topic}</span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Requested At</span>
-                  <span className="info-value">{formatDateTime(request.requestedAt)}</span>
-                </div>
               </div>
             </div>
 
             <div className="request-detail-section">
-              <h3 className="section-title">Student Information</h3>
+              <h3 className="section-title">Student Overview</h3>
               <div className="info-grid">
                 <div className="info-item">
-                  <span className="info-label">Progress in Course</span>
+                  <span className="info-label">Current Progress</span>
                   <span className="info-value">{request.studentProgress}%</span>
                 </div>
                 <div className="info-item">
-                  <span className="info-label">Previous Sessions</span>
-                  <span className="info-value">{request.previousSessions}</span>
+                  <span className="info-label">Prior Interaction</span>
+                  <span className="info-value">{request.previousSessions} sessions</span>
                 </div>
               </div>
               <div className="progress-bar" style={{ marginTop: '12px' }}>
@@ -265,24 +265,12 @@ function StudentRequests({ onBack }) {
                     className="btn-primary"
                     onClick={() => handleApprove(request.id)}
                   >
-                    Approve Request
-                  </button>
-                  <button
-                    className="btn-secondary"
-                    onClick={() => {
-                      const newDate = prompt('Enter new date (YYYY-MM-DD):', request.requestedDate)
-                      const newTime = prompt('Enter new time (e.g., 2:00 PM):', request.requestedTime)
-                      if (newDate && newTime) {
-                        handleReschedule(request.id, newDate, newTime)
-                      }
-                    }}
-                  >
-                    Reschedule
+                    Approve Enrollment
                   </button>
                   <button
                     className="btn-danger"
                     onClick={() => {
-                      const reason = prompt('Enter rejection reason:', 'Time slot not available')
+                      const reason = prompt('Enter rejection reason:', 'Course prerequisites not met')
                       if (reason) {
                         handleReject(request.id, reason)
                       }
@@ -296,35 +284,10 @@ function StudentRequests({ onBack }) {
 
             {request.status === 'Approved' && (
               <div className="request-actions-section">
-                <h3 className="section-title">Session Approved</h3>
+                <h3 className="section-title">Enrolled</h3>
                 <p className="approved-message">
-                  This session has been approved. You can reschedule if needed.
+                  This student is now enrolled and can access the classroom materials.
                 </p>
-                <div className="request-actions">
-                  <button
-                    className="btn-secondary"
-                    onClick={() => {
-                      const newDate = prompt('Enter new date (YYYY-MM-DD):', request.requestedDate)
-                      const newTime = prompt('Enter new time (e.g., 2:00 PM):', request.requestedTime)
-                      if (newDate && newTime) {
-                        handleReschedule(request.id, newDate, newTime)
-                      }
-                    }}
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    className="btn-danger"
-                    onClick={() => {
-                      const reason = prompt('Enter cancellation reason:', '')
-                      if (reason) {
-                        handleReject(request.id, reason)
-                      }
-                    }}
-                  >
-                    Cancel Session
-                  </button>
-                </div>
               </div>
             )}
           </div>
@@ -390,7 +353,7 @@ function StudentRequests({ onBack }) {
       {/* Filters */}
       <div className="dashboard-section">
         <div className="section-header-with-button">
-          <h2 className="section-title">Session Requests</h2>
+          <h2 className="section-title">Course Enrollment Requests</h2>
           <div className="filter-buttons">
             <button
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
@@ -434,11 +397,15 @@ function StudentRequests({ onBack }) {
                   <div className="request-card-header">
                     <div className="request-student-info">
                       <div className="student-avatar">
-                        <span>{request.studentName.charAt(0)}</span>
+                        {request.profile_image ? (
+                          <img src={request.profile_image} alt={request.studentName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                          <span>{request.studentName.charAt(0)}</span>
+                        )}
                       </div>
                       <div className="request-student-details">
                         <h3 className="request-student-name-small">{request.studentName}</h3>
-                        <p className="request-student-email-small">{request.studentEmail}</p>
+                        <p className="request-student-email-small">{request.studentEmail || 'No email'}</p>
                       </div>
                     </div>
                     <span
@@ -470,17 +437,9 @@ function StudentRequests({ onBack }) {
                         <span className="request-value">{formatDate(request.requestedDate)}</span>
                       </div>
                       <div className="request-info-item">
-                        <span className="request-label">Time:</span>
-                        <span className="request-value">{request.requestedTime}</span>
+                        <span className="request-label">Status:</span>
+                        <span className="request-value">{request.status}</span>
                       </div>
-                    </div>
-                    <div className="request-topic">
-                      <span className="request-label">Topic:</span>
-                      <span className="request-value">{request.topic}</span>
-                    </div>
-                    <div className="request-student-stats">
-                      <span className="request-stat">Progress: {request.studentProgress}%</span>
-                      <span className="request-stat">Previous Sessions: {request.previousSessions}</span>
                     </div>
                   </div>
 
@@ -502,7 +461,7 @@ function StudentRequests({ onBack }) {
                         <button
                           className="btn-danger"
                           onClick={() => {
-                            const reason = prompt('Enter rejection reason:', 'Time slot not available')
+                            const reason = prompt('Enter rejection reason:', 'Prerequisites not met')
                             if (reason) {
                               handleReject(request.id, reason)
                             }

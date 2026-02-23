@@ -38,6 +38,7 @@ import searchVectorImg from '../../assets/images/searchvector.png'
 import aiCourseImg from '../../assets/images/ai.jpg'
 import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
+import worldMapImg from '../../assets/images/worldmap.jpg'
 
 // Map courses to skills format
 // Featured Programs Data
@@ -995,7 +996,8 @@ export default function LandingPage({
       </nav>
 
       <main className="landing-main-content">
-        <section className="hero-section-v3">
+        <section className="hero-section-v3" id="search">
+
           <div className="hero-dark-card" style={{ position: 'relative', overflow: 'hidden' }}>
             <video
               ref={videoRef}
@@ -1083,7 +1085,8 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="featured-programs-section landing-section">
+        <section className="featured-programs-section landing-section" id="courses">
+
           <img src={settingsImg} alt="" className="bg-deco-settings" />
           <div className="featured-header reveal reveal-down">
             <div className="featured-text-group">
@@ -1176,21 +1179,14 @@ export default function LandingPage({
         </section>
 
         <section className="about-us-section landing-section">
-          {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> */}
-          {/* Static About Us Content Restored */}
-          <div className="about-content">
-            <h2 className="section-title-v3">About Us</h2>
-            <p className="about-text">
-              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience.
-              {/* We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters,  */}
-              empowering students and early-career professionals to confidently launch their careers
-            </p>
-          </div>
+          <img src={worldMapImg} alt="World Map" className="about-bg-image" />
+          <div className="about-overlay"></div>
 
-          {/* Slider Moved to "Box" (Image Container area) */}
-          <div className="about-slider-box">
+          <div className="about-carousel-container-v3 reveal reveal-pop">
+            <h2 className="about-title-v3">About Us</h2>
+
             <div
-              className={`about-carousel-track ${isDragging ? 'dragging' : ''}`}
+              className={`about-carousel-track-v3 ${isDragging ? 'dragging' : ''}`}
               style={{
                 transform: `translateX(calc(-${currentSlide * 100}% + ${dragOffset}px))`,
                 transition: isDragging ? 'none' : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -1204,30 +1200,26 @@ export default function LandingPage({
               onTouchEnd={handleDragEnd}
             >
               {aboutSlides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`about-slide-card ${index === currentSlide ? 'active' : ''}`}
-                  style={{ backgroundImage: `url(${slide.image})` }}
-                >
-                  <div className="about-card-content">
-                    <h3 className="about-card-title">{slide.title}</h3>
-                    <p className="about-card-text">{slide.text}</p>
-                  </div>
+                <div key={index} className="about-slide-v3">
+                  <h3 className="about-slide-title-v3">{slide.title}</h3>
+                  <p className="about-slide-text-v3">{slide.text}</p>
                 </div>
               ))}
             </div>
 
-            <div className="about-dots-box">
+            <div className="about-dots-v3">
               {aboutSlides.map((_, index) => (
                 <span
                   key={index}
-                  className={`about-dot ${index === currentSlide ? 'active' : ''}`}
+                  className={`dot-v3 ${index === currentSlide ? 'active' : ''}`}
                   onClick={() => setCurrentSlide(index)}
                 ></span>
               ))}
             </div>
           </div>
+
         </section>
+
 
         <section className="offer-section landing-section">
           <img src={settingsImg} alt="" className="bg-deco-settings" />
@@ -1304,7 +1296,8 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="mentors-section landing-section">
+        <section className="mentors-section landing-section" id="mentors">
+
           <div className="mentors-header reveal reveal-left">
             <div className="mentors-text-content">
               <h2 className="section-title-start">Professional Mentors</h2>
@@ -1453,7 +1446,8 @@ export default function LandingPage({
 
 
 
-        <section className="unified-footer-frame landing-section landing-section-v2 reveal">
+        <section className="unified-footer-frame landing-section landing-section-v2 reveal" id="testimonials">
+
 
 
 

@@ -1,7 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
+
   --primary-sky: #0ea5e9;
   --primary-sky-rgb: 14, 165, 233;
   --secondary-deep: #334155;
@@ -40296,149 +40301,123 @@ html {
 
 /* About Us Section */
 .about-us-section {
-  padding: clamp(3rem, 5vh, 6rem) 1.5rem;
-  background-color: #f8fafc;
-  /* Slate 100 for contrast */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.about-content {
-  max-width: 900px;
-  margin-bottom: 3rem;
-  /* Reduced from 4rem */
-}
-
-.about-text {
-  font-size: clamp(0.9rem, 1.5vw, 1rem);
-  /* Reduced from 1.125rem */
-  color: #64748b;
-  line-height: 1.6;
-  /* Reduced line-height slightly */
-  margin: 0 auto;
-}
-
-.about-image-container {
-  width: 100%;
-  max-width: 1000px;
-  /* Reduced max-width */
-  height: 350px;
-  /* Reduced from 400px */
-  border-radius: 1.5rem;
-  /* Reduced radius */
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.about-image-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #0f4c5c 0%, #1e88e5 100%);
-
-  /* Teal to Blue gradient matching reference */
-  /* You can replace this with an actual image later */
-}
-
-/* About Us Slider Box Styles (Replacing Image Container) */
-.about-slider-box {
   position: relative;
-  width: 85%;
+  width: 92%;
   max-width: 1400px;
-  /* Increased width as requested */
-  height: 450px;
-  /* Increased height slightly for better presence */
-  border-radius: 1.5rem;
+  margin: 4rem auto;
+  min-height: 600px;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 6rem 2rem !important;
+  text-align: center;
+  border-radius: 3rem;
   overflow: hidden;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.45);
 }
 
-.about-carousel-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: grab;
-  user-select: none;
-  /* Prevent text selection during drag */
-}
 
-.about-carousel-track.dragging {
-  cursor: grabbing;
-}
 
-.about-slide-card {
-  flex: 0 0 100%;
-  /* Each slide takes full width of the box */
-  height: 100%;
-  position: relative;
-  /* Before was absolute */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  padding: 3rem;
-  text-align: center;
-  background-size: cover;
-  background-position: center;
-}
-
-.about-slide-card::before {
-  content: '';
+.about-bg-image {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  /* Dimming overlay */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.about-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
   z-index: 1;
 }
 
-.about-card-content {
+.about-carousel-container-v3 {
   position: relative;
   z-index: 2;
-  /* Keep text above overlay */
+  color: #ffffff;
+  max-width: 1000px;
+  width: 100%;
+  overflow: hidden;
 }
 
-/* .about-slide-card.active class no longer needs to control opacity/z-index as the track moves */
-
-.about-card-title {
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.about-card-text {
-  font-size: clamp(0.9rem, 1.5vw, 1rem);
-  line-height: 1.6;
-  max-width: 700px;
-}
-
-.about-dots-box {
+.about-title-v3 {
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 20;
+  top: 2rem;
+  left: 3rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  z-index: 3;
 }
 
-.about-dot {
+
+
+.about-carousel-track-v3 {
+  display: flex;
+  width: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: grab;
+  user-select: none;
+}
+
+.about-carousel-track-v3.dragging {
+  cursor: grabbing;
+}
+
+.about-slide-v3 {
+  flex: 0 0 100%;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-slide-title-v3 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.about-slide-text-v3 {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 800px;
+  margin-bottom: 3rem;
+}
+
+.about-dots-v3 {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.dot-v3 {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.about-dot.active {
-  background-color: #fff;
+.dot-v3.active {
+  background-color: #ffffff;
   transform: scale(1.4);
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
+
+
 
 /* What We Offer Section */
 .offer-section {

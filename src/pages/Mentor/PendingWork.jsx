@@ -1,118 +1,118 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../App.css'
-
-const pendingWork = [
-  {
-    id: 1,
-    studentName: 'Sherin',
-    studentEmail: 'sherin@example.com',
-    course: 'React Advanced Patterns',
-    assignmentTitle: 'Build Custom Hook Library',
-    submissionDate: '2024-03-15T10:30:00',
-    dueDate: '2024-03-20',
-    status: 'Submitted',
-    type: 'Assignment',
-    description: 'Create a library of reusable custom hooks including useLocalStorage, useFetch, and useDebounce.',
-    attachments: [
-      { name: 'hooks-library.zip', type: 'zip', size: '2.4 MB' },
-      { name: 'README.md', type: 'markdown', size: '12 KB' },
-    ],
-    studentProgress: 65,
-  },
-  {
-    id: 2,
-    studentName: 'Rahul',
-    studentEmail: 'rahul@example.com',
-    course: 'DSA Mastery',
-    assignmentTitle: 'Algorithm Problem Set #5',
-    submissionDate: '2024-03-14T15:20:00',
-    dueDate: '2024-03-18',
-    status: 'Submitted',
-    type: 'Assignment',
-    description: 'Solve problems on dynamic programming and graph algorithms.',
-    attachments: [
-      { name: 'solutions.py', type: 'python', size: '45 KB' },
-    ],
-    studentProgress: 85,
-  },
-  {
-    id: 3,
-    studentName: 'Fatima',
-    studentEmail: 'fatima@example.com',
-    course: 'UI/UX Design Principles',
-    assignmentTitle: 'Design System Implementation',
-    submissionDate: '2024-03-13T09:15:00',
-    dueDate: '2024-03-18',
-    status: 'Submitted',
-    type: 'Project',
-    description: 'Create a complete design system with components, colors, typography, and spacing guidelines.',
-    attachments: [
-      { name: 'design-system.figma', type: 'figma', size: '8.2 MB' },
-      { name: 'documentation.pdf', type: 'pdf', size: '1.5 MB' },
-    ],
-    studentProgress: 40,
-  },
-  {
-    id: 4,
-    studentName: 'Priya',
-    studentEmail: 'priya@example.com',
-    course: 'React Advanced Patterns',
-    assignmentTitle: 'Code Review Request',
-    submissionDate: '2024-03-12T14:45:00',
-    dueDate: 'N/A',
-    status: 'Submitted',
-    type: 'Code Review',
-    description: 'Please review my React component refactoring. Looking for feedback on performance optimization.',
-    attachments: [
-      { name: 'components-refactored.zip', type: 'zip', size: '1.8 MB' },
-    ],
-    studentProgress: 75,
-  },
-  {
-    id: 5,
-    studentName: 'Amit',
-    studentEmail: 'amit@example.com',
-    course: 'System Design Fundamentals',
-    assignmentTitle: 'System Architecture Design',
-    submissionDate: '2024-03-11T11:30:00',
-    dueDate: '2024-03-15',
-    status: 'Submitted',
-    type: 'Project',
-    description: 'Design a scalable e-commerce system architecture with database schema and API design.',
-    attachments: [
-      { name: 'architecture-diagram.pdf', type: 'pdf', size: '3.2 MB' },
-      { name: 'api-documentation.md', type: 'markdown', size: '28 KB' },
-    ],
-    studentProgress: 55,
-  },
-]
+import supabase from '../../supabaseClient'
 
 function PendingWork({ onBack }) {
-  const [filter, setFilter] = useState('all') // all, assignment, project, code-review
-  const [selectedWork, setSelectedWork] = useState(null)
-  const [reviewedWork, setReviewedWork] = useState(new Set())
+  const [filter, setFilter] = useState('all')
+  const [selectedWorkId, setSelectedWorkId] = useState(null)
+  const [pendingWork, setPendingWork] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [feedback, setFeedback] = useState('')
 
-  const filteredWork = pendingWork.filter((work) => {
-    if (filter === 'all') return true
-    return work.type.toLowerCase().replace(' ', '-') === filter
-  })
+  const mentorId = localStorage.getItem('auth_id')
 
-  const handleApprove = (workId) => {
-    setReviewedWork(prev => new Set([...prev, workId]))
-    setSelectedWork(null)
+  useEffect(() => {
+    fetchPendingWork()
+  }, [mentorId])
+
+  const fetchPendingWork = async () => {
+    try {
+      setLoading(true)
+      // 1. Fetch submissions with assessment and course info
+      const { data: submissions, error: subError } = await supabase
+        .from('assessment_submissions')
+        .select(`
+          *,
+          assessments:assessment_id (
+            title,
+            description,
+            due_date,
+            courses (title)
+          )
+        `)
+        .eq('status', 'submitted')
+
+      if (subError) throw subError
+      if (!submissions || submissions.length === 0) {
+        setPendingWork([])
+        return
+      }
+
+      // 2. Fetch student details for all unique student_ids in the submissions
+      const studentIds = [...new Set(submissions.map(s => s.student_id))]
+      const { data: students, error: studentError } = await supabase
+        .from('student_details')
+        .select('student_id, name, profile_image')
+        .in('student_id', studentIds)
+
+      if (studentError) {
+        console.error('Error fetching student details:', studentError)
+      }
+
+      // 3. Merge student data into submissions
+      const studentMap = new Map(students?.map(s => [s.student_id, s]) || [])
+      const merged = submissions.map(s => ({
+        ...s,
+        student_details: studentMap.get(s.student_id) || { name: `Student #${s.student_id}` }
+      }))
+
+      setPendingWork(merged)
+    } catch (err) {
+      console.error('Error fetching pending work:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleRequestRevision = (workId, feedback) => {
-    setReviewedWork(prev => new Set([...prev, workId]))
-    setSelectedWork(null)
+  const handleApprove = async (submissionId) => {
+    try {
+      const { error } = await supabase
+        .from('assessment_submissions')
+        .update({
+          status: 'completed',
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', submissionId)
+
+      if (error) throw error
+      alert('Work approved successfully!')
+      setSelectedWorkId(null)
+      fetchPendingWork()
+    } catch (err) {
+      console.error('Error approving work:', err)
+      alert('Failed to approve: ' + err.message)
+    }
   }
 
-  const handleReject = (workId, reason) => {
-    setReviewedWork(prev => new Set([...prev, workId]))
-    setSelectedWork(null)
+  const handleReject = async (submissionId) => {
+    if (!feedback) {
+      alert('Please enter feedback before rejecting.')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('assessment_submissions')
+        .update({
+          status: 'rejected',
+          reviewed_at: new Date().toISOString(),
+          mentor_feedback: feedback
+        })
+        .eq('id', submissionId)
+
+      if (error) throw error
+      alert('Work rejected with feedback.')
+      setSelectedWorkId(null)
+      setFeedback('')
+      fetchPendingWork()
+    } catch (err) {
+      console.error('Error rejecting work:', err)
+      alert('Failed to reject: ' + err.message)
+    }
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -122,33 +122,27 @@ function PendingWork({ onBack }) {
     })
   }
 
-  const getTypeColor = (type) => {
-    switch (type) {
-      case 'Assignment':
-        return '#3b82f6'
-      case 'Project':
-        return '#8b5cf6'
-      case 'Code Review':
-        return '#22c55e'
-      default:
-        return '#6b7280'
-    }
+  const filteredWork = pendingWork.filter((work) => {
+    if (filter === 'all') return true
+    // Assessments don't have a 'type' field in the schema, but we can treat them all as assessments for now
+    return true
+  })
+
+  if (loading) {
+    return <div className="dashboard-page" style={{ padding: '100px', textAlign: 'center' }}>Loading pending work...</div>
   }
 
-  if (selectedWork) {
-    const work = pendingWork.find(w => w.id === selectedWork)
+  if (selectedWorkId) {
+    const work = pendingWork.find(w => w.id === selectedWorkId)
     if (!work) {
-      setSelectedWork(null)
+      setSelectedWorkId(null)
       return null
     }
-
-    const isReviewed = reviewedWork.has(work.id)
-    const typeColor = getTypeColor(work.type)
 
     return (
       <div className="dashboard-page">
         <div className="course-detail-header">
-          <button className="back-button" onClick={() => setSelectedWork(null)}>
+          <button className="back-button" onClick={() => setSelectedWorkId(null)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -161,42 +155,38 @@ function PendingWork({ onBack }) {
           <div className="work-review-card">
             <div className="work-review-header">
               <div>
-                <div className="work-type-badge" style={{ backgroundColor: `${typeColor}20`, color: typeColor, borderColor: typeColor }}>
-                  {work.type}
+                <div className="work-type-badge" style={{ backgroundColor: `#3b82f620`, color: '#3b82f6', borderColor: '#3b82f6' }}>
+                  Assessment
                 </div>
-                <h2 className="work-title">{work.assignmentTitle}</h2>
-                <p className="work-course">{work.course}</p>
+                <h2 className="work-title">{work.assessments?.title}</h2>
+                <p className="work-course">{work.assessments?.courses?.title}</p>
               </div>
-              {isReviewed && (
-                <span className="reviewed-badge">
-                  ✓ Reviewed
-                </span>
-              )}
             </div>
 
             <div className="work-student-info">
               <div className="student-avatar">
-                <span>{work.studentName.charAt(0)}</span>
+                {work.student_details?.profile_image ? (
+                  <img src={work.student_details.profile_image} alt={work.student_details.name} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                ) : (
+                  <span>{work.student_details?.name?.charAt(0)}</span>
+                )}
               </div>
               <div className="work-student-details">
-                <h3 className="work-student-name">{work.studentName}</h3>
-                <p className="work-student-email">{work.studentEmail}</p>
-                <div className="work-student-progress">
-                  <span>Progress: {work.studentProgress}%</span>
-                </div>
+                <h3 className="work-student-name">{work.student_details?.name}</h3>
+                <p className="work-student-email">Student ID: {work.student_id}</p>
               </div>
             </div>
 
             <div className="work-details-section">
-              <h3 className="section-title">Assignment Details</h3>
+              <h3 className="section-title">Submission Details</h3>
               <div className="info-grid">
                 <div className="info-item">
                   <span className="info-label">Submitted:</span>
-                  <span className="info-value">{formatDate(work.submissionDate)}</span>
+                  <span className="info-value">{formatDate(work.submitted_at)}</span>
                 </div>
                 <div className="info-item">
                   <span className="info-label">Due Date:</span>
-                  <span className="info-value">{work.dueDate === 'N/A' ? 'N/A' : formatDate(work.dueDate)}</span>
+                  <span className="info-value">{formatDate(work.assessments?.due_date)}</span>
                 </div>
                 <div className="info-item">
                   <span className="info-label">Status:</span>
@@ -206,84 +196,58 @@ function PendingWork({ onBack }) {
             </div>
 
             <div className="work-description-section">
-              <h3 className="section-title">Description</h3>
-              <p className="work-description">{work.description}</p>
+              <h3 className="section-title">Student Notes</h3>
+              <p className="work-description">{work.text_submission || 'No notes provided.'}</p>
             </div>
 
-            <div className="work-attachments-section">
-              <h3 className="section-title">Attachments</h3>
-              <div className="attachments-list">
-                {work.attachments.map((attachment, idx) => (
-                  <div key={idx} className="attachment-item">
-                    <div className="attachment-icon">
-                      {attachment.type === 'pdf' && '📄'}
-                      {attachment.type === 'zip' && '📦'}
-                      {attachment.type === 'figma' && '🎨'}
-                      {attachment.type === 'python' && '🐍'}
-                      {attachment.type === 'markdown' && '📝'}
-                    </div>
-                    <div className="attachment-info">
-                      <span className="attachment-name">{attachment.name}</span>
-                      <span className="attachment-size">{attachment.size}</span>
-                    </div>
-                    <button className="btn-secondary btn-small">Download</button>
-                  </div>
-                ))}
+            {/* In a real app, we would fetch attachments from assessment_attachments table here */}
+
+            <div className="work-review-actions">
+              <h3 className="section-title">Review Actions</h3>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '8px' }}>Feedback / Notes</label>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Enter feedback for the student..."
+                  style={{
+                    width: '100%',
+                    height: '100px',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
+
+              <div className="review-actions-grid">
+                <button
+                  className="btn-success"
+                  onClick={() => {
+                    if (confirm('Approve this work?')) handleApprove(work.id)
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Approve
+                </button>
+                <button
+                  className="btn-danger"
+                  onClick={() => {
+                    if (confirm('Reject this work? Feedback is required.')) handleReject(work.id)
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Reject
+                </button>
               </div>
             </div>
-
-            {!isReviewed && (
-              <div className="work-review-actions">
-                <h3 className="section-title">Review Actions</h3>
-                <div className="review-actions-grid">
-                  <button 
-                    className="btn-success"
-                    onClick={() => handleApprove(work.id)}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Approve
-                  </button>
-                  <button 
-                    className="btn-warning"
-                    onClick={() => {
-                      const feedback = prompt('Enter revision feedback:', '')
-                      if (feedback) {
-                        handleRequestRevision(work.id, feedback)
-                      }
-                    }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    Request Revision
-                  </button>
-                  <button 
-                    className="btn-danger"
-                    onClick={() => {
-                      const reason = prompt('Enter rejection reason:', '')
-                      if (reason) {
-                        handleReject(work.id, reason)
-                      }
-                    }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    Reject
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isReviewed && (
-              <div className="reviewed-message">
-                <p>✓ This work has been reviewed.</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -302,135 +266,61 @@ function PendingWork({ onBack }) {
         <h1 className="page-title">Review Pending Work</h1>
       </div>
 
-      {/* Stats Overview */}
-      <div className="dashboard-section progress-overview-section">
-        <div className="progress-overview-cards">
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #f59e0b' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>⏳</div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Pending Review</h3>
-              <p className="progress-card-value" style={{ color: '#f59e0b', fontSize: '28px', fontWeight: '700' }}>
-                {pendingWork.length - reviewedWork.size}
-              </p>
-            </div>
-          </div>
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #22c55e' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>✅</div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Reviewed</h3>
-              <p className="progress-card-value" style={{ color: '#22c55e', fontSize: '28px', fontWeight: '700' }}>
-                {reviewedWork.size}
-              </p>
-            </div>
-          </div>
-          <div className="progress-overview-card" style={{ borderTop: '4px solid #3b82f6' }}>
-            <div className="progress-card-icon" style={{ fontSize: '32px' }}>📋</div>
-            <div className="progress-card-content">
-              <h3 className="progress-card-title">Total Submissions</h3>
-              <p className="progress-card-value" style={{ color: '#3b82f6', fontSize: '28px', fontWeight: '700' }}>
-                {pendingWork.length}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
       <div className="dashboard-section">
         <div className="section-header-with-button">
-          <h2 className="section-title">Pending Work</h2>
-          <div className="filter-buttons">
-            <button
-              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              All ({pendingWork.length})
-            </button>
-            <button
-              className={`filter-btn ${filter === 'assignment' ? 'active' : ''}`}
-              onClick={() => setFilter('assignment')}
-            >
-              Assignments ({pendingWork.filter(w => w.type === 'Assignment').length})
-            </button>
-            <button
-              className={`filter-btn ${filter === 'project' ? 'active' : ''}`}
-              onClick={() => setFilter('project')}
-            >
-              Projects ({pendingWork.filter(w => w.type === 'Project').length})
-            </button>
-            <button
-              className={`filter-btn ${filter === 'code-review' ? 'active' : ''}`}
-              onClick={() => setFilter('code-review')}
-            >
-              Code Reviews ({pendingWork.filter(w => w.type === 'Code Review').length})
-            </button>
-          </div>
+          <h2 className="section-title">Submissions ({pendingWork.length})</h2>
         </div>
 
-        {/* Work List */}
         <div className="pending-work-list">
-          {filteredWork.length === 0 ? (
+          {pendingWork.length === 0 ? (
             <div className="empty-state">
-              <p>No pending work found matching your criteria.</p>
+              <p>No pending work found.</p>
             </div>
           ) : (
-            filteredWork.map((work) => {
-              const typeColor = getTypeColor(work.type)
-              const isReviewed = reviewedWork.has(work.id)
-              
+            pendingWork.map((work) => {
               return (
-                <div key={work.id} className={`work-card ${isReviewed ? 'reviewed' : ''}`}>
+                <div key={work.id} className="work-card">
                   <div className="work-card-header">
                     <div className="work-card-info">
-                      <div className="work-type-badge" style={{ backgroundColor: `${typeColor}20`, color: typeColor, borderColor: typeColor }}>
-                        {work.type}
+                      <div className="work-type-badge" style={{ backgroundColor: `#3b82f620`, color: '#3b82f6', borderColor: '#3b82f6' }}>
+                        Assessment
                       </div>
                       <div>
-                        <h3 className="work-card-title">{work.assignmentTitle}</h3>
-                        <p className="work-card-course">{work.course}</p>
+                        <h3 className="work-card-title">{work.assessments?.title}</h3>
+                        <p className="work-card-course">{work.assessments?.courses?.title}</p>
                       </div>
                     </div>
-                    {isReviewed && (
-                      <span className="reviewed-badge-small">✓ Reviewed</span>
-                    )}
                   </div>
 
                   <div className="work-card-student">
                     <div className="student-avatar-small">
-                      <span>{work.studentName.charAt(0)}</span>
+                      {work.student_details?.profile_image ? (
+                        <img src={work.student_details.profile_image} alt={work.student_details.name} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                      ) : (
+                        <span>{work.student_details?.name?.charAt(0)}</span>
+                      )}
                     </div>
                     <div>
-                      <p className="work-card-student-name">{work.studentName}</p>
-                      <p className="work-card-student-email">{work.studentEmail}</p>
+                      <p className="work-card-student-name">{work.student_details?.name}</p>
+                      <p className="work-card-student-email">ID: {work.student_id}</p>
                     </div>
                   </div>
 
                   <div className="work-card-meta">
                     <div className="work-meta-item">
                       <span className="meta-label">Submitted:</span>
-                      <span className="meta-value">{formatDate(work.submissionDate)}</span>
-                    </div>
-                    <div className="work-meta-item">
-                      <span className="meta-label">Due:</span>
-                      <span className="meta-value">{work.dueDate === 'N/A' ? 'N/A' : formatDate(work.dueDate)}</span>
-                    </div>
-                    <div className="work-meta-item">
-                      <span className="meta-label">Attachments:</span>
-                      <span className="meta-value">{work.attachments.length} file(s)</span>
+                      <span className="meta-value">{formatDate(work.submitted_at)}</span>
                     </div>
                   </div>
 
-                  <p className="work-card-description">{work.description}</p>
+                  <p className="work-card-description">{work.text_submission || 'No text provided.'}</p>
 
                   <div className="work-card-actions">
-                    <button 
+                    <button
                       className="btn-primary"
-                      onClick={() => setSelectedWork(work.id)}
+                      onClick={() => setSelectedWorkId(work.id)}
                     >
                       Review Work
-                    </button>
-                    <button className="btn-secondary">
-                      Message Student
                     </button>
                   </div>
                 </div>
@@ -444,4 +334,5 @@ function PendingWork({ onBack }) {
 }
 
 export default PendingWork
+
 
