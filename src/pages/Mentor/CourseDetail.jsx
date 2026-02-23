@@ -42,7 +42,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   }
 
   if (showLiveClassroom) {
-    return <MentorLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} />
+    return <MentorLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} onNavigate={onNavigate} />
   }
 
   if (!courseDetails) {

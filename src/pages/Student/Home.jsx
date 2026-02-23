@@ -80,7 +80,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   // Get scheduled sessions from context and filter out completed ones
   const allScheduled = scheduledSessions || []
   const liveUpcomingSessions = allScheduled
-    .filter(s => !s.completed)
+    .filter(s => !s.is_complete && !s.completed)
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
     .slice(0, 10)
 
@@ -572,7 +572,16 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
 
   // If active course is selected, show LiveClassroom
   if (activeCourse) {
-    return <StudentLiveClassroom course={activeCourse} onBack={() => setActiveCourse(null)} />
+    return (
+      <StudentLiveClassroom
+        course={activeCourse}
+        onNavigate={onNavigate}
+        onBack={() => {
+          setActiveCourse(null)
+          if (setIsLiveClassroomActive) setIsLiveClassroomActive(false)
+        }}
+      />
+    )
   }
   // Format current date for the header
   const currentDateFormatted = new Date().toLocaleDateString('en-US', {
@@ -902,6 +911,17 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                     </div>
 
                     <div className="session-actions-buttons" style={{ marginTop: '12px', width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        className="session-btn session-btn-secondary"
+                        style={{ padding: '8px 16px', fontSize: '14px', marginRight: '8px' }}
+                        onClick={() => {
+                          localStorage.setItem('open_reschedule_session_id', session.id);
+                          if (onNavigate) onNavigate('Calendar');
+                          setShowUpcomingSessionsModal(false);
+                        }}
+                      >
+                        Reschedule
+                      </button>
                       {session.meeting_link ? (
                         <button
                           className="session-btn session-btn-primary"

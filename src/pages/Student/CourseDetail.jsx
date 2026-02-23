@@ -5,7 +5,7 @@ import supabase from '../../supabaseClient'
 import '../../App.css'
 import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 
-function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
+function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavigate }) {
   const [showLiveClassroom, setShowLiveClassroom] = useState(false)
   const { enrolledCourses } = useDashboardData()
 
@@ -111,7 +111,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick }) {
   }
 
   if (showLiveClassroom) {
-    return <StudentLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} />
+    return <StudentLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} onNavigate={onNavigate} />
   }
 
   if (loading) {

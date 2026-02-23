@@ -2,8 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import RescheduleModal from '../../components/RescheduleModal.jsx'
+import RescheduleResponseModal from '../../components/RescheduleResponseModal.jsx'
 
-function MentorLiveClassroom({ course, onBack }) {
+function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const userRole = 'mentor'
   const { refetch } = useDashboardData()
 
@@ -53,12 +55,59 @@ function MentorLiveClassroom({ course, onBack }) {
   const [submissions, setSubmissions] = useState([])
   const [selectedSubmission, setSelectedSubmission] = useState(null)
   const [isMarkingComplete, setIsMarkingComplete] = useState(false)
+  const [showSessionsModal, setShowSessionsModal] = useState(false)
+  const [courseSessions, setCourseSessions] = useState([])
+  const [loadingSessions, setLoadingSessions] = useState(false)
+  const [selectedSession, setSelectedSession] = useState(null)
 
   useEffect(() => {
     if (showAssessmentListModal) {
       fetchDbAssessments()
     }
   }, [showAssessmentListModal])
+
+  useEffect(() => {
+    if (showSessionsModal) {
+      fetchCourseSessions()
+    }
+  }, [showSessionsModal])
+
+  const fetchCourseSessions = async () => {
+    try {
+      setLoadingSessions(true)
+      const courseId = course?.course_id || course?.id
+      const { data, error } = await supabase
+        .from('scheduled_classes')
+        .select('*, courses(title), reschedule_request, reschedule_role, rescheduled_date, reschedule_reason, is_complete')
+        .eq('course_id', courseId)
+        .order('scheduled_date', { ascending: true })
+
+      if (error) throw error
+
+      if (data) {
+        const mapped = data.map(session => ({
+          ...session,
+          date: new Date(session.scheduled_date).toLocaleDateString(),
+          time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }))
+
+        // Sort: Upcoming (is_complete: false) first, then Completed (is_complete: true)
+        mapped.sort((a, b) => {
+          if (a.is_complete === b.is_complete) return 0;
+          return a.is_complete ? 1 : -1;
+        });
+        setCourseSessions(mapped)
+      }
+    } catch (err) {
+      console.error('Error fetching course sessions:', err)
+    } finally {
+      setLoadingSessions(false)
+    }
+  }
+
+
+
+
 
   const fetchDbAssessments = async () => {
     try {
@@ -1135,6 +1184,17 @@ function MentorLiveClassroom({ course, onBack }) {
 
         if (schedError) throw schedError;
 
+        // Reset the reschedule_request flag regardless of approval/rejection (it's handled now)
+        await supabase
+          .from('scheduled_classes')
+          .update({
+            reschedule_request: false,
+            reschedule_role: null,
+            rescheduled_date: null,
+            reschedule_reason: null
+          })
+          .eq('id', data.original_session_id);
+
         // 3. Send a confirmation message
         const confirmationMsg = {
           chat_id: Number(chatId),
@@ -1159,6 +1219,12 @@ function MentorLiveClassroom({ course, onBack }) {
           read: false
         }
         await supabase.from('messages').insert([rejectionMsg]);
+
+        // Reset the reschedule_request flag on rejection
+        await supabase
+          .from('scheduled_classes')
+          .update({ reschedule_request: false, reschedule_role: null, rescheduled_date: null })
+          .eq('id', data.original_session_id);
       }
 
       alert(`Reschedule ${action}d successfully!`);
@@ -1264,10 +1330,15 @@ function MentorLiveClassroom({ course, onBack }) {
               </button>
               <button
                 className="live-complete-btn-v2"
-                onClick={() => {
-                  setShowAssessmentListModal(true)
-                  setShowAttachOptions(false)
-                }}
+                onClick={() => setShowSessionsModal(true)}
+                title="Upcoming Sessions"
+                style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', border: '1px solid rgba(14, 165, 233, 0.2)' }}
+              >
+                <span className="material-symbols-outlined">event_list</span>
+              </button>
+              <button
+                className="live-complete-btn-v2"
+                onClick={() => setShowAssessmentListModal(true)}
                 title="Assessments"
                 style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)' }}
               >
@@ -1419,68 +1490,48 @@ function MentorLiveClassroom({ course, onBack }) {
                       </div>
                     </div>
                   )}
-                  {message.type === 'reschedule_request' && (
-                    <div className="live-assessment-card" style={{ borderLeft: '4px solid #f59e0b', background: '#fffef3', minWidth: '240px' }}>
-                      <div className="assessment-card-header">
-                        <div className="assessment-icon">⏳</div>
-                        <div className="assessment-badge" style={{ background: '#fef3c7', color: '#92400e' }}>Reschedule Request</div>
-                      </div>
-                      {(() => {
-                        try {
-                          const data = JSON.parse(message.content);
-                          return (
-                            <>
-                              <h4 className="assessment-card-title">New Proposed Time</h4>
-                              <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                                <div style={{ fontSize: '14px', color: '#475569' }}>
-                                  <strong>Date:</strong> {new Date(data.new_date).toLocaleDateString()}
-                                </div>
-                                <div style={{ fontSize: '14px', color: '#475569' }}>
-                                  <strong>Time:</strong> {data.new_time}
-                                </div>
-                                {data.reason && (
-                                  <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '6px', borderRadius: '4px', width: '100%' }}>
-                                    "{data.reason}"
-                                  </div>
-                                )}
-
-                                <div style={{ fontSize: '13px', marginTop: '4px', fontWeight: '600', color: data.status === 'approved' ? '#22c55e' : data.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>
-                                  Status: {data.status.charAt(0).toUpperCase() + data.status.slice(1)}
-                                </div>
-
-                                {data.status === 'pending' && (
-                                  <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
-                                    {((data.proposed_by === 'student' && userRole === 'mentor') || (data.proposed_by === 'mentor' && userRole === 'student')) ? (
-                                      <>
-                                        <button
-                                          className="btn-primary"
-                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#22c55e', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
-                                          onClick={() => handleRescheduleAction(message, 'approve')}
-                                        >
-                                          Approve
-                                        </button>
-                                        <button
-                                          className="btn-secondary"
-                                          style={{ flex: 1, padding: '8px', fontSize: '12px', background: '#ef4444', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}
-                                          onClick={() => handleRescheduleAction(message, 'reject')}
-                                        >
-                                          Reject
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>Waiting for response...</span>
-                                    )}
-                                  </div>
-                                )}
+                  {message.type === 'reschedule_request' && (() => {
+                    try {
+                      const data = JSON.parse(message.content);
+                      if (data.status !== 'pending') return null;
+                      return (
+                        <div
+                          className="live-assessment-card"
+                          style={{
+                            borderLeft: '4px solid #f59e0b',
+                            background: '#fffef3',
+                            minWidth: '240px',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => {
+                            localStorage.setItem('open_reschedule_session_id', message.session_id);
+                            if (onNavigate) onNavigate('Calendar');
+                          }}
+                        >
+                          <div className="assessment-card-header">
+                            <div className="assessment-icon">⏳</div>
+                            <div className="assessment-badge" style={{ background: '#fef3c7', color: '#92400e' }}>Reschedule Request</div>
+                          </div>
+                          <h4 className="assessment-card-title">New Proposed Time</h4>
+                          <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                            <div style={{ fontSize: '14px', color: '#475569' }}>
+                              <strong>Date:</strong> {new Date(data.new_date).toLocaleDateString()}
+                            </div>
+                            <div style={{ fontSize: '14px', color: '#475569' }}>
+                              <strong>Time:</strong> {data.new_time}
+                            </div>
+                            {data.reason && (
+                              <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '6px', borderRadius: '4px', width: '100%' }}>
+                                "{data.reason}"
                               </div>
-                            </>
-                          );
-                        } catch (e) {
-                          return <p>Invalid reschedule data</p>;
-                        }
-                      })()}
-                    </div>
-                  )}
+                            )}
+                          </div>
+                        </div>
+                      );
+                    } catch (e) {
+                      return null;
+                    }
+                  })()}
                   {noteEditingId === message.id ? (
                     <div className="live-self-note-editor">
                       <textarea
@@ -1758,13 +1809,11 @@ function MentorLiveClassroom({ course, onBack }) {
                         fontSize: '20px'
                       }}
                     >
-                      +
+                      <span className="material-symbols-outlined">add</span>
+                      Create New
                     </button>
-                    <button
-                      className="modal-close-btn"
-                      onClick={() => setShowAssessmentListModal(false)}
-                    >
-                      ✕
+                    <button className="modal-close-btn" onClick={() => setShowAssessmentListModal(false)}>
+                      <span className="material-symbols-outlined">close</span>
                     </button>
                   </div>
                 </div>
@@ -1831,6 +1880,201 @@ function MentorLiveClassroom({ course, onBack }) {
                       >
                         Create your first assessment
                       </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Sessions Modal */}
+          {showSessionsModal && (
+            <div className="live-assessment-modal-overlay" style={{ zIndex: 10001 }} onClick={() => setShowSessionsModal(false)}>
+              <div className="live-assessment-modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+                <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>event_list</span>
+                    <h2 style={{ margin: 0 }}>Upcoming Sessions</h2>
+                  </div>
+                  <button className="modal-close-btn" onClick={() => setShowSessionsModal(false)}>
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+
+                <div className="assessment-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '16px' }}>
+                  {loadingSessions ? (
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
+                      <p>Loading sessions...</p>
+                    </div>
+                  ) : courseSessions.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>event_busy</span>
+                      <p>No sessions scheduled for this course.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {courseSessions.map((session) => (
+                        <div
+                          key={session.id}
+                          className="session-card-elegant"
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            opacity: session.is_complete ? 0.6 : 1,
+                            filter: session.is_complete ? 'grayscale(0.5)' : 'none'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ margin: '0 0 4px 0', color: '#1e293b' }}>{session.title}</h4>
+                              <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: '#64748b' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>calendar_month</span>
+                                  {session.date}
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
+                                  {session.time}
+                                </span>
+                              </div>
+                            </div>
+                            <span style={{
+                              background: session.is_complete ? '#f1f5f9' : '#e0f2fe',
+                              color: session.is_complete ? '#64748b' : '#0369a1',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              textTransform: 'uppercase'
+                            }}>
+                              {session.is_complete ? 'Completed' : 'Upcoming'}
+                            </span>
+                          </div>
+
+                          {!session.is_complete && session.reschedule_request && (
+                            <div style={{
+                              marginTop: '12px',
+                              background: '#fffef3',
+                              border: '1px solid #fde68a',
+                              borderRadius: '8px',
+                              padding: '12px'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#f59e0b' }}>history_toggle_off</span>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#92400e' }}>Reschedule Requested</span>
+                              </div>
+
+                              <div style={{ fontSize: '13px', color: '#475569', marginBottom: '10px' }}>
+                                <strong>Proposed:</strong> {new Date(session.rescheduled_date).toLocaleString()}
+                                {session.reschedule_reason && (
+                                  <div style={{ marginTop: '4px', fontStyle: 'italic', fontSize: '12px' }}>
+                                    "{session.reschedule_reason}"
+                                  </div>
+                                )}
+                              </div>
+
+                              {session.reschedule_role === 'student' ? (
+                                <button
+                                  className="btn-primary"
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    fontSize: '12px',
+                                    background: '#3b82f6',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                  }}
+                                  onClick={() => {
+                                    localStorage.setItem('open_reschedule_session_id', session.id);
+                                    if (onNavigate) onNavigate('Calendar');
+                                    setShowSessionsModal(false);
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>history_toggle_off</span>
+                                  Respond to Request
+                                </button>
+                              ) : (
+                                <button
+                                  className="btn-secondary"
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    fontSize: '12px',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '6px',
+                                    color: '#475569',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                  }}
+                                  onClick={() => {
+                                    localStorage.setItem('open_reschedule_session_id', session.id);
+                                    if (onNavigate) onNavigate('Calendar');
+                                    setShowSessionsModal(false);
+                                  }}
+                                >
+                                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit_calendar</span>
+                                  Edit My Request
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {!session.is_complete && !session.reschedule_request && (
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                              {session.meeting_link && (
+                                <a
+                                  href={session.meeting_link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn-primary"
+                                  style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none', padding: '8px 16px', fontSize: '13px' }}
+                                >
+                                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>video_call</span>
+                                  Join Meeting
+                                </a>
+                              )}
+                              <button
+                                className="btn-secondary"
+                                style={{
+                                  flex: 1,
+                                  padding: '8px',
+                                  fontSize: '12px',
+                                  background: 'white',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '6px',
+                                  color: '#64748b',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '6px'
+                                }}
+                                onClick={() => {
+                                  localStorage.setItem('open_reschedule_session_id', session.id);
+                                  if (onNavigate) onNavigate('Calendar');
+                                  setShowSessionsModal(false);
+                                }}
+                              >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_month</span>
+                                Reschedule
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -2217,6 +2461,20 @@ function MentorLiveClassroom({ course, onBack }) {
           </div >
         )
       }
+      <RescheduleModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        onConfirm={handleRescheduleConfirm}
+        sessionDetails={selectedSession}
+      />
+
+      <RescheduleResponseModal
+        isOpen={isResponseModalOpen}
+        onClose={() => setIsResponseModalOpen(false)}
+        sessionDetails={selectedSession}
+        onApprove={(s) => handleRescheduleResponse(s, 'approve')}
+        onReject={(s) => handleRescheduleResponse(s, 'reject')}
+      />
     </>
   )
 }

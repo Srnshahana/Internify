@@ -82,12 +82,12 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   // Sessions for stacked cards (Mentors see their schedule)
   const allScheduled = scheduledSessions || []
   const allCombinedSessions = allScheduled
-    .filter(s => !s.completed)
+    .filter(s => !s.is_complete && !s.completed)
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
     .slice(0, 10)
 
   // Calculate session completion progress
-  const completedCount = allScheduled.filter(s => s.completed).length
+  const completedCount = allScheduled.filter(s => s.is_complete || s.completed).length
   const totalCount = allScheduled.length
   const sessionProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
   const [currentSessionIndex, setCurrentSessionIndex] = useState(0)
@@ -160,6 +160,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   if (activeCourse) return (
     <MentorLiveClassroom
       course={activeCourse}
+      onNavigate={onNavigate}
       onBack={() => {
         setActiveCourse(null)
         if (setIsLiveClassroomActive) setIsLiveClassroomActive(false)
@@ -426,6 +427,17 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                     </div>
 
                     <div className="session-actions-buttons" style={{ marginTop: '12px', width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        className="session-btn session-btn-secondary"
+                        style={{ padding: '8px 16px', fontSize: '14px', marginRight: '8px' }}
+                        onClick={() => {
+                          localStorage.setItem('open_reschedule_session_id', session.id);
+                          if (onNavigate) onNavigate('Calendar');
+                          setShowUpcomingSessionsModal(false);
+                        }}
+                      >
+                        Reschedule
+                      </button>
                       <button
                         className="session-btn session-btn-primary"
                         onClick={() => session.meeting_link && window.open(session.meeting_link, '_blank')}
