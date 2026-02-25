@@ -25455,10 +25455,198 @@ h1 span {
   padding: 32px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
   animation: modalZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
   position: relative;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* Study Materials V2 Modal */
+.study-materials-modal-v2 {
+  background: rgba(255, 255, 255, 0.9);
+  width: 95%;
+  max-width: 900px !important;
+  border-radius: 32px;
+  padding: 0;
+  /* Header handles padding */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 90vh;
+}
+
+.materials-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.material-course-card-v2 {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.material-course-card-v2:hover {
+  transform: translateY(-5px);
+  border-color: #0ea5e9;
+  box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.1);
+}
+
+.course-icon-v2 {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #f0f9ff;
+  color: #0ea5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.course-card-title-v2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.materials-list-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 24px 24px;
+}
+
+.material-item-v2 {
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.material-item-v2:hover {
+  background: #f8fafc;
+  border-color: #0ea5e9;
+  transform: scale(1.01);
+}
+
+.material-type-icon-v2 {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.type-pdf-v2 {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.type-doc-v2 {
+  background: #ebf5ff;
+  color: #2b82fb;
+}
+
+.type-link-v2 {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.material-info-v2 h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.material-info-v2 p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.materials-back-btn-v2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 24px;
+  transition: all 0.2s ease;
+}
+
+.materials-back-btn-v2:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Premium Tabs for Modals */
+.premium-tabs-v2 {
+  display: flex;
+  gap: 8px;
+  padding: 0 32px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.premium-tab-btn-v2 {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.premium-tab-btn-v2:hover {
+  color: #0ea5e9;
+}
+
+.premium-tab-btn-v2.active {
+  color: #0ea5e9;
+  border-bottom-color: #0ea5e9;
+}
+
+.course-details-content-v2 {
+  padding: 0 32px 32px;
+}
+
+.detailed-list-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .modal-stats-summary {
@@ -30317,6 +30505,7 @@ h1 span {
 
 .calendar-glass-card {
   width: 100%;
+  margin-top: 24px;
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -30332,9 +30521,23 @@ h1 span {
 @media (min-width: 1024px) {
   .calendar-glass-card {
     flex: 1.4;
-    max-height: calc(100vh - 48px);
+    min-height: calc(100vh - 84px);
+    /* Increased min-height to push card to bottom */
+    max-height: calc(100vh - 84px);
     overflow-y: auto;
-    padding: 24px !important;
+    padding: 32px !important;
+    /* Slightly more padding on desktop */
+  }
+
+  .calendar-grid-elegant {
+    gap: 16px !important;
+    /* Increased gap for a larger feel */
+  }
+
+  .calendar-day-elegant {
+    min-height: 80px;
+    /* Make days taller on desktop */
+    font-size: 16px !important;
   }
 }
 
@@ -30460,9 +30663,17 @@ h1 span {
 
 .sessions-section-elegant {
   width: 100%;
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
+  margin-top: 24px;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 @media (min-width: 1024px) {
@@ -30470,18 +30681,21 @@ h1 span {
     flex: 1;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
-    padding: 24px 16px;
+    padding: 24px !important;
   }
 }
 
 .sessions-title-elegant {
+  font-family: 'Outfit', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 16px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 10px;
+  height: 48px;
+  /* Matching the height of the calendar nav area roughly */
 }
 
 .sessions-list-elegant {
@@ -30493,19 +30707,36 @@ h1 span {
 .session-card-elegant {
   background: #ffffff;
   border-radius: 20px;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 0.5px solid #f8fafc;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4px;
+  /* Ensure tiny gap even if list gap fails */
+}
+
+.session-card-elegant::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: #0ca5e9;
+  opacity: 0.8;
 }
 
 .session-card-elegant:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-  border-color: #e2e8f0;
+  transform: translateX(4px);
+  /* Shift right slightly on hover instead of up */
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.08);
+  border-color: #0ca5e9;
+  z-index: 10;
 }
 
 .session-info-elegant h4 {
@@ -31788,7 +32019,8 @@ h1 span {
 .draggable-carousel .carousel-slide {
   flex: 0 0 calc(33.33% - 16px);
   min-width: 300px;
-  /* Ensure cards don't get squished */
+  display: flex;
+  /* Allow children to fill height */
 }
 
 @media (max-width: 1024px) {
@@ -31805,7 +32037,64 @@ h1 span {
 
 /* Fix Profile Course Image Size */
 .profile-page-elegant .program-card-image-wrapper {
-  height: 100px;
+  height: 160px;
+  /* Increased from 100px for better visibility */
+}
+
+.profile-page-elegant .program-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-page-elegant .program-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-page-elegant .program-card-title {
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.profile-page-elegant .program-card-meta {
+  margin-top: auto;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  background: transparent;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  padding-left: 0;
+  padding-right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-page-elegant .program-card-level {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0ca5e9;
+  background: #f0f9ff;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #e0f2fe;
+}
+
+.profile-page-elegant .program-card-mentor {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 @media (max-width: 480px) {
@@ -33169,82 +33458,7 @@ html {
   }
 }
 
-/* ==========================================================================
-   FIX: CALENDAR SESSIONS SECTION DISTINCTION
-   ========================================================================== */
-
-/* Make sessions section more distinct from calendar */
-.sessions-section-elegant {
-  margin-top: 32px !important;
-  padding-top: 32px !important;
-  border-top: 2px solid #e2e8f0 !important;
-  background: transparent !important;
-}
-
-.sessions-title-elegant {
-  color: #0f172a !important;
-  margin-bottom: 20px !important;
-  padding-bottom: 12px !important;
-  border-bottom: 2px solid #0ca5e9 !important;
-  width: fit-content !important;
-}
-
-.sessions-list-elegant {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-}
-
-.session-card-elegant {
-  background: #ffffff !important;
-  border: 1px solid #f1f5f9 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-}
-
-.session-card-elegant:hover {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 8px 24px rgba(12, 165, 233, 0.12) !important;
-}
-
-/* Calendar grid stays white with subtle border */
-.calendar-grid-elegant {
-  background: #ffffff !important;
-  padding: 16px !important;
-  border-radius: 16px !important;
-  border: 1px solid #f1f5f9 !important;
-}
-
-/* Add visual separation between calendar and sessions */
-.calendar-grid-section {
-  margin-bottom: 24px !important;
-  padding-bottom: 24px !important;
-}
-
-/* ==========================================================================
-   FIX: BREAK UP CONTINUOUS WHITE IN CALENDAR
-   ========================================================================== */
-
-/* Give sessions section a light background to distinguish from calendar */
-.sessions-section-elegant {
-  margin-top: 32px !important;
-  padding-top: 32px !important;
-  border-top: 2px solid #e2e8f0 !important;
-  background: #ffffff !important;
-  margin-left: -24px !important;
-  margin-right: -24px !important;
-  width: calc(100% + 48px) !important;
-  padding-left: 24px !important;
-  padding-right: 24px !important;
-  border-radius: 32px 32px 0 0 !important;
-}
-
-/* Or alternative: subtle gradient background */
-/* .sessions-section-elegant {
-  background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%) !important;
-  padding: 24px !important;
-  border-radius: 20px !important;
-  margin-top: 24px !important;
-} */
+/* LEGACY OVERRIDES REMOVED FOR UNIFORM CALENDAR UI */
 
 /* ==========================================================================
    ITERATION 34: ELEGANT MY COURSES UI

@@ -317,7 +317,7 @@ function Calendar() {
     <div className="calendar-dashboard-wrapper" >
       <div className="calendar-glass-card">
         {/* Header - V2 Glass Style */}
-        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px' }}>
+        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px', width: '100%', padding: '1rem 24px' }}>
           <div className="live-header-title-v2" style={{ fontSize: '18px' }}>{currentMonth}</div>
           <div className="calendar-nav-actions">
             <button className="live-back-btn-v2" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}>
@@ -380,65 +380,113 @@ function Calendar() {
       </div>
 
       <div className="sessions-section-elegant">
-        <h3 className="sessions-title-elegant">Upcoming Mentorship Sessions</h3>
-        {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
-            <p style={{ marginTop: '10px' }}>Loading schedule...</p>
-          </div>
-        ) : sessions.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
-            <p style={{ fontSize: '16px', fontWeight: '500' }}>No upcoming sessions</p>
-            <p style={{ fontSize: '14px', marginTop: '4px' }}>Schedule a class from the Live Classroom</p>
-          </div>
-        ) : (
-          <div className="sessions-list-elegant">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className="session-card-elegant"
-                style={session.is_complete ? { opacity: 0.5, filter: 'grayscale(0.5)' } : {}}
-              >
-                <div className="session-main-content">
-                  <div className="session-time-box">
-                    <span className="time-main">{session.time}</span>
-                    <span className="time-sub">{session.date}</span>
-                  </div>
+        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px', width: '100%', padding: '1rem 24px' }}>
+          <div className="live-header-title-v2" style={{ fontSize: '18px', textAlign: 'left', width: '100%' }}>Upcoming Mentorship Sessions</div>
+        </header>
 
-                  <div className="session-info-elegant">
-                    <h4>{session.title}</h4>
-                    <div className="session-meta-elegant">
-                      <span>{session.course}</span>
+        <div className="sessions-content-scrollable" style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
+          {loading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
+              <p style={{ marginTop: '10px' }}>Loading schedule...</p>
+            </div>
+          ) : sessions.length === 0 ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
+              <p style={{ fontSize: '16px', fontWeight: '500' }}>No upcoming sessions</p>
+              <p style={{ fontSize: '14px', marginTop: '4px' }}>Schedule a class from the Live Classroom</p>
+            </div>
+          ) : (
+            <div className="sessions-list-elegant">
+              {sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="session-card-elegant"
+                  style={session.is_complete ? { opacity: 0.5, filter: 'grayscale(0.5)' } : {}}
+                >
+                  <div className="session-main-content">
+                    <div className="session-time-box">
+                      <span className="time-main">{session.time}</span>
+                      <span className="time-sub">{session.date}</span>
+                    </div>
+
+                    <div className="session-info-elegant">
+                      <h4>{session.title}</h4>
+                      <div className="session-meta-elegant">
+                        <span>{session.course}</span>
+                      </div>
+                    </div>
+
+                    <div className="session-badge-wrapper">
+                      <span className={`session-badge-elegant badge-${session.type}`}>
+                        {session.is_complete ? 'completed' : session.type}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="session-badge-wrapper">
-                    <span className={`session-badge-elegant badge-${session.type}`}>
-                      {session.is_complete ? 'completed' : session.type}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="session-actions-buttons">
-                  {!session.is_complete && (
-                    <>
-                      {session.reschedule_request ? (
-                        session.reschedule_role === 'mentor' ? (
-                          <button
-                            className="session-btn session-btn-secondary"
-                            disabled
-                            style={{ marginRight: '8px', opacity: 0.7, cursor: 'not-allowed' }}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '4px' }}>schedule</span>
-                            Request Sent
-                          </button>
+                  <div className="session-actions-buttons">
+                    {!session.is_complete && (
+                      <>
+                        {session.reschedule_request ? (
+                          session.reschedule_role === 'mentor' ? (
+                            <button
+                              className="session-btn session-btn-secondary"
+                              disabled
+                              style={{ marginRight: '8px', opacity: 0.7, cursor: 'not-allowed' }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '4px' }}>schedule</span>
+                              Request Sent
+                            </button>
+                          ) : (
+                            <button
+                              className="session-btn"
+                              onClick={() => handleResponseClick(session)}
+                              style={{
+                                background: '#0ea5e9',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 16px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontWeight: '500',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                marginRight: '8px'
+                              }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>schedule</span>
+                              Requested Reschedule
+                            </button>
+                          )
                         ) : (
                           <button
-                            className="session-btn"
-                            onClick={() => handleResponseClick(session)}
+                            className="session-btn session-btn-secondary"
+                            onClick={() => handleRescheduleClick(session)}
                             style={{
-                              background: '#0ea5e9',
+                              marginRight: '8px',
+                              background: '#f1f5f9',
+                              color: '#64748b',
+                              border: '1px solid #e2e8f0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="23 4 23 10 17 10"></polyline>
+                              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            Reschedule
+                          </button>
+                        )}
+                        {!session.is_complete && (
+                          <button
+                            className="session-btn"
+                            onClick={() => handleMarkComplete(session)}
+                            style={{
+                              marginRight: '8px',
+                              background: '#10b981',
                               color: 'white',
                               border: 'none',
                               padding: '10px 16px',
@@ -447,106 +495,63 @@ function Calendar() {
                               fontWeight: '500',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '6px',
-                              marginRight: '8px'
+                              gap: '6px'
                             }}
                           >
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>schedule</span>
-                            Requested Reschedule
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Mark Complete
                           </button>
-                        )
-                      ) : (
-                        <button
-                          className="session-btn session-btn-secondary"
-                          onClick={() => handleRescheduleClick(session)}
-                          style={{
-                            marginRight: '8px',
-                            background: '#f1f5f9',
-                            color: '#64748b',
-                            border: '1px solid #e2e8f0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                          </svg>
-                          Reschedule
-                        </button>
-                      )}
-                      {!session.is_complete && (
+                        )}
                         <button
                           className="session-btn"
-                          onClick={() => handleMarkComplete(session)}
+                          onClick={() => handleJoin(session.joinLink)}
                           style={{
-                            marginRight: '8px',
-                            background: '#10b981',
-                            color: 'white',
-                            border: 'none',
+                            background: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#fff' : '#0ea5e9',
+                            color: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#0ea5e9' : '#fff',
+                            border: session.reschedule_request && session.reschedule_role !== 'mentor' ? '1px solid #0ea5e9' : 'none',
                             padding: '10px 16px',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             fontWeight: '500',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            opacity: 0.8
                           }}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
                           </svg>
-                          Mark Complete
+                          Join
                         </button>
-                      )}
-                      <button
-                        className="session-btn"
-                        onClick={() => handleJoin(session.joinLink)}
-                        style={{
-                          background: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#fff' : '#0ea5e9',
-                          color: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#0ea5e9' : '#fff',
-                          border: session.reschedule_request && session.reschedule_role !== 'mentor' ? '1px solid #0ea5e9' : 'none',
-                          padding: '10px 16px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          fontWeight: '500',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          opacity: 0.8
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                          <polyline points="10 17 15 12 10 7"></polyline>
-                          <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
-                        Join
-                      </button>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
+
+        <RescheduleModal
+          isOpen={showRescheduleModal}
+          onClose={() => setShowRescheduleModal(false)}
+          onConfirm={handleRescheduleConfirm}
+          sessionDetails={selectedSession}
+        />
+
+        <RescheduleResponseModal
+          isOpen={isResponseModalOpen}
+          onClose={() => setIsResponseModalOpen(false)}
+          sessionDetails={selectedSession}
+          onApprove={(session) => handleRescheduleResponse(session, 'approve')}
+          onReject={(session) => handleRescheduleResponse(session, 'reject')}
+        />
       </div>
-
-      <RescheduleModal
-        isOpen={showRescheduleModal}
-        onClose={() => setShowRescheduleModal(false)}
-        onConfirm={handleRescheduleConfirm}
-        sessionDetails={selectedSession}
-      />
-
-      <RescheduleResponseModal
-        isOpen={isResponseModalOpen}
-        onClose={() => setIsResponseModalOpen(false)}
-        sessionDetails={selectedSession}
-        onApprove={(session) => handleRescheduleResponse(session, 'approve')}
-        onReject={(session) => handleRescheduleResponse(session, 'reject')}
-      />
     </div>
   )
 }

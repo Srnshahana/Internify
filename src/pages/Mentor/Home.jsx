@@ -823,158 +823,294 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
         </div>
       )}
 
-      {/* Course Details Modal */}
+      {/* Course Details Modal Redesign */}
       {showCourseDetailsModal && (
         <div className="modal-overlay" onClick={() => setShowCourseDetailsModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 className="modal-title" style={{ margin: 0 }}>Course Details</h2>
-              <button className="progress-modal-close" onClick={() => setShowCourseDetailsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-
-            <div className="tab-buttons-container" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+          <div className="study-materials-modal-v2" onClick={(e) => e.stopPropagation()}>
+            <header className="live-classroom-header-v2" style={{
+              background: 'linear-gradient(to right, #faf5ff, #f3e8ff)',
+              padding: '1.5rem 32px',
+              borderBottom: '1px solid rgba(255,255,255,0.5)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h2 className="live-header-title-v2" style={{ margin: 0, fontSize: '22px' }}>Course Details</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#64748b' }}>
+                  {selectedDetailsCourse ? `Sessions for ${selectedDetailsCourse.title}` : 'Overview of all courses on the platform'}
+                </p>
+              </div>
               <button
-                onClick={() => { setCourseDetailsTab('provided'); setSelectedDetailsCourse(null); }}
+                className="progress-modal-close"
+                onClick={() => setShowCourseDetailsModal(false)}
                 style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: courseDetailsTab === 'provided' ? '#0f172a' : 'transparent',
-                  color: courseDetailsTab === 'provided' ? 'white' : '#64748b',
-                  fontWeight: 600,
-                  cursor: 'pointer'
+                  background: 'white',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s'
                 }}
               >
-                Courses Provided
+                <span className="material-symbols-outlined">close</span>
               </button>
-              <button
-                onClick={() => { setCourseDetailsTab('all'); setSelectedDetailsCourse(null); }}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: courseDetailsTab === 'all' ? '#0f172a' : 'transparent',
-                  color: courseDetailsTab === 'all' ? 'white' : '#64748b',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                All Courses
-              </button>
-            </div>
+            </header>
 
-            <div className="modal-scrollable-content" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              {courseDetailsTab === 'provided' ? (
-                <div>
-                  {selectedDetailsCourse ? (
-                    <div>
-                      <button
-                        onClick={() => setSelectedDetailsCourse(null)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 600, cursor: 'pointer', marginBottom: '15px' }}
-                      >
-                        <span className="material-symbols-outlined">arrow_back</span> Back to list
-                      </button>
-                      <h3 style={{ marginBottom: '15px' }}>Sessions for {selectedDetailsCourse.title}</h3>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {scheduledSessions?.filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id).length > 0 ? (
-                          scheduledSessions
-                            .filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id)
-                            .map(session => (
-                              <div key={session.id} style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                                <h4 style={{ margin: '0 0 5px 0' }}>{session.title}</h4>
-                                <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
-                                  {session.scheduled_date ? new Date(session.scheduled_date).toLocaleString() : 'Not scheduled'}
+            {!selectedDetailsCourse && (
+              <div className="premium-tabs-v2">
+                <button
+                  onClick={() => { setCourseDetailsTab('provided'); setSelectedDetailsCourse(null); }}
+                  className={`premium-tab-btn-v2 ${courseDetailsTab === 'provided' ? 'active' : ''}`}
+                >
+                  Courses Provided
+                </button>
+                <button
+                  onClick={() => { setCourseDetailsTab('all'); setSelectedDetailsCourse(null); }}
+                  className={`premium-tab-btn-v2 ${courseDetailsTab === 'all' ? 'active' : ''}`}
+                >
+                  All Platform Courses
+                </button>
+              </div>
+            )}
+
+            <div className="modal-scrollable-content" style={{ maxHeight: 'calc(90vh - 160px)', overflowY: 'auto' }}>
+              <div className="course-details-content-v2">
+                {courseDetailsTab === 'provided' ? (
+                  <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                    {selectedDetailsCourse ? (
+                      <div className="detailed-list-v2">
+                        <button
+                          className="materials-back-btn-v2"
+                          onClick={() => setSelectedDetailsCourse(null)}
+                          style={{ margin: '0 0 20px 0' }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+                          Back to Course List
+                        </button>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          {scheduledSessions?.filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id).length > 0 ? (
+                            scheduledSessions
+                              .filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id)
+                              .map(session => (
+                                <div key={session.id} className="material-item-v2">
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                    <div className="material-type-icon-v2" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                                      <span className="material-symbols-outlined">event</span>
+                                    </div>
+                                    <div className="material-info-v2">
+                                      <h4>{session.title}</h4>
+                                      <p>{session.scheduled_date ? new Date(session.scheduled_date).toLocaleString('en-US', {
+                                        weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                      }) : 'Schedule TBA'}</p>
+                                    </div>
+                                  </div>
+                                  <button className="live-back-btn-v2" style={{ padding: '8px', borderRadius: '10px' }}>
+                                    <span className="material-symbols-outlined">chevron_right</span>
+                                  </button>
+                                </div>
+                              ))
+                          ) : (
+                            <div style={{ textAlign: 'center', padding: '40px', background: '#f8fafc', borderRadius: '16px', color: '#64748b' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '40px', opacity: 0.3 }}>event_busy</span>
+                              <p style={{ marginTop: '12px' }}>No sessions found for this course.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="detailed-list-v2">
+                        {uniqueTaughtCourses.map(course => (
+                          <div
+                            key={course.id}
+                            className="material-item-v2"
+                            onClick={() => setSelectedDetailsCourse(course)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <div className="material-type-icon-v2" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                                <span className="material-symbols-outlined">menu_book</span>
+                              </div>
+                              <div className="material-info-v2">
+                                <h4>{course.title}</h4>
+                                <p>{course.students_count || 0} Students Enrolled</p>
+                              </div>
+                            </div>
+                            <span className="material-symbols-outlined" style={{ color: '#94a3b8' }}>chevron_right</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                    {loadingAllCourses ? (
+                      <div style={{ textAlign: 'center', padding: '60px' }}>
+                        <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #7c3aed', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+                        <p style={{ color: '#64748b' }}>Discovering courses...</p>
+                      </div>
+                    ) : (
+                      <div className="detailed-list-v2">
+                        {allCourses.map(course => (
+                          <div
+                            key={course.id}
+                            className="material-item-v2"
+                            style={{ alignItems: 'flex-start' }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                              <div className="material-type-icon-v2" style={{ background: '#f5f3ff', color: '#7c3aed', marginTop: '4px' }}>
+                                <span className="material-symbols-outlined">school</span>
+                              </div>
+                              <div className="material-info-v2">
+                                <h4>{course.title}</h4>
+                                <p style={{ marginTop: '4px', lineHeight: '1.5', fontSize: '13px' }}>
+                                  {course.description ? (course.description.length > 120 ? `${course.description.substring(0, 120)}...` : course.description) : 'No description available.'}
                                 </p>
                               </div>
-                            ))
-                        ) : (
-                          <p style={{ color: '#64748b', textAlign: 'center' }}>No sessions found for this course.</p>
-                        )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {uniqueTaughtCourses.map(course => (
-                        <div
-                          key={course.id}
-                          onClick={() => setSelectedDetailsCourse(course)}
-                          style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                        >
-                          <span style={{ fontWeight: 600 }}>{course.title}</span>
-                          <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#94a3b8' }}>chevron_right</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  {loadingAllCourses ? (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>Loading platform courses...</div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {allCourses.map(course => (
-                        <div
-                          key={course.id}
-                          style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}
-                        >
-                          <span style={{ fontWeight: 600 }}>{course.title}</span>
-                          <p style={{ margin: '5px 0 0 0', fontSize: '0.875rem', color: '#64748b' }}>{course.description?.substring(0, 100)}...</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Study Materials Modal */}
+      {/* Study Materials Modal Redesign */}
       {showStudyMaterialsModal && (
         <div className="modal-overlay" onClick={() => setShowStudyMaterialsModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 className="modal-title" style={{ margin: 0 }}>Study Materials</h2>
-              <button className="progress-modal-close" onClick={() => setShowStudyMaterialsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <div className="study-materials-modal-v2" onClick={(e) => e.stopPropagation()}>
+            <header className="live-classroom-header-v2" style={{
+              background: 'linear-gradient(to right, #eff6ff, #dbeafe)',
+              padding: '1.5rem 32px',
+              borderBottom: '1px solid rgba(255,255,255,0.5)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h2 className="live-header-title-v2" style={{ margin: 0, fontSize: '22px' }}>Study Materials</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#64748b' }}>
+                  {selectedStudyMaterialCourse ? `Materials for ${selectedStudyMaterialCourse.title}` : 'Select a course to view resources'}
+                </p>
+              </div>
+              <button
+                className="progress-modal-close"
+                onClick={() => setShowStudyMaterialsModal(false)}
+                style={{
+                  background: 'white',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span className="material-symbols-outlined">close</span>
               </button>
-            </div>
+            </header>
 
-            <div className="modal-scrollable-content" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <div className="modal-scrollable-content" style={{ maxHeight: 'calc(90vh - 100px)', overflowY: 'auto' }}>
               {selectedStudyMaterialCourse ? (
-                <div>
+                <div style={{ animation: 'fadeIn 0.3s ease' }}>
                   <button
+                    className="materials-back-btn-v2"
                     onClick={() => setSelectedStudyMaterialCourse(null)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 600, cursor: 'pointer', marginBottom: '15px' }}
                   >
-                    <span className="material-symbols-outlined">arrow_back</span> Back to courses
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+                    Back to Course Selection
                   </button>
-                  <h3 style={{ marginBottom: '15px' }}>Materials for {selectedStudyMaterialCourse.title}</h3>
-                  <div style={{ padding: '15px', background: '#f0f9ff', borderRadius: '10px', border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>picture_as_pdf</span>
-                    <div>
-                      <h4 style={{ margin: 0 }}>pdf 1</h4>
-                      <p style={{ margin: 0, fontSize: '0.875rem', color: '#0369a1' }}>will be uploaded soon</p>
+
+                  <div className="materials-list-v2">
+                    <div className="material-item-v2">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="material-type-icon-v2 type-pdf-v2">
+                          <span className="material-symbols-outlined">picture_as_pdf</span>
+                        </div>
+                        <div className="material-info-v2">
+                          <h4>Course Syllabus & Curriculum</h4>
+                          <p>PDF Document • 1.2 MB</p>
+                        </div>
+                      </div>
+                      <button className="live-back-btn-v2" style={{ padding: '8px', borderRadius: '10px' }}>
+                        <span className="material-symbols-outlined">download</span>
+                      </button>
+                    </div>
+
+                    <div className="material-item-v2">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="material-type-icon-v2 type-doc-v2">
+                          <span className="material-symbols-outlined">description</span>
+                        </div>
+                        <div className="material-info-v2">
+                          <h4>Lecture Notes - Module 1</h4>
+                          <p>Word Doc • 850 KB</p>
+                        </div>
+                      </div>
+                      <button className="live-back-btn-v2" style={{ padding: '8px', borderRadius: '10px' }}>
+                        <span className="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
+
+                    <div className="material-item-v2">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="material-type-icon-v2 type-link-v2">
+                          <span className="material-symbols-outlined">link</span>
+                        </div>
+                        <div className="material-info-v2">
+                          <h4>Project Repository (GitHub)</h4>
+                          <p>External Resource • github.com</p>
+                        </div>
+                      </div>
+                      <button className="live-back-btn-v2" style={{ padding: '8px', borderRadius: '10px' }}>
+                        <span className="material-symbols-outlined">open_in_new</span>
+                      </button>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <p style={{ color: '#64748b', marginBottom: '10px' }}>Select a course to view its study materials:</p>
+                <div className="materials-grid-v2">
                   {uniqueTaughtCourses.map(course => (
                     <div
                       key={course.id}
+                      className="material-course-card-v2"
                       onClick={() => setSelectedStudyMaterialCourse(course)}
-                      style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
-                      <span style={{ fontWeight: 600 }}>{course.title}</span>
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#94a3b8' }}>chevron_right</span>
+                      <div className="course-icon-v2">
+                        <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>folder_open</span>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <h3 className="course-card-title-v2">{course.title}</h3>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>
+                          {course.materials_count || '0'} materials available
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>arrow_forward</span>
+                      </div>
                     </div>
                   ))}
+                  {uniqueTaughtCourses.length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '48px', opacity: 0.2 }}>auto_stories</span>
+                      <p style={{ marginTop: '16px', fontSize: '16px' }}>No courses found to display materials.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
