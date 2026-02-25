@@ -4,6 +4,7 @@ import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import RescheduleModal from '../../components/RescheduleModal.jsx'
 import RescheduleResponseModal from '../../components/RescheduleResponseModal.jsx'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 
 function StudentLiveClassroom({ course, onBack, onNavigate }) {
@@ -38,6 +39,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const [courseSessions, setCourseSessions] = useState([])
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
@@ -47,6 +50,25 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const assessmentFileInputRef = useRef(null)
 
   const [dbAssessments, setDbAssessments] = useState([])
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
+
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    })
+  }
+
+  useEffect(() => {
+    fetchDbAssessments()
+  }, [])
 
   useEffect(() => {
     if (showAssessmentListModal) {
@@ -94,6 +116,37 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
+  // --- Helper to clean legacy file links from submission text ---
+  const cleanSubmissionText = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    return text
+      .split('\n')
+      .filter(line => !line.trim().startsWith('File Attachment:'))
+      .join('\n')
+      .trim();
+  };
+
+  // --- Helper to extract attachments from text ---
+  const extractAttachmentsFromText = (text) => {
+    if (!text || typeof text !== 'string') return [];
+
+    // Match standard URLs
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+    const matches = text.match(urlRegex) || [];
+
+    return matches.map(url => {
+      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+      // Try to get a clean name from the URL
+      const fileName = url.split('/').pop().split('?')[0] || 'Attached File';
+      return {
+        file_url: url,
+        file_name: decodeURIComponent(fileName),
+        file_type: isImage ? 'image/jpeg' : 'application/octet-stream', // Generic
+        is_extracted: true
+      };
+    });
+  };
+
   const fetchDbAssessments = async () => {
     try {
       // 1. Fetch Assessments
@@ -110,7 +163,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         console.log('🔍 Fetching submissions for student:', currentUserId)
         const { data: submissions, error: subError } = await supabase
           .from('assessment_submissions')
-          .select('*') // Select all to see what we get
+          .select('*, assessment_attachments(*)')
           .eq('student_id', currentUserId)
           .in('assessment_id', assessments.map(a => a.id))
 
@@ -473,10 +526,111 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           .eq('id', data.original_session_id);
       }
 
-      alert(`Reschedule ${action}d successfully!`);
+      showModal('Success', `Reschedule ${action}d successfully!`, 'success');
     } catch (err) {
       console.error('Error handling reschedule action:', err);
-      alert('Failed to process reschedule action.');
+      showModal('Error', 'Failed to process reschedule action.', 'error');
+    }
+  }
+
+  const handleRescheduleConfirm = async (newDate, newTime, reason) => {
+    try {
+      if (!selectedSession) return;
+
+      const rescheduleData = {
+        original_session_id: selectedSession.id,
+        new_date: newDate,
+        new_time: newTime,
+        reason: reason,
+        status: 'pending',
+        proposed_by: 'student'
+      }
+
+      // Send to the current chat
+      await supabase
+        .from('messages')
+        .insert([{
+          chat_id: Number(chatId),
+          session_id: selectedSession.id,
+          role: 'student',
+          sender_id: Number(currentUserId),
+          content: JSON.stringify(rescheduleData),
+          type: 'reschedule_request',
+          read: false
+        }])
+
+      // Update the scheduled_classes table
+      const { error: updateError } = await supabase
+        .from('scheduled_classes')
+        .update({
+          reschedule_request: true,
+          reschedule_role: 'student',
+          rescheduled_date: `${newDate}T${newTime}`,
+          reschedule_reason: reason
+        })
+        .eq('id', selectedSession.id)
+
+      if (updateError) throw updateError
+
+      showModal('Success', 'Reschedule request sent to mentor!', 'success')
+      setShowRescheduleModal(false)
+      if (showSessionsModal) fetchCourseSessions() // Refresh sessions if modal open
+    } catch (err) {
+      console.error('Error sending reschedule request:', err)
+      showModal('Error', 'Failed to send reschedule request.', 'error')
+    }
+  }
+
+  const handleRescheduleResponse = async (session, action) => {
+    try {
+      const isApproved = action === 'approve'
+
+      // Find the reschedule request message
+      const { data: messages, error: msgFetchError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('chat_id', Number(chatId))
+        .eq('session_id', session.id)
+        .eq('type', 'reschedule_request')
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (msgFetchError) throw msgFetchError
+
+      if (messages && messages.length > 0) {
+        await handleRescheduleAction(messages[0], action)
+      } else {
+        // Fallback if message not found - still update the session
+        if (isApproved) {
+          await supabase
+            .from('scheduled_classes')
+            .update({
+              scheduled_date: session.rescheduled_date,
+              reschedule_request: false,
+              reschedule_role: null,
+              rescheduled_date: null,
+              reschedule_reason: null
+            })
+            .eq('id', session.id)
+        } else {
+          await supabase
+            .from('scheduled_classes')
+            .update({
+              reschedule_request: false,
+              reschedule_role: null,
+              rescheduled_date: null,
+              reschedule_reason: null
+            })
+            .eq('id', session.id)
+        }
+        showModal('Success', `Reschedule ${action}d successfully.`, 'success')
+      }
+
+      setIsResponseModalOpen(false)
+      fetchCourseSessions() // Refresh list
+    } catch (err) {
+      console.error('Error in handleRescheduleResponse:', err)
+      showModal('Error', 'Failed to process response.', 'error')
     }
   }
 
@@ -496,7 +650,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
     if (!chatId) {
       console.error('❌ Cannot send message: chatId is missing. Course data:', course)
-      alert('Error: Chat session not found. Please re-enter the classroom.')
+      showModal('Entry Error', 'Chat session not found. Please re-enter the classroom.', 'error')
       return
     }
 
@@ -528,7 +682,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
     if (error) {
       console.error('❌ Error sending message to Supabase:', error)
-      alert('Failed to send message: ' + error.message)
+      showModal('Error', 'Failed to send message: ' + error.message, 'error')
       return
     }
 
@@ -645,7 +799,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       if (attachmentError) {
         console.error('❌ Attachment Insert Error:', attachmentError)
-        alert('Failed to save attachment info: ' + attachmentError.message)
+        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
       } else {
         console.log('✅ Attachment Reserved:', attachmentData)
       }
@@ -687,11 +841,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         selfNote: '',
       }
       setMessages((prev) => [...prev, newMessage])
-      alert('Document sent successfully!')
+      showModal('Success', 'Document sent successfully!', 'success')
 
     } catch (err) {
       console.error('❌ Critical Error in Document Flow:', err)
-      alert('Error sending document: ' + err.message)
+      showModal('Error', 'Error sending document: ' + err.message, 'error')
     } finally {
       e.target.value = ''
       setShowAttachOptions(false)
@@ -754,7 +908,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       if (attachmentError) {
         console.error('❌ Attachment Insert Error:', attachmentError)
-        alert('Failed to save attachment info: ' + attachmentError.message)
+        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
       } else {
         console.log('✅ Attachment Reserved:', attachmentData)
       }
@@ -792,11 +946,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         selfNote: '',
       }
       setMessages((prev) => [...prev, newMessage])
-      alert('Image sent successfully!')
+      showModal('Success', 'Image sent successfully!', 'success')
 
     } catch (err) {
       console.error('❌ Critical Error in Image Flow:', err)
-      alert('Error sending image: ' + err.message)
+      showModal('Error', 'Error sending image: ' + err.message, 'error')
     } finally {
       e.target.value = ''
       setShowAttachOptions(false)
@@ -871,7 +1025,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
     } catch (err) {
       console.error('❌ Error sharing link:', err)
-      alert('Failed to share link: ' + err.message)
+      showModal('Error', 'Failed to share link: ' + err.message, 'error')
     }
   }
 
@@ -882,7 +1036,26 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
 
   const handleViewAssessment = (assessmentMessage) => {
-    setSelectedAssessment(assessmentMessage)
+    const assessmentId = assessmentMessage.assessmentId || assessmentMessage.id
+
+    // Find full assessment from state (includes submission and attachments)
+    const fullAssessment = dbAssessments.find(a => String(a.id) === String(assessmentId))
+
+    if (fullAssessment) {
+      // Merge: Take instructions from message (often up to date in chat), 
+      // but take submission details from dbAssessments
+      setSelectedAssessment({
+        ...assessmentMessage,
+        id: fullAssessment.id,
+        assessmentTitle: assessmentMessage.assessmentTitle || fullAssessment.title,
+        assessmentDescription: assessmentMessage.assessmentDescription || fullAssessment.description,
+        assessmentDueDate: assessmentMessage.assessmentDueDate || fullAssessment.due_date,
+        mySubmission: fullAssessment.mySubmission
+      })
+    } else {
+      setSelectedAssessment(assessmentMessage)
+    }
+
     // Reset submission form when opening assessment
     setAssessmentSubmission({ textSubmission: '', attachments: [] })
   }
@@ -910,7 +1083,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleSubmitAssessment = async () => {
     if (!assessmentSubmission.textSubmission && assessmentSubmission.attachments.length === 0) {
-      alert('Please provide either text submission or attach files')
+      showModal('Submission Error', 'Please provide either text submission or attach files', 'error')
       return
     }
 
@@ -951,14 +1124,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       // 2. Insert into assessment_submissions table
       console.log('💾 Saving submission to DB...')
 
-      // Construct a single text body including attachments since the 'attachments' column is missing
-      let finalSubmissionText = assessmentSubmission.textSubmission || ''
-      if (uploadedAttachments.length > 0) {
-        finalSubmissionText += '\n\n__Attachments:__\n'
-        uploadedAttachments.forEach(att => {
-          finalSubmissionText += `- [${att.name}](${att.url})\n`
-        })
-      }
+      const finalSubmissionText = assessmentSubmission.textSubmission || ''
 
       const submissionPayload = {
         assessment_id: selectedAssessment.id,
@@ -970,16 +1136,42 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       }
 
       // Try inserting. If submission_text also fails, we will need to know the correct column name.
-      const { error: dbError } = await supabase
+      const { data: submissionData, error: dbError } = await supabase
         .from('assessment_submissions')
         .insert([submissionPayload])
+        .select()
+        .single()
 
       if (dbError) {
         console.error('❌ DB Submission Error:', dbError)
         throw dbError
       }
 
-      console.log('✅ Submission Saved!')
+      console.log('✅ Submission Saved!', submissionData)
+
+      // 2.5 Insert Attachments into assessment_attachments table if any
+      if (uploadedAttachments.length > 0 && submissionData) {
+        console.log('💾 Saving attachments to DB...')
+        const attachmentInserts = uploadedAttachments.map(att => ({
+          submission_id: submissionData.id,
+          file_name: att.name,
+          file_url: att.url,
+          file_size: att.size,
+          file_type: att.type,
+          created_at: new Date().toISOString()
+        }))
+
+        const { error: attError } = await supabase
+          .from('assessment_attachments')
+          .insert(attachmentInserts)
+
+        if (attError) {
+          console.warn('⚠️ Error saving to assessment_attachments:', attError)
+          // We don't throw here as the main submission is already saved
+        } else {
+          console.log('✅ Attachments Saved!')
+        }
+      }
 
       // 3. Post confirmation to Chat
       const submissionMessage = {
@@ -1006,14 +1198,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       }
       setMessages((prev) => [...prev, optimisticMsg])
 
-      alert('Assessment submitted successfully!')
+      showModal('Success', 'Assessment submitted successfully!', 'success')
       setSelectedAssessment(null)
       setAssessmentSubmission({ textSubmission: '', attachments: [] })
       setShowAssessmentListModal(false)
+      fetchDbAssessments() // Refresh list to show 'submitted' status
 
     } catch (err) {
       console.error('❌ Submission Failed:', err)
-      alert('Failed to submit assessment: ' + err.message)
+      showModal('Error', 'Failed to submit assessment: ' + err.message, 'error')
     }
   }
 
@@ -1271,8 +1464,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                             cursor: 'pointer'
                           }}
                           onClick={() => {
-                            localStorage.setItem('open_reschedule_session_id', message.session_id);
-                            if (onNavigate) onNavigate('Calendar');
+                            const data = JSON.parse(message.content);
+                            setSelectedSession({ id: message.session_id, ...data });
+                            setIsResponseModalOpen(true);
                           }}
                         >
                           <div className="assessment-card-header">
@@ -1475,39 +1669,85 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           {selectedAssessment && userRole === 'student' && (
             <div className="live-assessment-modal-overlay" onClick={() => setSelectedAssessment(null)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>Assessment</h2>
+                <div className="assessment-modal-header" style={{
+                  background: 'linear-gradient(to right, #ffffff, #f8fafc)',
+                  padding: '24px 32px',
+                  borderBottom: '1px solid #e2e8f0',
+                  borderTopLeftRadius: '16px',
+                  borderTopRightRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0ea5e9'
+                    }}>
+                      <span className="material-symbols-outlined">assignment</span>
+                    </div>
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>Assessment Details</h2>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Check instructions and submit your work</p>
+                    </div>
+                  </div>
                   <button
-                    className="modal-close-btn"
+                    className="assessment-modal-close-btn"
                     onClick={() => setSelectedAssessment(null)}
                   >
-                    ✕
+                    <span className="material-symbols-outlined">close</span>
                   </button>
                 </div>
-                <div className="assessment-modal-content">
-                  <div className="assessment-view-header">
-                    <h3>{selectedAssessment.assessmentTitle}</h3>
-                    <p className="assessment-view-course">{course?.title || 'Course'}</p>
-                  </div>
-                  <div className="assessment-view-details">
-                    <div className="info-item">
-                      <span className="info-label">Due Date:</span>
-                      <span className="info-value">
-                        {/* {selectedAssessment.assessmentDueDate && !isNaN(new Date(selectedAssessment.assessmentDueDate).getTime())
-                          ? new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()
-                          : 'No Due Date'} */}
-                        To be announced
+                <div className="assessment-modal-content" style={{ padding: '32px' }}>
+                  <div className="assessment-view-header" style={{ marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px 0' }}>{selectedAssessment.assessmentTitle}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <span style={{ fontSize: '14px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>school</span>
+                        {course?.title || 'Course'}
+                      </span>
+                      <span style={{
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: '#ef4444',
+                        background: '#fef2f2',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
+                        Due: {selectedAssessment.assessmentDueDate ? new Date(selectedAssessment.assessmentDueDate).toLocaleDateString() : 'To be announced'}
                       </span>
                     </div>
                   </div>
-                  <div className="assessment-view-description">
-                    <h4>Instructions</h4>
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{selectedAssessment.assessmentDescription}</p>
+
+                  <div className="assessment-view-description" style={{
+                    background: '#f8fafc',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    marginBottom: '32px'
+                  }}>
+                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 12px 0', color: '#1e293b' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#64748b' }}>info</span>
+                      Instructions
+                    </h4>
+                    <p style={{ margin: 0, color: '#475569', fontSize: '15px', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                      {selectedAssessment.assessmentDescription}
+                    </p>
                   </div>
 
                   {/* Submission Form OR Status View */}
-                  {selectedAssessment.mySubmission && (selectedAssessment.mySubmission.status === 'submitted' || selectedAssessment.mySubmission.status === 'completed') ? (
-                    <div className="assessment-submission-form disabled-submission" style={{ opacity: 0.6, pointerEvents: 'none' }}>
+                  {selectedAssessment.mySubmission && ['submitted', 'completed', 'graded'].includes(selectedAssessment.mySubmission.status?.toLowerCase()) ? (
+                    <div className="assessment-submission-form disabled-submission" style={{ opacity: 0.9 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                         <h4 style={{ margin: 0 }}>Your Submission</h4>
                         <span style={{
@@ -1524,36 +1764,238 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
                       <div className="form-group">
                         <label className="form-label">Write your response / description</label>
-                        <textarea
-                          className="form-textarea"
-                          rows="8"
-                          placeholder="Describe your work, explain your approach, or provide any additional context..."
-                          value={selectedAssessment.mySubmission.text_submission || selectedAssessment.mySubmission.submission_text || ''}
-                          readOnly
-                          style={{ background: '#f8fafc', color: '#64748b' }}
-                        />
+                        <div style={{
+                          background: '#f8fafc',
+                          padding: '20px',
+                          borderRadius: '12px',
+                          border: '1px solid #e2e8f0',
+                          minHeight: '200px'
+                        }}>
+                          {(() => {
+                            const rawText = selectedAssessment.mySubmission.text_submission || selectedAssessment.mySubmission.submission_text || ''
+                            if (!rawText) return <p style={{ margin: 0, fontSize: '14px', color: '#94a3b8' }}>No text submission provided.</p>
+
+                            const cleanedText = cleanSubmissionText(rawText)
+                            // Split by Markdown links/images first
+                            const parts = cleanedText.split(/(\!\[.*?\]\(.*?\)|\[.*?\]\(.*?\))/)
+
+                            return (
+                              <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6' }}>
+                                {parts.map((part, index) => {
+                                  const markdownMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
+                                  if (markdownMatch) {
+                                    const [_, alt, url] = markdownMatch
+                                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+                                    if (isImage) {
+                                      return (
+                                        <div key={index} style={{ margin: '16px 0', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                          <img
+                                            src={url}
+                                            alt={alt}
+                                            style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block', backgroundColor: '#fff' }}
+                                          />
+                                        </div>
+                                      )
+                                    }
+                                    return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline', fontWeight: '500' }}>{alt || url}</a>
+                                  }
+
+                                  // For non-markdown parts, handle raw URLs
+                                  const subParts = part.split(/(https?:\/\/[^\s]+)/g)
+                                  return (
+                                    <span key={index}>
+                                      {subParts.map((subPart, subIndex) => {
+                                        if (subPart.match(/^https?:\/\//)) {
+                                          const isImageUrl = /\.(jpg|jpeg|png|gif|webp)$/i.test(subPart)
+                                          if (isImageUrl) {
+                                            return (
+                                              <div key={subIndex} style={{ margin: '16px 0', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                <img
+                                                  src={subPart}
+                                                  alt="Submission Image"
+                                                  style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block', backgroundColor: '#fff' }}
+                                                />
+                                              </div>
+                                            )
+                                          }
+                                          return (
+                                            <a
+                                              key={subIndex}
+                                              href={subPart}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              style={{
+                                                color: '#3b82f6',
+                                                textDecoration: 'none',
+                                                background: '#eff6ff',
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                fontWeight: '600',
+                                                wordBreak: 'break-all',
+                                                display: 'inline-block',
+                                                margin: '2px 0'
+                                              }}
+                                            >
+                                              <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>link</span>
+                                              Open Attachment
+                                            </a>
+                                          )
+                                        }
+                                        return <span key={subIndex} style={{ whiteSpace: 'pre-wrap' }}>{subPart}</span>
+                                      })}
+                                    </span>
+                                  )
+                                })}
+                              </div>
+                            )
+                          })()}
+                        </div>
                       </div>
 
                       <div className="form-group">
-                        <label className="form-label">Attach Files / Documents</label>
+                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#64748b' }}>attach_file</span>
+                          Submitted Attachments
+                        </label>
 
-                        {/* If attachments exist, show them */}
-                        {selectedAssessment.mySubmission.attachments && selectedAssessment.mySubmission.attachments.length > 0 ? (
-                          <div className="attachments-list" style={{ marginTop: '12px' }}>
-                            {selectedAssessment.mySubmission.attachments.map((attachment, idx) => (
-                              <div key={idx} className="attachment-item">
-                                <div className="attachment-icon">📎</div>
-                                <div className="attachment-info">
-                                  <span className="attachment-name">{attachment.name || `Attachment ${idx + 1}`}</span>
+                        {(() => {
+                          const dbAttachments = selectedAssessment.mySubmission.assessment_attachments || [];
+                          const extractedAttachments = extractAttachmentsFromText(selectedAssessment.mySubmission.text_submission);
+
+                          // Filter out extracted URLs that might already be in dbAttachments (by URL)
+                          const uniqueExtracted = extractedAttachments.filter(ext =>
+                            !dbAttachments.some(db => db.file_url === ext.file_url)
+                          );
+
+                          const allAttachments = [...dbAttachments, ...uniqueExtracted];
+
+                          if (allAttachments.length > 0) {
+                            return (
+                              <div className="attachments-list" style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'minmax(0, 1fr)',
+                                gap: '12px',
+                                marginTop: '8px'
+                              }}>
+                                {allAttachments.map((attachment, idx) => (
+                                  <div key={idx} className="attachment-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div className="attachment-item" style={{
+                                      background: 'white',
+                                      border: '1px solid #e2e8f0',
+                                      borderRadius: '12px',
+                                      padding: '12px 16px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      transition: 'all 0.2s ease',
+                                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                    }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                                        <div style={{
+                                          width: '36px',
+                                          height: '36px',
+                                          borderRadius: '10px',
+                                          background: '#f1f5f9',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          color: '#64748b',
+                                          flexShrink: 0
+                                        }}>
+                                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                                            {attachment.file_url && (attachment.file_url.toLowerCase().includes('png') || attachment.file_url.toLowerCase().includes('jpg') || attachment.file_url.toLowerCase().includes('jpeg')) ? 'image' : 'description'}
+                                          </span>
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                          <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {attachment.file_name}
+                                          </p>
+                                          <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8' }}>
+                                            {attachment.file_size ? `${(attachment.file_size / 1024).toFixed(1)} KB` : (attachment.is_extracted ? 'Text Link' : 'Attached File')}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <a
+                                          href={attachment.file_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          style={{
+                                            padding: '8px 16px',
+                                            background: '#eff6ff',
+                                            color: '#3b82f6',
+                                            borderRadius: '8px',
+                                            fontSize: '12px',
+                                            fontWeight: '700',
+                                            textDecoration: 'none',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            transition: 'all 0.2s ease'
+                                          }}
+                                        >
+                                          View
+                                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
+                                        </a>
+                                      </div>
+                                    </div>
+
+                                    {/* Inline Image Preview */}
+                                    {attachment.file_url && (attachment.file_url.toLowerCase().includes('png') || attachment.file_url.toLowerCase().includes('jpg') || attachment.file_url.toLowerCase().includes('jpeg')) && (
+                                      <div style={{
+                                        marginTop: '12px',
+                                        borderRadius: '12px',
+                                        overflow: 'hidden',
+                                        border: '1px solid #e2e8f0',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                        background: '#fff'
+                                      }}>
+                                        <img
+                                          src={attachment.file_url}
+                                          alt={attachment.file_name}
+                                          style={{ width: '100%', height: 'auto', maxHeight: '350px', objectFit: 'contain', display: 'block' }}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div style={{
+                                padding: '32px 24px',
+                                textAlign: 'center',
+                                background: '#f8fafc',
+                                border: '1px dashed #e2e8f0',
+                                borderRadius: '16px',
+                                color: '#94a3b8',
+                                fontSize: '13px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '12px'
+                              }}>
+                                <div style={{
+                                  width: '48px',
+                                  height: '48px',
+                                  borderRadius: '50%',
+                                  background: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                }}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#cbd5e1' }}>cloud_off</span>
+                                </div>
+                                <div>
+                                  <p style={{ margin: 0, fontWeight: '600', color: '#64748b' }}>No files attached</p>
+                                  <p style={{ margin: '4px 0 0 0', fontSize: '12px' }}>This submission contains only text</p>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed #cbd5e1', borderRadius: '8px', color: '#94a3b8', fontSize: '13px' }}>
-                            No files attached
-                          </div>
-                        )}
+                            );
+                          }
+                        })()}
                       </div>
 
                       <div className="assessment-view-actions">
@@ -1681,13 +2123,32 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           {showAssessmentListModal && (
             <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentListModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>All Assessments</h2>
+                <div className="assessment-modal-header" style={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  display: 'flex',
+                  padding: '24px 32px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0ea5e9'
+                    }}>
+                      <span className="material-symbols-outlined">assignment</span>
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>All Assessments</h2>
+                  </div>
                   <button
-                    className="modal-close-btn"
+                    className="assessment-modal-close-btn"
                     onClick={() => setShowAssessmentListModal(false)}
                   >
-                    ✕
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                   </button>
                 </div>
                 <div className="assessment-modal-content">
@@ -1698,7 +2159,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           key={assessment.id || idx}
                           className="assessment-list-item"
                           onClick={() => {
-                            console.log('� [DEBUG] Assessment Clicked:', assessment)
+                            console.log(' [DEBUG] Assessment Clicked:', assessment)
 
                             // 1. Reset submission state FIRST to avoid stale data conflicts
                             setAssessmentSubmission({ textSubmission: '', attachments: [] })
@@ -1766,13 +2227,32 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           {showSessionsModal && (
             <div className="live-assessment-modal-overlay" style={{ zIndex: 10001 }} onClick={() => setShowSessionsModal(false)}>
               <div className="live-assessment-modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>event_list</span>
-                    <h2 style={{ margin: 0 }}>Upcoming Sessions</h2>
+                <div className="assessment-modal-header" style={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  display: 'flex',
+                  padding: '24px 32px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#f0f9ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0ea5e9'
+                    }}>
+                      <span className="material-symbols-outlined">event_list</span>
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Upcoming Sessions</h2>
                   </div>
-                  <button className="modal-close-btn" onClick={() => setShowSessionsModal(false)}>
-                    <span className="material-symbols-outlined">close</span>
+                  <button
+                    className="assessment-modal-close-btn"
+                    onClick={() => setShowSessionsModal(false)}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                   </button>
                 </div>
 
@@ -1870,7 +2350,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                   }}
                                   onClick={() => {
                                     localStorage.setItem('open_reschedule_session_id', session.id);
-                                    if (onNavigate) onNavigate('Calendar');
+                                    setSelectedSession(session);
+                                    setIsResponseModalOpen(true);
                                     setShowSessionsModal(false);
                                   }}
                                 >
@@ -1896,7 +2377,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                   }}
                                   onClick={() => {
                                     localStorage.setItem('open_reschedule_session_id', session.id);
-                                    if (onNavigate) onNavigate('Calendar');
+                                    setSelectedSession(session);
+                                    setShowRescheduleModal(true);
                                     setShowSessionsModal(false);
                                   }}
                                 >
@@ -1939,7 +2421,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                 }}
                                 onClick={() => {
                                   localStorage.setItem('open_reschedule_session_id', session.id);
-                                  if (onNavigate) onNavigate('Calendar');
+                                  setSelectedSession(session);
+                                  setShowRescheduleModal(true);
                                   setShowSessionsModal(false);
                                 }}
                               >
@@ -2043,10 +2526,30 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           </div>
         )}
       </div>
+      <RescheduleModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        onConfirm={handleRescheduleConfirm}
+        sessionDetails={selectedSession}
+      />
+
+      <RescheduleResponseModal
+        isOpen={isResponseModalOpen}
+        onClose={() => setIsResponseModalOpen(false)}
+        sessionDetails={selectedSession}
+        onApprove={(s) => handleRescheduleResponse(s, 'approve')}
+        onReject={(s) => handleRescheduleResponse(s, 'reject')}
+      />
+
+      <MessageModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+      />
     </div>
   )
 }
 
 export default StudentLiveClassroom
-
-

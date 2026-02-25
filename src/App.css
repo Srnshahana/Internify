@@ -23765,12 +23765,15 @@ h1 span {
 
 /* Assessment in Classroom Chat */
 .live-assessment-card {
-  background: linear-gradient(135deg, #0ea5e920 0%, #0ca5e920 100%);
-  border: 2px solid #0ea5e9;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #3b82f6;
   border-radius: 12px;
-  padding: 20px;
-  margin: 8px 0;
-  transition: all 0.2s ease;
+  padding: 16px;
+  margin: 12px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 320px;
 }
 
 .live-assessment-card:hover {
@@ -23790,14 +23793,15 @@ h1 span {
 }
 
 .assessment-badge {
-  padding: 4px 12px;
-  background: #0ea5e9;
-  color: white;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 4px 10px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  border: 1px solid #dbeafe;
 }
 
 .assessment-card-title {
@@ -23851,13 +23855,24 @@ h1 span {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 20000 !important;
-  padding: 20px;
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  padding: 24px;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .live-assessment-modal {
@@ -23919,6 +23934,27 @@ h1 span {
 .modal-close-btn:hover {
   background: var(--border-color);
   color: var(--text-primary);
+}
+
+.assessment-modal-close-btn {
+  position: static !important;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 50%;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.assessment-modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .assessment-modal-content {
@@ -30258,30 +30294,48 @@ h1 span {
 
 .calendar-dashboard-wrapper {
   width: 100%;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100%;
-  gap: 32px;
+  min-height: 100vh;
+  gap: 24px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%) !important;
+}
+
+@media (min-width: 1024px) {
+  .calendar-dashboard-wrapper {
+    flex-direction: row;
+    align-items: flex-start;
+    height: 100vh;
+    padding: 24px 32px;
+    gap: 32px;
+    overflow: hidden;
+  }
 }
 
 .calendar-glass-card {
   width: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  /* Replaced black with white glass */
+  background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 32px;
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.04),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .calendar-glass-card {
+    flex: 1.4;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 24px !important;
+  }
 }
 
 .calendar-header-elegant {
@@ -30343,12 +30397,12 @@ h1 span {
 .calendar-grid-elegant {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .calendar-day-elegant {
   aspect-ratio: 1;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30358,10 +30412,9 @@ h1 span {
   border: 1px solid transparent;
   position: relative;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
   color: #334155;
   background: #ffffff;
-  /* Clean white background for days */
 }
 
 .calendar-day-elegant:hover:not(.empty) {
@@ -30405,7 +30458,6 @@ h1 span {
   cursor: default;
 }
 
-/* Sessions Section */
 .sessions-section-elegant {
   width: 100%;
   margin-top: 0;
@@ -30413,11 +30465,20 @@ h1 span {
   border-top: none;
 }
 
+@media (min-width: 1024px) {
+  .sessions-section-elegant {
+    flex: 1;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
+}
+
 .sessions-title-elegant {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #1e293b;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -30426,7 +30487,7 @@ h1 span {
 .sessions-list-elegant {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .session-card-elegant {
@@ -31987,16 +32048,7 @@ h1 span {
    ========================================================================== */
 
 /* Calendar Background Enhancement */
-.calendar-dashboard-wrapper {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%) !important;
-  min-height: 100vh;
-  padding: 24px;
-}
-
-.calendar-glass-card {
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
-}
+/* Duplicated calendar rules removed and consolidated in Iteration 30 */
 
 /* Profile Page - White Background */
 .profile-page-elegant {
@@ -37665,9 +37717,8 @@ html {
   width: 100% !important;
   max-width: none !important;
   min-height: auto !important;
-  /* Removed transform/opacity overrides to enable reveal animation */
-  padding: 2rem !important;
-  /* Reduced padding from 40px to 2rem (~32px) */
+  padding: 1.5rem !important;
+  /* Reduced from 2rem */
 }
 
 .success-stories-grid .testimonial-card:hover {
@@ -37970,9 +38021,12 @@ html {
   border-radius: 1.25rem;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.04);
-  padding: 2rem;
+  padding: 1.5rem;
+  /* Reduced from 2rem */
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  /* Reduced from 24px */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
 }
@@ -37985,16 +38039,20 @@ html {
 .testimonial-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  /* Reduced from 1rem */
+  margin-bottom: 0.75rem;
+  /* Reduced from 1rem */
 }
 
 .testimonial-avatar {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.75rem;
+  /* Reduced from 3.5rem */
+  height: 2.75rem;
+  /* Reduced from 3.5rem */
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #f1f5f9;
+  border: 1.5px solid #f1f5f9;
 }
 
 .testimonial-meta {
@@ -38005,13 +38063,16 @@ html {
 .testimonial-name {
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  /* Reduced from 0.95rem */
   color: #1e293b;
+  line-height: 1.2;
 }
 
 .testimonial-role {
   font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  /* Reduced from 0.8rem */
   color: #64748b;
   font-weight: 500;
 }
@@ -38019,24 +38080,26 @@ html {
 .testimonial-rating {
   display: flex;
   gap: 0.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  /* Reduced from 1rem */
 }
 
 .testimonial-rating .material-symbols-outlined {
-  font-size: 1.25rem;
+  font-size: 1rem;
+  /* Reduced from 1.25rem */
   color: #fbbf24;
-  /* Amber-400 */
 }
 
 .testimonial-quote {
   font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  /* Reduced from 0.875rem */
+  line-height: 1.5;
+  /* Reduced from 1.6 */
   color: #475569;
   font-style: italic;
   margin: 0;
   flex-grow: 1;
-  /* Pushes content if needed */
 }
 
 @media (max-width: 900px) {
@@ -40656,10 +40719,12 @@ html {
 }
 
 .mentor-info {
-  padding: 1.5rem;
+  padding: 1rem;
+  /* Reduced from 1.5rem */
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.25rem;
+  /* Reduced from 0.4rem */
   align-items: flex-start;
   text-align: left;
   background: #ffffff;
@@ -40667,10 +40732,12 @@ html {
 
 .mentor-name {
   font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  /* Reduced from 1rem */
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
+  /* Reduced from 0.25rem */
 }
 
 .mentor-rating-stars {
@@ -40682,9 +40749,9 @@ html {
 }
 
 .mentor-rating-stars .material-symbols-outlined {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  /* Reduced from 0.9rem */
   color: #fbbf24;
-  /* Amber 400 */
 }
 
 .mentor-rating-stars .star-outline {
@@ -40699,9 +40766,11 @@ html {
 }
 
 .mentor-role-company {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  /* Reduced from 0.85rem */
   color: #64748b;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
+  /* Reduced from 0.25rem */
   font-weight: 500;
 }
 
@@ -40711,10 +40780,10 @@ html {
 }
 
 .mentor-experience-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #475569;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   background: #f1f5f9;
   display: inline-block;
   padding: 2px 8px;
@@ -42839,5 +42908,195 @@ body {
 
   .upload-controls {
     align-items: center;
+  }
+}
+
+/* ==========================================================================
+   ITERATION 35: MODERN DARK FOOTER & CONTACT SECTION
+   ========================================================================== */
+
+.footer-v2 {
+  background: #05070a;
+  color: #94a3b8;
+  padding: 80px 5% 40px;
+}
+
+.footer-container-v2 {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-top-v2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+.footer-brand-col {
+  flex: 1.2;
+  max-width: 450px;
+}
+
+.footer-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.footer-logo-sq {
+  background: #0ea5e9;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.footer-logo-txt {
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.footer-brand-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.footer-contact-inline {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  padding: 4px;
+  max-width: 320px;
+}
+
+.footer-mini-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0 16px;
+  color: white;
+  font-size: 13px;
+  outline: none;
+}
+
+.footer-mini-input::placeholder {
+  color: #475569;
+}
+
+.footer-mini-btn {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-mini-btn:hover {
+  background: #0284c7;
+  transform: scale(1.05);
+}
+
+.footer-mini-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+
+.footer-links-row {
+  display: flex;
+  gap: 60px;
+}
+
+.footer-links-col {
+  min-width: 120px;
+}
+
+.footer-links-title {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-list li {
+  font-size: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.footer-links-list li:hover {
+  color: white;
+}
+
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 40px;
+}
+
+.footer-bottom-v2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-size: 14px;
+}
+
+.footer-made {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .footer-top-v2 {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer-links-row {
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .get-in-touch-input-wrapper {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .footer-bottom-v2 {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
   }
 }

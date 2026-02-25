@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import '../../App.css'
 import supabase from '../../supabaseClient'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 function Assessments({ onBack }) {
   const [assessments, setAssessments] = useState([])
@@ -15,6 +16,22 @@ function Assessments({ onBack }) {
     course_id: '',
     due_date: '',
   })
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
+
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    })
+  }
 
   // Mentor ID from auth
   const mentorId = localStorage.getItem('auth_id')
@@ -50,7 +67,7 @@ function Assessments({ onBack }) {
 
   const handleCreateAssessment = async () => {
     if (!newAssessment.title || !newAssessment.description || !newAssessment.course_id || !newAssessment.due_date) {
-      alert('Please fill in all fields')
+      showModal('Validation Error', 'Please fill in all fields', 'error')
       return
     }
 
@@ -68,13 +85,13 @@ function Assessments({ onBack }) {
 
       if (error) throw error
 
-      alert('Assessment created successfully!')
+      showModal('Success', 'Assessment created successfully!', 'success')
       setNewAssessment({ title: '', description: '', course_id: '', due_date: '' })
       setShowCreateForm(false)
       fetchAssessments() // Refresh list
     } catch (error) {
       console.error('Error creating assessment:', error)
-      alert('Failed to create assessment: ' + error.message)
+      showModal('Error', 'Failed to create assessment: ' + error.message, 'error')
     }
   }
 
@@ -114,7 +131,7 @@ function Assessments({ onBack }) {
 
       // Update local state
       setSubmissions(prev => prev.map(s => s.id === submissionId ? { ...s, status: 'completed' } : s))
-      alert('Marked as complete!')
+      showModal('Success', 'Marked as complete!', 'success')
     } catch (error) {
       console.error('Error marking submission complete:', error)
     }
@@ -131,12 +148,14 @@ function Assessments({ onBack }) {
 
   // --- Sub-components for Views ---
 
-  if (selectedSubmission) {
-    const submission = submissions.find(s => s.id === selectedSubmission)
-    if (!submission) return null
+  // --- Sub-components for Views ---
 
-    return (
-      <div className="dashboard-page-new">
+  const renderContent = () => {
+    if (selectedSubmission) {
+      const submission = submissions.find(s => s.id === selectedSubmission)
+      if (!submission) return null
+
+      return (
         <div className="dashboard-section">
           <div className="course-detail-header">
             <button className="back-button" onClick={() => setSelectedSubmission(null)}>
@@ -195,13 +214,11 @@ function Assessments({ onBack }) {
             </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
-  if (selectedAssessment) {
-    return (
-      <div className="dashboard-page-new">
+    if (selectedAssessment) {
+      return (
         <div className="dashboard-section">
           <div className="course-detail-header">
             <button className="back-button" onClick={() => setSelectedAssessment(null)}>
@@ -247,12 +264,10 @@ function Assessments({ onBack }) {
             </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
-  return (
-    <div className="dashboard-page-new">
+    return (
       <div className="dashboard-section">
         <div className="course-detail-header">
           <button className="back-button" onClick={onBack}>
@@ -291,6 +306,20 @@ function Assessments({ onBack }) {
           </div>
         )}
       </div>
+    )
+  }
+
+  return (
+    <div className="dashboard-page-new">
+      {renderContent()}
+
+      <MessageModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+      />
     </div>
   )
 }

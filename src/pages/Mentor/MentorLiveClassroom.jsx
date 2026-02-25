@@ -4,6 +4,7 @@ import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import RescheduleModal from '../../components/RescheduleModal.jsx'
 import RescheduleResponseModal from '../../components/RescheduleResponseModal.jsx'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const userRole = 'mentor'
@@ -59,6 +60,24 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const [courseSessions, setCourseSessions] = useState([])
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false)
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
+
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    })
+  }
 
   useEffect(() => {
     if (showAssessmentListModal) {
@@ -105,9 +124,36 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
+  // --- Helper to clean legacy file links from submission text ---
+  const cleanSubmissionText = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    return text
+      .split('\n')
+      .filter(line => !line.trim().startsWith('File Attachment:'))
+      .join('\n')
+      .trim();
+  };
 
+  // --- Helper to extract attachments from text ---
+  const extractAttachmentsFromText = (text) => {
+    if (!text || typeof text !== 'string') return [];
 
+    // Match standard URLs
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+    const matches = text.match(urlRegex) || [];
 
+    return matches.map(url => {
+      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+      // Try to get a clean name from the URL
+      const fileName = url.split('/').pop().split('?')[0] || 'Attached File';
+      return {
+        file_url: url,
+        file_name: decodeURIComponent(fileName),
+        file_type: isImage ? 'image/jpeg' : 'application/octet-stream', // Generic
+        is_extracted: true
+      };
+    });
+  };
 
   const fetchDbAssessments = async () => {
     try {
@@ -368,7 +414,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     if (!chatId) {
       console.error('❌ Cannot send message: chatId is missing. Course data:', course)
-      alert('Error: Chat session not found. Please re-enter the classroom.')
+      showModal('Entry Error', 'Chat session not found. Please re-enter the classroom.', 'error')
       return
     }
 
@@ -400,7 +446,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     if (error) {
       console.error('❌ Error sending message to Supabase:', error)
-      alert('Failed to send message: ' + error.message)
+      showModal('Error', 'Failed to send message: ' + error.message, 'error')
       return
     }
 
@@ -517,7 +563,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       if (attachmentError) {
         console.error('❌ Attachment Insert Error:', attachmentError)
-        alert('Failed to save attachment info: ' + attachmentError.message)
+        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
       } else {
         console.log('✅ Attachment Reserved:', attachmentData)
       }
@@ -559,11 +605,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         selfNote: '',
       }
       setMessages((prev) => [...prev, newMessage])
-      alert('Document sent successfully!')
+      showModal('Success', 'Document sent successfully!', 'success')
 
     } catch (err) {
       console.error('❌ Critical Error in Document Flow:', err)
-      alert('Error sending document: ' + err.message)
+      showModal('Error', 'Error sending document: ' + err.message, 'error')
     } finally {
       e.target.value = ''
       setShowAttachOptions(false)
@@ -626,7 +672,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       if (attachmentError) {
         console.error('❌ Attachment Insert Error:', attachmentError)
-        alert('Failed to save attachment info: ' + attachmentError.message)
+        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
       } else {
         console.log('✅ Attachment Reserved:', attachmentData)
       }
@@ -664,11 +710,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         selfNote: '',
       }
       setMessages((prev) => [...prev, newMessage])
-      alert('Image sent successfully!')
+      showModal('Success', 'Image sent successfully!', 'success')
 
     } catch (err) {
       console.error('❌ Critical Error in Image Flow:', err)
-      alert('Error sending image: ' + err.message)
+      showModal('Error', 'Error sending image: ' + err.message, 'error')
     } finally {
       e.target.value = ''
       setShowAttachOptions(false)
@@ -757,7 +803,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     } catch (err) {
       console.error('❌ Error sharing link:', err)
-      alert('Failed to share link: ' + err.message)
+      showModal('Error', 'Failed to share link: ' + err.message, 'error')
     }
   }
 
@@ -818,7 +864,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       if (attachmentError) {
         console.error('❌ Error inserting attachment record:', attachmentError)
-        alert('Table Insert Failed: ' + attachmentError.message)
+        showModal('Error', 'Table Insert Failed: ' + attachmentError.message, 'error')
         // throw attachmentError // Uncomment if you want to stop the flow
       } else {
         console.log('✅ Attachment record created:', attachmentData)
@@ -860,11 +906,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`
       }
       setMessages(prev => [...prev, optimisticMsg])
-      alert('Study Material uploaded successfully!')
+      showModal('Success', 'Study Material uploaded successfully!', 'success')
 
     } catch (err) {
       console.error('❌ CRITICAL Error uploading study material:', err)
-      alert('Failed to upload study material: ' + err.message)
+      showModal('Error', 'Failed to upload study material: ' + err.message, 'error')
     } finally {
       e.target.value = ''
       setShowAttachOptions(false)
@@ -873,7 +919,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleSendAssessment = async () => {
     if (!newAssessment.title || !newAssessment.description || !newAssessment.dueDate) {
-      alert('Please fill in all fields')
+      showModal('Validation Error', 'Please fill in all fields', 'error')
       return
     }
 
@@ -881,7 +927,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       console.log('📝 Creating Assessment in Table...')
       const courseId = course?.course_id || course?.id
 
-      const { error } = await supabase
+      const { data: createdAssessment, error } = await supabase
         .from('assessments')
         .insert({
           title: newAssessment.title,
@@ -891,11 +937,35 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           mentor_id: currentUserId,
           created_at: new Date().toISOString()
         })
+        .select()
+        .single()
 
       if (error) throw error
 
-      console.log('✅ Assessment Created Successfully')
-      alert('Assessment created and stored in the specific table successfully!')
+      console.log('✅ Assessment Created Successfully:', createdAssessment)
+
+      // 1.5 Send Message to Chat (Card format)
+      console.log('📤 Sending Assessment Message to Chat...')
+      const assessmentMessage = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: 'mentor',
+        sender_id: Number(currentUserId),
+        type: 'assessment',
+        content: JSON.stringify({
+          assessmentId: createdAssessment.id,
+          assessmentTitle: createdAssessment.title,
+          assessmentDescription: createdAssessment.description,
+          assessmentDueDate: createdAssessment.due_date
+        }),
+        read: false
+      }
+
+      const { error: msgError } = await supabase.from('messages').insert([assessmentMessage])
+      if (msgError) throw msgError
+
+      console.log('✅ Chat Notification Sent')
+      showModal('Success', 'Assessment created and sent to students successfully!', 'success')
 
       // Clear form but DO NOT add to chat messages
       setNewAssessment({ title: '', description: '', dueDate: '' })
@@ -904,14 +974,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     } catch (err) {
       console.error('❌ Error creating assessment:', err)
-      alert('Failed to create assessment: ' + err.message)
+      showModal('Error', 'Failed to create assessment: ' + err.message, 'error')
     }
   }
 
   const handleScheduleClass = async () => {
     // 1. Validation
     if (!scheduleClassData.title || !scheduleClassData.scheduled_date || !scheduleClassData.meeting_link) {
-      alert('Please fill in all fields (Title, Date, Link)')
+      showModal('Validation Error', 'Please fill in all fields (Title, Date, Link)', 'error')
       return
     }
 
@@ -980,13 +1050,13 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
       setMessages(prev => [...prev, newMessage])
 
-      alert('Class scheduled successfully!')
+      showModal('Success', 'Class scheduled successfully!', 'success')
       setScheduleClassData({ title: '', scheduled_date: '', meeting_link: '' })
       setShowScheduleClassModal(false)
 
     } catch (err) {
       console.error('❌ Error scheduling class:', err)
-      alert('Failed to schedule class: ' + err.message)
+      showModal('Error', 'Failed to schedule class: ' + err.message, 'error')
     }
   }
 
@@ -1036,7 +1106,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     } catch (err) {
       console.error('❌ Error posting assessment:', err)
-      alert('Failed to post assessment to chat')
+      showModal('Error', 'Failed to post assessment to chat', 'error')
     }
   }
 
@@ -1227,10 +1297,127 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           .eq('id', data.original_session_id);
       }
 
-      alert(`Reschedule ${action}d successfully!`);
+      showModal('Success', `Reschedule ${action}d successfully!`, 'success');
     } catch (err) {
       console.error('Error handling reschedule action:', err);
-      alert('Failed to process reschedule action.');
+      showModal('Error', 'Failed to process reschedule action.', 'error');
+    }
+  }
+
+  const handleRescheduleConfirm = async (newDate, newTime, reason) => {
+    try {
+      if (!selectedSession) return;
+
+      const rescheduleData = {
+        original_session_id: selectedSession.id,
+        new_date: newDate,
+        new_time: newTime,
+        reason: reason,
+        status: 'pending',
+        proposed_by: 'mentor'
+      }
+
+      // Send to the current chat
+      await supabase
+        .from('messages')
+        .insert([{
+          chat_id: Number(chatId),
+          session_id: selectedSession.id,
+          role: 'mentor',
+          sender_id: Number(currentUserId),
+          content: JSON.stringify(rescheduleData),
+          type: 'reschedule_request',
+          read: false
+        }])
+
+      // Update the scheduled_classes table
+      const { error: updateError } = await supabase
+        .from('scheduled_classes')
+        .update({
+          reschedule_request: true,
+          reschedule_role: 'mentor',
+          rescheduled_date: `${newDate}T${newTime}`,
+          reschedule_reason: reason
+        })
+        .eq('id', selectedSession.id)
+
+      if (updateError) throw updateError
+
+      showModal('Success', 'Reschedule request sent to student!', 'success')
+      setShowRescheduleModal(false)
+      if (showSessionsModal) fetchCourseSessions() // Refresh sessions if modal open
+    } catch (err) {
+      console.error('Error sending reschedule request:', err)
+      showModal('Error', 'Failed to send reschedule request.', 'error')
+    }
+  }
+
+  const handleRescheduleResponse = async (session, action) => {
+    try {
+      const isApproved = action === 'approve';
+
+      // 1. Find and update the pending reschedule message
+      const { data: messages, error: msgError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('session_id', session.id)
+        .eq('type', 'reschedule_request')
+        .eq('chat_id', Number(chatId))
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (msgError) throw msgError;
+
+      if (messages && messages.length > 0) {
+        const message = messages[0];
+        const requestData = JSON.parse(message.content);
+        const updatedData = { ...requestData, status: isApproved ? 'approved' : 'rejected' };
+
+        await supabase
+          .from('messages')
+          .update({ content: JSON.stringify(updatedData) })
+          .eq('id', message.id);
+      }
+
+      // 2. Update scheduled_classes
+      const updatePayload = {
+        reschedule_request: false,
+        reschedule_role: null,
+        rescheduled_date: null,
+        reschedule_reason: null
+      };
+
+      if (isApproved && session.rescheduled_date) {
+        updatePayload.scheduled_date = session.rescheduled_date;
+      }
+
+      const { error: schedError } = await supabase
+        .from('scheduled_classes')
+        .update(updatePayload)
+        .eq('id', session.id);
+
+      if (schedError) throw schedError;
+
+      // 3. Send confirmation/rejection text message
+      const textMsg = {
+        chat_id: Number(chatId),
+        session_id: Number(session.id),
+        role: 'mentor',
+        sender_id: Number(currentUserId),
+        content: isApproved
+          ? `Reschedule approved. New time: ${new Date(session.rescheduled_date).toLocaleString()}`
+          : `Reschedule request rejected by mentor.`,
+        type: 'text',
+        read: false
+      };
+      await supabase.from('messages').insert([textMsg]);
+
+      showModal('Success', `Reschedule request ${action}d successfully!`, 'success');
+      setIsResponseModalOpen(false);
+      if (showSessionsModal) fetchCourseSessions();
+    } catch (err) {
+      console.error('Error responding to reschedule:', err);
+      showModal('Error', 'Failed to process response.', 'error');
     }
   }
 
@@ -1720,13 +1907,36 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           {showAssessmentForm && (
             <div className="live-assessment-modal-overlay" onClick={() => setShowAssessmentForm(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>Create Assessment</h2>
+                <div className="assessment-modal-header" style={{
+                  background: 'linear-gradient(to right, #ffffff, #f8fafc)',
+                  padding: '24px 32px',
+                  borderBottom: '1px solid #e2e8f0',
+                  borderTopLeftRadius: '16px',
+                  borderTopRightRadius: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#3b82f6'
+                    }}>
+                      <span className="material-symbols-outlined">assignment_add</span>
+                    </div>
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>Create Assessment</h2>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Assign a new task to your students</p>
+                    </div>
+                  </div>
                   <button
-                    className="modal-close-btn"
+                    className="assessment-modal-close-btn"
                     onClick={() => setShowAssessmentForm(false)}
                   >
-                    ✕
+                    <span className="material-symbols-outlined">close</span>
                   </button>
                 </div>
                 <div className="assessment-modal-content">
@@ -1785,9 +1995,28 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           {showAssessmentListModal && (
             <div className="live-assessment-modal-overlay" style={{ zIndex: 10001 }} onClick={() => setShowAssessmentListModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
-                  <h2>Assessments</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="assessment-modal-header" style={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  display: 'flex',
+                  padding: '24px 32px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#3b82f6'
+                    }}>
+                      <span className="material-symbols-outlined">assignment</span>
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Assessments</h2>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <button
                       className="modal-action-btn"
                       onClick={() => {
@@ -1799,21 +2028,25 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         background: '#3b82f6',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '50%',
-                        width: '32px',
-                        height: '32px',
+                        borderRadius: '20px',
+                        padding: '8px 16px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        gap: '8px',
                         cursor: 'pointer',
-                        fontSize: '20px'
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)'
                       }}
                     >
-                      <span className="material-symbols-outlined">add</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
                       Create New
                     </button>
-                    <button className="modal-close-btn" onClick={() => setShowAssessmentListModal(false)}>
-                      <span className="material-symbols-outlined">close</span>
+                    <button
+                      className="assessment-modal-close-btn"
+                      onClick={() => setShowAssessmentListModal(false)}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                     </button>
                   </div>
                 </div>
@@ -1995,7 +2228,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                   }}
                                   onClick={() => {
                                     localStorage.setItem('open_reschedule_session_id', session.id);
-                                    if (onNavigate) onNavigate('Calendar');
+                                    setSelectedSession(session);
+                                    setIsResponseModalOpen(true);
                                     setShowSessionsModal(false);
                                   }}
                                 >
@@ -2021,7 +2255,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                   }}
                                   onClick={() => {
                                     localStorage.setItem('open_reschedule_session_id', session.id);
-                                    if (onNavigate) onNavigate('Calendar');
+                                    setSelectedSession(session);
+                                    setShowRescheduleModal(true);
                                     setShowSessionsModal(false);
                                   }}
                                 >
@@ -2064,7 +2299,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                 }}
                                 onClick={() => {
                                   localStorage.setItem('open_reschedule_session_id', session.id);
-                                  if (onNavigate) onNavigate('Calendar');
+                                  setSelectedSession(session);
+                                  setShowRescheduleModal(true);
                                   setShowSessionsModal(false);
                                 }}
                               >
@@ -2087,13 +2323,32 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           {showScheduleClassModal && (
             <div className="live-assessment-modal-overlay" onClick={() => setShowScheduleClassModal(false)}>
               <div className="live-assessment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="assessment-modal-header">
-                  <h2>Schedule Next Class</h2>
+                <div className="assessment-modal-header" style={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  display: 'flex',
+                  padding: '24px 32px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      background: '#ecfdf5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#059669'
+                    }}>
+                      <span className="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Schedule Next Class</h2>
+                  </div>
                   <button
-                    className="modal-close-btn"
+                    className="assessment-modal-close-btn"
                     onClick={() => setShowScheduleClassModal(false)}
                   >
-                    ✕
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                   </button>
                 </div>
                 <div className="assessment-modal-content">
@@ -2137,23 +2392,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             </div>
           )}
 
-          {/* Assessment List Modal for Students (Correctly placed) */}
-
-
-          <input
-            ref={docInputRef}
-            type="file"
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
-            style={{ display: 'none' }}
-            onChange={handleDocSelected}
-          />
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleImageSelected}
-          />
         </div>
       </div>
 
@@ -2259,19 +2497,41 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               className="mentor-assessment-modal-container"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mentor-modal-header">
-                <h2 className="mentor-modal-title">
-                  {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
-                </h2>
+              <div className="mentor-modal-header" style={{
+                padding: '24px 32px',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: '#f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#3b82f6'
+                  }}>
+                    <span className="material-symbols-outlined">
+                      {selectedSubmission ? 'rate_review' : 'assignment'}
+                    </span>
+                  </div>
+                  <h2 className="mentor-modal-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>
+                    {selectedSubmission ? 'Review Submission' : selectedAssessment.title}
+                  </h2>
+                </div>
                 <button
                   onClick={() => {
                     if (selectedSubmission) setSelectedSubmission(null)
                     else setSelectedAssessment(null)
                   }}
-                  className="mentor-modal-close-btn"
+                  className="assessment-modal-close-btn"
                   title="Close"
                 >
-                  ✕
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                 </button>
               </div>
 
@@ -2289,9 +2549,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         <p className="submission-meta">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
                       </div>
                       <div className="submission-status-badge-wrapper">
-                        <span className={`status-badge-large ${selectedSubmission.status === 'completed' ? 'badge-completed' : 'badge-pending'
+                        <span className={`status-badge-large ${['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'badge-completed' : 'badge-pending'
                           }`}>
-                          {selectedSubmission.status === 'completed' ? 'Completed' : 'Pending Review'}
+                          {['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'Completed' : 'Pending Review'}
                         </span>
                       </div>
                     </div>
@@ -2301,16 +2561,16 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         <h3 className="card-title">Text Submission</h3>
                       </div>
                       {(() => {
-                        const text = selectedSubmission.text_submission
+                        const text = cleanSubmissionText(selectedSubmission.text_submission)
                         if (!text) return <div className="card-body text-content"><span className="no-content">No text provided.</span></div>
 
                         const parts = text.split(/(\!\[.*?\]\(.*?\)|\[.*?\]\(.*?\))/)
                         return (
                           <div className="card-body text-content">
                             {parts.map((part, index) => {
-                              const imageMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
-                              if (imageMatch) {
-                                const [_, alt, url] = imageMatch
+                              const markdownMatch = part.match(/\!\[(.*?)\]\((.*?)\)/) || part.match(/\[(.*?)\]\((.*?)\)/)
+                              if (markdownMatch) {
+                                const [_, alt, url] = markdownMatch
                                 const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
                                 if (isImage) {
                                   return (
@@ -2325,66 +2585,230 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                 }
                                 return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>{alt || url}</a>
                               }
-                              return <span key={index}>{part}</span>
+
+                              // For non-markdown parts, handle raw URLs
+                              const subParts = part.split(/(https?:\/\/[^\s]+)/g)
+                              return (
+                                <span key={index}>
+                                  {subParts.map((subPart, subIndex) => {
+                                    if (subPart.match(/^https?:\/\//)) {
+                                      const isImageUrl = /\.(jpg|jpeg|png|gif|webp)$/i.test(subPart)
+                                      if (isImageUrl) {
+                                        return (
+                                          <div key={subIndex} style={{ margin: '16px 0', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                            <img
+                                              src={subPart}
+                                              alt="Submission Image"
+                                              style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block', backgroundColor: '#fff' }}
+                                            />
+                                          </div>
+                                        )
+                                      }
+                                      return (
+                                        <a
+                                          key={subIndex}
+                                          href={subPart}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          style={{
+                                            color: '#3b82f6',
+                                            textDecoration: 'none',
+                                            background: '#eff6ff',
+                                            padding: '4px 12px',
+                                            borderRadius: '6px',
+                                            fontWeight: '600',
+                                            wordBreak: 'break-all',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            margin: '4px 0'
+                                          }}
+                                        >
+                                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>link</span>
+                                          Open Attachment
+                                        </a>
+                                      )
+                                    }
+                                    return <span key={subIndex} style={{ whiteSpace: 'pre-wrap' }}>{subPart}</span>
+                                  })}
+                                </span>
+                              )
                             })}
                           </div>
                         )
                       })()}
                     </div>
 
-                    {selectedSubmission.assessment_attachments?.length > 0 && (
-                      <div className="mentor-attachments-card">
-                        <div className="card-header">
-                          <h3 className="card-title">Attachments ({selectedSubmission.assessment_attachments.length})</h3>
-                        </div>
-                        <div className="card-body attachments-list">
-                          {selectedSubmission.assessment_attachments.map(att => {
-                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(att.file_name)
-                            return (
-                              <div key={att.id} className="attachment-item" style={{ flexDirection: isImage ? 'column' : 'row', alignItems: isImage ? 'flex-start' : 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                  <span className="icon">{isImage ? '�️' : '�📎'}</span>
-                                  <div className="file-info">
-                                    <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="file-name">
-                                      {att.file_name}
-                                    </a>
-                                    <span className="file-type">{isImage ? 'Image' : 'Document'}</span>
-                                  </div>
-                                  <a href={att.file_url} download target="_blank" rel="noopener noreferrer" className="download-btn">
-                                    ⬇️
-                                  </a>
-                                </div>
-                                {isImage && (
-                                  <div style={{ marginTop: '12px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                    <img
-                                      src={att.file_url}
-                                      alt={att.file_name}
-                                      style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', backgroundColor: '#f8fafc' }}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
+                    {(() => {
+                      const dbAttachments = selectedSubmission.assessment_attachments || [];
+                      const extractedAttachments = extractAttachmentsFromText(selectedSubmission.text_submission);
 
-                    {selectedSubmission.status !== 'completed' && (
-                      <div className="mentor-action-footer">
-                        <button
-                          onClick={() => handleMarkComplete(selectedSubmission.id)}
-                          className="mark-complete-btn"
-                          disabled={isMarkingComplete}
-                          style={{
-                            opacity: isMarkingComplete ? 0.7 : 1,
-                            cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
-                          }}
-                        >
-                          {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
-                        </button>
-                      </div>
-                    )}
+                      // Filter out extracted URLs that might already be in dbAttachments (by URL)
+                      const uniqueExtracted = extractedAttachments.filter(ext =>
+                        !dbAttachments.some(db => db.file_url === ext.file_url)
+                      );
+
+                      const allAttachments = [...dbAttachments, ...uniqueExtracted];
+
+                      if (allAttachments.length > 0) {
+                        return (
+                          <div className="mentor-attachments-section" style={{ marginTop: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '24px' }}>
+                            <h4 style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              margin: '0 0 16px 0',
+                              fontSize: '15px',
+                              fontWeight: '700',
+                              color: '#1e293b'
+                            }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#64748b' }}>attach_file</span>
+                              Student Attachments ({allAttachments.length})
+                            </h4>
+
+                            <div className="attachments-list" style={{
+                              display: 'grid',
+                              gridTemplateColumns: '1fr',
+                              gap: '12px'
+                            }}>
+                              {allAttachments.map((att, idx) => {
+                                const isImage = att.file_url && (att.file_url.toLowerCase().includes('png') || att.file_url.toLowerCase().includes('jpg') || att.file_url.toLowerCase().includes('jpeg'));
+                                return (
+                                  <div key={idx} className="attachment-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <div className="attachment-item" style={{
+                                      background: 'white',
+                                      border: '1px solid #e2e8f0',
+                                      borderRadius: '12px',
+                                      padding: '12px 16px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      transition: 'all 0.2s ease',
+                                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                    }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                                        <div style={{
+                                          width: '36px',
+                                          height: '36px',
+                                          borderRadius: '10px',
+                                          background: '#f8fafc',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          color: isImage ? '#f59e0b' : '#3b82f6',
+                                          flexShrink: 0
+                                        }}>
+                                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                                            {isImage ? 'image' : 'description'}
+                                          </span>
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                          <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {att.file_name}
+                                          </p>
+                                          <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8' }}>
+                                            {att.file_size ? `${(att.file_size / 1024).toFixed(1)} KB` : (att.is_extracted ? 'Text Link' : 'Attached File')}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <a
+                                        href={att.file_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mentor-view-file-btn"
+                                        style={{
+                                          background: '#eff6ff',
+                                          color: '#3b82f6',
+                                          padding: '8px 16px',
+                                          borderRadius: '8px',
+                                          fontSize: '12px',
+                                          fontWeight: '700',
+                                          textDecoration: 'none',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px'
+                                        }}
+                                      >
+                                        View
+                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
+                                      </a>
+                                    </div>
+
+                                    {isImage && (
+                                      <div style={{
+                                        borderRadius: '12px',
+                                        overflow: 'hidden',
+                                        border: '1px solid #e2e8f0',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                        background: '#fff'
+                                      }}>
+                                        <img
+                                          src={att.file_url}
+                                          alt={att.file_name}
+                                          style={{ width: '100%', height: 'auto', maxHeight: '350px', objectFit: 'contain', display: 'block' }}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div style={{
+                            marginTop: '24px',
+                            padding: '32px 24px',
+                            textAlign: 'center',
+                            background: '#f8fafc',
+                            border: '1px dashed #e2e8f0',
+                            borderRadius: '16px',
+                            color: '#94a3b8',
+                            fontSize: '13px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '12px'
+                          }}>
+                            <div style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              background: '#fff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                            }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#cbd5e1' }}>cloud_off</span>
+                            </div>
+                            <div>
+                              <p style={{ margin: 0, fontWeight: '600', color: '#64748b' }}>No files attached</p>
+                              <p style={{ margin: '4px 0 0 0', fontSize: '12px' }}>Student submitted text only</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    })()}
+
+                    {
+                      selectedSubmission.status !== 'completed' && (
+                        <div className="mentor-action-footer">
+                          <button
+                            onClick={() => handleMarkComplete(selectedSubmission.id)}
+                            className="mark-complete-btn"
+                            disabled={isMarkingComplete}
+                            style={{
+                              opacity: isMarkingComplete ? 0.7 : 1,
+                              cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
+                          </button>
+                        </div>
+                      )
+                    }
                   </div>
                 ) : (
                   // Assessment Details & Submissions List View
@@ -2474,6 +2898,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         sessionDetails={selectedSession}
         onApprove={(s) => handleRescheduleResponse(s, 'approve')}
         onReject={(s) => handleRescheduleResponse(s, 'reject')}
+      />
+
+      <MessageModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
       />
     </>
   )

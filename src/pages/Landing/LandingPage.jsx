@@ -1481,67 +1481,75 @@ export default function LandingPage({
               </div>
             ))}
           </div>
-
-          {/* Get in Touch Section Removed - Integrated into Footer */}
         </section>
+
+
       </main >
 
-      <footer className="footer-redesign reveal">
-        <div className="footer-content-new">
-          <div className="footer-main-row">
-            <div className="footer-left-col">
-              <div className="footer-logo-row reveal reveal-up">
-                <div className="footer-logo-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bolt</span>
-                </div>
-                <h2 className="footer-logo-text">Internify</h2>
+      <footer className="footer-v2">
+        <div className="footer-container-v2">
+          <div className="footer-top-v2">
+            <div className="footer-brand-col">
+              <div className="footer-logo-group">
+                <div className="footer-logo-sq">I</div>
+                <h2 className="footer-logo-txt">Internify</h2>
               </div>
-              <div className="footer-links-grid">
-                <div className="footer-column reveal reveal-up stagger-1">
-                  <h4 className="footer-column-title">Platform</h4>
-                  <ul className="footer-links-list">
-                    <li className="footer-link-item" onClick={() => navigate('/explore')}>Mentorship</li>
-                    <li className="footer-link-item" onClick={() => navigate('/explore')}>Courses</li>
-                    <li className="footer-link-item" onClick={() => navigate('/jobs')}>Careers</li>
-                  </ul>
-                </div>
-                <div className="footer-column reveal reveal-up stagger-2">
-                  <h4 className="footer-column-title">Company</h4>
-                  <ul className="footer-links-list">
-                    <li className="footer-link-item">About</li>
-                    <li className="footer-link-item">Terms</li>
-                    <li className="footer-link-item">Privacy</li>
-                  </ul>
-                </div>
+              <p className="footer-brand-desc">
+                Helping students find clarity, build skills, and launch careers<br />
+                with the guidance of experienced mentors.
+              </p>
+              <div className="footer-contact-inline">
+                <input type="email" placeholder="Get in touch (your email)" className="footer-mini-input" />
+                <button className="footer-mini-btn" onClick={() => showModal('Success', 'Your message has been sent!', 'success')}>
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
               </div>
             </div>
-
-            <div className="footer-right-col reveal reveal-up stagger-3">
-              <div className="feature-card get-in-touch-card footer-contact-card">
-                <div className="feature-icon-wrapper icon-contact">
-                  <span className="material-symbols-outlined">mail</span>
-                </div>
-                <h2 className="feature-title">Get in Touch</h2>
-                <p className="feature-desc">
-                  Have questions or need guidance? Our team is available to help.
-                </p>
-                <div className="get-in-touch-form-new">
-                  <input type="email" placeholder="Enter your email" className="get-in-touch-input-new" />
-                  <button className="feature-btn btn-contact">Send Message</button>
-                </div>
+            <div className="footer-links-row">
+              <div className="footer-links-col">
+                <h4 className="footer-links-title">Product</h4>
+                <ul className="footer-links-list">
+                  <li onClick={() => navigate('/explore')}>Features</li>
+                  <li onClick={() => navigate('/mentors')}>Mentors</li>
+                  <li onClick={() => navigate('/explore')}>Pricing</li>
+                  <li onClick={() => navigate('/explore')}>Success Stories</li>
+                </ul>
+              </div>
+              <div className="footer-links-col">
+                <h4 className="footer-links-title">Company</h4>
+                <ul className="footer-links-list">
+                  <li>About Us</li>
+                  <li>Careers</li>
+                  <li>Blog</li>
+                  <li>Press</li>
+                </ul>
+              </div>
+              <div className="footer-links-col">
+                <h4 className="footer-links-title">Support</h4>
+                <ul className="footer-links-list">
+                  <li>Help Center</li>
+                  <li>Contact</li>
+                  <li>Privacy Policy</li>
+                  <li>Terms</li>
+                </ul>
+              </div>
+              <div className="footer-links-col">
+                <h4 className="footer-links-title">Community</h4>
+                <ul className="footer-links-list">
+                  <li>Discord</li>
+                  <li>Twitter</li>
+                  <li>LinkedIn</li>
+                  <li>Instagram</li>
+                </ul>
               </div>
             </div>
           </div>
-          <div className="footer-bottom-new reveal reveal-up stagger-3">
-            <p className="footer-copyright">© 2026 Internify</p>
-            <div className="footer-socials">
-              <div className="social-icon-pill">
-                <span className="material-symbols-outlined">public</span>
-              </div>
-              <div className="social-icon-pill">
-                <span className="material-symbols-outlined">share</span>
-              </div>
-            </div>
+
+          <div className="footer-divider"></div>
+
+          <div className="footer-bottom-v2">
+            <p className="footer-copy">© 2026 Internify. All rights reserved.</p>
+            <p className="footer-made">Made with <span style={{ color: '#ef4444' }}>❤</span> for students everywhere</p>
           </div>
         </div>
       </footer>

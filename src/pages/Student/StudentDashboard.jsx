@@ -45,6 +45,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
             onEnterClassroom={() => setIsLiveClassroomActive(true)}
             onMentorClick={setSelectedMentor}
             setIsCourseDetailActive={setIsCourseDetailActive}
+            onNavigate={setActivePage}
           />
         )
       case 'Calendar':
@@ -100,7 +101,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
 
       {/* Main Content - Full Width */}
       <main className="dashboard-main-new full-width-main">
-        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} style={activePage === 'Home' || activePage === 'Classrooms' ? { padding: 0, maxWidth: '100%' } : {}}>
+        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} style={activePage === 'Home' || activePage === 'Classrooms' || activePage === 'Calendar' ? { padding: 0, maxWidth: '100%' } : {}}>
           {renderPage(activePage)}
         </div>
       </main>

@@ -5,7 +5,7 @@ import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
-function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorClick, setIsCourseDetailActive }) {
+function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorClick, setIsCourseDetailActive, onNavigate }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [activeTab, setActiveTab] = useState('active')
 
@@ -32,6 +32,7 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
         onBack={() => setSelectedCourse(null)}
         onEnterClassroom={onEnterClassroom}
         onMentorClick={onMentorClick}
+        onNavigate={onNavigate}
       />
     )
   }

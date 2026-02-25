@@ -12,6 +12,7 @@ import StudentProfileTemplate from '../../components/StudentProfileTemplate.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
 import { useNavigate } from 'react-router-dom'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
 import landingIllustration from '../../assets/images/landingpage-illlustration.svg'
@@ -63,6 +64,29 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   const [classroomName, setClassroomName] = useState('')
   const [isApprovedSuccessfully, setIsApprovedSuccessfully] = useState(false)
   const [showProgressGraphModal, setShowProgressGraphModal] = useState(false)
+  const [showCourseDetailsModal, setShowCourseDetailsModal] = useState(false)
+  const [courseDetailsTab, setCourseDetailsTab] = useState('provided') // 'provided' or 'all'
+  const [selectedDetailsCourse, setSelectedDetailsCourse] = useState(null)
+  const [allCourses, setAllCourses] = useState([])
+  const [loadingAllCourses, setLoadingAllCourses] = useState(false)
+  const [showStudyMaterialsModal, setShowStudyMaterialsModal] = useState(false)
+  const [selectedStudyMaterialCourse, setSelectedStudyMaterialCourse] = useState(null)
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
+
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    })
+  }
 
   // Ad Banner state
   const ads = [
@@ -149,6 +173,28 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
     }
     checkTable();
   }, [])
+
+  useEffect(() => {
+    if (showCourseDetailsModal && courseDetailsTab === 'all' && allCourses.length === 0) {
+      fetchAllCourses()
+    }
+  }, [showCourseDetailsModal, courseDetailsTab])
+
+  const fetchAllCourses = async () => {
+    setLoadingAllCourses(true)
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+      if (error) throw error
+      setAllCourses(data || [])
+    } catch (err) {
+      console.error('Error fetching all courses:', err)
+      showModal('Error', 'Failed to fetch all courses: ' + err.message, 'error')
+    } finally {
+      setLoadingAllCourses(false)
+    }
+  }
 
   if (loading) {
     return <Loading fullScreen={true} />
@@ -238,19 +284,6 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
         </div>
       </header>
 
-      <section className="dashboard-search-container-v2">
-        <div className="dashboard-search-pill-v2">
-          <SearchIcon className="dashboard-search-icon-v2" />
-          <input
-            type="text"
-            className="dashboard-search-input-v2"
-            placeholder="Search students, courses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleSearch}
-          />
-        </div>
-      </section>
 
       <section className="dashboard-ad-section-v2">
         <div className="dashboard-ad-card-v2">
@@ -291,6 +324,14 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             <span className="material-symbols-outlined">analytics</span>
           </div>
           <h3 className="dashboard-card-title-v2">Class<br />Progress</h3>
+          <span className="material-symbols-outlined dashboard-card-arrow">arrow_outward</span>
+        </div>
+
+        <div className="dashboard-glass-card-v2" onClick={() => setShowCourseDetailsModal(true)}>
+          <div className="dashboard-card-icon-wrapper icon-purple-v2" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+            <span className="material-symbols-outlined">menu_book</span>
+          </div>
+          <h3 className="dashboard-card-title-v2">Course<br />Details</h3>
           <span className="material-symbols-outlined dashboard-card-arrow">arrow_outward</span>
         </div>
       </section>
@@ -371,6 +412,13 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             <p className="featured-session-description">New features for mentors to track student progress and manage attendance.</p>
             <div className="featured-session-footer">
               <span className="featured-session-duration">Article • 5m read</span>
+            </div>
+          </div>
+          <div className="featured-session-card" style={{ background: 'white', cursor: 'pointer' }} onClick={() => setShowStudyMaterialsModal(true)}>
+            <h3 className="featured-session-title">Study Materials</h3>
+            <p className="featured-session-description">Access course-specific resources and uploaded materials.</p>
+            <div className="featured-session-footer">
+              <span className="featured-session-duration">Materials • Repository</span>
             </div>
           </div>
         </div>
@@ -573,7 +621,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                         setIsApprovedSuccessfully(true)
                       } catch (err) {
                         console.error('Error approving:', err)
-                        alert('Failed to approve request: ' + (err.message || 'Unknown error'))
+                        showModal('Error', 'Failed to approve request: ' + (err.message || 'Unknown error'), 'error')
                       }
                     }}
                     style={{
@@ -601,13 +649,13 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                           .eq('id', Number(approvalCourse.id))
 
                         if (error) throw error
-                        alert('Request rejected.')
+                        showModal('Success', 'Request rejected.', 'success')
                         setShowApprovalModal(false)
                         setApprovalCourse(null)
                         window.location.reload()
                       } catch (err) {
                         console.error('Error rejecting:', err)
-                        alert('Failed to reject request: ' + (err.message || 'Unknown error'))
+                        showModal('Error', 'Failed to reject request: ' + (err.message || 'Unknown error'), 'error')
                       }
                     }}
                     style={{
@@ -774,6 +822,173 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
           </div>
         </div>
       )}
+
+      {/* Course Details Modal */}
+      {showCourseDetailsModal && (
+        <div className="modal-overlay" onClick={() => setShowCourseDetailsModal(false)}>
+          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 className="modal-title" style={{ margin: 0 }}>Course Details</h2>
+              <button className="progress-modal-close" onClick={() => setShowCourseDetailsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            <div className="tab-buttons-container" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+              <button
+                onClick={() => { setCourseDetailsTab('provided'); setSelectedDetailsCourse(null); }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: courseDetailsTab === 'provided' ? '#0f172a' : 'transparent',
+                  color: courseDetailsTab === 'provided' ? 'white' : '#64748b',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Courses Provided
+              </button>
+              <button
+                onClick={() => { setCourseDetailsTab('all'); setSelectedDetailsCourse(null); }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: courseDetailsTab === 'all' ? '#0f172a' : 'transparent',
+                  color: courseDetailsTab === 'all' ? 'white' : '#64748b',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                All Courses
+              </button>
+            </div>
+
+            <div className="modal-scrollable-content" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {courseDetailsTab === 'provided' ? (
+                <div>
+                  {selectedDetailsCourse ? (
+                    <div>
+                      <button
+                        onClick={() => setSelectedDetailsCourse(null)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 600, cursor: 'pointer', marginBottom: '15px' }}
+                      >
+                        <span className="material-symbols-outlined">arrow_back</span> Back to list
+                      </button>
+                      <h3 style={{ marginBottom: '15px' }}>Sessions for {selectedDetailsCourse.title}</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {scheduledSessions?.filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id).length > 0 ? (
+                          scheduledSessions
+                            .filter(s => s.course_id === selectedDetailsCourse.id || s.courses?.id === selectedDetailsCourse.id)
+                            .map(session => (
+                              <div key={session.id} style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                <h4 style={{ margin: '0 0 5px 0' }}>{session.title}</h4>
+                                <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
+                                  {session.scheduled_date ? new Date(session.scheduled_date).toLocaleString() : 'Not scheduled'}
+                                </p>
+                              </div>
+                            ))
+                        ) : (
+                          <p style={{ color: '#64748b', textAlign: 'center' }}>No sessions found for this course.</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {uniqueTaughtCourses.map(course => (
+                        <div
+                          key={course.id}
+                          onClick={() => setSelectedDetailsCourse(course)}
+                          style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                        >
+                          <span style={{ fontWeight: 600 }}>{course.title}</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#94a3b8' }}>chevron_right</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  {loadingAllCourses ? (
+                    <div style={{ textAlign: 'center', padding: '20px' }}>Loading platform courses...</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {allCourses.map(course => (
+                        <div
+                          key={course.id}
+                          style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                        >
+                          <span style={{ fontWeight: 600 }}>{course.title}</span>
+                          <p style={{ margin: '5px 0 0 0', fontSize: '0.875rem', color: '#64748b' }}>{course.description?.substring(0, 100)}...</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Study Materials Modal */}
+      {showStudyMaterialsModal && (
+        <div className="modal-overlay" onClick={() => setShowStudyMaterialsModal(false)}>
+          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 className="modal-title" style={{ margin: 0 }}>Study Materials</h2>
+              <button className="progress-modal-close" onClick={() => setShowStudyMaterialsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            <div className="modal-scrollable-content" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {selectedStudyMaterialCourse ? (
+                <div>
+                  <button
+                    onClick={() => setSelectedStudyMaterialCourse(null)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 600, cursor: 'pointer', marginBottom: '15px' }}
+                  >
+                    <span className="material-symbols-outlined">arrow_back</span> Back to courses
+                  </button>
+                  <h3 style={{ marginBottom: '15px' }}>Materials for {selectedStudyMaterialCourse.title}</h3>
+                  <div style={{ padding: '15px', background: '#f0f9ff', borderRadius: '10px', border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>picture_as_pdf</span>
+                    <div>
+                      <h4 style={{ margin: 0 }}>pdf 1</h4>
+                      <p style={{ margin: 0, fontSize: '0.875rem', color: '#0369a1' }}>will be uploaded soon</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <p style={{ color: '#64748b', marginBottom: '10px' }}>Select a course to view its study materials:</p>
+                  {uniqueTaughtCourses.map(course => (
+                    <div
+                      key={course.id}
+                      onClick={() => setSelectedStudyMaterialCourse(course)}
+                      style={{ padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{course.title}</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#94a3b8' }}>chevron_right</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <MessageModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+      />
     </div>
   )
 }
