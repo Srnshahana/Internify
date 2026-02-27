@@ -599,6 +599,7 @@ export default function LandingPage({
   const careerGuidanceTrackRef = useRef(null)
   const [roadmapStep, setRoadmapStep] = useState(0)
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false)
+  const [aboutSlideIndex, setAboutSlideIndex] = useState(0)
 
   const roadmapContainerRef = useRef(null)
 
@@ -916,68 +917,7 @@ export default function LandingPage({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Slider State
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-
-  const aboutSlides = [
-    {
-      title: "Who We Are",
-      text: "Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience. We are a community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent.",
-      image: backgroundImg
-    },
-    {
-      title: "What We Do",
-      text: "We provide personalized guidance, hands-on projects, verified certificates, and opportunities to connect with top mentors and recruiters. Our platform empowers students and early-career professionals to build practical skills and launch their careers with confidence.",
-      image: backgroundImg
-    },
-    {
-      title: "Who We're For",
-      text: "Whether you're a student looking for your first break, a career switcher seeking new opportunities, or a lifelong learner aiming to upskill, Internify is built for you. We support ambitious individuals ready to take charge of their professional journey.",
-      image: backgroundImg
-    }
-  ];
-
-  // Auto-slide Effect
-  useEffect(() => {
-    if (isDragging) return; // Pause auto-slide while dragging
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % aboutSlides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [aboutSlides.length, isDragging]);
-
-  // Drag/Swipe Handlers
-  const handleDragStart = (e) => {
-    setIsDragging(true);
-    setStartX(e.type.includes('mouse') ? e.pageX : e.touches[0].clientX);
-    setDragOffset(0);
-  };
-
-  const handleDragMove = (e) => {
-    if (!isDragging) return;
-    const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-    const diff = currentX - startX;
-    setDragOffset(diff);
-  };
-
-  const handleDragEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-
-    // Snap to slide if drag distance is significant
-    if (Math.abs(dragOffset) > 50) {
-      if (dragOffset > 0 && currentSlide > 0) {
-        setCurrentSlide(currentSlide - 1);
-      } else if (dragOffset < 0 && currentSlide < aboutSlides.length - 1) {
-        setCurrentSlide(currentSlide + 1);
-      }
-    }
-    setDragOffset(0);
-  };
+  // Simplified About Us Section
 
   return (
     <div className="landing-page-new font-sans">
@@ -997,53 +937,42 @@ export default function LandingPage({
 
       <main className="landing-main-content">
         <section className="hero-section-v3" id="search">
-
-          <div className="hero-dark-card" style={{ position: 'relative', overflow: 'hidden' }}>
-            <video
-              ref={videoRef}
-              className="hero-video-bg"
-              onCanPlay={() => {
-                if (videoRef.current) {
-                  videoRef.current.play().catch(console.error);
-                }
-              }}
-              autoPlay
-              loop
-              muted
-              playsInline
-              controls={false}
-              style={{
+          <div className="hero-neu-card">
+            <div className="hero-video-frame">
+              <video
+                ref={videoRef}
+                className="hero-video-bg"
+                onCanPlay={() => {
+                  if (videoRef.current) {
+                    videoRef.current.play().catch(console.error);
+                  }
+                }}
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls={false}
+              >
+                <source src={heroVideo} type="video/mp4" />
+              </video>
+              <div className="hero-video-overlay" style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
-                zIndex: 0,
-                opacity: 0.6 // Adjust opacity to match previous dark overlay feel
-              }}
-            >
-              <source src={heroVideo} type="video/mp4" />
-            </video>
+                background: 'rgba(224, 229, 236, 0.4)', /* Soft light overlay */
+                zIndex: 1
+              }}></div>
+            </div>
 
-            {/* Overlay to ensure text readability if video is bright */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'rgba(0,0,0,0.5)',
-              zIndex: 1
-            }}></div>
-
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Stept</h1>
+            <div style={{ position: 'relative', zIndex: 10 }}>
+              <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Step</h1>
               <p className="hero-subtitle-v3 reveal reveal-right">
                 A career mentorship ecosystem that connects students with experienced mentors to provide clarity, direction, and real-world guidance.
               </p>
 
-              <div className="hero-search-v3">
+              <div className="hero-search-v3 reveal reveal-up stagger-3">
                 <input
                   type="text"
                   placeholder="Search mentors , skills ..."
@@ -1057,35 +986,19 @@ export default function LandingPage({
                 </span>
               </div>
 
-              <div className="hero-actions-v3">
+              <div className="hero-actions-v3 reveal reveal-up stagger-4">
                 <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
                   View Courses
                   <span className="material-symbols-outlined icon-right">arrow_forward</span>
                 </button>
                 <button className="btn-v3-outline">Let's Talk</button>
               </div>
-
-              {/* <div className="hero-stats-row-v3">
-                <div className="stat-item-v3">
-                  <span className="stat-val-v3">3500+</span>
-                  <span className="stat-lbl-v3">Students</span>
-                </div>
-                <div className="stat-divider-v3"></div>
-                <div className="stat-item-v3">
-                  <span className="stat-val-v3">500+</span>
-                  <span className="stat-lbl-v3">Mentors</span>
-                </div>
-                <div className="stat-divider-v3"></div>
-                <div className="stat-item-v3">
-                  <span className="stat-val-v3">1200+</span>
-                  <span className="stat-lbl-v3">Hired</span>
-                </div>
-              </div> */}
             </div>
           </div>
         </section>
 
         <section className="featured-programs-section landing-section" id="courses">
+          <div className="neu-texture-overlay"></div>
 
           <img src={settingsImg} alt="" className="bg-deco-settings" />
           <div className="featured-header reveal reveal-down">
@@ -1108,8 +1021,10 @@ export default function LandingPage({
           <div className="featured-grid">
             {featuredPrograms.map((program, index) => (
               <div key={program.id} className={`program-card reveal reveal-up stagger-${(index % 3) + 1}`}>
-                <img src={program.image} alt={program.title} className="program-bg" />
-                <div className="program-overlay"></div>
+                <div className="program-card-image-wrapper">
+                  <img src={program.image} alt={program.title} className="program-bg" />
+                  <div className="program-overlay"></div>
+                </div>
                 <div className="program-content">
                   <div className="program-top-meta">
                     <span className="program-category">{program.growthStat}</span>
@@ -1122,18 +1037,12 @@ export default function LandingPage({
         </section>
 
 
-        <section
-          className="mission-section landing-section"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${image1})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed'
-          }}
-        >
+        <section className="mission-section landing-section">
+          <div className="neu-texture-overlay"></div>
+
           {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> Removed as requested */}
           <img src={shadowImg} alt="" className="bg-deco-shadow top-right" />
-          <div className="mission-centered-header reveal reveal-pop">
+          <div className="mission-centered-header">
             <h2 className="section-title-v3">What’s Holding You Back</h2>
             <p className="mission-subtitle-v3">
               Every early-career professional faces the struggle of having no clear direction. Without
@@ -1142,7 +1051,7 @@ export default function LandingPage({
           </div>
 
           <div className="mission-problems-grid">
-            <div className="problem-card-v3 reveal reveal-slow reveal-right stagger-slow-1">
+            <div className="problem-card-v3">
               <div className="problem-icon-v3">
                 <span className="material-symbols-outlined icon-large-blue">laptop_mac</span>
               </div>
@@ -1153,7 +1062,7 @@ export default function LandingPage({
               </p>
             </div>
 
-            <div className="problem-card-v3 reveal reveal-slow reveal-up stagger-slow-2">
+            <div className="problem-card-v3">
               <div className="problem-icon-v3">
                 <span className="material-symbols-outlined icon-large-blue">person</span>
               </div>
@@ -1164,7 +1073,7 @@ export default function LandingPage({
               </p>
             </div>
 
-            <div className="problem-card-v3 reveal reveal-slow reveal-left stagger-slow-3">
+            <div className="problem-card-v3">
               <div className="problem-icon-v3">
                 <span className="material-symbols-outlined icon-large-blue">design_services</span>
               </div>
@@ -1179,53 +1088,88 @@ export default function LandingPage({
         </section>
 
         <section className="about-us-section landing-section">
-          <img src={worldMapImg} alt="World Map" className="about-bg-image" />
-          <div className="about-overlay"></div>
+          <div className="neu-texture-overlay"></div>
+          <div className="neu-wavy-texture"></div>
 
-          <div className="about-carousel-container-v3 reveal reveal-pop">
-            <h2 className="about-title-v3">About Us</h2>
+          {/* Background Blobs */}
+          <div className="about-bg-blobs">
+            <div className="neu-blob blob-1"></div>
+            <div className="neu-blob blob-2"></div>
+            <div className="neu-blob blob-3"></div>
+          </div>
+
+          <div className="about-vessel-container">
+            <div className="about-title-vessel">About Us</div>
+
+            <p className="about-intro-text">
+              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience.
+            </p>
 
             <div
-              className={`about-carousel-track-v3 ${isDragging ? 'dragging' : ''}`}
-              style={{
-                transform: `translateX(calc(-${currentSlide * 100}% + ${dragOffset}px))`,
-                transition: isDragging ? 'none' : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
+              className="about-scroll-vessel"
+              onScroll={({ target }) => {
+                const scrollLeft = target.scrollLeft;
+                const width = target.clientWidth;
+                const index = Math.round(scrollLeft / width);
+                setAboutSlideIndex(index);
               }}
-              onMouseDown={handleDragStart}
-              onMouseMove={handleDragMove}
-              onMouseUp={handleDragEnd}
-              onMouseLeave={handleDragEnd}
-              onTouchStart={handleDragStart}
-              onTouchMove={handleDragMove}
-              onTouchEnd={handleDragEnd}
             >
-              {aboutSlides.map((slide, index) => (
-                <div key={index} className="about-slide-v3">
-                  <h3 className="about-slide-title-v3">{slide.title}</h3>
-                  <p className="about-slide-text-v3">{slide.text}</p>
+              <div className="about-features-vessel-list">
+                <div className="about-feature-item-vessel">
+                  <h3 className="about-feature-title">Who We Are</h3>
+                  <p className="about-feature-desc">
+                    A community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent.
+                  </p>
                 </div>
-              ))}
+
+                <div className="about-feature-item-vessel">
+                  <h3 className="about-feature-title">What We Do</h3>
+                  <p className="about-feature-desc">
+                    We provide personalized guidance, hands-on projects, and verified certificates to build practical skills.
+                  </p>
+                </div>
+
+                <div className="about-feature-item-vessel">
+                  <h3 className="about-feature-title">Who We're For</h3>
+                  <p className="about-feature-desc">
+                    Ambitious students, career switchers, and lifelong learners ready to take charge of their professional journey.
+                  </p>
+                </div>
+
+                <div className="about-feature-item-vessel">
+                  <h3 className="about-feature-title">Our Vision</h3>
+                  <p className="about-feature-desc">
+                    To create a world where every learner has access to the mentorship they need to reach their full potential.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="about-dots-v3">
-              {aboutSlides.map((_, index) => (
-                <span
-                  key={index}
-                  className={`dot-v3 ${index === currentSlide ? 'active' : ''}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
+            <div className="about-vessel-dots">
+              {[0, 1, 2, 3].map((idx) => (
+                <div
+                  key={idx}
+                  className={`vessel-dot ${aboutSlideIndex === idx ? 'active' : ''}`}
+                  onClick={() => {
+                    const vessel = document.querySelector('.about-scroll-vessel');
+                    if (vessel) {
+                      vessel.scrollTo({
+                        left: idx * vessel.clientWidth,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                ></div>
               ))}
             </div>
           </div>
-
         </section>
 
 
         <section className="offer-section landing-section">
-          <img src={settingsImg} alt="" className="bg-deco-settings" />
-          <img src={shadowImg} alt="" className="bg-deco-shadow top-left" />
-          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-right" />
-          <div className="offer-header reveal reveal-pop">
+          <div className="neu-texture-overlay"></div>
+
+          <div className="offer-header">
             <h2 className="section-title-v3">What we offer</h2>
             <p className="offer-subtitle">
               Our goal is to equip you with the skills, guidance, and connections to launch<br />
@@ -1235,7 +1179,7 @@ export default function LandingPage({
 
           <div className="offer-grid">
             {/* Card 1 */}
-            <div className="offer-card reveal reveal-backflip stagger-1">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">lightbulb</span>
               <span className="offer-number">01</span>
               <h3 className="offer-card-title">1-on-1 Mentorship</h3>
@@ -1245,7 +1189,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 2 */}
-            <div className="offer-card reveal reveal-backflip stagger-2">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">edit_square</span>
               <span className="offer-number">02</span>
               <h3 className="offer-card-title">Real-World Projects</h3>
@@ -1255,7 +1199,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 3 */}
-            <div className="offer-card reveal reveal-backflip stagger-3">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">verified</span>
               <span className="offer-number">03</span>
               <h3 className="offer-card-title">Verified Certificates</h3>
@@ -1265,7 +1209,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 4 */}
-            <div className="offer-card reveal reveal-backflip stagger-4">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">computer</span>
               <span className="offer-number">04</span>
               <h3 className="offer-card-title">Referral Letters</h3>
@@ -1275,7 +1219,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 5 */}
-            <div className="offer-card reveal reveal-backflip stagger-5">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">description</span>
               <span className="offer-number">05</span>
               <h3 className="offer-card-title">Career Guidance & Interview Prep</h3>
@@ -1285,7 +1229,7 @@ export default function LandingPage({
             </div>
 
             {/* Card 6 */}
-            <div className="offer-card reveal reveal-backflip stagger-6">
+            <div className="offer-card">
               <span className="material-symbols-outlined offer-icon-blue">forum</span>
               <span className="offer-number">06</span>
               <h3 className="offer-card-title">Recruitments & Opportunities</h3>
@@ -1297,8 +1241,10 @@ export default function LandingPage({
         </section>
 
         <section className="mentors-section landing-section" id="mentors">
+          <div className="neu-texture-overlay"></div>
 
-          <div className="mentors-header reveal reveal-left">
+
+          <div className="mentors-header">
             <div className="mentors-text-content">
               <h2 className="section-title-start">Professional Mentors</h2>
               <div className="title-underline-blue"></div>
@@ -1357,7 +1303,7 @@ export default function LandingPage({
                 skills: ["React", "GraphQL", "Web"]
               }
             ].map((mentor, index) => (
-              <div key={mentor.id} className={`mentor-card-compact reveal reveal-up stagger-${(index % 4) + 1}`}>
+              <div key={mentor.id} className="mentor-card-compact">
                 <div className="mentor-image-container">
                   <img src={mentor.image} alt={mentor.name} className="mentor-image" />
                 </div>
@@ -1385,19 +1331,16 @@ export default function LandingPage({
 
         {/* New Get Hired & Mentor Section */}
         {/* New Get Hired & Mentor Section */}
-        <section
-          className="get-hired-section landing-section reveal reveal-slow reveal-up"
-          style={{
-            backgroundImage: `url(${image1})`
-          }}
-        >
+        <section className="get-hired-section landing-section">
+          <div className="neu-texture-overlay"></div>
+
           {/* <img src={searchVectorImg} alt="" className="bg-deco-search-vector" /> */}
           <div className="section-header-v3">
             <h2 className="section-title-v3">Career Growth Opportunities</h2>
             <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
           </div>
           <div className="get-hired-grid">
-            <div className="feature-card reveal reveal-backflip stagger-1">
+            <div className="feature-card">
               <div className="feature-icon-wrapper icon-hired">
                 <span className="material-symbols-outlined">rocket_launch</span>
               </div>
@@ -1408,7 +1351,7 @@ export default function LandingPage({
               <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
             </div>
 
-            <div className="feature-card reveal reveal-backflip stagger-2">
+            <div className="feature-card">
               <div className="feature-icon-wrapper icon-mentor">
                 <span className="material-symbols-outlined">school</span>
               </div>
@@ -1446,38 +1389,53 @@ export default function LandingPage({
 
 
 
-        <section className="unified-footer-frame landing-section landing-section-v2 reveal" id="testimonials">
+        <section className="unified-footer-frame landing-section landing-section-v2" id="testimonials">
+          <div className="neu-texture-overlay"></div>
+
 
 
 
 
           {/* Success Stories Component */}
-          <div className="mentors-header reveal reveal-story-pop">
-            <div className="mentors-text-content">
-              <h2 className="section-title-start">Success <span>Stories</span></h2>
-              <div className="title-underline-blue"></div>
-              <p className="mentors-desc">
-                Hear from our community of learners who have transformed their careers.<br />
-                Their journeys from beginners to professionals inspire everything we do.
-              </p>
-            </div>
+          <div className="neu-section-header">
+            <div className="neu-section-tag">Success Stories</div>
+            <h2 className="neu-section-title">Hear From Our Community</h2>
+            <p className="neu-section-desc">
+              Real stories from people who transformed their careers through
+              meaningful mentorship.
+            </p>
           </div>
+
           <div className="success-stories-grid">
             {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
-              <div key={story.id} className={`testimonial-card reveal reveal-flip-up stagger-${(idx % 3) + 1}`}>
-                <div className="testimonial-header">
-                  <img src={story.mentorImage} alt={story.mentorName} className="testimonial-avatar" />
-                  <div className="testimonial-meta">
-                    <span className="testimonial-name">{story.mentorName}</span>
-                    <span className="testimonial-role">{story.mentorRole}</span>
+              <div key={story.id} className="neu-story-card-wrapper">
+                <div className="neu-story-card">
+                  <div className="neu-quote-circle">
+                    <span className="material-symbols-outlined">format_quote</span>
+                  </div>
+
+                  <div className="neu-story-rating">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined icon-filled">star</span>
+                    ))}
+                  </div>
+
+                  <p className="neu-story-quote-txt">"{story.quote}"</p>
+
+                  <div className="neu-story-divider"></div>
+
+                  <div className="neu-story-footer">
+                    <div className="neu-story-avatar-group">
+                      <div className="neu-story-avatar-neu">
+                        <img src={story.mentorImage} alt={story.mentorName} />
+                      </div>
+                    </div>
+                    <div className="neu-footer-info">
+                      <span className="neu-footer-name">{story.mentorName}</span>
+                      <span className="neu-footer-role">{story.mentorRole}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="testimonial-rating">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="material-symbols-outlined icon-filled">star</span>
-                  ))}
-                </div>
-                <p className="testimonial-quote">"{story.quote}"</p>
               </div>
             ))}
           </div>
@@ -1488,68 +1446,74 @@ export default function LandingPage({
 
       <footer className="footer-v2">
         <div className="footer-container-v2">
-          <div className="footer-top-v2">
-            <div className="footer-brand-col">
-              <div className="footer-logo-group">
-                <div className="footer-logo-sq">I</div>
-                <h2 className="footer-logo-txt">Internify</h2>
+          <div className="neumorphic-footer-card">
+            <div className="footer-top-v2">
+              <div className="footer-brand-col">
+                <div className="footer-logo-group">
+                  <div className="footer-logo-outer">
+                    <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>auto_awesome</span>
+                  </div>
+                  <h2 className="footer-logo-txt">Internify</h2>
+                </div>
+                <p className="footer-brand-desc">
+                  Empowering growth through meaningful mentorship connections worldwide.
+                  Helping students find clarity and launch careers.
+                </p>
+                <div className="footer-social-neu">
+                  <button className="neu-social-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </button>
+                  <button className="neu-social-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.98 0 1.778-.773 1.778-1.729V1.729C24 .774 23.205 0 22.225 0z" />
+                    </svg>
+                  </button>
+                  <button className="neu-social-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <p className="footer-brand-desc">
-                Helping students find clarity, build skills, and launch careers<br />
-                with the guidance of experienced mentors.
-              </p>
-              <div className="footer-contact-inline">
-                <input type="email" placeholder="Get in touch (your email)" className="footer-mini-input" />
-                <button className="footer-mini-btn" onClick={() => showModal('Success', 'Your message has been sent!', 'success')}>
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
+              <div className="footer-links-row">
+                <div className="footer-links-col">
+                  <h4>Platform</h4>
+                  <ul className="footer-links-list">
+                    <li onClick={() => navigate('/explore')}>Find a Mentor</li>
+                    <li onClick={() => navigate('/mentors')}>Become a Mentor</li>
+                    <li onClick={() => navigate('/explore')}>Browse Topics</li>
+                    <li onClick={() => navigate('/explore')}>Pricing</li>
+                  </ul>
+                </div>
+                <div className="footer-links-col">
+                  <h4>Company</h4>
+                  <ul className="footer-links-list">
+                    <li>About Us</li>
+                    <li>Careers</li>
+                    <li>Blog</li>
+                    <li>Press</li>
+                  </ul>
+                </div>
+                <div className="footer-links-col">
+                  <h4>Support</h4>
+                  <ul className="footer-links-list">
+                    <li>Help Center</li>
+                    <li>Contact</li>
+                    <li>Privacy Policy</li>
+                    <li>Terms</li>
+                  </ul>
+                </div>
               </div>
             </div>
-            <div className="footer-links-row">
-              <div className="footer-links-col">
-                <h4 className="footer-links-title">Product</h4>
-                <ul className="footer-links-list">
-                  <li onClick={() => navigate('/explore')}>Features</li>
-                  <li onClick={() => navigate('/mentors')}>Mentors</li>
-                  <li onClick={() => navigate('/explore')}>Pricing</li>
-                  <li onClick={() => navigate('/explore')}>Success Stories</li>
-                </ul>
-              </div>
-              <div className="footer-links-col">
-                <h4 className="footer-links-title">Company</h4>
-                <ul className="footer-links-list">
-                  <li>About Us</li>
-                  <li>Careers</li>
-                  <li>Blog</li>
-                  <li>Press</li>
-                </ul>
-              </div>
-              <div className="footer-links-col">
-                <h4 className="footer-links-title">Support</h4>
-                <ul className="footer-links-list">
-                  <li>Help Center</li>
-                  <li>Contact</li>
-                  <li>Privacy Policy</li>
-                  <li>Terms</li>
-                </ul>
-              </div>
-              <div className="footer-links-col">
-                <h4 className="footer-links-title">Community</h4>
-                <ul className="footer-links-list">
-                  <li>Discord</li>
-                  <li>Twitter</li>
-                  <li>LinkedIn</li>
-                  <li>Instagram</li>
-                </ul>
-              </div>
+
+            <div className="neu-footer-divider"></div>
+
+            <div className="footer-bottom-neu">
+              <p className="footer-copy-neu">© 2026 Internify. All rights reserved.</p>
+              <p className="footer-made-neu">Made with <span>❤</span> for mentors and mentees everywhere</p>
             </div>
-          </div>
-
-          <div className="footer-divider"></div>
-
-          <div className="footer-bottom-v2">
-            <p className="footer-copy">© 2026 Internify. All rights reserved.</p>
-            <p className="footer-made">Made with <span style={{ color: '#ef4444' }}>❤</span> for students everywhere</p>
           </div>
         </div>
       </footer>
