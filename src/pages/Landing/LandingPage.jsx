@@ -39,8 +39,7 @@ import aiCourseImg from '../../assets/images/ai.jpg'
 import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
 import worldMapImg from '../../assets/images/worldmap.jpg'
-
-// Map courses to skills format
+// Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
   {
@@ -223,6 +222,16 @@ const careerGuidanceTestimonials = [
     mentorRole: 'Marketing Strategist @ Spotify',
     quote: 'The weekly sessions kept me accountable and motivated. My advisor\'s feedback on my career path was invaluable in improving my approach.',
     studentName: 'Sophia Martinez',
+    studentRating: 5,
+    bgColor: 'sky'
+  },
+  {
+    id: 5,
+    mentorImage: testimonial3,
+    mentorName: 'Ryan Foster',
+    mentorRole: 'Software Engineer @ Meta',
+    quote: 'Internify gave me structured guidance that transformed my coding interviews. I went from constant rejections to landing offers at top tech companies.',
+    studentName: 'Ryan Foster',
     studentRating: 5,
     bgColor: 'sky'
   }
@@ -1014,7 +1023,7 @@ export default function LandingPage({
           <div className="neu-texture-overlay"></div>
 
           <img src={settingsImg} alt="" className="bg-deco-settings" />
-          <div className="featured-header reveal reveal-down">
+          <div className="featured-header">
             <div className="featured-text-group">
               <h2 className="section-title-start">Featured Courses</h2>
               <div className="title-underline-blue"></div>
@@ -1033,7 +1042,7 @@ export default function LandingPage({
 
           <div className="featured-grid">
             {featuredPrograms.map((program, index) => (
-              <div key={program.id} className={`program-card reveal reveal-up stagger-${(index % 3) + 1}`}>
+              <div key={program.id} className="program-card">
                 <div className="program-card-image-wrapper">
                   <img src={program.image} alt={program.title} className="program-bg" />
                   <div className="program-overlay"></div>
@@ -1050,7 +1059,7 @@ export default function LandingPage({
         </section>
 
 
-        <section className="mission-section landing-section reveal reveal-pop" id="mission">
+        <section className="mission-section landing-section" id="mission">
           <div className="mission-bg-pattern">
             <div className="pattern-dots-right"></div>
           </div>
@@ -1136,114 +1145,143 @@ export default function LandingPage({
         </section>
         <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
 
-        <section className="about-us-section landing-section">
-          <div className="neu-texture-overlay"></div>
-          <section className="about-premium-section" id="about">
-            <div className="premium-side-text">
-              THIS IS FULLY EDITABLE LANDING PAGE
+        <section className="about-premium-section" id="about">
+
+          {/* Background blobs */}
+          <div className="premium-bg-elements">
+            <div className="premium-blob blob-1"></div>
+            <div className="premium-blob blob-2"></div>
+          </div>
+
+          {/* CAREERS ghost watermark — vertical, right side */}
+          <div className="premium-shape-3d-wrapper">
+            <div className="premium-a-container">
+              <h1 className="premium-a-text">CAREERS</h1>
             </div>
+          </div>
 
-            <div className="premium-bg-elements">
-              <div className="premium-blob blob-1"></div>
-              <div className="premium-blob blob-2"></div>
-              <div className="premium-shape-3d">A</div>
-            </div>
+          <div className="premium-about-container">
+            {/* Left Content Side */}
+            <div className="premium-about-left">
+              <h2 className="premium-about-title">
+                About<span>.</span>Us
+              </h2>
+              <p className="premium-about-subtitle">your brand game</p>
 
-            <div className="premium-about-container">
-              {/* Left Content Side */}
-              <div className="premium-about-left">
-                <h2 className="premium-about-title">
-                  Re<span>.</span>vamp
-                </h2>
-                <p className="premium-about-subtitle">your career game</p>
+              <p className="premium-description">
+                Internify helps you transform your professional journey with precision-guided
+                mentorship and industry-standard training modules. Level up your skills
+                with a platform designed for the modern ambitious talent.
+              </p>
 
-                <div className="premium-about-slider">
-                  <div className="premium-slider-content">
-                    <p className="premium-description">
-                      {aboutFeatures[aboutSlideIndex].desc}
-                    </p>
-                  </div>
-                  <div className="premium-slider-nav">
-                    {aboutFeatures.map((_, idx) => (
-                      <span
-                        key={idx}
-                        className={`premium-nav-dot ${aboutSlideIndex === idx ? 'active' : ''}`}
-                        onClick={() => setAboutSlideIndex(idx)}
-                      ></span>
-                    ))}
-                  </div>
-                </div>
-
-                <button className="premium-contact-btn">
-                  Contact us
-                </button>
-
-                <div className="premium-files-hint">
-                  <span className="hint-label">FILES:</span>
-                  <div className="hint-icons">
-                    <div className="hint-icon-box">Ps</div>
-                    <div className="hint-icon-box">Bl</div>
-                    <div className="hint-icon-box">Jpg</div>
-                  </div>
-                </div>
+              <div className="premium-slider-nav">
+                <div className="premium-nav-dot active"></div>
+                <div className="premium-nav-dot"></div>
+                <div className="premium-nav-dot"></div>
               </div>
 
-              {/* Right Decorative Side */}
-              <div className="premium-about-right">
-                {/* Grid Module */}
-                <div className="floating-module grid-module">
-                  <div className="grid-overlay"></div>
-                  <div className="grid-points">
-                    <span className="point tl"><span className="p-icon"></span></span>
-                    <span className="point tr"><span className="p-icon"></span></span>
-                  </div>
-                  <div className="grid-center-icon">
-                    <span className="material-symbols-outlined">zoom_out_map</span>
-                  </div>
-                  <div className="grid-bottom-line">
-                    <span className="point bl"></span>
-                    <span className="point br"></span>
-                  </div>
-                </div>
+              <button className="premium-contact-btn">
+                Contact us
+              </button>
 
-                {/* Text Editor Module */}
-                <div className="floating-module controllers-module">
-                  <div className="controls-header">
-                    <span className="c-icon">T</span>
-                    <span className="c-icon italic">T</span>
-                    <span className="c-icon bold">T</span>
-                    <span className="c-icon">%</span>
-                  </div>
-                  <div className="controls-body">
-                    <p className="skeleton-text-hint">Write something...</p>
-                    <div className="skeleton-block"></div>
-                  </div>
-                </div>
-
-                {/* Sliders Module */}
-                <div className="floating-module sliders-module">
-                  <div className="slider-item">
-                    <span className="slider-label">Hue:</span>
-                    <div className="slider-track"><div className="slider-thumb" style={{ left: '70%' }}></div></div>
-                  </div>
-                  <div className="slider-item">
-                    <span className="slider-label">Brightness:</span>
-                    <div className="slider-track"><div className="slider-thumb" style={{ left: '40%' }}></div></div>
-                  </div>
-                  <div className="slider-item">
-                    <span className="slider-label">Saturation:</span>
-                    <div className="slider-track"><div className="slider-thumb" style={{ left: '90%' }}></div></div>
-                  </div>
-                </div>
-
-                {/* Color Palette Module */}
-                <div className="floating-module color-palette-module">
-                  <div className="palette-gradient"></div>
-                  <div className="palette-picker"></div>
+              <div className="premium-files-hint">
+                <span className="hint-label">FILES:</span>
+                <div className="hint-icons">
+                  <div className="hint-icon-box ps-box">Ps</div>
+                  <div className="hint-icon-box li-box">in</div>
+                  <div className="hint-icon-box ai-box">Ai</div>
+                  <div className="hint-icon-box jpg-box">JPG</div>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Right Decorative Side - Career Themed */}
+            <div className="premium-about-right">
+
+              {/* Module 1: LinkedIn Profile Card */}
+              <div className="floating-module career-linkedin-module">
+                <div className="li-header">
+                  <div className="li-avatar">
+                    <span className="material-symbols-outlined">person</span>
+                  </div>
+                  <div className="li-info">
+                    <p className="li-name">Sarah Johnson</p>
+                    <p className="li-title">Product Designer → hired</p>
+                  </div>
+                  <div className="li-badge">
+                    <span className="material-symbols-outlined">verified</span>
+                  </div>
+                </div>
+                <div className="li-stats">
+                  <div className="li-stat"><span className="li-num">420</span><span className="li-lbl">connections</span></div>
+                  <div className="li-divider"></div>
+                  <div className="li-stat"><span className="li-num">18</span><span className="li-lbl">interviews</span></div>
+                  <div className="li-divider"></div>
+                  <div className="li-stat"><span className="li-num">3</span><span className="li-lbl">offers</span></div>
+                </div>
+              </div>
+
+              {/* Module 2: Resume Score */}
+              <div className="floating-module career-resume-module">
+                <div className="resume-header">
+                  <span className="material-symbols-outlined resume-icon">description</span>
+                  <span className="resume-title">Resume Score</span>
+                </div>
+                <div className="resume-score-ring">
+                  <svg viewBox="0 0 60 60" className="score-svg">
+                    <circle cx="30" cy="30" r="24" className="ring-bg" />
+                    <circle cx="30" cy="30" r="24" className="ring-fill" strokeDasharray="108 43" />
+                  </svg>
+                  <span className="score-number">87</span>
+                </div>
+                <div className="resume-tags">
+                  <span className="r-tag good">Keywords ✓</span>
+                  <span className="r-tag good">ATS-ready ✓</span>
+                  <span className="r-tag warn">Portfolio</span>
+                </div>
+              </div>
+
+              {/* Module 3: Career Match card — mid left */}
+              <div className="floating-module career-match-module">
+                <div className="cm-badge-ribbon">CAREER MATCH</div>
+                <div className="cm-top">
+                  <span className="material-symbols-outlined cm-star">star</span>
+                  <span className="cm-label">CAREER MATCH</span>
+                </div>
+                <p className="cm-role">UX DESIGNER</p>
+                <div className="cm-bar-wrap">
+                  <div className="cm-bar-fill" style={{ width: '90%' }}></div>
+                </div>
+                <p className="cm-pct">90% match</p>
+              </div>
+
+              {/* Module 4: Skills Progress — bottom right */}
+              <div className="floating-module career-skills-module">
+                <p className="skills-title">TOP SKILLS PROGRESS</p>
+                <div className="skill-row">
+                  <span className="skill-name">UX Research</span>
+                  <div className="skill-bar"><div className="skill-fill" style={{ width: '90%' }}></div></div>
+                  <span className="skill-pct">90%</span>
+                </div>
+                <div className="skill-row">
+                  <span className="skill-name">Figma</span>
+                  <div className="skill-bar"><div className="skill-fill" style={{ width: '75%' }}></div></div>
+                  <span className="skill-pct">75%</span>
+                </div>
+                <div className="skill-row">
+                  <span className="skill-name">Leadership</span>
+                  <div className="skill-bar"><div className="skill-fill blue" style={{ width: '60%' }}></div></div>
+                  <span className="skill-pct">60%</span>
+                </div>
+              </div>
+
+              {/* Module 5: Color wheel — bottom center */}
+              <div className="floating-module career-wheel-module">
+                <div className="color-wheel-circle"></div>
+              </div>
+
+            </div>
+          </div>
         </section>
 
 
@@ -1420,7 +1458,7 @@ export default function LandingPage({
             <div className="growth-deco-text-v5">GROWTH</div>
 
             <div className="growth-deco-elements">
-              {/* 3 Gears as in reference */}
+              {/* 5 Gears as in reference */}
               <div className="deco-gear gg-1">
                 <span className="material-symbols-outlined">settings</span>
               </div>
@@ -1430,11 +1468,26 @@ export default function LandingPage({
               <div className="deco-gear gg-3">
                 <span className="material-symbols-outlined">settings</span>
               </div>
+              <div className="deco-gear gg-4">
+                <span className="material-symbols-outlined">settings</span>
+              </div>
+              <div className="deco-gear gg-5">
+                <span className="material-symbols-outlined">settings</span>
+              </div>
 
               {/* Decorative Squares / Blocks */}
               <div className="deco-square gs-1"></div>
               <div className="deco-square gs-2"></div>
               <div className="deco-square gs-3"></div>
+              <div className="deco-square gs-4"></div>
+              <div className="deco-square gs-5"></div>
+              <div className="deco-square gs-6"></div>
+
+              {/* Small Decorative Boxes */}
+              <div className="gs-box gs-box-1"></div>
+              <div className="gs-box gs-box-2"></div>
+              <div className="gs-box gs-box-3"></div>
+              <div className="gs-box gs-box-4"></div>
 
               {/* Skeleton UI (Top-Right and Bottom-Left) */}
               <div className="growth-skeleton-group sk-top-right">
@@ -1474,7 +1527,7 @@ export default function LandingPage({
                 <div className="metric-neu">
                   <span className="material-symbols-outlined">trending_up</span>
                   <div className="metric-info">
-                    <span className="m-label">Trending</span>
+                    <span className="m-label">Growth</span>
                     <span className="m-val">+24%</span>
                   </div>
                 </div>
@@ -1553,38 +1606,76 @@ export default function LandingPage({
             </p>
           </div>
 
-          <div className="success-stories-grid">
-            {careerGuidanceTestimonials.slice(0, 3).map((story, idx) => (
-              <div key={story.id} className="neu-story-card-wrapper">
-                <div className="neu-story-card">
-                  <div className="neu-quote-circle">
-                    <span className="material-symbols-outlined">format_quote</span>
-                  </div>
+          <div className="ref-testimonials-grid">
+            {careerGuidanceTestimonials.map((story, idx) => {
+              // Blue shades: deep → sky → mid → pale → indigo → cyan
+              const accentGradients = [
+                'linear-gradient(135deg, #1e40af, #3b82f6)',
+                'linear-gradient(135deg, #0369a1, #0ea5e9)',
+                'linear-gradient(135deg, #1d4ed8, #60a5fa)',
+                'linear-gradient(135deg, #0284c7, #38bdf8)',
+                'linear-gradient(135deg, #1e3a8a, #2563eb)',
+                'linear-gradient(135deg, #075985, #0ea5e9)',
+              ]
+              const accentColors = ['#3b82f6', '#0ea5e9', '#60a5fa', '#38bdf8', '#2563eb', '#06b6d4']
+              const numbers = ['01', '02', '03', '04', '05', '06']
+              const isEven = idx % 2 === 1  // even index → cap at bottom
 
-                  <div className="neu-story-rating">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="material-symbols-outlined icon-filled">star</span>
-                    ))}
-                  </div>
+              return (
+                <div
+                  key={story.id}
+                  className={`ref-card-wrapper ${isEven ? 'ref-card-lower' : 'ref-card-raised'}`}
+                >
+                  <div className="ref-neu-card">
 
-                  <p className="neu-story-quote-txt">"{story.quote}"</p>
+                    {/* TOP cap — only for odd cards (01, 03) */}
+                    {!isEven && (
+                      <div className="ref-cap ref-cap-top" style={{ background: accentGradients[idx] }} />
+                    )}
 
-                  <div className="neu-story-divider"></div>
+                    <div className="ref-card-body">
+                      {/* Large light-gray number */}
+                      <span className="ref-card-number">{numbers[idx]}</span>
 
-                  <div className="neu-story-footer">
-                    <div className="neu-story-avatar-group">
-                      <div className="neu-story-avatar-neu">
-                        <img src={story.mentorImage} alt={story.mentorName} />
+                      {/* Colored mentor name label */}
+                      <p className="ref-card-label" style={{ color: accentColors[idx] }}>
+                        {story.mentorName}
+                      </p>
+
+                      {/* Dotted rule in accent color */}
+                      <div className="ref-card-rule" style={{ borderColor: accentColors[idx] }} />
+
+                      {/* Stars */}
+                      <div className="ref-card-stars">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className="material-symbols-outlined icon-filled ref-star">star</span>
+                        ))}
+                      </div>
+
+                      {/* Quote text */}
+                      <p className="ref-card-quote">{story.quote}</p>
+
+                      {/* Avatar footer */}
+                      <div className="ref-card-footer">
+                        <div className="ref-card-avatar">
+                          <img src={story.mentorImage} alt={story.mentorName} />
+                        </div>
+                        <div>
+                          <p className="ref-card-footer-name">{story.mentorName}</p>
+                          <p className="ref-card-footer-role">{story.mentorRole}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="neu-footer-info">
-                      <span className="neu-footer-name">{story.mentorName}</span>
-                      <span className="neu-footer-role">{story.mentorRole}</span>
-                    </div>
+
+                    {/* BOTTOM cap — only for even cards (02, 04) */}
+                    {isEven && (
+                      <div className="ref-cap ref-cap-bottom" style={{ background: accentGradients[idx] }} />
+                    )}
+
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
 
