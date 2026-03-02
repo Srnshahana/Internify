@@ -575,6 +575,21 @@ export default function LandingPage({
   const mentorTrackRef = useRef(null)
   const skillsTrackRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [aboutSlideIndex, setAboutSlideIndex] = useState(0)
+  const aboutFeatures = [
+    {
+      title: "Who We Are",
+      desc: "Internify is a premiere mentorship platform bridging the gap between academic learning and high-stakes industry performance through expert-led guidance."
+    },
+    {
+      title: "Our Mission",
+      desc: "We empower the next generation of digital builders by providing a structured ecosystem of real-world projects, verified certifications, and elite networking."
+    },
+    {
+      title: "Our Vision",
+      desc: "To create a global standard for professional excellence where every ambitious learner has a direct, frictionless path to their dream career."
+    }
+  ]
   const [trackSet, setTrackSet] = useState(0)
   useEffect(() => {
     const interval = setInterval(() => {
@@ -599,7 +614,6 @@ export default function LandingPage({
   const careerGuidanceTrackRef = useRef(null)
   const [roadmapStep, setRoadmapStep] = useState(0)
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false)
-  const [aboutSlideIndex, setAboutSlideIndex] = useState(0)
 
   const roadmapContainerRef = useRef(null)
 
@@ -937,61 +951,60 @@ export default function LandingPage({
 
       <main className="landing-main-content">
         <section className="hero-section-v3" id="search">
-          <div className="hero-neu-card">
-            <div className="hero-video-frame">
-              <video
-                ref={videoRef}
-                className="hero-video-bg"
-                onCanPlay={() => {
-                  if (videoRef.current) {
-                    videoRef.current.play().catch(console.error);
-                  }
-                }}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls={false}
-              >
-                <source src={heroVideo} type="video/mp4" />
-              </video>
-              <div className="hero-video-overlay" style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(224, 229, 236, 0.4)', /* Soft light overlay */
-                zIndex: 1
-              }}></div>
+          {/* Floating 3D Decoration for Glass look */}
+          <div className="glass-decoration-elements">
+            <div className="floating-sphere sphere-1"></div>
+            <div className="floating-sphere sphere-2"></div>
+            <div className="floating-sphere sphere-3"></div>
+            <div className="floating-sphere sphere-4"></div>
+            {/* Metallic 3D Rings (Torus) */}
+            <div className="glass-ring ring-1"></div>
+            <div className="glass-ring ring-2"></div>
+            <div className="glass-ring ring-3"></div>
+          </div>
+
+          <div className="hero-glass-card">
+            {/* Browser Mockup Header */}
+            <div className="browser-header">
+              <div className="browser-controls">
+                <span className="dot red"></span>
+                <span className="dot yellow"></span>
+                <span className="dot green"></span>
+              </div>
+              <div className="browser-address-bar">
+                <span>www.internify.com</span>
+              </div>
+              <div className="browser-spacer"></div>
             </div>
 
-            <div style={{ position: 'relative', zIndex: 10 }}>
-              <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Step</h1>
-              <p className="hero-subtitle-v3 reveal reveal-right">
-                A career mentorship ecosystem that connects students with experienced mentors to provide clarity, direction, and real-world guidance.
-              </p>
+            <div className="hero-content-wrapper">
+              <div style={{ position: 'relative', zIndex: 10 }}>
+                <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Step</h1>
+                <p className="hero-subtitle-v3 reveal reveal-right">
+                  A career mentorship ecosystem that connects students with experienced mentors to provide clarity, direction, and real-world guidance.
+                </p>
 
-              <div className="hero-search-v3 reveal reveal-up stagger-3">
-                <input
-                  type="text"
-                  placeholder="Search mentors , skills ..."
-                  className="hero-input-v3"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <span className="search-icon-v3" onClick={handleSearch} style={{ cursor: 'pointer' }}>
-                  <span className="material-symbols-outlined">search</span>
-                </span>
-              </div>
+                <div className="hero-search-v3 reveal reveal-up stagger-3">
+                  <input
+                    type="text"
+                    placeholder="Search mentors , skills ..."
+                    className="hero-input-v3"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <span className="search-icon-v3" onClick={handleSearch} style={{ cursor: 'pointer' }}>
+                    <span className="material-symbols-outlined">search</span>
+                  </span>
+                </div>
 
-              <div className="hero-actions-v3 reveal reveal-up stagger-4">
-                <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
-                  View Courses
-                  <span className="material-symbols-outlined icon-right">arrow_forward</span>
-                </button>
-                <button className="btn-v3-outline">Let's Talk</button>
+                <div className="hero-actions-v3 reveal reveal-up stagger-4">
+                  <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
+                    View Courses
+                    <span className="material-symbols-outlined icon-right">arrow_forward</span>
+                  </button>
+                  <button className="btn-v3-outline">Let's Talk</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1037,132 +1050,200 @@ export default function LandingPage({
         </section>
 
 
-        <section className="mission-section landing-section">
+        <section className="mission-section landing-section reveal reveal-pop" id="mission">
+          <div className="mission-bg-pattern">
+            <div className="pattern-dots-right"></div>
+          </div>
+
           <div className="neu-texture-overlay"></div>
 
-          {/* <img src={settingsImg} alt="" className="bg-deco-settings" /> Removed as requested */}
-          <img src={shadowImg} alt="" className="bg-deco-shadow top-right" />
-          <div className="mission-centered-header">
-            <h2 className="section-title-v3">What’s Holding You Back</h2>
-            <p className="mission-subtitle-v3">
-              Every early-career professional faces the struggle of having no clear direction. Without
-              guidance, it’s easy to feel lost, overwhelmed, and unsure of the next steps.
-            </p>
+          {/* Background Blobs for Vibrance */}
+          <div className="mission-bg-blobs">
+            <div className="mission-blob blob-1"></div>
+            <div className="mission-blob blob-2"></div>
           </div>
 
-          <div className="mission-problems-grid">
-            <div className="problem-card-v3">
-              <div className="problem-icon-v3">
-                <span className="material-symbols-outlined icon-large-blue">laptop_mac</span>
+          <div className="mission-composition">
+            {/* Background Decorative Elements */}
+            <div className="mission-deco-text-v4">CHALLENGES</div>
+
+            <div className="inspo-deco-elements">
+              <div className="deco-square ds-1"></div>
+              <div className="deco-square ds-2"></div>
+              <div className="deco-square ds-3"></div>
+              <div className="deco-gear dg-1">
+                <span className="material-symbols-outlined">settings</span>
               </div>
-              <h3 className="problem-title-v3">No Real-World Experience ?</h3>
-              <p className="problem-text-v3">
-                You’ve learned a lot in theory, but when applying it, there’s a big gap
-                between what you know and what the real world expects
-              </p>
+              <div className="deco-gear dg-2">
+                <span className="material-symbols-outlined">settings</span>
+              </div>
             </div>
 
-            <div className="problem-card-v3">
-              <div className="problem-icon-v3">
-                <span className="material-symbols-outlined icon-large-blue">person</span>
+            {/* 3 Central Neumorphic Devices */}
+            <div className="mission-device-grid">
+              {/* Card 1: Experience */}
+              <div className="mission-device">
+                <div className="device-inner">
+                  <div className="device-header-pill"></div>
+                  <div className="mission-text-content-v4">
+                    <span className="mission-tag-v4">CHALLENGE 01</span>
+                    <h2 className="mission-title-v4">EXPERIENCE</h2>
+                    <div className="mission-divider"></div>
+                    <p className="mission-desc-v4">
+                      You’ve learned theory, but there’s a gap between what you know and what the real world expects.
+                    </p>
+                    <button className="device-btn">SOLVE NOW</button>
+                  </div>
+                  <div className="device-home-button"></div>
+                </div>
               </div>
-              <h3 className="problem-title-v3">No Internship Opportunities ?</h3>
-              <p className="problem-text-v3">
-                You’re ready to work, but opportunities are scarce, and doors close before you
-                can show your potential
-              </p>
-            </div>
 
-            <div className="problem-card-v3">
-              <div className="problem-icon-v3">
-                <span className="material-symbols-outlined icon-large-blue">design_services</span>
+              {/* Card 2: Opportunities */}
+              <div className="mission-device">
+                <div className="device-inner">
+                  <div className="device-header-pill"></div>
+                  <div className="mission-text-content-v4">
+                    <span className="mission-tag-v4">CHALLENGE 02</span>
+                    <h2 className="mission-title-v4">OPPORTUNITIES</h2>
+                    <div className="mission-divider"></div>
+                    <p className="mission-desc-v4">
+                      You’re ready to work, but opportunities are scarce, and doors close before you can show potential.
+                    </p>
+                    <button className="device-btn">OPEN DOORS</button>
+                  </div>
+                  <div className="device-home-button"></div>
+                </div>
               </div>
-              <h3 className="problem-title-v3">Unprepared for Job Market ?</h3>
-              <p className="problem-text-v3">
-                You dream of starting your career, but without guidance or a strong portfolio,
-                the path feels uncertain.
-              </p>
+
+              {/* Card 3: Readiness */}
+              <div className="mission-device">
+                <div className="device-inner">
+                  <div className="device-header-pill"></div>
+                  <div className="mission-text-content-v4">
+                    <span className="mission-tag-v4">CHALLENGE 03</span>
+                    <h2 className="mission-title-v4">READINESS</h2>
+                    <div className="mission-divider"></div>
+                    <p className="mission-desc-v4">
+                      Corporate world demands more than skills; it requires professionalism, confidence, and network.
+                    </p>
+                    <button className="device-btn">GET READY</button>
+                  </div>
+                  <div className="device-home-button"></div>
+                </div>
+              </div>
             </div>
           </div>
-          <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
         </section>
+        <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
 
         <section className="about-us-section landing-section">
           <div className="neu-texture-overlay"></div>
-          <div className="neu-wavy-texture"></div>
+          <section className="about-premium-section" id="about">
+            <div className="premium-side-text">
+              THIS IS FULLY EDITABLE LANDING PAGE
+            </div>
 
-          {/* Background Blobs */}
-          <div className="about-bg-blobs">
-            <div className="neu-blob blob-1"></div>
-            <div className="neu-blob blob-2"></div>
-            <div className="neu-blob blob-3"></div>
-          </div>
+            <div className="premium-bg-elements">
+              <div className="premium-blob blob-1"></div>
+              <div className="premium-blob blob-2"></div>
+              <div className="premium-shape-3d">A</div>
+            </div>
 
-          <div className="about-vessel-container">
-            <div className="about-title-vessel">About Us</div>
+            <div className="premium-about-container">
+              {/* Left Content Side */}
+              <div className="premium-about-left">
+                <h2 className="premium-about-title">
+                  Re<span>.</span>vamp
+                </h2>
+                <p className="premium-about-subtitle">your career game</p>
 
-            <p className="about-intro-text">
-              Internify is a mentorship and internship platform that bridges the gap between learning and real-world experience.
-            </p>
-
-            <div
-              className="about-scroll-vessel"
-              onScroll={({ target }) => {
-                const scrollLeft = target.scrollLeft;
-                const width = target.clientWidth;
-                const index = Math.round(scrollLeft / width);
-                setAboutSlideIndex(index);
-              }}
-            >
-              <div className="about-features-vessel-list">
-                <div className="about-feature-item-vessel">
-                  <h3 className="about-feature-title">Who We Are</h3>
-                  <p className="about-feature-desc">
-                    A community of innovators, educators, and industry leaders dedicated to shaping the future of tech talent.
-                  </p>
+                <div className="premium-about-slider">
+                  <div className="premium-slider-content">
+                    <p className="premium-description">
+                      {aboutFeatures[aboutSlideIndex].desc}
+                    </p>
+                  </div>
+                  <div className="premium-slider-nav">
+                    {aboutFeatures.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`premium-nav-dot ${aboutSlideIndex === idx ? 'active' : ''}`}
+                        onClick={() => setAboutSlideIndex(idx)}
+                      ></span>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="about-feature-item-vessel">
-                  <h3 className="about-feature-title">What We Do</h3>
-                  <p className="about-feature-desc">
-                    We provide personalized guidance, hands-on projects, and verified certificates to build practical skills.
-                  </p>
+                <button className="premium-contact-btn">
+                  Contact us
+                </button>
+
+                <div className="premium-files-hint">
+                  <span className="hint-label">FILES:</span>
+                  <div className="hint-icons">
+                    <div className="hint-icon-box">Ps</div>
+                    <div className="hint-icon-box">Bl</div>
+                    <div className="hint-icon-box">Jpg</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Decorative Side */}
+              <div className="premium-about-right">
+                {/* Grid Module */}
+                <div className="floating-module grid-module">
+                  <div className="grid-overlay"></div>
+                  <div className="grid-points">
+                    <span className="point tl"><span className="p-icon"></span></span>
+                    <span className="point tr"><span className="p-icon"></span></span>
+                  </div>
+                  <div className="grid-center-icon">
+                    <span className="material-symbols-outlined">zoom_out_map</span>
+                  </div>
+                  <div className="grid-bottom-line">
+                    <span className="point bl"></span>
+                    <span className="point br"></span>
+                  </div>
                 </div>
 
-                <div className="about-feature-item-vessel">
-                  <h3 className="about-feature-title">Who We're For</h3>
-                  <p className="about-feature-desc">
-                    Ambitious students, career switchers, and lifelong learners ready to take charge of their professional journey.
-                  </p>
+                {/* Text Editor Module */}
+                <div className="floating-module controllers-module">
+                  <div className="controls-header">
+                    <span className="c-icon">T</span>
+                    <span className="c-icon italic">T</span>
+                    <span className="c-icon bold">T</span>
+                    <span className="c-icon">%</span>
+                  </div>
+                  <div className="controls-body">
+                    <p className="skeleton-text-hint">Write something...</p>
+                    <div className="skeleton-block"></div>
+                  </div>
                 </div>
 
-                <div className="about-feature-item-vessel">
-                  <h3 className="about-feature-title">Our Vision</h3>
-                  <p className="about-feature-desc">
-                    To create a world where every learner has access to the mentorship they need to reach their full potential.
-                  </p>
+                {/* Sliders Module */}
+                <div className="floating-module sliders-module">
+                  <div className="slider-item">
+                    <span className="slider-label">Hue:</span>
+                    <div className="slider-track"><div className="slider-thumb" style={{ left: '70%' }}></div></div>
+                  </div>
+                  <div className="slider-item">
+                    <span className="slider-label">Brightness:</span>
+                    <div className="slider-track"><div className="slider-thumb" style={{ left: '40%' }}></div></div>
+                  </div>
+                  <div className="slider-item">
+                    <span className="slider-label">Saturation:</span>
+                    <div className="slider-track"><div className="slider-thumb" style={{ left: '90%' }}></div></div>
+                  </div>
+                </div>
+
+                {/* Color Palette Module */}
+                <div className="floating-module color-palette-module">
+                  <div className="palette-gradient"></div>
+                  <div className="palette-picker"></div>
                 </div>
               </div>
             </div>
-
-            <div className="about-vessel-dots">
-              {[0, 1, 2, 3].map((idx) => (
-                <div
-                  key={idx}
-                  className={`vessel-dot ${aboutSlideIndex === idx ? 'active' : ''}`}
-                  onClick={() => {
-                    const vessel = document.querySelector('.about-scroll-vessel');
-                    if (vessel) {
-                      vessel.scrollTo({
-                        left: idx * vessel.clientWidth,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }}
-                ></div>
-              ))}
-            </div>
-          </div>
+          </section>
         </section>
 
 
@@ -1334,32 +1415,98 @@ export default function LandingPage({
         <section className="get-hired-section landing-section">
           <div className="neu-texture-overlay"></div>
 
-          {/* <img src={searchVectorImg} alt="" className="bg-deco-search-vector" /> */}
-          <div className="section-header-v3">
-            <h2 className="section-title-v3">Career Growth Opportunities</h2>
-            <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
-          </div>
-          <div className="get-hired-grid">
-            <div className="feature-card">
-              <div className="feature-icon-wrapper icon-hired">
-                <span className="material-symbols-outlined">rocket_launch</span>
+          <div className="growth-composition">
+            {/* Background Decorative Elements */}
+            <div className="growth-deco-text-v5">GROWTH</div>
+
+            <div className="growth-deco-elements">
+              {/* 3 Gears as in reference */}
+              <div className="deco-gear gg-1">
+                <span className="material-symbols-outlined">settings</span>
               </div>
-              <h3 className="feature-title">Get Hired Instantly</h3>
-              <p className="feature-desc">
-                Join our exclusive placement program and get direct referrals to top tech firms. Fast-track your career with our network.
-              </p>
-              <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
+              <div className="deco-gear gg-2">
+                <span className="material-symbols-outlined">settings</span>
+              </div>
+              <div className="deco-gear gg-3">
+                <span className="material-symbols-outlined">settings</span>
+              </div>
+
+              {/* Decorative Squares / Blocks */}
+              <div className="deco-square gs-1"></div>
+              <div className="deco-square gs-2"></div>
+              <div className="deco-square gs-3"></div>
+
+              {/* Skeleton UI (Top-Right and Bottom-Left) */}
+              <div className="growth-skeleton-group sk-top-right">
+                <div className="sk-line"></div>
+                <div className="sk-line"></div>
+                <div className="sk-line"></div>
+              </div>
+
+              <div className="growth-skeleton-group sk-bottom-left">
+                <div className="sk-line"></div>
+                <div className="sk-line"></div>
+                <div className="sk-line"></div>
+              </div>
+
+              {/* Dot Indicators Column (Matches Image Far Right) */}
+              <div className="growth-dots-col">
+                <div className="g-dot"></div>
+                <div className="g-dot"></div>
+                <div className="g-dot active"></div>
+                <div className="g-dot"></div>
+                <div className="g-dot"></div>
+              </div>
+
+              {/* Single Central Blue Dot (Matches Image) */}
+              <div className="growth-single-dot"></div>
+
+              {/* Decorative Spark (Matches Image Bottom Right) */}
+              <div className="growth-spark-deco">
+                <span className="material-symbols-outlined">auto_awesome</span>
+              </div>
+
+              {/* Central Device Shape (Translucent Backdrop) */}
+              <div className="growth-device-backdrop"></div>
+
+              {/* Only 1 Metric: TRENDING (Top-Left of Card) */}
+              <div className="growth-metric m-trending">
+                <div className="metric-neu">
+                  <span className="material-symbols-outlined">trending_up</span>
+                  <div className="metric-info">
+                    <span className="m-label">Trending</span>
+                    <span className="m-val">+24%</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="feature-card">
-              <div className="feature-icon-wrapper icon-mentor">
-                <span className="material-symbols-outlined">school</span>
+            <div className="section-header-v3">
+              <h2 className="section-title-v3">Career Growth Opportunities</h2>
+              <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
+            </div>
+            <div className="get-hired-grid">
+              <div className="feature-card">
+                <div className="feature-icon-wrapper icon-hired">
+                  <span className="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <h3 className="feature-title">Get Hired Instantly</h3>
+                <p className="feature-desc">
+                  Join our exclusive placement program and get direct referrals to top tech firms. Fast-track your career with our network.
+                </p>
+                <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
               </div>
-              <h3 className="feature-title">Become a Mentor</h3>
-              <p className="feature-desc">
-                Share your expertise, guide aspiring developers, and shape the future of tech. Join our community of industry leaders.
-              </p>
-              <button className="feature-btn btn-mentor" onClick={() => navigate('/mentors')}>Start Mentoring</button>
+
+              <div className="feature-card">
+                <div className="feature-icon-wrapper icon-mentor">
+                  <span className="material-symbols-outlined">school</span>
+                </div>
+                <h3 className="feature-title">Become a Mentor</h3>
+                <p className="feature-desc">
+                  Share your expertise, guide aspiring developers, and shape the future of tech. Join our community of industry leaders.
+                </p>
+                <button className="feature-btn btn-mentor" onClick={() => navigate('/mentors')}>Start Mentoring</button>
+              </div>
             </div>
           </div>
         </section>
