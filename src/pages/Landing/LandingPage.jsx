@@ -1059,90 +1059,7 @@ export default function LandingPage({
         </section>
 
 
-        <section className="mission-section landing-section" id="mission">
-          <div className="mission-bg-pattern">
-            <div className="pattern-dots-right"></div>
-          </div>
 
-          <div className="neu-texture-overlay"></div>
-
-          {/* Background Blobs for Vibrance */}
-          <div className="mission-bg-blobs">
-            <div className="mission-blob blob-1"></div>
-            <div className="mission-blob blob-2"></div>
-          </div>
-
-          <div className="mission-composition">
-            {/* Background Decorative Elements */}
-            <div className="mission-deco-text-v4">CHALLENGES</div>
-
-            <div className="inspo-deco-elements">
-              <div className="deco-square ds-1"></div>
-              <div className="deco-square ds-2"></div>
-              <div className="deco-square ds-3"></div>
-              <div className="deco-gear dg-1">
-                <span className="material-symbols-outlined">settings</span>
-              </div>
-              <div className="deco-gear dg-2">
-                <span className="material-symbols-outlined">settings</span>
-              </div>
-            </div>
-
-            {/* 3 Central Neumorphic Devices */}
-            <div className="mission-device-grid">
-              {/* Card 1: Experience */}
-              <div className="mission-device">
-                <div className="device-inner">
-                  <div className="device-header-pill"></div>
-                  <div className="mission-text-content-v4">
-                    <span className="mission-tag-v4">CHALLENGE 01</span>
-                    <h2 className="mission-title-v4">EXPERIENCE</h2>
-                    <div className="mission-divider"></div>
-                    <p className="mission-desc-v4">
-                      You’ve learned theory, but there’s a gap between what you know and what the real world expects.
-                    </p>
-                    <button className="device-btn">SOLVE NOW</button>
-                  </div>
-                  <div className="device-home-button"></div>
-                </div>
-              </div>
-
-              {/* Card 2: Opportunities */}
-              <div className="mission-device">
-                <div className="device-inner">
-                  <div className="device-header-pill"></div>
-                  <div className="mission-text-content-v4">
-                    <span className="mission-tag-v4">CHALLENGE 02</span>
-                    <h2 className="mission-title-v4">OPPORTUNITIES</h2>
-                    <div className="mission-divider"></div>
-                    <p className="mission-desc-v4">
-                      You’re ready to work, but opportunities are scarce, and doors close before you can show potential.
-                    </p>
-                    <button className="device-btn">OPEN DOORS</button>
-                  </div>
-                  <div className="device-home-button"></div>
-                </div>
-              </div>
-
-              {/* Card 3: Readiness */}
-              <div className="mission-device">
-                <div className="device-inner">
-                  <div className="device-header-pill"></div>
-                  <div className="mission-text-content-v4">
-                    <span className="mission-tag-v4">CHALLENGE 03</span>
-                    <h2 className="mission-title-v4">READINESS</h2>
-                    <div className="mission-divider"></div>
-                    <p className="mission-desc-v4">
-                      Corporate world demands more than skills; it requires professionalism, confidence, and network.
-                    </p>
-                    <button className="device-btn">GET READY</button>
-                  </div>
-                  <div className="device-home-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
         <img src={shadowImg} alt="" className="bg-deco-shadow bottom-left" />
 
         <section className="about-premium-section" id="about">
@@ -1285,81 +1202,249 @@ export default function LandingPage({
         </section>
 
 
-        <section className="offer-section landing-section">
-          <div className="neu-texture-overlay"></div>
 
-          <div className="offer-header">
-            <h2 className="section-title-v3">What we offer</h2>
-            <p className="offer-subtitle">
-              Our goal is to equip you with the skills, guidance, and connections to launch<br />
-              your career."
-            </p>
+
+        <section className="mission-section landing-section" id="mission">
+          <div className="neu-texture-overlay"></div>
+          <div className="mission-bg-blobs">
+            <div className="mission-blob blob-1"></div>
+            <div className="mission-blob blob-2"></div>
+            <div className="mission-blob blob-3"></div>
           </div>
 
-          <div className="offer-grid">
-            {/* Card 1 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">lightbulb</span>
-              <span className="offer-number">01</span>
-              <h3 className="offer-card-title">1-on-1 Mentorship</h3>
-              <p className="offer-card-text">
-                Personalized guidance from industry experts to help you navigate your career path.
+          <div className="mission-composition">
+            {/* Big watermark text */}
+            <div className="mission-deco-text-v4">GROWTH</div>
+
+
+            {/* Section label above cards */}
+            <div className="growth-section-header">
+              <span className="growth-section-tag">CAREER GROWTH</span>
+              <h2 className="growth-section-title">
+                Your Path to <span className="growth-title-accent">Career Success</span>
+              </h2>
+              <p className="growth-section-sub">
+                Three opportunity pillars that take you from where you are to where you want to be.
               </p>
             </div>
 
-            {/* Card 2 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">edit_square</span>
-              <span className="offer-number">02</span>
-              <h3 className="offer-card-title">Real-World Projects</h3>
-              <p className="offer-card-text">
-                Hands-on projects that build practical skills and strengthen your portfolio.
-              </p>
+            {/* 3 Neumorphic Growth Cards */}
+            <div className="mission-device-grid">
+
+              {/* Card 1 — blue */}
+              <div className="mission-device growth-card-1">
+                <div className="gc-icon-wrap">
+                  <span className="material-symbols-outlined">workspace_premium</span>
+                </div>
+                <h3 className="gc-title">EXPERIENCE</h3>
+                <p className="gc-desc">
+                  Gain real hands-on experience through guided internships and live projects that bridge theory and industry practice.
+                </p>
+                <div className="gc-bottom-tab"></div>
+              </div>
+
+              {/* Card 2 — pink */}
+              <div className="mission-device growth-card-2">
+                <div className="gc-icon-wrap">
+                  <span className="material-symbols-outlined">hub</span>
+                </div>
+                <h3 className="gc-title">NETWORK</h3>
+                <p className="gc-desc">
+                  Unlock access to curated job opportunities, recruiters, and an ever-growing community of professionals ready to sponsor your growth.
+                </p>
+                <div className="gc-bottom-tab"></div>
+              </div>
+
+              {/* Card 3 — teal */}
+              <div className="mission-device growth-card-3">
+                <div className="gc-icon-wrap">
+                  <span className="material-symbols-outlined">military_tech</span>
+                </div>
+                <h3 className="gc-title">READINESS</h3>
+                <p className="gc-desc">
+                  Sharpen interview skills, build a standout portfolio, and acquire the professionalism and confidence every recruiter looks for.
+                </p>
+                <div className="gc-bottom-tab"></div>
+              </div>
+
             </div>
 
-            {/* Card 3 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">verified</span>
-              <span className="offer-number">03</span>
-              <h3 className="offer-card-title">Verified Certificates</h3>
-              <p className="offer-card-text">
-                Skill-backed certificates to showcase your achievements to employers.
-              </p>
-            </div>
-
-            {/* Card 4 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">computer</span>
-              <span className="offer-number">04</span>
-              <h3 className="offer-card-title">Referral Letters</h3>
-              <p className="offer-card-text">
-                Mentor-issued recommendations to support internship and job applications.
-              </p>
-            </div>
-
-            {/* Card 5 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">description</span>
-              <span className="offer-number">05</span>
-              <h3 className="offer-card-title">Career Guidance & Interview Prep</h3>
-              <p className="offer-card-text">
-                Resume reviews, mock interviews, and advice aligned with recruiter expectations.
-              </p>
-            </div>
-
-            {/* Card 6 */}
-            <div className="offer-card">
-              <span className="material-symbols-outlined offer-icon-blue">forum</span>
-              <span className="offer-number">06</span>
-              <h3 className="offer-card-title">Recruitments & Opportunities</h3>
-              <p className="offer-card-text">
-                Connect with top companies and apply for internships and entry-level roles.
-              </p>
-            </div>
           </div>
         </section>
 
+
+
+
+
+
+        <section className="offer-section landing-section">
+          <div className="neu-texture-overlay"></div>
+          <div className="offer-bg-blobs">
+            <div className="offer-blob ob-1"></div>
+            <div className="offer-blob ob-2"></div>
+            <div className="offer-blob ob-3"></div>
+          </div>
+
+          {/* Header */}
+          <div className="offer-header">
+            <span className="offer-tag-pill">WHAT WE OFFER</span>
+            <h2 className="offer-title">
+              Everything You Need to <br />
+              <span className="offer-title-accent">Launch Your Career</span>
+            </h2>
+            <p className="offer-subtitle">
+              From mentorship to placement — every tool, connection, and
+              certification to take you from learner to professional.
+            </p>
+          </div>
+
+          {/* ── Flow block 1: items 01, 02, 03 ── */}
+          <div className="offer-flow-block">
+
+            {/* SVG S-curve connector — blue→purple→pink */}
+            <svg
+              className="offer-flow-svg"
+              viewBox="0 0 900 180"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="ofg1" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#2563eb" />
+                  <stop offset="50%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+                <marker id="arr1" markerWidth="10" markerHeight="8"
+                  refX="9" refY="4" orient="auto">
+                  <polygon points="0 0, 10 4, 0 8" fill="#ec4899" />
+                </marker>
+              </defs>
+              {/* S-curve: arc over C1, dip under to C2, arc up to C3 */}
+              <path
+                d="M 70,90 C 70,0 230,0 230,90 C 230,180 370,180 450,90 C 530,0 670,0 750,60"
+                stroke="url(#ofg1)"
+                strokeWidth="2.5"
+                fill="none"
+                strokeLinecap="round"
+                markerEnd="url(#arr1)"
+              />
+            </svg>
+
+            {/* Item 01 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-solid-blue">
+                <span className="material-symbols-outlined">lightbulb</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-blue">OFFER 01</span>
+                <h3 className="offer-flow-title">1-on-1 Mentorship</h3>
+                <p className="offer-flow-desc">Personalized guidance from industry experts to navigate your career path with confidence.</p>
+              </div>
+            </div>
+
+            {/* Item 02 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-dash-purple">
+                <span className="material-symbols-outlined">edit_square</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-purple">OFFER 02</span>
+                <h3 className="offer-flow-title">Real-World Projects</h3>
+                <p className="offer-flow-desc">Hands-on projects that build practical skills and strengthen your professional portfolio.</p>
+              </div>
+            </div>
+
+            {/* Item 03 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-dash-pink">
+                <span className="material-symbols-outlined">verified</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-pink">OFFER 03</span>
+                <h3 className="offer-flow-title">Verified Certificates</h3>
+                <p className="offer-flow-desc">Skill-backed certificates recognised by employers — prove what you know.</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── Flow block 2: items 04, 05, 06 ── */}
+          <div className="offer-flow-block">
+
+            {/* SVG S-curve connector — cyan→blue→purple */}
+            <svg
+              className="offer-flow-svg"
+              viewBox="0 0 900 180"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="ofg2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#06b6d4" />
+                  <stop offset="50%" stopColor="#2563eb" />
+                  <stop offset="100%" stopColor="#7c3aed" />
+                </linearGradient>
+                <marker id="arr2" markerWidth="10" markerHeight="8"
+                  refX="9" refY="4" orient="auto">
+                  <polygon points="0 0, 10 4, 0 8" fill="#7c3aed" />
+                </marker>
+              </defs>
+              <path
+                d="M 70,90 C 70,0 230,0 230,90 C 230,180 370,180 450,90 C 530,0 670,0 750,60"
+                stroke="url(#ofg2)"
+                strokeWidth="2.5"
+                fill="none"
+                strokeLinecap="round"
+                markerEnd="url(#arr2)"
+              />
+            </svg>
+
+            {/* Item 04 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-solid-cyan">
+                <span className="material-symbols-outlined">forward_to_inbox</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-cyan">OFFER 04</span>
+                <h3 className="offer-flow-title">Referral Letters</h3>
+                <p className="offer-flow-desc">Mentor-issued recommendations that open doors to internships and entry-level roles.</p>
+              </div>
+            </div>
+
+            {/* Item 05 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-dash-blue">
+                <span className="material-symbols-outlined">record_voice_over</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-blue">OFFER 05</span>
+                <h3 className="offer-flow-title">Interview Prep</h3>
+                <p className="offer-flow-desc">Mock interviews and recruiter-aligned advice so you perform at your absolute best.</p>
+              </div>
+            </div>
+
+            {/* Item 06 */}
+            <div className="offer-flow-item">
+              <div className="offer-flow-circle ofc-ring-dash-purple">
+                <span className="material-symbols-outlined">hub</span>
+              </div>
+              <div className="offer-flow-info">
+                <span className="offer-flow-num ofn-purple">OFFER 06</span>
+                <h3 className="offer-flow-title">Recruitments & Network</h3>
+                <p className="offer-flow-desc">Connect with top companies and an ever-growing network of industry leaders.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
         <section className="mentors-section landing-section" id="mentors">
+
+
+
           <div className="neu-texture-overlay"></div>
 
 
@@ -1422,29 +1507,41 @@ export default function LandingPage({
                 skills: ["React", "GraphQL", "Web"]
               }
             ].map((mentor, index) => (
-              <div key={mentor.id} className="mentor-card-compact">
-                <div className="mentor-image-container">
-                  <img src={mentor.image} alt={mentor.name} className="mentor-image" />
+              <div key={mentor.id} className="mentor-card-premium">
+                {/* Top Area - Integrated Image + Status Bar */}
+                <div className="mentor-card-top">
+                  <div className="mentor-card-rating">
+                    <span className="material-symbols-outlined star-icon">star</span>
+                    {mentor.rating}.0
+                  </div>
+                  <img src={mentor.image} alt={mentor.name} className="mentor-card-img" />
+                  <div className="mentor-card-status-bar">
+                    {mentor.experience} Professional Experience
+                  </div>
                 </div>
-                <div className="mentor-info">
-                  <h3 className="mentor-name">{mentor.name}</h3>
-                  <div className="mentor-role-company">
-                    {mentor.role} <span className="text-highlight">@ {mentor.company}</span>
-                  </div>
-                  <div className="mentor-experience-text">
-                    {mentor.experience} Exp
-                  </div>
-                  <div className="mentor-rating-stars">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={`material-symbols-outlined ${i < Math.floor(mentor.rating) ? 'star-filled' : 'star-outline'}`}>
-                        star
-                      </span>
-                    ))}
+
+                {/* Body - Reorganized Content */}
+                <div className="mentor-card-body">
+                  <div className="mentor-card-header">
+                    <h3 className="mentor-card-name">{mentor.name}</h3>
+                    <a href={`/mentor/${mentor.id}`} className="mentor-card-link">
+                      View Profile <span className="material-symbols-outlined icon-small">north_east</span>
+                    </a>
                   </div>
 
+                  <div className="mentor-card-subtext">
+                    {mentor.role} <span className="text-accent">@ {mentor.company}</span>
+                  </div>
+
+                  <div className="mentor-card-skills">
+                    {mentor.skills.map((skill, si) => (
+                      <span key={si} className="mentor-skill-tag">{skill}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
+
           </div>
         </section>
 
