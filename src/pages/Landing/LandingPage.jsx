@@ -29,6 +29,7 @@ import supabase from '../../supabaseClient'
 import '../../App.css'
 import heroVideo from '../../assets/images/hero.mp4'
 import heroImg from '../../assets/images/hero.jpg'
+import worldmapImg from '../../assets/images/worldmap.jpg'
 import topProgram3 from '../../assets/images/topprogram3.jpg'
 import backgroundImg from '../../assets/images/background.png'
 import image1 from '../../assets/images/njk.jpg'
@@ -47,24 +48,44 @@ const featuredPrograms = [
     title: 'Artificial Intelligence & Machine Learning',
     category: 'Future Tech',
     growthStat: '7x job growth',
+    badge: 'Most Popular',
+    ribbon: 'Free access until 30/06/2026',
+    tags: ['Python', 'Neural Nets', 'ChatGPT', 'TensorFlow'],
     image: aiCourseImg,
-    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+    accentColor: '#5b8dee'
   },
   {
     id: 'fp-2',
-    title: 'Digital Marketing',
+    title: 'Digital Marketing & AI Strategy',
     category: 'AI Strategy',
     growthStat: '443% skill demand growth',
+    badge: 'Trending',
+    ribbon: 'Enroll before 15/05/2026',
+    tags: ['SEO', 'Analytics', 'Ad Campaigns', 'Content AI'],
     image: digitalMarketingImg,
-    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+    accentColor: '#e05fa0'
   },
   {
     id: 'fp-3',
     title: 'Ethical Hacking and Cyber Security',
     category: 'Digital Security',
     growthStat: '4M+ job shortage',
+    badge: 'High Demand',
+    ribbon: 'Limited seats — act fast',
+    tags: ['Penetration Testing', 'Linux', 'OSINT', 'Firewalls'],
     image: ethicalHackingImg,
-    overlayColor: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+    accentColor: '#2abfa3'
+  },
+  {
+    id: 'fp-4',
+    title: 'Data Science & Analytics',
+    category: 'Data Intelligence',
+    growthStat: '35% faster career growth',
+    badge: 'New',
+    ribbon: 'Batch starting 01/04/2026',
+    tags: ['SQL', 'Python', 'Tableau', 'Statistics'],
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+    accentColor: '#f59e42'
   }
 ]
 // Smart Careers for 2027 Data
@@ -959,60 +980,107 @@ export default function LandingPage({
       </nav>
 
       <main className="landing-main-content">
-        <section className="hero-section-v3" id="search">
-          {/* Floating 3D Decoration for Glass look */}
-          <div className="glass-decoration-elements">
-            <div className="floating-sphere sphere-1"></div>
-            <div className="floating-sphere sphere-2"></div>
-            <div className="floating-sphere sphere-3"></div>
-            <div className="floating-sphere sphere-4"></div>
-            {/* Metallic 3D Rings (Torus) */}
-            <div className="glass-ring ring-1"></div>
-            <div className="glass-ring ring-2"></div>
-            <div className="glass-ring ring-3"></div>
-          </div>
+        <section className="hero-section-neu" id="home">
+          <div className="neu-hero-container reveal reveal-up">
+            <div className="neu-hero-content">
+              <span className="neu-hero-label">INTERNIFY ECOSYSTEM</span>
+              <h1 className="neu-hero-title">
+                Grow Your Career <br />
+                <span>th Expert Mentors</span>
+              </h1>
+              <p className="neu-hero-subtitle">
+                {/* The global network for growth. Connecting students with
+                experienced mentors for direction and clarity. */}
+                A global network built for growth. We connect students with industry mentors who bring 5+ years of real-world experience, so you gain practical skills that truly prepare you for your career.
+              </p>
 
-          <div className="hero-glass-card">
-            {/* Browser Mockup Header */}
-            <div className="browser-header">
-              <div className="browser-controls">
-                <span className="dot red"></span>
-                <span className="dot yellow"></span>
-                <span className="dot green"></span>
-              </div>
-              <div className="browser-address-bar">
-                <span>www.internify.com</span>
-              </div>
-              <div className="browser-spacer"></div>
-            </div>
-
-            <div className="hero-content-wrapper">
-              <div style={{ position: 'relative', zIndex: 10 }}>
-                <h1 className="hero-title-v3 reveal reveal-left">Build Your Career Step by Step</h1>
-                <p className="hero-subtitle-v3 reveal reveal-right">
-                  A career mentorship ecosystem that connects students with experienced mentors to provide clarity, direction, and real-world guidance.
-                </p>
-
-                <div className="hero-search-v3 reveal reveal-up stagger-3">
+              {/* Neumorphic Search Bar */}
+              <div className="neu-search-container">
+                <div className="neu-search-box">
+                  <span className="material-symbols-outlined neu-search-icon">search</span>
                   <input
                     type="text"
-                    placeholder="Search mentors , skills ..."
-                    className="hero-input-v3"
+                    placeholder="Search mentors, skills, or topics..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="neu-search-input"
                   />
-                  <span className="search-icon-v3" onClick={handleSearch} style={{ cursor: 'pointer' }}>
-                    <span className="material-symbols-outlined">search</span>
-                  </span>
+                  <button className="neu-btn-search" onClick={handleSearch}>Search</button>
+                </div>
+              </div>
+
+              <div className="neu-hero-actions">
+                <button className="neu-btn-primary" onClick={() => navigate('/explore')}>
+                  Browse Mentors
+                </button>
+                <button className="neu-btn-secondary" onClick={() => setIsCourseModalOpen(true)}>
+                  Explore Courses
+                </button>
+              </div>
+            </div>
+
+            <div className="neu-hero-visual-v5">
+              <div className="neu-global-network">
+                {/* Neumorphic Embossed Map */}
+                <div className="neu-map-wrapper">
+                  <img src={worldmapImg} alt="World Map" className="neu-embossed-map" />
                 </div>
 
-                <div className="hero-actions-v3 reveal reveal-up stagger-4">
-                  <button className="btn-v3-primary" onClick={() => setIsCourseModalOpen(true)}>
-                    View Courses
-                    <span className="material-symbols-outlined icon-right">arrow_forward</span>
-                  </button>
-                  <button className="btn-v3-outline">Let's Talk</button>
+                {/* SVG lines — viewBox 0 0 100 100 = % space, preserveAspectRatio none to match container */}
+                <svg className="neu-connection-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {/* NA (20,44) → EU (43,39) */}
+                  <path d="M 20,44 Q 28,25 43,39" className="neu-line-path" />
+                  {/* EU (43,39) → AS (67,44) */}
+                  <path d="M 43,39 Q 55,58 67,44" className="neu-line-path" />
+                  {/* AS (67,44) → JP (80,33) */}
+                  <path d="M 67,44 Q 75,24 80,33" className="neu-line-path" />
+                  {/* EU (43,39) → SA (37,72) */}
+                  <path d="M 43,39 Q 40,60 37,72" className="neu-line-path" />
+                  {/* NA (20,44) → SA (37,72) */}
+                  <path d="M 20,44 Q 25,62 37,72" className="neu-line-path" />
+                  {/* AS (67,44) → SA (37,72) */}
+                  <path d="M 67,44 Q 55,65 37,72" className="neu-line-path" />
+                </svg>
+
+                {/* Glowing Nodes — % positions matching SVG coordinates */}
+                <div className="neu-glow-node" style={{ top: '44%', left: '20%' }}></div>  {/* NA */}
+                <div className="neu-glow-node" style={{ top: '39%', left: '43%' }}></div>  {/* EU */}
+                <div className="neu-glow-node" style={{ top: '44%', left: '67%' }}></div>  {/* AS */}
+                <div className="neu-glow-node" style={{ top: '33%', left: '80%' }}></div>  {/* JP */}
+                <div className="neu-glow-node" style={{ top: '72%', left: '37%' }}></div>  {/* SA */}
+
+                {/* Profile Cards — appear just above/beside corresponding node */}
+                <div className="neu-profile-card card-alex" style={{ top: '24%', left: '8%' }}>
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Alex C" className="avatar-small" />
+                  <div className="card-info">
+                    <span className="card-name">Alex C.</span>
+                    <span className="card-role">AI Engineer</span>
+                  </div>
+                </div>
+
+                <div className="neu-profile-card card-sarah" style={{ top: '52%', left: '35%' }}>
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Sarah K" className="avatar-small" />
+                  <div className="card-info">
+                    <span className="card-name">Sarah K.</span>
+                    <span className="card-role">Cybersecurity Expert</span>
+                  </div>
+                </div>
+
+                <div className="neu-profile-card card-kenji" style={{ top: '15%', left: '65%' }}>
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Kenji T" className="avatar-small" />
+                  <div className="card-info">
+                    <span className="card-name">Kenji T.</span>
+                    <span className="card-role">Data Scientist</span>
+                  </div>
+                </div>
+
+                <div className="neu-profile-card card-priya" style={{ top: '77%', left: '42%' }}>
+                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Priya S" className="avatar-small" />
+                  <div className="card-info">
+                    <span className="card-name">Priya S.</span>
+                    <span className="card-role">Product Manager</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1020,17 +1088,16 @@ export default function LandingPage({
         </section>
 
         <section className="featured-programs-section landing-section" id="courses">
-          <div className="neu-texture-overlay"></div>
 
-          <img src={settingsImg} alt="" className="bg-deco-settings" />
           <div className="featured-header">
             <div className="featured-text-group">
-              <h2 className="section-title-start">Featured Courses</h2>
-              <div className="title-underline-blue"></div>
-              <p className="featured-desc">
-                Explore the top courses built on skills that remain relevant <br />
-                for decades. Future-proof your career with knowledge that <br />
-                stands the test of time.
+              <span className="offer-tag-pill">CURATED COURSES</span>
+              <h2 className="offer-title">
+                Our <span className="offer-title-accent">Featured Courses</span>
+              </h2>
+              <p className="offer-subtitle">
+                Explore the top courses built on skills that remain relevant for decades.
+                Future-proof your career with knowledge that stands the test of time.
               </p>
             </div>
             <div className="view-all-container">
@@ -1040,19 +1107,34 @@ export default function LandingPage({
             </div>
           </div>
 
-          <div className="featured-grid">
-            {featuredPrograms.map((program, index) => (
-              <div key={program.id} className="program-card">
-                <div className="program-card-image-wrapper">
-                  <img src={program.image} alt={program.title} className="program-bg" />
-                  <div className="program-overlay"></div>
+          <div className="featured-grid-new">
+            {featuredPrograms.map((program) => (
+              <div key={program.id} className="fc-card">
+
+                {/* ── Top image block ── */}
+                <div className="fc-image-block" style={{ background: program.accentColor }}>
+                  <img src={program.image} alt={program.title} className="fc-img" />
+                  {/* Badge top-right */}
+                  <span className="fc-badge">{program.badge}</span>
+                  {/* Ribbon at bottom of image */}
+                  <div className="fc-ribbon">{program.ribbon}</div>
                 </div>
-                <div className="program-content">
-                  <div className="program-top-meta">
-                    <span className="program-category">{program.growthStat}</span>
+
+                {/* ── Bottom info block ── */}
+                <div className="fc-body">
+                  <div className="fc-title-row">
+                    <h3 className="fc-title">{program.title}</h3>
+                    <span className="fc-cta" onClick={() => navigate('/explore')}>
+                      Enroll Now ↗
+                    </span>
                   </div>
-                  <h3 className="program-title">{program.title}</h3>
+                  {/* <div className="fc-tags">
+                    {program.tags.map((tag) => (
+                      <span key={tag} className="fc-tag">{tag}</span>
+                    ))}
+                  </div> */}
                 </div>
+
               </div>
             ))}
           </div>
@@ -1221,7 +1303,7 @@ export default function LandingPage({
             <div className="growth-section-header">
               <span className="growth-section-tag">CAREER GROWTH</span>
               <h2 className="growth-section-title">
-                Your Path to <span className="growth-title-accent">Career Success</span>
+                What's Holding <span className="growth-title-accent"> You Back?</span>
               </h2>
               <p className="growth-section-sub">
                 Three opportunity pillars that take you from where you are to where you want to be.
@@ -1236,7 +1318,7 @@ export default function LandingPage({
                 <div className="gc-icon-wrap">
                   <span className="material-symbols-outlined">workspace_premium</span>
                 </div>
-                <h3 className="gc-title">EXPERIENCE</h3>
+                <h3 className="gc-title">No Real-World Experience ?</h3>
                 <p className="gc-desc">
                   Gain real hands-on experience through guided internships and live projects that bridge theory and industry practice.
                 </p>
@@ -1248,7 +1330,7 @@ export default function LandingPage({
                 <div className="gc-icon-wrap">
                   <span className="material-symbols-outlined">hub</span>
                 </div>
-                <h3 className="gc-title">NETWORK</h3>
+                <h3 className="gc-title">	No Internship Opportunities ?</h3>
                 <p className="gc-desc">
                   Unlock access to curated job opportunities, recruiters, and an ever-growing community of professionals ready to sponsor your growth.
                 </p>
@@ -1260,7 +1342,7 @@ export default function LandingPage({
                 <div className="gc-icon-wrap">
                   <span className="material-symbols-outlined">military_tech</span>
                 </div>
-                <h3 className="gc-title">READINESS</h3>
+                <h3 className="gc-title">Unprepared for Job Market ?</h3>
                 <p className="gc-desc">
                   Sharpen interview skills, build a standout portfolio, and acquire the professionalism and confidence every recruiter looks for.
                 </p>

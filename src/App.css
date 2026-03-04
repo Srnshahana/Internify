@@ -40592,10 +40592,8 @@ html {
 
 /* Featured Programs Section Styles - V3 */
 .featured-programs-section {
-  padding: clamp(6rem, 10vh, 10rem) 1.5rem !important;
-  /* Increased padding */
-  background: #cbdce6 !important;
-  /* Sync with Hero Icy Blue */
+  padding: clamp(3rem, 5vh, 4rem) 1.5rem !important;
+  background: #dfe5e9 !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -40603,24 +40601,173 @@ html {
   overflow: hidden !important;
 }
 
-.featured-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+/* ── Neumorphic Featured Course Cards ── */
+.featured-grid-new {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.6rem;
   width: 95%;
-  max-width: 1100px !important;
-  margin-bottom: 4rem;
-  flex-wrap: wrap;
-  gap: 2rem;
+  max-width: 1300px;
   position: relative;
   z-index: 2;
 }
 
-.featured-text-group {
-  max-width: 600px;
+.fc-card {
+  background: #dfe5e9;
+  /* Same as section — key for neumorphic effect */
+  border-radius: 24px;
+  box-shadow: 8px 8px 20px #b8bfc4, -8px -8px 20px #ffffff;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
+.fc-card:hover {
+  box-shadow: 12px 12px 28px #adb3b8, -12px -12px 28px #ffffff;
+  transform: translateY(-4px);
+}
 
+/* Top image area — inset concave look */
+.fc-image-block {
+  position: relative;
+  margin: 14px 14px 0 14px;
+  width: calc(100% - 28px);
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.18),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.5);
+}
+
+.fc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Badge — top right */
+.fc-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dfe5e9;
+  color: #333;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  box-shadow: 3px 3px 7px #b8bfc4, -3px -3px 7px #ffffff;
+}
+
+/* Ribbon at image bottom */
+.fc-ribbon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 12px;
+  letter-spacing: 0.02em;
+}
+
+/* Body */
+.fc-body {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fc-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fc-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d3748;
+  line-height: 1.35;
+  margin: 0;
+  flex: 1;
+}
+
+.fc-cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2563eb;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding-top: 3px;
+  transition: color 0.2s ease;
+}
+
+.fc-cta:hover {
+  color: #1d4ed8;
+}
+
+/* Tag pills — neumorphic inset */
+.fc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fc-tag {
+  background: #dfe5e9;
+  color: #555e6e;
+  font-size: 0.73rem;
+  font-weight: 500;
+  padding: 5px 13px;
+  border-radius: 20px;
+  box-shadow: inset 2px 2px 5px #b8bfc4, inset -2px -2px 5px #ffffff;
+}
+
+@media (max-width: 900px) {
+  .featured-grid-new {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .featured-grid-new {
+    grid-template-columns: 1fr;
+  }
+}
+
+.featured-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 95%;
+  max-width: 1300px !important;
+  /* Match the grid width */
+  margin-bottom: 3rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+  /* Good for mobile */
+}
+
+.featured-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 700px;
+  gap: 1rem;
+}
 
 /* Hero Stats Row Styling */
 .hero-stats-row-v3 {
@@ -46187,5 +46334,743 @@ body {
 
   .ref-card-lower {
     margin-top: 0;
+  }
+}
+
+/* --- Minimalist Premium Hero V4 --- */
+.hero-section-premium-v4 {
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 60px 4%;
+  position: relative;
+  overflow: hidden;
+  color: #1a1a1a;
+}
+
+.hero-grid-v4 {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-left-v4 {
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.hero-label-v4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #888;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.hero-title-v4 {
+  font-family: 'Playfair Display', serif;
+  /* Fallback to serif if not loaded */
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 1.1;
+  color: #222;
+  margin-bottom: 30px;
+  font-weight: 400;
+}
+
+.title-bold-v4 {
+  font-weight: 700;
+}
+
+.hero-subtitle-v4 {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 40px;
+  max-width: 500px;
+}
+
+.hero-actions-v4 {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.btn-v4-primary {
+  padding: 16px 36px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  color: #1a1a1a;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-v4-primary:hover {
+  background-color: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+  transform: translateY(-2px);
+}
+
+.btn-v4-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #222;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.icon-v4 {
+  font-size: 20px;
+}
+
+.hero-filter-v4 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filter-label-v4 {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.filter-dots-v4 {
+  display: flex;
+  gap: 10px;
+}
+
+.f-dot-v4 {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.f-dot-v4.active {
+  background-color: #555;
+}
+
+.filter-val-v4 {
+  font-size: 0.85rem;
+  color: #222;
+  font-weight: 500;
+}
+
+.hero-right-v4 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hero-img-box-v4 {
+  width: 100%;
+  max-width: 550px;
+  aspect-ratio: 1/1.2;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+}
+
+.hero-main-img-v4 {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.hero-img-box-v4:hover .hero-main-img-v4 {
+  transform: scale(1.05);
+}
+
+.hero-side-nav-v4 {
+  position: absolute;
+  right: 4%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 3;
+}
+
+.side-pager-v4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.pager-num-v4 {
+  font-size: 0.8rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.pager-num-v4.active {
+  color: #1a1a1a;
+  position: relative;
+}
+
+.pager-line-v4 {
+  width: 1px;
+  height: 60px;
+  background-color: #1a1a1a;
+}
+
+.side-discover-v4 {
+  writing-mode: vertical-rl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  color: #1a1a1a;
+}
+
+.discover-text-v4 {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Responsiveness */
+@media (max-width: 1024px) {
+  .hero-grid-v4 {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero-left-v4 {
+    align-items: center;
+  }
+
+  .hero-subtitle-v4 {
+    margin: 0 auto 40px;
+  }
+
+  .hero-side-nav-v4 {
+    display: none;
+  }
+}
+
+/* --- Neumorphic Hero Section --- */
+.hero-section-neu {
+  background-color: #dfe5e9;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 80px 5%;
+  position: relative;
+  overflow: hidden;
+}
+
+.neu-hero-container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+  align-items: center;
+  width: 100%;
+  padding-left: 3%;
+}
+
+.neu-hero-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.neu-hero-label {
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  color: #777;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.neu-hero-title {
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  line-height: 1.1;
+  color: #333;
+  font-weight: 800;
+  margin-bottom: 25px;
+}
+
+.neu-hero-title span {
+  color: #2563eb;
+  /* Primary accent */
+}
+
+.neu-hero-subtitle {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 40px;
+}
+
+/* Neumorphic Search Bar */
+.neu-search-container {
+  margin-bottom: 45px;
+  max-width: 600px;
+}
+
+.neu-search-box {
+  display: flex;
+  align-items: center;
+  background: #ebebeb;
+  padding: 10px 15px;
+  border-radius: 50px;
+  box-shadow: inset 6px 6px 12px #c8c8c8,
+    inset -6px -6px 12px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.neu-search-icon {
+  color: #888;
+  margin-right: 12px;
+  font-size: 24px;
+}
+
+.neu-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #333;
+  padding: 10px 0;
+}
+
+.neu-search-input::placeholder {
+  color: #999;
+}
+
+.neu-btn-search {
+  padding: 10px 25px;
+  background: #ebebeb;
+  border: none;
+  border-radius: 25px;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 6px 6px 12px #c8c8c8,
+    -6px -6px 12px #ffffff;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+
+.neu-btn-search:hover {
+  box-shadow: 2px 2px 5px #c8c8c8,
+    -2px -2px 5px #ffffff;
+  transform: translateY(1px);
+}
+
+.neu-btn-search:active {
+  box-shadow: inset 4px 4px 8px #c8c8c8,
+    inset -4px -4px 8px #ffffff;
+}
+
+/* Hero Actions */
+.neu-hero-actions {
+  display: flex;
+  gap: 25px;
+}
+
+.neu-btn-primary {
+  padding: 15px 35px;
+  background: #ebebeb;
+  border-radius: 12px;
+  border: none;
+  color: #2563eb;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 8px 8px 16px #c8c8c8,
+    -8px -8px 16px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.neu-btn-primary:hover {
+  box-shadow: 4px 4px 8px #c8c8c8,
+    -4px -4px 8px #ffffff;
+  transform: translateY(-2px);
+}
+
+.neu-btn-primary:active {
+  box-shadow: inset 6px 6px 12px #c8c8c8,
+    inset -6px -6px 12px #ffffff;
+}
+
+.neu-btn-secondary {
+  padding: 15px 35px;
+  background: #ebebeb;
+  border-radius: 12px;
+  border: none;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 8px 8px 16px #c8c8c8,
+    -8px -8px 16px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.neu-btn-secondary:hover {
+  box-shadow: 4px 4px 8px #c8c8c8,
+    -4px -4px 8px #ffffff;
+  transform: translateY(-2px);
+}
+
+.neu-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.neu-img-card {
+  padding: 20px;
+  background: #ebebeb;
+  border-radius: 30px;
+  box-shadow: 15px 15px 30px #c8c8c8,
+    -15px -15px 30px #ffffff;
+}
+
+.neu-main-img {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 20px;
+  display: block;
+}
+
+/* Visibility enhancements */
+.neu-hero-title,
+.neu-hero-subtitle,
+.neu-hero-label,
+.neu-search-input {
+  text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 1024px) {
+  .neu-hero-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 40px;
+  }
+
+  .neu-hero-content,
+  .neu-search-container,
+  .neu-hero-actions {
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .neu-search-container {
+    width: 100%;
+  }
+}
+
+/* --- Neumorphic Network Visual --- */
+.neu-network-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  background: #ebebeb;
+  border-radius: 50%;
+  box-shadow: 20px 20px 60px #c8c8c8,
+    -20px -20px 60px #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.neu-network-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.neu-network-lines line {
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 1px;
+}
+
+.neu-node {
+  position: absolute;
+  background: #1a1a1a;
+  /* Dark nodes as in inspo */
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 6px 6px 12px #b0b0b0,
+    -6px -6px 12px #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.neu-node:hover {
+  transform: scale(1.2);
+  box-shadow: 10px 10px 20px #a0a0a0,
+    -10px -10px 20px #ffffff;
+}
+
+.node-small {
+  background: #333;
+  box-shadow: 3px 3px 6px #c8c8c8,
+    -3px -3px 6px #ffffff;
+}
+
+/* Floating animation for a dynamic feel */
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(5px, 5px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.node-1 {
+  animation: float 4s ease-in-out infinite;
+}
+
+.node-2 {
+  animation: float 5s ease-in-out infinite 1s;
+}
+
+.node-3 {
+  animation: float 6s ease-in-out infinite 0.5s;
+}
+
+.node-4 {
+  animation: float 4.5s ease-in-out infinite 1.5s;
+}
+
+.node-5 {
+  animation: float 5.5s ease-in-out infinite 2s;
+}
+
+.node-6 {
+  animation: float 4.8s ease-in-out infinite 0.8s;
+}
+
+/* Responsive tweaks for network */
+@media (max-width: 768px) {
+  .neu-network-container {
+    width: 300px;
+    height: 300px;
+    margin-top: 40px;
+  }
+}
+
+/* --- Premium Neumorphic Global Network --- */
+.neu-hero-visual-v5 {
+  flex: 1.2;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 650px;
+  background: transparent !important;
+}
+
+.neu-global-network {
+  position: relative;
+  width: 100%;
+  max-width: 1050px;
+  height: 630px;
+  background: transparent !important;
+  margin-left: auto;
+  overflow: hidden;
+}
+
+.neu-map-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.neu-embossed-map {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.3;
+  filter: none;
+  /* No shadow or elevation */
+}
+
+.neu-connection-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.neu-line-path {
+  fill: none;
+  stroke: rgba(80, 130, 220, 0.3);
+  stroke-width: 0.4;
+  stroke-dasharray: 2, 2;
+  stroke-linecap: round;
+  animation: dash 25s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.neu-glow-node {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #2563eb;
+  border-radius: 50%;
+  z-index: 3;
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.6),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+  }
+
+  50% {
+    transform: scale(1.3);
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
+  }
+}
+
+.neu-profile-card {
+  position: absolute;
+  background: #ebebeb;
+  padding: 8px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 4;
+  box-shadow: 5px 5px 10px #c8c8c8,
+    -5px -5px 10px #ffffff;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  animation: float-slow 6s infinite ease-in-out;
+}
+
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.neu-profile-card:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow: 8px 8px 16px #bcbcbc,
+    -8px -8px 16px #ffffff;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  object-fit: cover;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.card-role {
+  font-size: 0.7rem;
+  color: #666;
+}
+
+/* Card specific delays for float animation */
+.card-alex {
+  animation-delay: 0.5s;
+}
+
+.card-sarah {
+  animation-delay: 2s;
+}
+
+.card-kenji {
+  animation-delay: 1.2s;
+}
+
+.card-priya {
+  animation-delay: 3s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .neu-hero-visual-v5 {
+    min-height: 400px;
+    width: 100%;
+  }
+
+  .neu-global-network {
+    transform: scale(0.8);
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .neu-global-network {
+    transform: scale(0.6);
+    height: 300px;
+  }
+
+  .neu-profile-card {
+    display: none;
+    /* Hide cards on very small screens for clarity */
   }
 }
