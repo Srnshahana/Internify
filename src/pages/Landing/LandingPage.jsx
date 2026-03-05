@@ -1000,7 +1000,8 @@ export default function LandingPage({
                   <span className="material-symbols-outlined neu-search-icon">search</span>
                   <input
                     type="text"
-                    placeholder="Search mentors, skills, or topics..."
+                    placeholder="Search mentors, skills..."
+                    // className="hero-input-v3"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -1152,25 +1153,35 @@ export default function LandingPage({
             <div className="premium-blob blob-2"></div>
           </div>
 
-          {/* CAREERS ghost watermark — vertical, right side */}
+          {/* Structural Neumorphic 'A' shape — Matches reference image depth and cutouts */}
           <div className="premium-shape-3d-wrapper">
-            <div className="premium-a-container">
-              <h1 className="premium-a-text">CAREERS</h1>
+            <div className="premium-a-structural-container">
+              <div className="shape-a-main">
+                <div className="shape-a-cutout-top"></div>
+                <div className="featured-header-premium">
+                  <div className="featured-text-group-premium">
+                    <span className="featured-tag-pill">ABOUT US</span>
+                    <h2 className="h2-premium">
+                      Elevate Your <span className="text-gradient-blue">Professional Brand</span>
+                    </h2>
+                    <p className="featured-desc-premium">
+                      Internify helps you transform your professional journey with precision-guided
+                      mentorship and industry-standard training modules.
+                    </p>
+                  </div>
+                </div>
+                <div className="shape-a-cutout-bottom"></div>
+              </div>
             </div>
           </div>
 
           <div className="premium-about-container">
             {/* Left Content Side */}
             <div className="premium-about-left">
-              <h2 className="premium-about-title">
-                About<span>.</span>Us
-              </h2>
-              <p className="premium-about-subtitle">your brand game</p>
-
               <p className="premium-description">
-                Internify helps you transform your professional journey with precision-guided
-                mentorship and industry-standard training modules. Level up your skills
-                with a platform designed for the modern ambitious talent.
+                Level up your skills with a platform designed for the modern ambitious talent.
+                Connect with mentors who have walked the path you're on and gain the
+                insights that only experience can provide.
               </p>
 
               <div className="premium-slider-nav">
@@ -1183,100 +1194,117 @@ export default function LandingPage({
                 Contact us
               </button>
 
-              <div className="premium-files-hint">
-                <span className="hint-label">FILES:</span>
+              <div className="about-social-hint">
+                <span className="hint-label">FOLLOW US:</span>
                 <div className="hint-icons">
-                  <div className="hint-icon-box ps-box">Ps</div>
-                  <div className="hint-icon-box li-box">in</div>
-                  <div className="hint-icon-box ai-box">Ai</div>
-                  <div className="hint-icon-box jpg-box">JPG</div>
+                  <div className="social-icon-box twitter-box" title="Twitter">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+                    </svg>
+                  </div>
+                  <div className="social-icon-box instagram-box" title="Instagram">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </div>
+                  <div className="social-icon-box telegram-box" title="Telegram">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.21 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+                    </svg>
+                  </div>
+                  <div className="social-icon-box linkedin-box" title="LinkedIn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                    </svg>
+                  </div>
+                  <div className="social-icon-box facebook-box" title="Facebook">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.312h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Decorative Side - Career Themed */}
+            {/* Right Decorative Side - Matches reference image composition */}
             <div className="premium-about-right">
 
-              {/* Module 1: LinkedIn Profile Card */}
-              <div className="floating-module career-linkedin-module">
-                <div className="li-header">
-                  <div className="li-avatar">
-                    <span className="material-symbols-outlined">person</span>
+              {/* Reference Element 1: Floating Grid Overlay */}
+              <div className="floating-ui-grid">
+                <div className="grid-corner tl"></div>
+                <div className="grid-corner tr"></div>
+                <div className="grid-corner bl"></div>
+                <div className="grid-corner br"></div>
+                <div className="grid-center-cursor">
+                  <span className="material-symbols-outlined">open_with</span>
+                </div>
+              </div>
+
+              {/* Reference Element 2: Top Header Bar (T T T %) */}
+              <div className="floating-module premium-header-bar">
+                <div className="bar-controls">
+                  <span className="material-symbols-outlined active-icon">analytics</span>
+                  <span className="material-symbols-outlined">auto_awesome</span>
+                  <span className="material-symbols-outlined">verified</span>
+                  <span className="hint-percent">100%</span>
+                </div>
+                <div className="bar-content-rich">
+                  <p className="bar-main-text">Path: Senior Data Architect</p>
+                  <div className="bar-tags">
+                    <span className="b-tag">Python</span>
+                    <span className="b-tag">SQL</span>
+                    <span className="b-tag">Cloud</span>
                   </div>
-                  <div className="li-info">
-                    <p className="li-name">Sarah Johnson</p>
-                    <p className="li-title">Product Designer → hired</p>
-                  </div>
-                  <div className="li-badge">
-                    <span className="material-symbols-outlined">verified</span>
-                  </div>
-                </div>
-                <div className="li-stats">
-                  <div className="li-stat"><span className="li-num">420</span><span className="li-lbl">connections</span></div>
-                  <div className="li-divider"></div>
-                  <div className="li-stat"><span className="li-num">18</span><span className="li-lbl">interviews</span></div>
-                  <div className="li-divider"></div>
-                  <div className="li-stat"><span className="li-num">3</span><span className="li-lbl">offers</span></div>
                 </div>
               </div>
 
-              {/* Module 2: Resume Score */}
-              <div className="floating-module career-resume-module">
-                <div className="resume-header">
-                  <span className="material-symbols-outlined resume-icon">description</span>
-                  <span className="resume-title">Resume Score</span>
+              {/* New Career Element: Live Session Pill */}
+              <div className="floating-module premium-live-session">
+                <div className="live-indicator"></div>
+                <span className="live-text">LIVE: Figma Workshop</span>
+              </div>
+
+              {/* New Career Element: Goal Progress Card */}
+              <div className="floating-module premium-goal-card">
+                <div className="goal-header">
+                  <span className="material-symbols-outlined goal-icon">flag</span>
+                  <span className="goal-label">CAREER READINESS</span>
                 </div>
-                <div className="resume-score-ring">
-                  <svg viewBox="0 0 60 60" className="score-svg">
-                    <circle cx="30" cy="30" r="24" className="ring-bg" />
-                    <circle cx="30" cy="30" r="24" className="ring-fill" strokeDasharray="108 43" />
-                  </svg>
-                  <span className="score-number">87</span>
+                <div className="goal-progress-wrap">
+                  <div className="goal-progress-bar" style={{ width: '65%' }}></div>
                 </div>
-                <div className="resume-tags">
-                  <span className="r-tag good">Keywords ✓</span>
-                  <span className="r-tag good">ATS-ready ✓</span>
-                  <span className="r-tag warn">Portfolio</span>
+                <span className="goal-pct">65% Achieved</span>
+              </div>
+
+              {/* Reference Element 3: Settings/Slider Panel (Right Edge) */}
+              <div className="floating-module premium-slider-panel">
+                <div className="slider-row">
+                  <p className="s-label">Hue</p>
+                  <div className="s-track"><div className="s-thumb" style={{ left: '70%' }}></div></div>
+                </div>
+                <div className="slider-row">
+                  <p className="s-label">Brightness</p>
+                  <div className="s-track"><div className="s-thumb" style={{ left: '40%' }}></div></div>
+                </div>
+                <div className="slider-row">
+                  <p className="s-label">Saturation</p>
+                  <div className="s-track"><div className="s-thumb" style={{ left: '90%' }}></div></div>
                 </div>
               </div>
 
-              {/* Module 3: Career Match card — mid left */}
-              <div className="floating-module career-match-module">
-                <div className="cm-badge-ribbon">CAREER MATCH</div>
-                <div className="cm-top">
-                  <span className="material-symbols-outlined cm-star">star</span>
-                  <span className="cm-label">CAREER MATCH</span>
-                </div>
-                <p className="cm-role">UX DESIGNER</p>
-                <div className="cm-bar-wrap">
-                  <div className="cm-bar-fill" style={{ width: '90%' }}></div>
-                </div>
-                <p className="cm-pct">90% match</p>
-              </div>
-
-              {/* Module 4: Skills Progress — bottom right */}
-              <div className="floating-module career-skills-module">
-                <p className="skills-title">TOP SKILLS PROGRESS</p>
-                <div className="skill-row">
-                  <span className="skill-name">UX Research</span>
-                  <div className="skill-bar"><div className="skill-fill" style={{ width: '90%' }}></div></div>
-                  <span className="skill-pct">90%</span>
-                </div>
-                <div className="skill-row">
-                  <span className="skill-name">Figma</span>
-                  <div className="skill-bar"><div className="skill-fill" style={{ width: '75%' }}></div></div>
-                  <span className="skill-pct">75%</span>
-                </div>
-                <div className="skill-row">
-                  <span className="skill-name">Leadership</span>
-                  <div className="skill-bar"><div className="skill-fill blue" style={{ width: '60%' }}></div></div>
-                  <span className="skill-pct">60%</span>
+              {/* Reference Element 4: Color Gradient Card (Bottom Right) */}
+              <div className="floating-module premium-color-card">
+                <div className="color-gradient-surface">
+                  <div className="selector-dot"></div>
                 </div>
               </div>
 
-              {/* Module 5: Color wheel — bottom center */}
-              <div className="floating-module career-wheel-module">
-                <div className="color-wheel-circle"></div>
+              {/* Original Career Context (Hidden behind or integrated if needed) */}
+              <div className="career-context-modules" style={{ display: 'none' }}>
+                <div className="floating-module career-linkedin-module"></div>
+                <div className="floating-module career-resume-module"></div>
               </div>
 
             </div>
@@ -1301,11 +1329,11 @@ export default function LandingPage({
 
             {/* Section label above cards */}
             <div className="growth-section-header">
-              <span className="growth-section-tag">CAREER GROWTH</span>
-              <h2 className="growth-section-title">
-                What's Holding <span className="growth-title-accent"> You Back?</span>
+              <span className="featured-tag-pill">CAREER GROWTH</span>
+              <h2 className="h2-premium">
+                Your Path to <span className="text-gradient-blue">Career Success</span>
               </h2>
-              <p className="growth-section-sub">
+              <p className="featured-desc-premium">
                 Three opportunity pillars that take you from where you are to where you want to be.
               </p>
             </div>
@@ -1368,16 +1396,18 @@ export default function LandingPage({
           </div>
 
           {/* Header */}
-          <div className="offer-header">
-            <span className="offer-tag-pill">WHAT WE OFFER</span>
-            <h2 className="offer-title">
-              Everything You Need to <br />
-              <span className="offer-title-accent">Launch Your Career</span>
-            </h2>
-            <p className="offer-subtitle">
-              From mentorship to placement — every tool, connection, and
-              certification to take you from learner to professional.
-            </p>
+          <div className="featured-header-premium">
+            <div className="featured-text-group-premium">
+              <span className="featured-tag-pill">WHAT WE OFFER</span>
+              <h2 className="h2-premium">
+                Everything You Need to <br />
+                <span className="text-gradient-blue">Launch Your Career</span>
+              </h2>
+              <p className="featured-desc-premium">
+                From mentorship to placement — every tool, connection, and
+                certification to take you from learner to professional.
+              </p>
+            </div>
           </div>
 
           {/* ── Flow block 1: items 01, 02, 03 ── */}
@@ -1530,19 +1560,23 @@ export default function LandingPage({
           <div className="neu-texture-overlay"></div>
 
 
-          <div className="mentors-header">
-            <div className="mentors-text-content">
-              <h2 className="section-title-start">Professional Mentors</h2>
-              <div className="title-underline-blue"></div>
-              <p className="mentors-desc">
+          <div className="featured-header-premium">
+            <div className="featured-text-group-premium">
+              <span className="featured-tag-pill">EXPERT GUIDANCE</span>
+              <h2 className="h2-premium">
+                Professional <span className="text-gradient-blue">Mentors</span>
+              </h2>
+              <p className="featured-desc-premium">
                 Our mentors are industry experts with 5+ years of real-world
                 experience, providing practical guidance and insights to help
                 you succeed in your career.
               </p>
+              <div className="view-all-container-premium">
+                <span className="featured-view-all-btn" onClick={() => navigate('/mentors')}>
+                  View All Mentors <span className="material-symbols-outlined">arrow_forward</span>
+                </span>
+              </div>
             </div>
-            <a href="/mentors" className="view-all-link">
-              View All mentors <span className="material-symbols-outlined icon-inline">arrow_forward</span>
-            </a>
           </div>
 
           <div className="mentors-grid">
@@ -1590,35 +1624,42 @@ export default function LandingPage({
               }
             ].map((mentor, index) => (
               <div key={mentor.id} className="mentor-card-premium">
-                {/* Top Area - Integrated Image + Status Bar */}
+                {/* Top Area - Refined Image Container */}
                 <div className="mentor-card-top">
                   <div className="mentor-card-rating">
                     <span className="material-symbols-outlined star-icon">star</span>
                     {mentor.rating}.0
                   </div>
                   <img src={mentor.image} alt={mentor.name} className="mentor-card-img" />
-                  <div className="mentor-card-status-bar">
-                    {mentor.experience} Professional Experience
-                  </div>
                 </div>
 
-                {/* Body - Reorganized Content */}
+                {/* Body - Clean Aesthetic */}
                 <div className="mentor-card-body">
                   <div className="mentor-card-header">
-                    <h3 className="mentor-card-name">{mentor.name}</h3>
-                    <a href={`/mentor/${mentor.id}`} className="mentor-card-link">
-                      View Profile <span className="material-symbols-outlined icon-small">north_east</span>
-                    </a>
+                    <h3 className="mentor-card-name">
+                      {mentor.name}
+                      <span className="material-symbols-outlined verified-badge">check_circle</span>
+                    </h3>
                   </div>
 
-                  <div className="mentor-card-subtext">
-                    {mentor.role} <span className="text-accent">@ {mentor.company}</span>
-                  </div>
+                  <p className="mentor-card-bio">
+                    {mentor.role} who focuses on simplicity & usability at {mentor.company}.
+                  </p>
 
-                  <div className="mentor-card-skills">
-                    {mentor.skills.map((skill, si) => (
-                      <span key={si} className="mentor-skill-tag">{skill}</span>
-                    ))}
+                  <div className="mentor-card-footer-stats">
+                    <div className="stats-info">
+                      <div className="stat-item">
+                        <span className="material-symbols-outlined">person</span>
+                        312
+                      </div>
+                      <div className="stat-item">
+                        <span className="material-symbols-outlined">assignment_turned_in</span>
+                        48
+                      </div>
+                    </div>
+                    <button className="mentor-follow-btn">
+                      Follow +
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1713,9 +1754,16 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="section-header-v3">
-              <h2 className="section-title-v3">Career Growth Opportunities</h2>
-              <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
+            <div className="featured-header-premium" style={{ marginBottom: '3rem' }}>
+              <div className="featured-text-group-premium">
+                <span className="featured-tag-pill">OPPORTUNITIES</span>
+                <h2 className="h2-premium">
+                  Career Growth <span className="text-gradient-blue">Opportunities</span>
+                </h2>
+                <p className="featured-desc-premium">
+                  Take the next step in your professional journey with our tailored programs.
+                </p>
+              </div>
             </div>
             <div className="get-hired-grid">
               <div className="feature-card">
@@ -1776,13 +1824,16 @@ export default function LandingPage({
 
 
           {/* Success Stories Component */}
-          <div className="neu-section-header">
-            <div className="neu-section-tag">Success Stories</div>
-            <h2 className="neu-section-title">Hear From Our Community</h2>
-            <p className="neu-section-desc">
-              Real stories from people who transformed their careers through
-              meaningful mentorship.
-            </p>
+          <div className="featured-header-premium" style={{ marginBottom: '4rem' }}>
+            <div className="featured-text-group-premium">
+              <span className="featured-tag-pill">SUCCESS STORIES</span>
+              <h2 className="h2-premium">
+                Hear From Our <span className="text-gradient-blue">Community</span>
+              </h2>
+              <p className="featured-desc-premium">
+                Real stories from people who transformed their careers through meaningful mentorship.
+              </p>
+            </div>
           </div>
 
           <div className="ref-testimonials-grid">
