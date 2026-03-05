@@ -986,7 +986,7 @@ export default function LandingPage({
               <span className="neu-hero-label">INTERNIFY ECOSYSTEM</span>
               <h1 className="neu-hero-title">
                 Grow Your Career <br />
-                <span>th Expert Mentors</span>
+                <span>with Expert Mentors</span>
               </h1>
               <p className="neu-hero-subtitle">
                 {/* The global network for growth. Connecting students with
@@ -1094,24 +1094,23 @@ export default function LandingPage({
             <div className="featured-text-group">
               <span className="offer-tag-pill">CURATED COURSES</span>
               <h2 className="offer-title">
-                Our <span className="offer-title-accent">Featured Courses</span>
+                Featured <span className="offer-title-accent"> Courses</span>
               </h2>
               <p className="offer-subtitle">
                 Explore the top courses built on skills that remain relevant for decades.
                 Future-proof your career with knowledge that stands the test of time.
               </p>
             </div>
-            <div className="view-all-container">
-              <span className="view-all-text" onClick={() => navigate('/explore')}>
-                View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
-              </span>
-            </div>
           </div>
 
           <div className="featured-grid-new">
-            {featuredPrograms.map((program) => (
+            {featuredPrograms.map((program, index) => (
               <div key={program.id} className="fc-card">
-
+                {index === featuredPrograms.length - 1 && (
+                  <div className="fc-view-all-corner" onClick={() => navigate('/explore')}>
+                    View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
+                  </div>
+                )}
                 {/* ── Top image block ── */}
                 <div className="fc-image-block" style={{ background: program.accentColor }}>
                   <img src={program.image} alt={program.title} className="fc-img" />
@@ -1125,9 +1124,9 @@ export default function LandingPage({
                 <div className="fc-body">
                   <div className="fc-title-row">
                     <h3 className="fc-title">{program.title}</h3>
-                    <span className="fc-cta" onClick={() => navigate('/explore')}>
+                    {/* <span className="fc-cta" onClick={() => navigate('/explore')}>
                       Enroll Now ↗
-                    </span>
+                    </span> */}
                   </div>
                   {/* <div className="fc-tags">
                     {program.tags.map((tag) => (
@@ -1178,12 +1177,17 @@ export default function LandingPage({
           <div className="premium-about-container">
             {/* Left Content Side */}
             <div className="premium-about-left">
-              <p className="premium-description">
-                Level up your skills with a platform designed for the modern ambitious talent.
-                Connect with mentors who have walked the path you're on and gain the
-                insights that only experience can provide.
-              </p>
+              <h2 className="premium-about-title">
+                About<span>.</span>Us
+              </h2>
+              {/* <p className="premium-about-subtitle">your brand game</p> */}
 
+              <p className="premium-description">
+                We are a mentor-led internship platform built to bridge the gap between
+                education and real industry experience. Our goal is to help students and
+                early professionals move beyond theory by learning directly from experienced
+                mentors and working on practical, real-world projects.
+              </p>
               <div className="premium-slider-nav">
                 <div className="premium-nav-dot active"></div>
                 <div className="premium-nav-dot"></div>
@@ -1237,9 +1241,9 @@ export default function LandingPage({
                 <div className="grid-corner tr"></div>
                 <div className="grid-corner bl"></div>
                 <div className="grid-corner br"></div>
-                <div className="grid-center-cursor">
+                {/* <div className="grid-center-cursor">
                   <span className="material-symbols-outlined">open_with</span>
-                </div>
+                </div> */}
               </div>
 
               {/* Reference Element 2: Top Header Bar (T T T %) */}
@@ -1251,7 +1255,7 @@ export default function LandingPage({
                   <span className="hint-percent">100%</span>
                 </div>
                 <div className="bar-content-rich">
-                  <p className="bar-main-text">Path: Senior Data Architect</p>
+                  <p className="bar-main-text">Valued Real world skill</p>
                   <div className="bar-tags">
                     <span className="b-tag">Python</span>
                     <span className="b-tag">SQL</span>
@@ -1263,7 +1267,7 @@ export default function LandingPage({
               {/* New Career Element: Live Session Pill */}
               <div className="floating-module premium-live-session">
                 <div className="live-indicator"></div>
-                <span className="live-text">LIVE: Figma Workshop</span>
+                <span className="live-text">LIVE: Workshops</span>
               </div>
 
               {/* New Career Element: Goal Progress Card */}
@@ -1273,9 +1277,9 @@ export default function LandingPage({
                   <span className="goal-label">CAREER READINESS</span>
                 </div>
                 <div className="goal-progress-wrap">
-                  <div className="goal-progress-bar" style={{ width: '65%' }}></div>
+                  <div className="goal-progress-bar" style={{ width: '85%' }}></div>
                 </div>
-                <span className="goal-pct">65% Achieved</span>
+                <span className="goal-pct">85% Achieved</span>
               </div>
 
               {/* Reference Element 3: Settings/Slider Panel (Right Edge) */}
@@ -1298,6 +1302,30 @@ export default function LandingPage({
               <div className="floating-module premium-color-card">
                 <div className="color-gradient-surface">
                   <div className="selector-dot"></div>
+                </div>
+                <div className="premium-card-content">
+                  <div className="feature-check-list light-checklist">
+                    <div className="check-item">
+                      <span className="material-symbols-outlined check-icon">check_circle</span>
+                      <span className="check-text">Internship Check</span>
+                    </div>
+                    <div className="check-item">
+                      <span className="material-symbols-outlined check-icon">check_circle</span>
+                      <span className="check-text">Projects Check</span>
+                    </div>
+                    <div className="check-item">
+                      <span className="material-symbols-outlined check-icon">check_circle</span>
+                      <span className="check-text">Referrals Check</span>
+                    </div>
+                    <div className="check-item">
+                      <span className="material-symbols-outlined check-icon">check_circle</span>
+                      <span className="check-text">Experience Check</span>
+                    </div>
+                    <div className="check-item">
+                      <span className="material-symbols-outlined check-icon">check_circle</span>
+                      <span className="check-text">Certificate Check</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1328,10 +1356,10 @@ export default function LandingPage({
 
 
             {/* Section label above cards */}
-            <div className="growth-section-header">
+            <div className="growth-section-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center', marginBottom: '4rem' }}>
               <span className="featured-tag-pill">CAREER GROWTH</span>
               <h2 className="h2-premium">
-                Your Path to <span className="text-gradient-blue">Career Success</span>
+                Challenges Along Your <span className="text-gradient-blue">Career Journey</span>
               </h2>
               <p className="featured-desc-premium">
                 Three opportunity pillars that take you from where you are to where you want to be.
@@ -1397,7 +1425,7 @@ export default function LandingPage({
 
           {/* Header */}
           <div className="featured-header-premium">
-            <div className="featured-text-group-premium">
+            <div className="featured-text-group-premium" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <span className="featured-tag-pill">WHAT WE OFFER</span>
               <h2 className="h2-premium">
                 Everything You Need to <br />
@@ -1561,7 +1589,7 @@ export default function LandingPage({
 
 
           <div className="featured-header-premium">
-            <div className="featured-text-group-premium">
+            <div className="featured-text-group-premium" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <span className="featured-tag-pill">EXPERT GUIDANCE</span>
               <h2 className="h2-premium">
                 Professional <span className="text-gradient-blue">Mentors</span>
@@ -1740,7 +1768,7 @@ export default function LandingPage({
               </div>
 
               {/* Central Device Shape (Translucent Backdrop) */}
-              <div className="growth-device-backdrop"></div>
+              {/* <div className="growth-device-backdrop"></div> */}
 
               {/* Only 1 Metric: TRENDING (Top-Left of Card) */}
               <div className="growth-metric m-trending">
@@ -1748,22 +1776,16 @@ export default function LandingPage({
                   <span className="material-symbols-outlined">trending_up</span>
                   <div className="metric-info">
                     <span className="m-label">Growth</span>
-                    <span className="m-val">+24%</span>
+                    <span className="m-val">90%</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="featured-header-premium" style={{ marginBottom: '3rem' }}>
-              <div className="featured-text-group-premium">
-                <span className="featured-tag-pill">OPPORTUNITIES</span>
-                <h2 className="h2-premium">
-                  Career Growth <span className="text-gradient-blue">Opportunities</span>
-                </h2>
-                <p className="featured-desc-premium">
-                  Take the next step in your professional journey with our tailored programs.
-                </p>
-              </div>
+            <div className="section-header-v3">
+              <span className="featured-tag-pill">CAREER PATH</span>
+              <h2 className="section-title-v3">Career Growth Opportunities</h2>
+              <p className="section-subtitle-v3">Take the next step in your professional journey with our tailored programs.</p>
             </div>
             <div className="get-hired-grid">
               <div className="feature-card">
@@ -1825,7 +1847,7 @@ export default function LandingPage({
 
           {/* Success Stories Component */}
           <div className="featured-header-premium" style={{ marginBottom: '4rem' }}>
-            <div className="featured-text-group-premium">
+            <div className="featured-text-group-premium" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <span className="featured-tag-pill">SUCCESS STORIES</span>
               <h2 className="h2-premium">
                 Hear From Our <span className="text-gradient-blue">Community</span>
