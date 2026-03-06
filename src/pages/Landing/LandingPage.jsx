@@ -1599,11 +1599,6 @@ export default function LandingPage({
                 experience, providing practical guidance and insights to help
                 you succeed in your career.
               </p>
-              <div className="view-all-container-premium">
-                <span className="featured-view-all-btn" onClick={() => navigate('/mentors')}>
-                  View All Mentors <span className="material-symbols-outlined">arrow_forward</span>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -1650,8 +1645,15 @@ export default function LandingPage({
                 image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff",
                 skills: ["React", "GraphQL", "Web"]
               }
-            ].map((mentor, index) => (
+            ].map((mentor, index, array) => (
               <div key={mentor.id} className="mentor-card-premium">
+                {/* View All Corner Link - Positioned 'above' the grid via CSS like in courses */}
+                {index === array.length - 1 && (
+                  <div className="mentor-view-all-corner" onClick={() => navigate('/mentors')}>
+                    View All Mentors <span className="material-symbols-outlined">arrow_forward</span>
+                  </div>
+                )}
+
                 {/* Top Area - Refined Image Container */}
                 <div className="mentor-card-top">
                   <div className="mentor-card-rating">
@@ -1663,15 +1665,16 @@ export default function LandingPage({
 
                 {/* Body - Clean Aesthetic */}
                 <div className="mentor-card-body">
-                  <div className="mentor-card-header">
-                    <h3 className="mentor-card-name">
-                      {mentor.name}
+                  <div className="mentor-card-info-header">
+                    <h3 className="mentor-card-name">{mentor.name}</h3>
+                    <div className="mentor-card-meta-row">
+                      <span className="mentor-card-company">{mentor.company}</span>
                       <span className="material-symbols-outlined verified-badge">check_circle</span>
-                    </h3>
+                    </div>
                   </div>
 
                   <p className="mentor-card-bio">
-                    {mentor.role} who focuses on simplicity & usability at {mentor.company}.
+                    {mentor.role} specializing in premium digital experiences.
                   </p>
 
                   <div className="mentor-card-footer-stats">
@@ -1703,16 +1706,16 @@ export default function LandingPage({
 
           <div className="growth-composition">
             {/* Background Decorative Elements */}
-            <div className="growth-deco-text-v5">GROWTH</div>
+            {/* <div className="growth-deco-text-v5">GROWTH</div> */}
 
             <div className="growth-deco-elements">
               {/* 5 Gears as in reference */}
-              <div className="deco-gear gg-1">
+              {/* <div className="deco-gear gg-1">
                 <span className="material-symbols-outlined">settings</span>
-              </div>
-              <div className="deco-gear gg-2">
+              </div> */}
+              {/* <div className="deco-gear gg-2">
                 <span className="material-symbols-outlined">settings</span>
-              </div>
+              </div> */}
               <div className="deco-gear gg-3">
                 <span className="material-symbols-outlined">settings</span>
               </div>
@@ -1796,7 +1799,7 @@ export default function LandingPage({
                 <p className="feature-desc">
                   Join our exclusive placement program and get direct referrals to top tech firms. Fast-track your career with our network.
                 </p>
-                <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Apply for Referrals</button>
+                <button className="feature-btn btn-hired" onClick={() => navigate('/explore')}>Get Hired Instantly</button>
               </div>
 
               <div className="feature-card">
