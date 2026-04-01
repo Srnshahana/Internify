@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import techBgJson from '../../assets/lottie/Technology backgrounds.json'
@@ -39,6 +39,8 @@ import searchVectorImg from '../../assets/images/searchvector.png'
 import aiCourseImg from '../../assets/images/ai.jpg'
 import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
+import dashboardImg from '../../assets/images/dashboard.png'
+import classroomImg from '../../assets/images/clasroom.png'
 import worldMapImg from '../../assets/images/worldmap.jpg'
 // Category data with icons
 // Featured Programs Data
@@ -51,7 +53,7 @@ const featuredPrograms = [
     badge: 'Most Popular',
     ribbon: 'Free access until 30/06/2026',
     tags: ['Python', 'Neural Nets', 'ChatGPT', 'TensorFlow'],
-    image: aiCourseImg,
+    image: dashboardImg,
     accentColor: '#5b8dee'
   },
   {
@@ -62,13 +64,13 @@ const featuredPrograms = [
     badge: 'Trending',
     ribbon: 'Enroll before 15/05/2026',
     tags: ['SEO', 'Analytics', 'Ad Campaigns', 'Content AI'],
-    image: digitalMarketingImg,
+    image: classroomImg,
     accentColor: '#e05fa0'
   },
   {
     id: 'fp-3',
-    title: 'Ethical Hacking and Cyber Security',
-    category: 'Digital Security',
+    title: 'Digital Security Specialist',
+    category: 'Mobile Template',
     growthStat: '4M+ job shortage',
     badge: 'High Demand',
     ribbon: 'Limited seats — act fast',
@@ -506,6 +508,111 @@ const TypewriterText = ({ text }) => {
   )
 }
 
+// Interactive Particle Grid Component
+const InteractiveGrid = () => {
+  const canvasRef = useRef(null)
+  const mouse = useRef({ x: -1000, y: -1000 })
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let animationFrameId
+    let particles = []
+
+    const resize = () => {
+      if (!canvas) return
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+      initParticles()
+    }
+
+    const initParticles = () => {
+      particles = []
+      const gap = 20
+      const rows = Math.ceil(canvas.height / gap)
+      const cols = Math.ceil(canvas.width / gap)
+
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          particles.push({
+            x: j * gap + gap / 2,
+            y: i * gap + gap / 2,
+            baseX: j * gap + gap / 2,
+            baseY: i * gap + gap / 2,
+            size: 1.2,
+            density: Math.random() * 20 + 10
+          })
+        }
+      }
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'
+
+      particles.forEach(p => {
+        let dx = mouse.current.x - p.x
+        let dy = mouse.current.y - p.y
+        let distance = Math.sqrt(dx * dx + dy * dy)
+        let forceDirectionX = dx / (distance || 1)
+        let forceDirectionY = dy / (distance || 1)
+        let maxDistance = 100
+        let force = (maxDistance - distance) / maxDistance
+        let directionX = forceDirectionX * force * p.density
+        let directionY = forceDirectionY * force * p.density
+
+        if (distance < maxDistance) {
+          p.x -= directionX
+          p.y -= directionY
+        } else {
+          if (p.x !== p.baseX) {
+            let dx = p.x - p.baseX
+            p.x -= dx / 10
+          }
+          if (p.y !== p.baseY) {
+            let dy = p.y - p.baseY
+            p.y -= dy / 10
+          }
+        }
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.fill()
+      })
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      mouse.current.x = e.clientX - rect.left
+      mouse.current.y = e.clientY - rect.top
+    }
+
+    const handleMouseLeave = () => {
+      mouse.current.x = -1000
+      mouse.current.y = -1000
+    }
+
+    window.addEventListener('resize', resize)
+    window.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseleave', handleMouseLeave)
+
+    resize()
+    animate()
+
+    return () => {
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', handleMouseMove)
+      canvas.removeEventListener('mouseleave', handleMouseLeave)
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [])
+
+  return <canvas ref={canvasRef} className="stitch-canvas-grid" />
+}
+
 export default function LandingPage({
   onOpenExplore,
   onOpenResources,
@@ -646,6 +753,24 @@ export default function LandingPage({
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false)
 
   const roadmapContainerRef = useRef(null)
+  const auraRef = useRef(null)
+  const coursesCarouselRef = useRef(null)
+
+  const handleMouseMove = (e) => {
+    if (!auraRef.current) return
+    const { clientX, clientY } = e
+    auraRef.current.style.left = `${clientX}px`
+    auraRef.current.style.top = `${clientY}px`
+  }
+
+  const scrollCarousel = (direction) => {
+    if (!coursesCarouselRef.current) return
+    const scrollAmount = 450
+    coursesCarouselRef.current.scrollBy({
+      left: direction === 'right' ? scrollAmount : -scrollAmount,
+      behavior: 'smooth'
+    })
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -967,174 +1092,128 @@ export default function LandingPage({
     <div className="landing-page-new font-sans">
 
       <nav className="simple-navbar">
-        <div className="nav-container">
-          <div className="nav-logo">Internify</div>
-          <div className="nav-links">
-            <a href="#search">Search</a>
-            <a href="#courses">courses</a>
-            <a href="#mentors">mentors</a>
-            <a href="#testimonials">testimonials</a>
-            <button className="nav-login-simple" onClick={() => navigate('/login')}>login</button>
+        <div className="nav-container-new">
+          {/* Logo Section */}
+          <div className="nav-logo-group" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+            <div className="nav-logo-circle"></div>
+            <span className="nav-logo-text">Internify</span>
+          </div>
+
+          {/* Main Links (Center) */}
+          <div className="nav-links-center">
+            <a href="#explore">Explore Mentors</a>
+            <a href="#courses" onClick={(e) => { e.preventDefault(); setIsCourseModalOpen(true); }}>Explore Courses</a>
+            <a href="#resources">Resources</a>
+            <a href="#about">About Us</a>
+          </div>
+
+          {/* Auxiliary Links (Right) */}
+          <div className="nav-links-right">
+            <button className="nav-aux-link" onClick={() => navigate('/mentor-onboarding')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Apply as Mentor</button>
+            <button className="nav-login-btn-new" onClick={() => navigate('/login')}>Log in</button>
           </div>
         </div>
       </nav>
 
       <main className="landing-main-content">
-        <section className="hero-section-neu" id="home">
-          <div className="neu-hero-container reveal reveal-up">
-            <div className="neu-hero-content">
-              <span className="neu-hero-label">INTERNIFY ECOSYSTEM</span>
-              <h1 className="neu-hero-title">
-                Grow Your Career <br />
-                <span>with Expert Mentors</span>
-              </h1>
-              <p className="neu-hero-subtitle">
-                {/* The global network for growth. Connecting students with
-                experienced mentors for direction and clarity. */}
-                A global network built for growth. We connect students with industry mentors who bring 5+ years of real-world experience, so you gain practical skills that truly prepare you for your career.
-              </p>
 
-              {/* Neumorphic Search Bar */}
-              <div className="neu-search-container">
-                <div className="neu-search-box">
-                  <span className="material-symbols-outlined neu-search-icon">search</span>
-                  <input
-                    type="text"
-                    placeholder="Search mentors, skills..."
-                    // className="hero-input-v3"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="neu-search-input"
-                  />
-                  <button className="neu-btn-search" onClick={handleSearch}>Search</button>
-                </div>
+        {/* Stitch-Inspired Hero Section */}
+        <section className="stitch-hero" id="home" onMouseMove={handleMouseMove}>
+          <InteractiveGrid />
+          <div className="stitch-aura" ref={auraRef}></div>
+
+          <div className="stitch-hero-content">
+            <h1 className="stitch-hero-heading">
+              Launch Your Career with<br />
+              Industry Mentors
+            </h1>
+            <p className="stitch-hero-subheading">
+              Experience real-world projects, get direct referrals,
+              and build your professional brand with Internify.
+            </p>
+
+            {/* Glassmorphic Search Container */}
+            <div className="stitch-search-container">
+              <div className="stitch-search-input-wrapper">
+                What skill or mentor shall we find?
               </div>
 
-              <div className="neu-hero-actions">
-                <button className="neu-btn-primary" onClick={() => navigate('/explore')}>
-                  Browse Mentors
-                </button>
-                <button className="neu-btn-secondary" onClick={() => setIsCourseModalOpen(true)}>
-                  Explore Courses
-                </button>
-              </div>
-            </div>
-
-            <div className="neu-hero-visual-v5">
-              <div className="neu-global-network">
-                {/* Neumorphic Embossed Map */}
-                <div className="neu-map-wrapper">
-                  <img src={worldmapImg} alt="World Map" className="neu-embossed-map" />
+              <div className="stitch-search-actions">
+                <div className="stitch-search-pills">
+                  <div className="stitch-search-pill active">Mentors</div>
+                  <div className="stitch-search-pill">Courses</div>
+                  <div className="stitch-search-pill">Projects</div>
                 </div>
 
-                {/* SVG lines — viewBox 0 0 100 100 = % space, preserveAspectRatio none to match container */}
-                <svg className="neu-connection-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {/* NA (20,44) → EU (43,39) */}
-                  <path d="M 20,44 Q 28,25 43,39" className="neu-line-path" />
-                  {/* EU (43,39) → AS (67,44) */}
-                  <path d="M 43,39 Q 55,58 67,44" className="neu-line-path" />
-                  {/* AS (67,44) → JP (80,33) */}
-                  <path d="M 67,44 Q 75,24 80,33" className="neu-line-path" />
-                  {/* EU (43,39) → SA (37,72) */}
-                  <path d="M 43,39 Q 40,60 37,72" className="neu-line-path" />
-                  {/* NA (20,44) → SA (37,72) */}
-                  <path d="M 20,44 Q 25,62 37,72" className="neu-line-path" />
-                  {/* AS (67,44) → SA (37,72) */}
-                  <path d="M 67,44 Q 55,65 37,72" className="neu-line-path" />
-                </svg>
-
-                {/* Glowing Nodes — % positions matching SVG coordinates */}
-                <div className="neu-glow-node" style={{ top: '44%', left: '20%' }}></div>  {/* NA */}
-                <div className="neu-glow-node" style={{ top: '39%', left: '43%' }}></div>  {/* EU */}
-                <div className="neu-glow-node" style={{ top: '44%', left: '67%' }}></div>  {/* AS */}
-                <div className="neu-glow-node" style={{ top: '33%', left: '80%' }}></div>  {/* JP */}
-                <div className="neu-glow-node" style={{ top: '72%', left: '37%' }}></div>  {/* SA */}
-
-                {/* Profile Cards — appear just above/beside corresponding node */}
-                <div className="neu-profile-card card-alex" style={{ top: '24%', left: '8%' }}>
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Alex C" className="avatar-small" />
-                  <div className="card-info">
-                    <span className="card-name">Alex C.</span>
-                    <span className="card-role">AI Engineer</span>
-                  </div>
-                </div>
-
-                <div className="neu-profile-card card-sarah" style={{ top: '52%', left: '35%' }}>
-                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Sarah K" className="avatar-small" />
-                  <div className="card-info">
-                    <span className="card-name">Sarah K.</span>
-                    <span className="card-role">Cybersecurity Expert</span>
-                  </div>
-                </div>
-
-                <div className="neu-profile-card card-kenji" style={{ top: '15%', left: '65%' }}>
-                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Kenji T" className="avatar-small" />
-                  <div className="card-info">
-                    <span className="card-name">Kenji T.</span>
-                    <span className="card-role">Data Scientist</span>
-                  </div>
-                </div>
-
-                <div className="neu-profile-card card-priya" style={{ top: '77%', left: '42%' }}>
-                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Priya S" className="avatar-small" />
-                  <div className="card-info">
-                    <span className="card-name">Priya S.</span>
-                    <span className="card-role">Product Manager</span>
-                  </div>
+                <div className="stitch-search-btn-group">
+                  <span className="material-symbols-outlined" style={{ color: 'rgba(255,255,255,0.4)', alignSelf: 'center', cursor: 'pointer' }}>
+                    settings
+                  </span>
+                  <button className="stitch-search-btn" onClick={handleSearch}>
+                    <span className="material-symbols-outlined">arrow_forward</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="featured-programs-section landing-section" id="courses">
 
-          <div className="featured-header">
-            <div className="featured-text-group">
-              <span className="offer-tag-pill">CURATED COURSES</span>
-              <h2 className="offer-title">
-                Featured <span className="offer-title-accent"> Courses</span>
-              </h2>
-              <p className="offer-subtitle">
-                Explore the top courses built on skills that remain relevant for decades.
-                Future-proof your career with knowledge that stands the test of time.
-              </p>
+
+        {/* ── Full-width marquee logo bar ── */}
+        {/* <div className="hero-marquee-section">
+          <p className="hero-marquee-label">Trusted by 3.7 million companies</p>
+          <div className="hero-marquee-track-wrap">
+            <div className="hero-marquee-track">
+              {[0, 1].map((i) => (
+                <div className="hero-marquee-set" key={i}>
+                  <div className="hero-logo-item"><svg viewBox="0 0 130 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Salesforce</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 115 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Evernote</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 125 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Microsoft</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 80 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Adobe</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 95 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Google</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 78 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">Slack</text></svg></div>
+                  <div className="hero-logo-item"><svg viewBox="0 0 105 32" height="28"><text x="0" y="24" fontFamily="'Inter',sans-serif" fontWeight="800" fontSize="21" fill="#8a95a3">LinkedIn</text></svg></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div> */}
+
+        {/* Stitch-Inspired Featured Courses Section */}
+        <section className="stitch-courses-section" id="courses">
+          <div className="stitch-courses-header">
+            <h2 className="stitch-courses-title">Get started with templates</h2>
+            <div className="stitch-carousel-nav">
+              <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <button className="stitch-nav-btn" onClick={() => scrollCarousel('right')}>
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </button>
             </div>
           </div>
 
-          <div className="featured-grid-new">
+          <div className="stitch-courses-carousel" ref={coursesCarouselRef}>
             {featuredPrograms.map((program, index) => (
-              <div key={program.id} className="fc-card">
-                {index === featuredPrograms.length - 1 && (
-                  <div className="fc-view-all-corner" onClick={() => navigate('/explore')}>
-                    View All courses <span className="material-symbols-outlined icon-inline">arrow_forward</span>
-                  </div>
-                )}
-                {/* ── Top image block ── */}
-                <div className="fc-image-block" style={{ background: program.accentColor }}>
-                  <img src={program.image} alt={program.title} className="fc-img" />
-                  {/* Badge top-right */}
-                  <span className="fc-badge">{program.badge}</span>
-                  {/* Ribbon at bottom of image */}
-                  <div className="fc-ribbon">{program.ribbon}</div>
+              <div
+                key={program.id}
+                className={`stitch-course-card ${index === 0 ? 'is-first' : ''}`}
+                onClick={() => navigate(`/course/${program.id}`)}
+              >
+                {/* Background Blur Layer */}
+                <img src={program.image} alt="" className="stitch-card-bg-blur" />
+
+                {/* Centered Main Image Layer */}
+                <div className="stitch-card-inner">
+                  <img src={program.image} alt={program.title} className="stitch-course-main-img" />
                 </div>
 
-                {/* ── Bottom info block ── */}
-                <div className="fc-body">
-                  <div className="fc-title-row">
-                    <h3 className="fc-title">{program.title}</h3>
-                    {/* <span className="fc-cta" onClick={() => navigate('/explore')}>
-                      Enroll Now ↗
-                    </span> */}
-                  </div>
-                  {/* <div className="fc-tags">
-                    {program.tags.map((tag) => (
-                      <span key={tag} className="fc-tag">{tag}</span>
-                    ))}
-                  </div> */}
+                {/* Bottom Text Overlay */}
+                <div className="stitch-course-overlay">
+                  <span className="stitch-course-label">{program.category}</span>
+                  <h3 className="stitch-course-title-card">{program.title}</h3>
                 </div>
-
               </div>
             ))}
           </div>
@@ -1451,7 +1530,7 @@ export default function LandingPage({
             >
               <defs>
                 <linearGradient id="ofg1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#2563eb" />
+                  <stop offset="0%" stopColor="#1a2b4b" />
                   <stop offset="50%" stopColor="#7c3aed" />
                   <stop offset="100%" stopColor="#ec4899" />
                 </linearGradient>
@@ -1522,8 +1601,8 @@ export default function LandingPage({
             >
               <defs>
                 <linearGradient id="ofg2" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#06b6d4" />
-                  <stop offset="50%" stopColor="#2563eb" />
+                  <stop offset="0%" stopColor="#41568c" />
+                  <stop offset="50%" stopColor="#1a2b4b" />
                   <stop offset="100%" stopColor="#7c3aed" />
                 </linearGradient>
                 <marker id="arr2" markerWidth="10" markerHeight="8"
@@ -1865,14 +1944,14 @@ export default function LandingPage({
             {careerGuidanceTestimonials.map((story, idx) => {
               // Blue shades: deep → sky → mid → pale → indigo → cyan
               const accentGradients = [
-                'linear-gradient(135deg, #1e40af, #3b82f6)',
-                'linear-gradient(135deg, #0369a1, #0ea5e9)',
-                'linear-gradient(135deg, #1d4ed8, #60a5fa)',
-                'linear-gradient(135deg, #0284c7, #38bdf8)',
-                'linear-gradient(135deg, #1e3a8a, #2563eb)',
-                'linear-gradient(135deg, #075985, #0ea5e9)',
+                'linear-gradient(135deg, #1a2b4b, #2d3e6a)',
+                'linear-gradient(135deg, #2d3e6a, #41568c)',
+                'linear-gradient(135deg, #1a2b4b, #41568c)',
+                'linear-gradient(135deg, #2d3e6a, #41568c)',
+                'linear-gradient(135deg, #1a2b4b, #1a2b4b)',
+                'linear-gradient(135deg, #1a2b4b, #41568c)',
               ]
-              const accentColors = ['#3b82f6', '#0ea5e9', '#60a5fa', '#38bdf8', '#2563eb', '#06b6d4']
+              const accentColors = ['#2d3e6a', '#41568c', '#41568c', '#41568c', '#1a2b4b', '#41568c']
               const numbers = ['01', '02', '03', '04', '05', '06']
               const isEven = idx % 2 === 1  // even index → cap at bottom
 
