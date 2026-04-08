@@ -217,9 +217,50 @@ export const DevOpsIcon = ({ className = "" }) => (
   </svg>
 )
 
+
 export const SearchIcon = ({ className = "" }) => (
   <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
     <path d="m21 21-4.35-4.35" />
+  </svg>
+)
+
+// Feature Bento Icons (Minimalist)
+export const NetworkIcon = ({ className = "" }) => (
+  <svg className={className} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <circle cx="19" cy="5" r="2" />
+    <circle cx="5" cy="19" r="2" />
+    <circle cx="19" cy="19" r="2" />
+    <circle cx="5" cy="5" r="2" />
+    <path d="M12 9l5.5-2.5M12 15l-5.5 2.5M15 12l3.5 5.5M9 12l-3.5-5.5" />
+  </svg>
+)
+
+export const RingsIcon = ({ className = "" }) => (
+  <svg className={className} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="12" r="6" />
+    <circle cx="15" cy="12" r="6" />
+  </svg>
+)
+
+export const DiamondIcon = ({ className = "" }) => (
+  <svg className={className} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 3h12l4 6-10 12L2 9z" />
+    <path d="M11 3l-4 6 5 12 5-12-4-6M2 9h20" />
+  </svg>
+)
+
+export const StaircaseIcon = ({ className = "" }) => (
+  <svg className={className} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21h18" />
+    <path d="M3 21v-4h4v-4h4v-4h4v-4h4" />
+    <path d="M15 5h4v4" />
+  </svg>
+)
+export const BadgeCheckIcon = ({ className = "" }) => (
+  <svg className={className} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+    <path d="m9 12 2 2 4-4" />
   </svg>
 )

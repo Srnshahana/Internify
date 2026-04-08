@@ -133,8 +133,8 @@ h4,
   padding: 20px 5%;
   background: rgba(255, 255, 255, 0.4);
   /* Glass Effect */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   position: sticky;
   top: 0;
@@ -294,14 +294,14 @@ h4,
   position: relative !important;
   width: 100% !important;
   min-height: 100vh;
-  background-color: #000 !important;
+  background-color: #eef5ff !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   overflow: hidden !important;
-  color: white !important;
+  color: #0f172a !important;
   padding: 120px 2rem 80px 2rem !important;
   margin: 0 !important;
 }
@@ -312,11 +312,12 @@ h4,
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
+  opacity: 1 !important;
+  transition: none !important;
 }
 
-/* Official Stitch Background Video */
 .stitch-bg-video {
   position: absolute;
   top: 0;
@@ -326,8 +327,12 @@ h4,
   object-fit: cover;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.8;
-  filter: saturate(1.2) brightness(0.9);
+  opacity: 0.7;
+  /* Precisely tuned to 160deg to hit the Sky-Blue and Deep-Blue tones on the inverted layer */
+  filter: invert(1) hue-rotate(160deg) saturate(1.8) brightness(1.1);
+  /* Smooth bottom fade to eliminate the "cut" line between sections */
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
 /* Typography for the Hero */
@@ -351,7 +356,7 @@ h4,
   line-height: 1.1 !important;
   margin-bottom: 2rem !important;
   letter-spacing: -0.015em !important;
-  color: #ffffff !important;
+  color: #0f172a !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 1100px;
@@ -362,7 +367,7 @@ h4,
 .stitch-hero-subheading {
   font-family: 'Inter', sans-serif !important;
   font-size: clamp(1.1rem, 2vw, 1.4rem) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(15, 23, 42, 0.7) !important;
   margin-bottom: 3.5rem !important;
   max-width: 750px;
   width: 100%;
@@ -376,26 +381,35 @@ h4,
 
 /* Glassmorphic Search Container */
 .stitch-search-container {
-  background: rgba(255, 255, 255, 0.05);
-  /* Very subtle white */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 2rem;
   padding: 1.5rem;
   width: 100%;
-  max-width: 700px;
+  max-width: 752px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
 .stitch-search-input-wrapper {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 1.1rem;
+  color: rgba(15, 23, 42, 0.4);
+  font-size: 1.25rem;
   text-align: left;
   padding-left: 0.5rem;
+}
+
+.stitch-search-input-wrapper input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #0f172a;
+  font-size: inherit;
 }
 
 .stitch-search-actions {
@@ -410,20 +424,21 @@ h4,
 }
 
 .stitch-search-pill {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(15, 23, 42, 0.7);
   padding: 0.5rem 1.25rem;
   border-radius: 9999px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid transparent;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stitch-search-pill.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: #0f172a;
+  color: white;
+  border-color: #0f172a;
 }
 
 .stitch-search-btn-group {
@@ -432,16 +447,21 @@ h4,
 }
 
 .stitch-search-btn {
-  background: white;
-  color: black;
-  width: 2.5rem;
-  height: 2.5rem;
+  background: #0f172a;
+  color: white;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border: none;
+  transition: transform 0.2s ease;
+}
+
+.stitch-search-btn:hover {
+  transform: scale(1.05);
 }
 
 .stitch-search-btn .material-symbols-outlined {
@@ -40297,14 +40317,14 @@ html {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
-  background: rgba(11, 11, 15, 0.8) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  padding: 18px 0;
+  z-index: 2000; /* Increased to stay above all sections */
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+  padding: 14px 0;
   font-family: 'Inter', sans-serif;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05); /* Precise light separator */
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-container-new {
@@ -40317,11 +40337,19 @@ html {
 }
 
 .nav-logo-text {
-  color: #ffffff !important;
-  font-size: 1.5rem;
-  font-weight: 850;
-  letter-spacing: -0.03em;
+  color: #0f172a !important;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   text-decoration: none;
+}
+
+.nav-logo-circle {
+  width: 32px;
+  height: 32px;
+  background: #2563eb;
+  border-radius: 50%;
+  margin-right: 12px;
 }
 
 .nav-links-center {
@@ -40331,15 +40359,21 @@ html {
 }
 
 .nav-links-center a {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: #475569 !important;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-links-center a:hover {
-  color: #ffffff !important;
+  color: #2563eb !important;
+  transform: translateY(-1px);
+}
+
+.nav-links-center a:hover {
+  color: #2563eb !important;
+  transform: translateY(-1px);
 }
 
 .nav-links-right {
@@ -40349,32 +40383,35 @@ html {
 }
 
 .nav-aux-link {
-  color: rgba(255, 255, 255, 0.7) !important;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
+  color: #475569 !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .nav-aux-link:hover {
-  color: #ffffff !important;
+  color: #2563eb !important;
 }
 
 .nav-login-btn-new {
-  background: white !important;
-  color: black !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
   padding: 10px 24px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  border: none;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid #0f172a;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.1);
 }
 
 .nav-login-btn-new:hover {
-  background: #f0f0f0 !important;
-  transform: translateY(-1px);
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
 }
 
 /* Force Visibility for Landing Content */
@@ -40785,9 +40822,9 @@ html {
 
 /* ─── STITCH COURSES SECTION ─── */
 .stitch-courses-section {
-  padding: 2.5rem 5% 8rem !important;
-  /* Extremely tight top padding */
-  background: #000 !important;
+  padding: 60px 5% 60px !important;
+  /* Narrower, more professional vertical profile */
+  background: #eef5ff !important;
   position: relative;
   overflow: hidden;
 }
@@ -40805,11 +40842,11 @@ html {
 
 .stitch-courses-title {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
-  /* Smaller, cleaner heading */
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  /* Balanced hierarchy */
+  font-weight: 500;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
 .stitch-carousel-nav {
@@ -40821,9 +40858,9 @@ html {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40832,8 +40869,8 @@ html {
 }
 
 .stitch-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.3);
   transform: scale(1.05);
 }
 
@@ -40846,10 +40883,17 @@ html {
   display: flex;
   gap: 2.2rem;
   overflow-x: auto;
-  padding: 1rem 0 5rem;
+  /* Significant padding-top to prevent "chopped" cards on hover */
+  padding: 2rem 2% 2rem 2%;
+  margin-left: -2%;
+  /* Offset content left padding to align first card with header */
+  margin-top: 0 !important;
+  /* Reset margin-top since padding-top handles it better for animation space */
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  position: relative;
+  z-index: 5;
 }
 
 .stitch-courses-carousel::-webkit-scrollbar {
@@ -40866,9 +40910,12 @@ html {
   position: relative;
   cursor: pointer;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  background: #000;
+  background: #ffffff;
+  /* Solid white background to hide dots */
   flex-shrink: 0;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  /* Ensure cards are above the dot grid (z-index 2) */
 }
 
 .stitch-course-card.is-first {
@@ -48116,12 +48163,14 @@ body {
 
 /* ─── STITCH FEATURES BENTO GRID ─── */
 .stitch-features-section {
-  padding: 120px 5%;
-  background: #000000;
+  padding: 120px 5% 220px 5%; /* Increased bottom padding for section spacing */
+  background: #eef5ff !important;
   display: flex;
   justify-content: center;
   position: relative;
   z-index: 5;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .stitch-features-grid {
@@ -48129,19 +48178,40 @@ body {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: minmax(450px, auto);
-  gap: 1.5rem;
+  grid-auto-rows: minmax(520px, auto);
+  gap: 2.5rem;
+}
+
+@keyframes mesh-move {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(5%, 10%) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-10%, 5%) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 .feature-card {
   position: relative;
   border-radius: 40px;
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  /* Minimalist base */
+  backdrop-filter: blur(25px) saturate(110%);
+  -webkit-backdrop-filter: blur(25px) saturate(110%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
@@ -48151,62 +48221,361 @@ body {
 
 .feature-card.large {
   grid-column: span 2;
+  background: #1e1b4b;
+  /* Default Deep Indigo for Mentor */
 }
 
 .feature-card.small {
   grid-column: span 1;
 }
 
+/* Vibrant Card Themes (Glassmorphism + Dynamic Light) */
+/* Card One: Easy Edits (Precision Reconstruction) */
+/* Card One: Easy Edits (Premium Light Glass Transformation) */
+.feat-easy-edits {
+  background: #f8fafc !important;
+  /* Premium off-white base */
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.1) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden;
+}
+
+.feat-easy-edits .feature-label {
+  color: #2563eb !important;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+}
+
+.feat-easy-edits .feature-title {
+  color: #020617 !important;
+  font-weight: 700;
+  font-size: 3.2rem !important;
+  /* Scale parity with other cards */
+  max-width: 520px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.feat-easy-edits .feature-desc {
+  color: #020617 !important;
+  font-size: 1.15rem !important;
+  /* Airy Scale */
+  max-width: 450px;
+  line-height: 1.6;
+  opacity: 0.8;
+  margin-top: 0;
+  font-weight: 400;
+}
+
+.feat-mentor {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(91, 141, 238, 0.4) !important;
+  box-shadow: inset 0 0 40px rgba(91, 141, 238, 0.1);
+}
+
+.feat-mentor .feature-bg-blur {
+  background: radial-gradient(circle at 20% 30%, #3b82f6 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, #1e3a8a 0%, transparent 60%);
+  animation: mesh-move 15s infinite alternate linear;
+}
+
+.feat-mentor .feature-title,
+.feat-mentor .feature-desc {
+  color: #f8fafc !important;
+}
+
+.feat-guidance {
+  background: #f8fafc !important;
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.1) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden;
+}
+
+.feat-guidance .feature-bg-blur {
+  display: none !important;
+  /* Hide old blue gradient fog */
+}
+
+.feat-guidance .feature-title {
+  color: #020617 !important;
+  font-weight: 700;
+  font-size: 2.2rem !important;
+  /* Proportional for small card */
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feat-guidance .feature-desc {
+  color: #020617 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.6;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.feat-verified {
+  background: #f8fafc !important;
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.1) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden;
+}
+
+.feat-verified .feature-bg-blur {
+  display: none !important;
+}
+
+.feat-verified .feature-title {
+  color: #020617 !important;
+  font-weight: 700;
+  font-size: 2.2rem !important;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feat-verified .feature-desc {
+  color: #020617 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.6;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.feat-verified .feature-inner-svg {
+  width: 120px !important;
+  height: 120px !important;
+  color: #c084fc !important;
+  filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.3));
+  transition: all 0.5s ease;
+}
+
+.feat-verified:hover .feature-inner-svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 30px rgba(192, 132, 252, 0.5));
+}
+
+.feat-accelerator {
+  background: #f8fafc !important;
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.feat-accelerator .feature-bg-blur {
+  display: none !important;
+  /* Remove grey tint from stair image */
+}
+
+.feat-accelerator .feature-title {
+  color: #020617 !important;
+  font-weight: 700;
+  font-size: 3.2rem !important;
+  line-height: 1.1;
+  margin-bottom: 2rem;
+  max-width: 480px;
+}
+
+.feat-accelerator .feature-desc {
+  color: #020617 !important;
+  font-size: 1.15rem !important;
+  line-height: 1.6;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.feat-accelerator .feature-card-inner {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 50% !important;
+  /* Limit visual height */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding-top: 5rem !important;
+  z-index: 1 !important;
+}
+
 /* Background Blur Layer (Stitch Aesthetic) */
 .feature-bg-blur {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(30px) saturate(1.4) brightness(0.5);
-  transform: scale(1.2);
+  inset: -20%;
+  /* Expanded to hide edges during anim */
+  width: 140%;
+  height: 140%;
+  filter: blur(80px) saturate(2);
   z-index: 1;
-  opacity: 0.7;
-  transition: all 1s ease;
+  opacity: 0.4;
+  /* Increased from 0.2 for Life */
+  transition: opacity 1s ease;
+  pointer-events: none;
 }
 
 .feature-card:hover .feature-bg-blur {
-  opacity: 1;
+  opacity: 0.8;
   transform: scale(1.3) rotate(1deg);
 }
 
 /* Floating Inner UI Module (Modern Abstract Refinement) */
 .feature-card-inner {
   position: absolute;
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
   z-index: 2;
-  border-radius: 0;
-  overflow: visible;
-  border: none;
-  box-shadow: none;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.feature-inner-img {
+.large .feature-card-inner {
+  top: 20%;
+  right: 15%;
+  width: 45%;
+}
+
+.feat-easy-edits .feature-card-inner {
+  top: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  /* Center mockups vertically */
+}
+
+.small .feature-card-inner {
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65%;
+}
+
+.feat-guidance .feature-card-inner {
+  top: 2% !important;
+}
+
+/* Mockup Grid Architecture (High-Fidelity Mirroring) */
+.mockup-grid {
+  position: absolute;
+  top: 0;
+  right: -12%;
+  /* Increased bleed for breathability */
+  width: 55%;
+  /* Slightly narrower to give text more room */
+  height: 100%;
+  display: flex;
+  gap: 2rem;
+  padding: 3rem 2rem;
+  overflow: visible;
+  z-index: 20;
+}
+
+.mockup-slot {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  height: 110%;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  /* Slightly softer stroke */
+  /* Ultra-minimal Silk Shadow for premium depth */
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.04),
+    0 20px 50px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mockup-slot:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(37, 99, 235, 0.2);
+  /* Soft brand tint on hover */
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1);
+}
+
+.mockup-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.95;
+}
+
+/* Staggered Vertical Alignment (Mirroring 3-Slot Grid Ref) */
+.m1 {
+  top: -15%;
+}
+
+.m1 img {
+  object-position: bottom;
+}
+
+.m2 {
+  top: 15%;
+}
+
+.m2 img {
+  object-position: top;
+}
+
+.m3 {
+  flex: 0.9;
+  top: 0;
+  height: 90%;
+  align-self: center;
+}
+
+.m3 img {
+  object-position: center;
+}
+
+.feat-easy-edits:hover .mockup-slot {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.feature-inner-svg {
   width: 100%;
   height: auto;
-  max-height: 320px;
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.9)) saturate(1.1);
-  transition: transform 0.6s ease, filter 0.6s ease;
+  max-height: 280px;
+  stroke-width: 1.5;
+  opacity: 0.75;
+  /* Increased for high-end vibrancy */
+  filter: drop-shadow(0 0 25px currentColor);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  color: inherit;
 }
 
-.feature-card:hover .feature-inner-img {
-  transform: scale(1.05);
-  filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 1)) saturate(1.2);
+.feature-card:hover .feature-inner-svg {
+  transform: scale(1.1) rotate(2deg);
+  opacity: 1;
+  filter: drop-shadow(0 0 40px currentColor) brightness(1.2);
+}
+
+.feat-mentor .feature-inner-svg {
+  color: #60a5fa;
+}
+
+.feat-guidance .feature-inner-svg {
+  color: #3b82f6;
+}
+
+.feat-verified .feature-inner-svg {
+  color: #a78bfa;
+}
+
+.feat-accelerator .feature-inner-svg {
+  color: #10b981;
 }
 
 /* Card Content Positioning (Bottom Left) */
@@ -48214,35 +48583,90 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 2.5rem;
+  padding: 4rem;
+  /* Even airier for Card One focus */
   z-index: 10;
-  max-width: 90%;
+  max-width: 100%;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
   width: 100%;
+}
+
+.feat-easy-edits .feature-content {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  padding-left: 4.5rem !important;
+  padding-bottom: 4.5rem !important;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 10 !important;
+}
+
+.feat-mentor .feature-content {
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-left: 4.5rem !important;
+  padding-bottom: 4.5rem !important;
+  height: 100%;
+  pointer-events: none;
+}
+
+.feat-accelerator .feature-content {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  padding-left: 4.5rem !important;
+  padding-bottom: 4.5rem !important;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 10 !important;
+}
+
+.feat-guidance .feature-content,
+.feat-verified .feature-content {
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem !important;
+}
+
+.feat-easy-edits .feature-content {
+  background: transparent !important;
 }
 
 .feature-label {
   display: block;
   font-size: 0.75rem;
-  font-weight: 700;
-  color: #94a3b8;
+  font-weight: 800;
+  color: #3b82f6 !important;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 1.2rem;
 }
 
 .feature-title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 500;
+  /* Crisp Sans-Serif aesthetic */
+  color: #0f172a;
+  margin-bottom: 1rem;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
 }
 
 .feature-desc {
-  font-size: 1.1rem;
-  color: #cbd5e1;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  /* Body Token */
+  color: #475569;
   line-height: 1.6;
   margin: 0;
   max-width: 500px;
@@ -48260,7 +48684,7 @@ body {
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
   opacity: 1;
 }
@@ -48304,11 +48728,40 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: #000;
-  z-index: 100;
-  /* Higher z-index to avoid clipping by previous sections */
-  margin-top: -2rem;
-  /* Pull up slightly to overlap with features grid background if needed */
+  background: #eef5ff;
+  z-index: 10;
+  margin-top: -8rem; /* Increased overlap for smoother top blend */
+  box-shadow: none !important;
+  border: none !important;
+  /* Multi-edge Feathered Mask for top and bottom transition */
+  -webkit-mask-image: linear-gradient(
+    to bottom, 
+    transparent 0%, 
+    black 7%, 
+    black 93%, 
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom, 
+    transparent 0%, 
+    black 7%, 
+    black 93%, 
+    transparent 100%
+  );
+}
+
+/* Soft Transition Mask */
+.stitch-cta-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  background: linear-gradient(to bottom, #f8fafc, transparent);
+  z-index: 15;
+  /* Above canvas dots */
+  pointer-events: none;
 }
 
 .cta-aura-wrapper {
@@ -48326,8 +48779,8 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(140px);
-  opacity: 0.55;
-  mix-blend-mode: screen;
+  opacity: 0.35;
+  mix-blend-mode: soft-light; /* Changed from multiply to fix transition shadows */
   animation: auraRotate 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -48388,23 +48841,24 @@ body {
 
 .stitch-cta-content {
   max-width: 850px;
-  z-index: 2;
+  z-index: 10;
   position: relative;
 }
 
 .stitch-cta-title {
-  font-size: 4rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  /* Hero-Level Scale 1 */
+  font-weight: 500;
+  color: #0f172a;
   margin-bottom: 1.5rem;
   letter-spacing: -0.04em;
   line-height: 1.1;
-  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.1));
 }
 
 .stitch-cta-subtitle {
-  font-size: 1.35rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  /* Body Token */
+  color: #475569;
   margin-bottom: 3.5rem;
   line-height: 1.6;
   max-width: 650px;
@@ -48413,10 +48867,10 @@ body {
 }
 
 .stitch-cta-btn {
-  background: #111111;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1.25rem 3rem;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #0f172a; /* Darkened border to match inspiration */
+  padding: 1.25rem 3.5rem;
   border-radius: 100px;
   font-size: 1.15rem;
   font-weight: 600;
@@ -48424,15 +48878,17 @@ body {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05);
+  z-index: 10;
 }
 
-.stitch-cta-btn:hover {
-  background: #ffffff;
-  color: #000000;
+.stitch-cta-btn:hover,
+.stitch-cta-btn:focus {
+  background: #0f172a;
+  color: #ffffff;
   transform: translateY(-5px);
-  box-shadow: 0 25px 50px rgba(255, 255, 255, 0.15);
-  border-color: #ffffff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  border-color: #0f172a;
 }
 
 @media (max-width: 1024px) {
@@ -48463,7 +48919,7 @@ body {
 
 /* Stitch FAQ Section */
 .stitch-faq-section {
-  background: #000;
+  background: #eef5ff;
   padding: 6rem 2rem;
   display: flex;
   justify-content: center;
@@ -48475,9 +48931,10 @@ body {
 }
 
 .stitch-faq-title {
-  font-size: 4rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  /* Level 2 Token */
+  font-weight: 500;
+  color: #0f172a;
   margin-bottom: 5rem;
   letter-spacing: -0.04em;
 }
@@ -48489,24 +48946,25 @@ body {
 }
 
 .stitch-faq-item {
-  background: #0D0D0D;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
   border-radius: 20px;
   padding: 2rem 2.5rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stitch-faq-item:hover {
-  background: #141414;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
 .stitch-faq-item.is-active {
-  background: #141414;
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  background: #ffffff;
+  border-color: #5b8dee;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
 }
 
 .stitch-faq-header {
@@ -48518,7 +48976,7 @@ body {
 .stitch-faq-q {
   font-size: 1.35rem;
   font-weight: 500;
-  color: #ffffff;
+  color: #0f172a;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -48537,7 +48995,7 @@ body {
 .stitch-faq-body {
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   animation: faqFadeIn 0.5s ease forwards;
 }
 
@@ -48554,17 +49012,18 @@ body {
 }
 
 .stitch-faq-a {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.2rem;
+  color: #475569;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  /* Body Token */
   line-height: 1.7;
   margin: 0;
 }
 
 /* Stitch Footer */
 .stitch-footer {
-  background: #000;
+  background: #eef5ff;
   padding: 6rem 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stitch-footer-container {
@@ -48579,8 +49038,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: #fff;
-  opacity: 0.9;
+  color: #0f172a;
 }
 
 .lab-icon {
@@ -48600,7 +49058,7 @@ body {
 }
 
 .footer-link {
-  color: #666;
+  color: #475569;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 400;
@@ -48608,7 +49066,7 @@ body {
 }
 
 .footer-link:hover {
-  color: #fff;
+  color: #1a1a1a;
 }
 
 @media (max-width: 1024px) {
@@ -48644,48 +49102,24 @@ body {
   }
 }
 
-/* Stitch Mentors Section */
-.stitch-mentors-section {
-  background: #000;
-  padding: 6rem 2rem;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-}
-
-.stitch-mentors-container {
-  max-width: 1400px;
-  width: 100%;
-}
-
-.stitch-mentors-header {
-  text-align: left;
-  margin-bottom: 5rem;
-}
-
-.stitch-mentors-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
 .mentor-stitch-card {
   position: relative;
-  background: #0a0a0a;
-  border-radius: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #f8fafc !important; /* Premium off-white base from feature cards */
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.1) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  border-radius: 40px; /* Synchronized with feature card radius */
   overflow: hidden;
-  height: 480px;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(15, 23, 42, 0.05) !important;
   display: flex;
   flex-direction: column;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
 .mentor-stitch-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px); /* Synchronized with feature card hover */
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
 }
 
 .mentor-bg-blur {
@@ -48694,20 +49128,21 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(40px) saturate(1.5) brightness(0.6);
-  opacity: 0.5;
-  transition: opacity 0.5s ease, transform 0.8s ease;
+  filter: blur(60px) saturate(1.5);
+  opacity: 0.15;
+  /* Subtle vibe change */
+  transition: opacity 0.8s ease;
   z-index: 1;
 }
 
 .mentor-stitch-card:hover .mentor-bg-blur {
-  opacity: 0.8;
-  transform: scale(1.1);
+  opacity: 0.25;
 }
 
 .mentor-card-inner {
   position: relative;
-  height: 300px;
+  height: 240px;
+  /* Reduced for smaller card feel */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -48715,18 +49150,20 @@ body {
 }
 
 .mentor-image-frame {
-  width: 180px;
-  height: 180px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  border: 4px solid #ffffff;
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.1),
+    0 5px 10px rgba(15, 23, 42, 0.05);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
 }
 
 .mentor-stitch-card:hover .mentor-image-frame {
-  transform: scale(1.05) translateY(-5px);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.08) translateY(-4px);
+  border-color: #3b82f6;
 }
 
 .mentor-profile-img {
@@ -48740,7 +49177,6 @@ body {
   padding: 0 2rem 2.5rem;
   z-index: 10;
   margin-top: auto;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
   width: 100%;
   box-sizing: border-box;
 }
@@ -48753,13 +49189,13 @@ body {
 }
 
 .mentor-company-pill {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.05);
   padding: 4px 12px;
   border-radius: 100px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #fff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #5b8dee !important;
+  border: 1px solid rgba(91, 141, 238, 0.2);
 }
 
 .verified-icon {
@@ -48769,17 +49205,72 @@ body {
 
 .mentor-name {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffffff !important;
+  font-weight: 600;
+  color: #0f172a !important;
   margin-bottom: 0.2rem;
   letter-spacing: -0.02em;
 }
 
 .mentor-role {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.95rem;
+  color: #475569 !important;
   margin: 0;
   font-weight: 400;
+}
+
+/* Professional Mentors Section (Light Glass Redesign) */
+.stitch-mentors-section {
+  background: #eef5ff;
+  padding: 16rem 2rem; /* Doubled vertical padding for premium breathing room */
+  position: relative;
+  overflow: hidden;
+  margin-top: -80px; 
+  z-index: 1;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.stitch-mentors-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stitch-mentors-header {
+  max-width: 800px;
+  margin-bottom: 5rem;
+}
+
+.stitch-mentors-header .feature-label {
+  color: #2563eb !important;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.stitch-mentors-section .stitch-faq-title {
+  color: #0f172a !important;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: 2rem;
+  line-height: 1.1;
+}
+
+.stitch-mentors-section .stitch-faq-a {
+  color: #475569 !important;
+  font-size: 1.25rem !important;
+  line-height: 1.6;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+.stitch-mentors-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 @media (max-width: 1200px) {
@@ -48792,4 +49283,119 @@ body {
   .stitch-mentors-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Prompt Bar Mockup (Light Theme Mirror) */
+.prompt-bar-mockup {
+  position: relative;
+  width: 90%;
+  max-width: 450px;
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.figma-grid-lines {
+  position: absolute;
+  inset: -10px;
+  pointer-events: none;
+}
+
+.line-v,
+.line-h {
+  position: absolute;
+  background: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.05);
+}
+
+.line-v {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.line-h {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+.v1 {
+  left: 18%;
+}
+
+.v2 {
+  right: 18%;
+}
+
+.h1 {
+  top: 38%;
+}
+
+.h2 {
+  bottom: 38%;
+}
+
+.prompt-bar-capsule {
+  width: 100%;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 28px;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06);
+  z-index: 5;
+  transition: all 0.5s ease;
+}
+
+.prompt-text {
+  color: #020617;
+  opacity: 0.5;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.prompt-btn {
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 40px;
+  color: #020617;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  transition: all 0.3s ease;
+}
+
+.prompt-return-text {
+  font-family: 'SF Mono', 'Roboto Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.prompt-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.feat-accelerator:hover .prompt-bar-capsule {
+  transform: translateY(-5px);
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+.feat-accelerator:hover .prompt-btn {
+  background: #2563eb;
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
 }

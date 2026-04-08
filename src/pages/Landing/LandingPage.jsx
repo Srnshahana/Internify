@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import techBgJson from '../../assets/lottie/Technology backgrounds.json'
 import bannerJson from '../../assets/lottie/landingapgae-robot.json'
-import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon, BoltIcon, TargetIcon, FinanceIcon, ProductIcon, MobileIcon, WebIcon, DevOpsIcon } from '../../components/Icons.jsx'
+import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon, BoltIcon, TargetIcon, FinanceIcon, ProductIcon, MobileIcon, WebIcon, DevOpsIcon, NetworkIcon, RingsIcon, DiamondIcon, StaircaseIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
@@ -13,10 +13,11 @@ import '../../App.css'
 import dashboardImg from '../../assets/images/dashboard.png'
 import classroomImg from '../../assets/images/clasroom.png'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
-import featureMentors from '../../assets/images/feature-mentors-abstract.png'
-import featureProjects from '../../assets/images/feature-projects-abstract.png'
-import featureCertificate from '../../assets/images/feature-certificate-abstract.png'
-import featureCareer from '../../assets/images/feature-career-abstract.png'
+import featNode from '../../assets/images/feat-glass-node.png'
+import featRings from '../../assets/images/feat-glass-rings.png'
+import featDiamond from '../../assets/images/feat-glass-diamond.png'
+import featStaircase from '../../assets/images/feat-glass-stairs.png'
+import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
 // Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
@@ -68,30 +69,40 @@ const featuredPrograms = [
 const stitchFeatures = [
   {
     id: 'feat-1',
-    title: 'Expert Mentors',
-    description: 'Learn from industry leaders with years of experience at top tech giants.',
-    image: featureMentors,
+    title: '5+ year experienced mentors ',
+    type: 'easy-edits',
+    description: 'Learn directly from industry experts with 5+ years of hands-on experience in their respective fields.',
+    Icon: NetworkIcon,
+    image: classroomImg,
+    mockupGrid: true,
     size: 'large'
   },
   {
     id: 'feat-2',
-    title: '1-on-1 Guidance',
+    title: '1-on-1 Guidance & flexibility ',
+    type: 'guidance',
     description: 'Work on real-world projects with personal mentorship to bridge the theory-practice gap.',
-    image: featureProjects,
+    Icon: RingsIcon,
+    image: featRings,
     size: 'small'
   },
   {
     id: 'feat-3',
-    title: 'Verified Credentials',
+    title: 'Verified certificates and direct referals ',
+    type: 'verified',
     description: 'Earn industry-recognized certificates and personalized referral letters for your career.',
-    image: featureCertificate,
+    Icon: BadgeCheckIcon,
+    image: null,
     size: 'small'
   },
   {
     id: 'feat-4',
-    title: 'Career Accelerators',
+    title: 'Career support',
+    type: 'accelerator',
     description: 'Get exclusive networking opportunities, mock interview prep, and end-to-end recruitment support.',
-    image: featureCareer,
+    Icon: StaircaseIcon,
+    image: featStaircase,
+    promptBar: true, /* Custom Visual for Stitch Design Mirror */
     size: 'large'
   }
 ];
@@ -142,9 +153,24 @@ const InteractiveGrid = () => {
 
     const resize = () => {
       if (!canvas) return
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-      initParticles()
+      const dpr = window.devicePixelRatio || 1
+      const rect = canvas.getBoundingClientRect()
+
+      // Only resize if dimensions are valid and have actually changed
+      if (rect.width > 0 && rect.height > 0) {
+        // Set internal drawing buffer to match high-DPI scaling
+        canvas.width = rect.width * dpr
+        canvas.height = rect.height * dpr
+
+        // Ensure CSS box stays the same
+        canvas.style.width = `${rect.width}px`
+        canvas.style.height = `${rect.height}px`
+
+        // Scale the context globally to handle drawing units
+        ctx.scale(dpr, dpr)
+
+        initParticles()
+      }
     }
 
     const initParticles = () => {
@@ -160,7 +186,7 @@ const InteractiveGrid = () => {
             y: i * gap + gap / 2,
             baseX: j * gap + gap / 2,
             baseY: i * gap + gap / 2,
-            size: 1.2,
+            size: 1.4, // Consistent base size
             density: Math.random() * 20 + 10
           })
         }
@@ -168,8 +194,10 @@ const InteractiveGrid = () => {
     }
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'
+      // Use the actual CSS dimensions for clearing since ctx is scaled
+      const rect = canvas.getBoundingClientRect()
+      ctx.clearRect(0, 0, rect.width, rect.height)
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.32)' // Restored to subtle "normal" color
 
       particles.forEach(p => {
         let dx = mouse.current.x - p.x
@@ -215,8 +243,15 @@ const InteractiveGrid = () => {
       mouse.current.y = -1000
     }
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        resize() // Force a clean re-draw when coming back
+      }
+    }
+
     window.addEventListener('resize', resize)
     window.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     canvas.addEventListener('mouseleave', handleMouseLeave)
 
     resize()
@@ -225,6 +260,7 @@ const InteractiveGrid = () => {
     return () => {
       window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       canvas.removeEventListener('mouseleave', handleMouseLeave)
       cancelAnimationFrame(animationFrameId)
     }
@@ -363,16 +399,15 @@ export default function LandingPage({
         <div className="nav-container-new">
           {/* Logo Section */}
           <div className="nav-logo-group" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <div className="nav-logo-circle"></div>
             <span className="nav-logo-text">Internify</span>
           </div>
 
           {/* Main Links (Center) */}
           <div className="nav-links-center">
-            <a href="#explore">Explore Mentors</a>
-            <a href="#courses" onClick={(e) => { e.preventDefault(); setIsCourseModalOpen(true); }}>Explore Courses</a>
-            <a href="#resources">Resources</a>
-            <a href="#about">About Us</a>
+            <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Mentors</a>
+            <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Courses</a>
+            <a href="#faq">Resources</a>
+            <a href="#footer">About Us</a>
           </div>
 
           {/* Auxiliary Links (Right) */}
@@ -427,9 +462,9 @@ export default function LandingPage({
               </div>
               <div className="stitch-search-actions">
                 <div className="stitch-search-pills">
-                  <span className="stitch-search-pill active">All Mentors</span>
-                  <span className="stitch-search-pill">Popular</span>
-                  <span className="stitch-search-pill">Rising</span>
+                  <span className="stitch-search-pill active" onClick={() => navigate('/explore')} style={{ cursor: 'pointer' }}>All Mentors</span>
+                  <span className="stitch-search-pill" onClick={() => navigate('/explore')} style={{ cursor: 'pointer' }}>Popular</span>
+                  <span className="stitch-search-pill" onClick={() => navigate('/explore')} style={{ cursor: 'pointer' }}>Rising</span>
                 </div>
                 <div className="stitch-search-btn-group">
                   <button className="stitch-search-btn" onClick={handleSearch}>
@@ -465,6 +500,7 @@ export default function LandingPage({
 
         {/* Stitch-Inspired Featured Courses Section */}
         <section className="stitch-courses-section" id="courses">
+          <InteractiveGrid />
           <div className="stitch-courses-header">
             <h2 className="stitch-courses-title">Get started with templates</h2>
             <div className="stitch-carousel-nav">
@@ -508,14 +544,40 @@ export default function LandingPage({
             {stitchFeatures.map((feat) => (
               <div
                 key={feat.id}
-                className={`feature-card ${feat.size}`}
+                className={`feature-card ${feat.size} feat-${feat.type}`}
               >
                 {/* Background Blur Layer (Stitch Aesthetic) */}
-                <img src={feat.image} alt="" className="feature-bg-blur" />
+                {feat.type !== 'easy-edits' && (
+                  <img src={feat.image} alt="" className="feature-bg-blur" />
+                )}
 
-                {/* Sharp Floating Inner UI Module */}
+                {/* Sharp Floating Inner UI Module (Mockup Grid Reconstruction) */}
                 <div className="feature-card-inner">
-                  <img src={feat.image} alt={feat.title} className="feature-inner-img" />
+                  {feat.mockupGrid ? (
+                    <div className="mockup-grid">
+                      <div className="mockup-slot m1"><img src={feat.image} alt="" /></div>
+                      <div className="mockup-slot m2"><img src={feat.image} alt="" /></div>
+                      <div className="mockup-slot m3"><img src={feat.image} alt="" /></div>
+                    </div>
+                  ) : feat.promptBar ? (
+                    <div className="prompt-bar-mockup">
+                      <div className="figma-grid-lines">
+                        <div className="line-v v1"></div>
+                        <div className="line-v v2"></div>
+                        <div className="line-h h1"></div>
+                        <div className="line-h h2"></div>
+                      </div>
+                      <div className="prompt-bar-capsule">
+                        <span className="prompt-text">Enter destination</span>
+                        <div className="prompt-btn">
+                          <span className="material-symbols-outlined">keyboard_return</span>
+                          <span className="prompt-return-text">_RETURN</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <feat.Icon className="feature-inner-svg" />
+                  )}
                 </div>
 
                 {/* Text Layer (Bottom Left) */}
@@ -534,6 +596,7 @@ export default function LandingPage({
 
         {/* ─── STITCH MENTOR CTA SECTION (Vibe Aesthetic) ─── */}
         <section className="stitch-cta-section">
+          <InteractiveGrid />
           <div className="cta-aura-wrapper">
             <div className="cta-blob cta-blob-1"></div>
             <div className="cta-blob cta-blob-2"></div>
@@ -553,40 +616,14 @@ export default function LandingPage({
           </div>
         </section>
 
-        {/* ─── STITCH FAQ SECTION ─── */}
-        <section className="stitch-faq-section">
-          <div className="stitch-faq-container">
-            <h2 className="stitch-faq-title">Questions?</h2>
-            <div className="stitch-faq-list">
-              {stitchFaqs.map((faq, index) => (
-                <div
-                  key={faq.id}
-                  className={`stitch-faq-item ${activeFaq === index ? 'is-active' : ''}`}
-                  onClick={() => toggleFaq(index)}
-                >
-                  <div className="stitch-faq-header">
-                    <h3 className="stitch-faq-q">{faq.question}</h3>
-                    <span className="material-symbols-outlined faq-icon">
-                      {activeFaq === index ? 'close' : 'add'}
-                    </span>
-                  </div>
-                  {activeFaq === index && (
-                    <div className="stitch-faq-body">
-                      <p className="stitch-faq-a">{faq.answer}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
         {/* ─── STITCH MENTORS SECTION ─── */}
         <section className="stitch-mentors-section" id="mentors">
           <div className="stitch-mentors-container">
             <div className="stitch-mentors-header">
               <span className="feature-label">EXPERT GUIDANCE</span>
-              <h2 className="stitch-faq-title">Professional Mentors</h2>
+              <h2 className="stitch-faq-title">Professionals </h2>
               <p className="stitch-faq-a" style={{ maxWidth: '600px', marginBottom: '4rem' }}>
                 Our mentors are industry experts with 5+ years of real-world
                 experience at leading companies like Google, Meta, and Netflix.
@@ -601,10 +638,7 @@ export default function LandingPage({
                 { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff" }
               ].map((mentor) => (
                 <div key={mentor.id} className="mentor-stitch-card">
-                  {/* Layer 1: Blurred Backdrop */}
-                  <img src={mentor.image} alt="" className="mentor-bg-blur" />
-
-                  {/* Layer 2: Dot Grid Texture */}
+                  {/* Layer 1: Dot Grid Texture */}
                   <div className="card-dot-grid"></div>
 
                   {/* Layer 3: Floating Profile Module */}
@@ -633,6 +667,35 @@ export default function LandingPage({
 
 
 
+
+
+        {/* ─── STITCH FAQ SECTION ─── */}
+        <section className="stitch-faq-section" id="faq">
+          <div className="stitch-faq-container">
+            <h2 className="stitch-faq-title">Questions?</h2>
+            <div className="stitch-faq-list">
+              {stitchFaqs.map((faq, index) => (
+                <div
+                  key={faq.id}
+                  className={`stitch-faq-item ${activeFaq === index ? 'is-active' : ''}`}
+                  onClick={() => toggleFaq(index)}
+                >
+                  <div className="stitch-faq-header">
+                    <h3 className="stitch-faq-q">{faq.question}</h3>
+                    <span className="material-symbols-outlined faq-icon">
+                      {activeFaq === index ? 'close' : 'add'}
+                    </span>
+                  </div>
+                  {activeFaq === index && (
+                    <div className="stitch-faq-body">
+                      <p className="stitch-faq-a">{faq.answer}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
 
 
