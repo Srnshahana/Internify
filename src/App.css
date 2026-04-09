@@ -27248,14 +27248,17 @@ h1 span {
 /* Left Side - Visual */
 .login-premium-visual {
   position: relative;
-  background: linear-gradient(135deg, #41568c 0%, #41568c 100%);
+  background: #2356c6 !important;
+  /* Focused Vibrant Blue from CTA buttons */
   background-size: cover;
   background-position: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 60px;
+  padding: 50px;
   color: #ffffff;
+  overflow: hidden;
+  /* Added to contain canvas particles */
 }
 
 .login-premium-overlay {
@@ -27264,9 +27267,25 @@ h1 span {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(12, 165, 233, 0.6) 100%);
-  backdrop-filter: blur(5px);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.4) 0%, rgba(15, 23, 42, 0.2) 100%);
   z-index: 1;
+}
+
+.login-premium-visual canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.login-premium-brand,
+.login-premium-text {
+  position: relative;
+  z-index: 10;
+  /* Ensure text is above canvas and overlay */
 }
 
 .login-premium-brand,
@@ -27462,7 +27481,7 @@ h1 span {
 
 .login-button-modern {
   width: 100%;
-  background: linear-gradient(135deg, #41568c 0%, #41568c 100%);
+  background: #2356c6 !important;
   color: #ffffff;
   border: none;
   padding: 16px;
@@ -27470,14 +27489,14 @@ h1 span {
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(12, 165, 233, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
 }
 
 .login-button-modern:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2d3e6a 0%, #41568c 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(12, 165, 233, 0.35);
+  background: #1d4ed8 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
 }
 
 /* Social Login */
@@ -40317,13 +40336,15 @@ html {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 2000; /* Increased to stay above all sections */
+  z-index: 2000;
+  /* Increased to stay above all sections */
   background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(25px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
   padding: 14px 0;
   font-family: 'Inter', sans-serif;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.05); /* Precise light separator */
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+  /* Precise light separator */
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -40347,7 +40368,7 @@ html {
 .nav-logo-circle {
   width: 32px;
   height: 32px;
-  background: #2563eb;
+  background: #2356c6;
   border-radius: 50%;
   margin-right: 12px;
 }
@@ -40367,12 +40388,12 @@ html {
 }
 
 .nav-links-center a:hover {
-  color: #2563eb !important;
+  color: #2356c6 !important;
   transform: translateY(-1px);
 }
 
 .nav-links-center a:hover {
-  color: #2563eb !important;
+  color: #2356c6 !important;
   transform: translateY(-1px);
 }
 
@@ -40391,7 +40412,7 @@ html {
 }
 
 .nav-aux-link:hover {
-  color: #2563eb !important;
+  color: #2356c6 !important;
 }
 
 .nav-login-btn-new {
@@ -40408,8 +40429,8 @@ html {
 }
 
 .nav-login-btn-new:hover {
-  background: #2563eb !important;
-  border-color: #2563eb !important;
+  background: #2356c6 !important;
+  border-color: #2356c6 !important;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
 }
@@ -48163,7 +48184,8 @@ body {
 
 /* ─── STITCH FEATURES BENTO GRID ─── */
 .stitch-features-section {
-  padding: 120px 5% 220px 5%; /* Increased bottom padding for section spacing */
+  padding: 120px 5% 220px 5%;
+  /* Increased bottom padding for section spacing */
   background: #eef5ff !important;
   display: flex;
   justify-content: center;
@@ -48242,7 +48264,7 @@ body {
 }
 
 .feat-easy-edits .feature-label {
-  color: #2563eb !important;
+  color: #2356c6 !important;
   font-weight: 700;
   letter-spacing: 0.1em;
   font-size: 0.85rem;
@@ -48730,24 +48752,21 @@ body {
   text-align: center;
   background: #eef5ff;
   z-index: 10;
-  margin-top: -8rem; /* Increased overlap for smoother top blend */
+  margin-top: -8rem;
+  /* Increased overlap for smoother top blend */
   box-shadow: none !important;
   border: none !important;
   /* Multi-edge Feathered Mask for top and bottom transition */
-  -webkit-mask-image: linear-gradient(
-    to bottom, 
-    transparent 0%, 
-    black 7%, 
-    black 93%, 
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom, 
-    transparent 0%, 
-    black 7%, 
-    black 93%, 
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 7%,
+      black 93%,
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 7%,
+      black 93%,
+      transparent 100%);
 }
 
 /* Soft Transition Mask */
@@ -48780,7 +48799,8 @@ body {
   border-radius: 50%;
   filter: blur(140px);
   opacity: 0.35;
-  mix-blend-mode: soft-light; /* Changed from multiply to fix transition shadows */
+  mix-blend-mode: soft-light;
+  /* Changed from multiply to fix transition shadows */
   animation: auraRotate 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -48869,7 +48889,8 @@ body {
 .stitch-cta-btn {
   background: #ffffff;
   color: #0f172a;
-  border: 1px solid #0f172a; /* Darkened border to match inspiration */
+  border: 1px solid #0f172a;
+  /* Darkened border to match inspiration */
   padding: 1.25rem 3.5rem;
   border-radius: 100px;
   font-size: 1.15rem;
@@ -48918,11 +48939,15 @@ body {
 }
 
 /* Stitch FAQ Section */
+/* Master AI-Themed FAQ Section (Light Background + Dark Cards) */
 .stitch-faq-section {
   background: #eef5ff;
-  padding: 6rem 2rem;
+  padding: 5rem 2rem;
+  /* Reduced from 8rem */
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 10;
 }
 
 .stitch-faq-container {
@@ -48931,75 +48956,67 @@ body {
 }
 
 .stitch-faq-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  /* Level 2 Token */
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 500;
   color: #0f172a;
-  margin-bottom: 5rem;
+  margin-bottom: 2.5rem;
+  /* Reduced from 4rem */
   letter-spacing: -0.04em;
 }
 
 .stitch-faq-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 12px;
+  /* Professional tight spacing */
 }
 
 .stitch-faq-item {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  border-radius: 20px;
-  padding: 2rem 2.5rem;
+  background: #ffffff;
+  /* Light Glass Accordion Base */
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  /* Subtle dark border */
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
 }
 
 .stitch-faq-item:hover {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  background: #fcfcfd;
+  border-color: rgba(15, 23, 42, 0.1);
+  transform: translateY(-1px);
 }
 
 .stitch-faq-item.is-active {
   background: #ffffff;
-  border-color: #5b8dee;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
 
 .stitch-faq-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
 }
 
 .stitch-faq-q {
-  font-size: 1.35rem;
-  font-weight: 500;
-  color: #0f172a;
+  color: #0f172a !important;
+  /* Dark questions for light theme */
+  font-size: 1.1rem;
+  font-weight: 600;
   margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.faq-icon {
-  color: #666;
-  font-size: 28px;
-  transition: all 0.3s ease;
-}
-
-.stitch-faq-item.is-active .faq-icon {
-  color: #fff;
-  transform: rotate(0deg);
 }
 
 .stitch-faq-body {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  animation: faqFadeIn 0.5s ease forwards;
+  padding-top: 1.5rem;
+  animation: faq-slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes faqFadeIn {
+@keyframes faq-slide-down {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -49012,11 +49029,26 @@ body {
 }
 
 .stitch-faq-a {
-  color: #475569;
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  /* Body Token */
-  line-height: 1.7;
+  color: #475569 !important;
+  /* Slate gray for answers */
+  font-size: 1rem;
+  line-height: 1.6;
   margin: 0;
+}
+
+.faq-icon {
+  color: #0f172a !important;
+  /* Dark icons */
+  font-size: 1.2rem !important;
+  opacity: 0.5;
+  transition: transform 0.3s ease;
+}
+
+.is-active .faq-icon {
+  opacity: 1;
+  color: #2356c6 !important;
+  /* Blue accent when active */
+  transform: rotate(0deg);
 }
 
 /* Stitch Footer */
@@ -49104,10 +49136,12 @@ body {
 
 .mentor-stitch-card {
   position: relative;
-  background: #f8fafc !important; /* Premium off-white base from feature cards */
+  background: #f8fafc !important;
+  /* Premium off-white base from feature cards */
   background-image: radial-gradient(circle, rgba(15, 23, 42, 0.1) 1px, transparent 1px) !important;
   background-size: 24px 24px !important;
-  border-radius: 40px; /* Synchronized with feature card radius */
+  border-radius: 40px;
+  /* Synchronized with feature card radius */
   overflow: hidden;
   border: 1px solid rgba(15, 23, 42, 0.05) !important;
   display: flex;
@@ -49117,7 +49151,8 @@ body {
 }
 
 .mentor-stitch-card:hover {
-  transform: translateY(-5px); /* Synchronized with feature card hover */
+  transform: translateY(-5px);
+  /* Synchronized with feature card hover */
   border-color: rgba(37, 99, 235, 0.2) !important;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
 }
@@ -49221,10 +49256,11 @@ body {
 /* Professional Mentors Section (Light Glass Redesign) */
 .stitch-mentors-section {
   background: #eef5ff;
-  padding: 16rem 2rem; /* Doubled vertical padding for premium breathing room */
+  padding: 8rem 2rem;
+  /* Reduced from 16rem */
   position: relative;
   overflow: hidden;
-  margin-top: -80px; 
+  margin-top: -80px;
   z-index: 1;
   box-shadow: none !important;
   border: none !important;
@@ -49237,14 +49273,17 @@ body {
 
 .stitch-mentors-header {
   max-width: 800px;
-  margin-bottom: 5rem;
+  margin: 0 auto 3rem auto;
+  /* Reduced from 5rem */
+  text-align: center;
 }
 
 .stitch-mentors-header .feature-label {
-  color: #2563eb !important;
+  color: #2356c6 !important;
   font-weight: 700;
   letter-spacing: 0.1em;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+  /* Reduced from 1.5rem */
   display: block;
 }
 
@@ -49253,7 +49292,8 @@ body {
   font-size: clamp(1.8rem, 3.5vw, 2.5rem) !important;
   font-weight: 500 !important;
   letter-spacing: -0.02em !important;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
+  /* Reduced from 2rem */
   line-height: 1.1;
 }
 
@@ -49394,7 +49434,7 @@ body {
 }
 
 .feat-accelerator:hover .prompt-btn {
-  background: #2563eb;
+  background: #2356c6;
   color: white;
   border-color: #3b82f6;
   box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);

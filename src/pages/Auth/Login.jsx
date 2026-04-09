@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import supabase from '../../supabaseClient.js'
@@ -115,6 +115,108 @@ function Login({ onBack, onShowSignup, onLogin }) {
       }
     }
   };
+
+  // Interactive Particle Grid Component for Login Visual
+  const InteractiveGrid = () => {
+    const canvasRef = useRef(null)
+    const mouse = useRef({ x: -1000, y: -1000 })
+
+    useEffect(() => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      let animationFrameId
+      let particles = []
+
+      const resize = () => {
+        if (!canvas) return
+        const rect = canvas.parentNode.getBoundingClientRect()
+        const dpr = window.devicePixelRatio || 1
+        canvas.width = rect.width * dpr
+        canvas.height = rect.height * dpr
+        ctx.scale(dpr, dpr)
+        initParticles()
+      }
+
+      const initParticles = () => {
+        particles = []
+        const gap = 24
+        const rows = Math.ceil(canvas.height / gap)
+        const cols = Math.ceil(canvas.width / gap)
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            particles.push({
+              x: j * gap + gap / 2,
+              y: i * gap + gap / 2,
+              baseX: j * gap + gap / 2,
+              baseY: i * gap + gap / 2,
+              size: 1.2,
+              density: Math.random() * 20 + 10
+            })
+          }
+        }
+      }
+
+      const animate = () => {
+        const rect = canvas.getBoundingClientRect()
+        ctx.clearRect(0, 0, rect.width, rect.height)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)' // White particles for blue background
+
+        particles.forEach(p => {
+          let dx = mouse.current.x - p.x
+          let dy = mouse.current.y - p.y
+          let distance = Math.sqrt(dx * dx + dy * dy)
+          let forceDirectionX = dx / (distance || 1)
+          let forceDirectionY = dy / (distance || 1)
+          let maxDistance = 100
+          let force = (maxDistance - distance) / maxDistance
+          let directionX = forceDirectionX * force * p.density
+          let directionY = forceDirectionY * force * p.density
+
+          if (distance < maxDistance) {
+            p.x -= directionX
+            p.y -= directionY
+          } else {
+            if (p.x !== p.baseX) p.x -= (p.x - p.baseX) / 10
+            if (p.y !== p.baseY) p.y -= (p.y - p.baseY) / 10
+          }
+
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+          ctx.closePath()
+          ctx.fill()
+        })
+        animationFrameId = requestAnimationFrame(animate)
+      }
+
+      const handleMouseMove = (e) => {
+        const rect = canvas.getBoundingClientRect()
+        mouse.current.x = e.clientX - rect.left
+        mouse.current.y = e.clientY - rect.top
+      }
+
+      const handleMouseLeave = () => {
+        mouse.current.x = -1000
+        mouse.current.y = -1000
+      }
+
+      window.addEventListener('resize', resize)
+      canvas.addEventListener('mousemove', handleMouseMove)
+      canvas.addEventListener('mouseleave', handleMouseLeave)
+      resize()
+      animate()
+
+      return () => {
+        window.removeEventListener('resize', resize)
+        canvas.removeEventListener('mousemove', handleMouseMove)
+        canvas.removeEventListener('mouseleave', handleMouseLeave)
+        cancelAnimationFrame(animationFrameId)
+      }
+    }, [])
+
+    return <canvas ref={canvasRef} />
+  }
+
   return (
     <div className="login-page-premium">
       <MessageModal
@@ -126,8 +228,9 @@ function Login({ onBack, onShowSignup, onLogin }) {
         onConfirm={pendingAction}
       />
       <div className="login-premium-container">
-        {/* Left Side - Image/Brand */}
+        {/* Left Side - Image/Brand with Interactive Background */}
         <div className="login-premium-visual">
+          <InteractiveGrid />
           <div className="login-premium-overlay"></div>
           <div className="login-premium-brand">
             <span>Internify.</span>

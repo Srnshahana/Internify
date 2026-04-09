@@ -412,7 +412,7 @@ export default function LandingPage({
 
           {/* Auxiliary Links (Right) */}
           <div className="nav-links-right">
-            <button className="nav-aux-link" onClick={() => navigate('/mentor-onboarding')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Apply as Mentor</button>
+            <button className="nav-aux-link" onClick={() => navigate('/apply-mentor')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Apply as Mentor</button>
             <button className="nav-login-btn-new" onClick={() => navigate('/login')}>Log in</button>
           </div>
         </div>
@@ -624,7 +624,7 @@ export default function LandingPage({
             <div className="stitch-mentors-header">
               <span className="feature-label">EXPERT GUIDANCE</span>
               <h2 className="stitch-faq-title">Professionals </h2>
-              <p className="stitch-faq-a" style={{ maxWidth: '600px', marginBottom: '4rem' }}>
+              <p className="stitch-faq-a" style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
                 Our mentors are industry experts with 5+ years of real-world
                 experience at leading companies like Google, Meta, and Netflix.
               </p>
