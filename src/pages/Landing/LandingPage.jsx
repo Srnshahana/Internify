@@ -10,8 +10,8 @@ import '../../App.css'
 import dashboardImg from '../../assets/images/dashboard.png'
 import classroomImg from '../../assets/images/clasroom.png'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
-import featRings from '../../assets/images/feat-glass-rings.png'
-import featStaircase from '../../assets/images/feat-glass-stairs.png'
+import featMentors from '../../assets/images/feature-mentors.png'
+import featCareer from '../../assets/images/feature-career.png'
 // Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
@@ -76,7 +76,7 @@ const stitchFeatures = [
     type: 'guidance',
     description: 'Work on real-world projects with personal mentorship to bridge the theory-practice gap.',
     Icon: RingsIcon,
-    image: featRings,
+    image: featMentors,
     size: 'small'
   },
   {
@@ -93,7 +93,7 @@ const stitchFeatures = [
     title: 'Career support',
     type: 'accelerator',
     description: 'Get exclusive networking opportunities, mock interview prep, and end-to-end recruitment support.',
-    image: featStaircase,
+    image: featCareer,
     promptBar: true, /* Custom Visual for Stitch Design Mirror */
     size: 'large'
   }
