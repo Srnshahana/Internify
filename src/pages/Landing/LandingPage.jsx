@@ -1,9 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Lottie from 'lottie-react'
-import techBgJson from '../../assets/lottie/Technology backgrounds.json'
-import bannerJson from '../../assets/lottie/landingapgae-robot.json'
-import { ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, DataIcon, MarketingIcon, CloudIcon, SecurityIcon, WritingIcon, ExploreIcon, CalendarIcon, ClassroomIcon, ProfileIcon, FolderIcon, CertificateIcon, BoltIcon, TargetIcon, FinanceIcon, ProductIcon, MobileIcon, WebIcon, DevOpsIcon, NetworkIcon, RingsIcon, DiamondIcon, StaircaseIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
+import { NetworkIcon, RingsIcon, StaircaseIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
@@ -13,11 +10,8 @@ import '../../App.css'
 import dashboardImg from '../../assets/images/dashboard.png'
 import classroomImg from '../../assets/images/clasroom.png'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
-import featNode from '../../assets/images/feat-glass-node.png'
 import featRings from '../../assets/images/feat-glass-rings.png'
-import featDiamond from '../../assets/images/feat-glass-diamond.png'
 import featStaircase from '../../assets/images/feat-glass-stairs.png'
-import digitalMarketingImg from '../../assets/images/digital marketting.jpg'
 // Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
