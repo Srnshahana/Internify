@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { NetworkIcon, RingsIcon, StaircaseIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
+import { RingsIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
 import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
@@ -66,7 +66,6 @@ const stitchFeatures = [
     title: '5+ year experienced mentors ',
     type: 'easy-edits',
     description: 'Learn directly from industry experts with 5+ years of hands-on experience in their respective fields.',
-    Icon: NetworkIcon,
     image: classroomImg,
     mockupGrid: true,
     size: 'large'
@@ -94,7 +93,6 @@ const stitchFeatures = [
     title: 'Career support',
     type: 'accelerator',
     description: 'Get exclusive networking opportunities, mock interview prep, and end-to-end recruitment support.',
-    Icon: StaircaseIcon,
     image: featStaircase,
     promptBar: true, /* Custom Visual for Stitch Design Mirror */
     size: 'large'
@@ -569,8 +567,10 @@ export default function LandingPage({
                         </div>
                       </div>
                     </div>
-                  ) : (
+                  ) : feat.Icon ? (
                     <feat.Icon className="feature-inner-svg" />
+                  ) : (
+                    feat.image && <img src={feat.image} alt="" className="feature-inner-img" />
                   )}
                 </div>
 
