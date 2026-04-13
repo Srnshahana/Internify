@@ -160,7 +160,7 @@ function Login({ onBack, onShowSignup, onLogin }) {
       const animate = () => {
         const rect = canvas.getBoundingClientRect()
         ctx.clearRect(0, 0, rect.width, rect.height)
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)' // White particles for blue background
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)' // Dark particles for light background
 
         particles.forEach(p => {
           let dx = mouse.current.x - p.x

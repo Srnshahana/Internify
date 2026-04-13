@@ -132,7 +132,7 @@ const topCourses = [
 
 
 // Interactive Particle Grid Component
-const InteractiveGrid = () => {
+export const InteractiveGrid = ({ type = "repel" }) => {
   const canvasRef = useRef(null)
   const mouse = useRef({ x: -1000, y: -1000 })
 
@@ -203,8 +203,21 @@ const InteractiveGrid = () => {
         let directionY = forceDirectionY * force * p.density
 
         if (distance < maxDistance) {
-          p.x -= directionX
-          p.y -= directionY
+          if (type === "attract") {
+            p.x += directionX
+            p.y += directionY
+            
+            // Draw Constellation Line
+            ctx.beginPath()
+            ctx.moveTo(mouse.current.x, mouse.current.y)
+            ctx.lineTo(p.x, p.y)
+            ctx.strokeStyle = `rgba(15, 23, 42, ${0.12 * force})`
+            ctx.lineWidth = 0.5
+            ctx.stroke()
+          } else {
+            p.x -= directionX
+            p.y -= directionY
+          }
         } else {
           if (p.x !== p.baseX) {
             let dx = p.x - p.baseX
@@ -399,7 +412,7 @@ export default function LandingPage({
             <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Mentors</a>
             <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Courses</a>
             <a href="#faq">Resources</a>
-            <a href="#footer">About Us</a>
+            <a href="#faq">FAQ</a>
           </div>
 
           {/* Auxiliary Links (Right) */}
@@ -445,7 +458,7 @@ export default function LandingPage({
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: 'white',
+                    color: '#0f172a',
                     width: '100%',
                     outline: 'none',
                     fontSize: '1.2rem'
@@ -538,7 +551,7 @@ export default function LandingPage({
                 key={feat.id}
                 className={`feature-card ${feat.size} feat-${feat.type}`}
               >
-                {/* Background Blur Layer (Stitch Aesthetic) */}
+                Background Blur Layer (Stitch Aesthetic)
                 {feat.type !== 'easy-edits' && (
                   <img src={feat.image} alt="" className="feature-bg-blur" />
                 )}
@@ -560,7 +573,7 @@ export default function LandingPage({
                         <div className="line-h h2"></div>
                       </div>
                       <div className="prompt-bar-capsule">
-                        <span className="prompt-text">Enter destination</span>
+                        <span className="prompt-text">your dream internship</span>
                         <div className="prompt-btn">
                           <span className="material-symbols-outlined">keyboard_return</span>
                           <span className="prompt-return-text">_RETURN</span>
@@ -590,7 +603,7 @@ export default function LandingPage({
 
         {/* ─── STITCH MENTOR CTA SECTION (Vibe Aesthetic) ─── */}
         <section className="stitch-cta-section">
-          <InteractiveGrid />
+          <InteractiveGrid type="attract" />
           <div className="cta-aura-wrapper">
             <div className="cta-blob cta-blob-1"></div>
             <div className="cta-blob cta-blob-2"></div>
@@ -709,9 +722,10 @@ export default function LandingPage({
             <span className="lab-text">Internify Labs</span>
           </div>
           <div className="stitch-footer-links">
-            <a href="#privacy" className="footer-link">Privacy Notice</a>
-            <a href="#terms" className="footer-link">Terms & Privacy</a>
-            <a href="#notices" className="footer-link">Third Party Notices</a>
+            <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }} className="footer-link">Privacy Notice</a>
+            <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }} className="footer-link">Terms of Service</a>
+            <a href="#faq" className="footer-link">FAQ</a>
+            <a href="/contact-us" onClick={(e) => { e.preventDefault(); navigate('/contact-us'); }} className="footer-link">Contact Us</a>
           </div>
         </div>
       </footer>

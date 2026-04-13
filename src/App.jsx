@@ -11,6 +11,10 @@ import Payment from './pages/Learning/Payment.jsx'
 import LandingPage from './pages/Landing/LandingPage.jsx'
 import ApplyMentor from './pages/Explore/ApplyMentor.jsx'
 import Profile from './pages/Student/Profile.jsx'
+import NotFound from './pages/NotFound.jsx'
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy.jsx'
+import TermsConditions from './pages/Legal/TermsConditions.jsx'
+import ContactUs from './pages/Legal/ContactUs.jsx'
 import { courses, mentors } from './data/staticData.js'
 import supabase from './supabaseClient'
 import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
@@ -480,7 +484,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
