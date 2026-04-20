@@ -61,6 +61,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
               setActivePage('Home');
               setSearchQuery('');
             }}
+            isLoading={loading}
           />
         )
       case 'Profile':

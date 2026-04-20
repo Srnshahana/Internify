@@ -11,7 +11,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   const { enrolledCourses } = useDashboardData()
 
   // Try to find matching course in context (taughtCourses)
-  const contextCourse = enrolledCourses?.find(c => c.course_id === course?.course_id || c.id === course?.id)
+  const contextCourse = enrolledCourses?.find(c => course?.id ? (String(c.id) === String(course.id)) : (String(c.course_id) === String(course?.course_id)))
   const [courseDetails, setCourseDetails] = useState(contextCourse || course)
   const [loading, setLoading] = useState(true)
 

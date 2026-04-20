@@ -48,7 +48,8 @@ function Assessments({ onBack }) {
         .select(`
           *,
           assessment_submissions (count),
-          courses (title)
+          courses (title),
+          student_details (name)
         `)
         .eq('mentor_id', mentorId)
         .order('created_at', { ascending: false })
@@ -291,7 +292,12 @@ function Assessments({ onBack }) {
                 <div className="assessment-header">
                   <div>
                     <h3 className="assessment-title">{assessment.title}</h3>
-                    <p className="assessment-course">{assessment.courses?.title || 'General'}</p>
+                    <p className="assessment-course">
+                      {assessment.courses?.title || 'General'}
+                      {assessment.student_details?.name && (
+                        <span style={{ color: '#0ea5e9', fontWeight: '600' }}> • {assessment.student_details.name}</span>
+                      )}
+                    </p>
                   </div>
                 </div>
                 <div className="assessment-meta">

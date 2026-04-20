@@ -20,7 +20,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   // Use course.sessions (new) or course.classes (legacy)
   const initialSessions = course?.sessions || course?.classes || [
-    { id: 1, title: 'Introduction & Setup', status: 'completed' },
+    { id: 1, title: 'Introduction & Setup', status: 'upcoming' },
     { id: 2, title: 'Components & Props', status: 'upcoming' },
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
   ]
@@ -31,6 +31,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     initialSessions[0]?.id || 1
 
   const [activeSessionId, setActiveSessionId] = useState(firstPendingId)
+  const [subscriptionStatus, setSubscriptionStatus] = useState('connecting')
+
+  // EFFECT: Sync activeSessionId with real data when course.sessions arrives
+  useEffect(() => {
+    if (course?.sessions?.length > 0) {
+      const realFirstId = course.sessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
+                         course.sessions[0]?.id
+      if (realFirstId && realFirstId !== activeSessionId) {
+        console.log('🎯 [Student] Syncing activeSessionId to real database ID:', realFirstId)
+        setActiveSessionId(realFirstId)
+      }
+    }
+  }, [course?.sessions])
   const [messageInput, setMessageInput] = useState('')
 
   // Removed mentor assessment creation state
@@ -42,6 +55,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false)
   const [messages, setMessages] = useState([])
+  const channelRef = useRef(null)
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
 
@@ -89,7 +103,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const { data, error } = await supabase
         .from('scheduled_classes')
         .select('*, courses(title), reschedule_request, reschedule_role, rescheduled_date, reschedule_reason, is_complete')
-        .eq('course_id', courseId)
+        .eq('student_id', Number(currentUserId)) // ISOLATION: Only show sessions for this student
         .order('scheduled_date', { ascending: true })
 
       if (error) throw error
@@ -153,7 +167,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const { data: assessments, error: asmError } = await supabase
         .from('assessments')
         .select('*')
-        .eq('course_id', course?.course_id || course?.id)
+        .eq('student_id', Number(currentUserId)) // ISOLATION: Only show assessments for this student
         .order('created_at', { ascending: false })
 
       if (asmError) throw asmError
@@ -254,8 +268,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
             }
           })
-          console.log('🗺️ Mapped messages:', mapped)
-          setMessages(mapped)
+          setMessages(prev => {
+            const fetchedIds = new Set(data.map(m => String(m.id)))
+            const pendingRealtime = prev.filter(m => !fetchedIds.has(String(m.id)))
+            
+            const combined = [...mapped, ...pendingRealtime].sort((a, b) => {
+              const dateA = a.created_at ? new Date(a.created_at).getTime() : (typeof a.id === 'number' ? a.id : 0)
+              const dateB = b.created_at ? new Date(b.created_at).getTime() : (typeof b.id === 'number' ? b.id : 0)
+              return dateA - dateB
+            })
+            
+            console.log(`🔄 Merged ${mapped.length} fetched with ${pendingRealtime.length} pending messages for Student`)
+            return combined
+          })
         }
       } catch (err) {
         console.error('❌ Catch block fetching chat history:', err)
@@ -269,80 +294,58 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   useEffect(() => {
     if (!chatId) return
 
-    console.log('📡 Setting up subscription for chatId:', chatId)
+    console.log('📡 Setting up student subscription for chatId:', chatId)
     const channel = supabase
-      .channel(`chat:${chatId}`)
+      .channel(`chat:${chatId}`, {
+        config: {
+          broadcast: { self: false },
+          presence: { key: currentUserId }
+        }
+      })
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*', 
         schema: 'public',
-        table: 'messages',
-        filter: `chat_id=eq.${chatId}`
+        table: 'messages'
       }, (payload) => {
-        console.log('📥 NEW Realtime payload received:', payload)
-        const newMessage = payload.new
+        const newMessage = payload.new || payload.old
+        if (String(newMessage?.chat_id) !== String(chatId)) return
 
         setMessages((prev) => {
-          // 1. Check if ID exists
-          if (prev.some(m => m.id === newMessage.id)) return prev
-
-          // 2. Check if this payload is the "real" version of an optimistic message
-          // (Matching content and sender and recent timestamp)
-          const optimisticMatchIndex = prev.findIndex(m =>
-            m.content === newMessage.content &&
-            m.sender_id === newMessage.sender_id &&
-            typeof m.id === 'number' && m.id > 1700000000000 // Simple check for Date.now() style IDs
-          )
-
-          // Infer type from file_url or content if type is missing from DB
-          let inferredType = newMessage.type || 'text'
-
-          if (newMessage.type === 'assessment') {
-            try {
-              const details = JSON.parse(newMessage.content)
-              Object.assign(newMessage, details)
-            } catch (e) { }
-            inferredType = 'assessment'
+          // Deduplicate by database ID or temp trace ID
+          if (prev.some(m => String(m.id) === String(newMessage.id) || (m.tempId && m.tempId === newMessage.tempId))) {
+            return prev.map(m => (m.tempId === newMessage.tempId || String(m.id) === String(newMessage.id)) ? { ...m, ...newMessage, tempId: undefined } : m)
           }
 
-          if (!newMessage.type && newMessage.file_url) {
-            const ext = newMessage.file_url.split('.').pop().toLowerCase()
-            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) inferredType = 'image'
-            else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext)) inferredType = 'file'
-          } else if (!newMessage.type && (newMessage.content || '').startsWith('http')) {
-            inferredType = 'link'
+          if (payload.eventType === 'INSERT') {
+            const msgForState = {
+              ...newMessage,
+              from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+              type: newMessage.type || 'text',
+              time: newMessage.created_at ? new Date(newMessage.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+            }
+            return [...prev, msgForState].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
           }
-
-          const msgForState = {
-            ...newMessage,
-            from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
-            type: inferredType,
-            time: newMessage.created_at ? new Date(newMessage.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
-          }
-
-          if (optimisticMatchIndex !== -1) {
-            console.log('🔄 Replacing optimistic message with real DB entry')
-            const newState = [...prev]
-            // Keep optimistic type if it was specific (like study_material) and DB is generic 'file'
-            // or just strictly use DB state? Let's Merge carefully.
-            newState[optimisticMatchIndex] = { ...newState[optimisticMatchIndex], ...msgForState }
-            return newState
-
-          }
-
-          console.log('✅ Appending new realtime message')
-          return [...prev, msgForState]
+          return prev
+        })
+      })
+      .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
+        console.log('🚀 Student Broadcast received:', payload)
+        setMessages((prev) => {
+          if (prev.some(m => (m.tempId && m.tempId === payload.tempId) || String(m.id) === String(payload.id))) return prev
+          return [...prev, payload].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
         })
       })
       .subscribe((status) => {
-        console.log('📡 Subscription status update:', status)
-        if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Realtime channel error. Check Supabase DB Replication settings.')
-        }
+        console.log(`🔌 Student Subscription status for chat ${chatId}:`, status)
+        setSubscriptionStatus(status)
       })
 
+    channelRef.current = channel
+
     return () => {
-      console.log('🔌 Cleaning up subscription for chatId:', chatId)
+      console.log('🔌 Student Cleaning up subscription for chatId:', chatId)
       supabase.removeChannel(channel)
+      channelRef.current = null
     }
   }, [chatId])
 
@@ -648,37 +651,57 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       return
     }
 
+    const trimmedInput = messageInput.trim()
+    // Detect Google Meet links
+    if (trimmedInput.includes('meet.google.com')) {
+      console.log('📽️ Google Meet link detected. Blocking student from sending.')
+      setMessageInput('')
+      showModal('Action Resticted', 'Only mentors can schedule and share meeting links through the official classroom scheduler.', 'warning')
+      return
+    }
+
     if (!chatId) {
       console.error('❌ Cannot send message: chatId is missing. Course data:', course)
       showModal('Entry Error', 'Chat session not found. Please re-enter the classroom.', 'error')
       return
     }
 
+    const tempId = Date.now().toString()
     const pendingMsg = {
       chat_id: Number(chatId),
       session_id: Number(activeSessionId),
       role: userRole === 'mentor' ? 'mentor' : 'student',
       sender_id: Number(currentUserId),
       content: messageInput.trim(),
-      read: false
+      read: false,
+      tempId: tempId
     }
 
-    console.log('📤 Sending to DB (type is omitted for DB):', pendingMsg)
-
-    // Optimistically update the UI so the user sees it immediately
+    // Optimistically update the UI 
     const optimisticMsg = {
       ...pendingMsg,
-      id: Date.now(), // temporary ID
-      from: 'learner', // Right side for YOU
-      type: 'text',   // REQUIRED for UI to show the text
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+      id: tempId, 
+      from: 'learner', 
+      type: 'text',   
+      time: getCurrentTime()
     }
     setMessages(prev => [...prev, optimisticMsg])
+    setMessageInput('')
 
-    // Insert to Supabase
+    // 1. BROADCAST (Instant Path)
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'chat-message',
+        payload: { ...optimisticMsg, from: 'mentor' } // Recipient sees message from 'mentor' (the other side)
+      })
+    }
+
+    // 2. SUPABASE DB (Persistent Path)
+    const { tempId: _temp, ...dbMsg } = pendingMsg
     const { error } = await supabase
       .from('messages')
-      .insert([pendingMsg])
+      .insert([dbMsg])
 
     if (error) {
       console.error('❌ Error sending message to Supabase:', error)
@@ -1282,7 +1305,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
 
-        <div className="live-header-title-v2">{classroom.title}</div>
+        <div className="live-header-title-v2">{classroom.classroom_name || classroom.title}</div>
+
+        <div className={`live-status-badge ${subscriptionStatus}`}>
+          <div className="status-dot"></div>
+          {subscriptionStatus === 'SUBSCRIBED' ? 'Live' : 
+           subscriptionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
           <button
@@ -1627,23 +1656,54 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           </form>
           {showAttachOptions && (
-            <div className="live-attach-sheet-v2">
-              <button className="attach-option-btn" onClick={handleAttachDocument}>
-                <div className="attach-icon-circle purple">
-                  <span className="material-symbols-outlined">description</span>
-                </div>
-                <span className="attach-label">Document</span>
-              </button>
+            <>
+              <div 
+                className="attach-options-overlay" 
+                onClick={() => setShowAttachOptions(false)}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 45,
+                  background: 'transparent'
+                }}
+              />
+              <div className="live-attach-sheet-v2" style={{ zIndex: 50 }}>
+                <button 
+                  type="button"
+                  className="attach-close-btn" 
+                  onClick={() => setShowAttachOptions(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                </button>
 
-              <button className="attach-option-btn" onClick={handleAttachImage}>
-                <div className="attach-icon-circle pink">
-                  <span className="material-symbols-outlined">image</span>
-                </div>
-                <span className="attach-label">Gallery</span>
-              </button>
+                <button className="attach-option-btn" onClick={handleAttachDocument}>
+                  <div className="attach-icon-circle purple">
+                    <span className="material-symbols-outlined">description</span>
+                  </div>
+                  <span className="attach-label">Document</span>
+                </button>
 
-
-            </div>
+                <button className="attach-option-btn" onClick={handleAttachImage}>
+                  <div className="attach-icon-circle pink">
+                    <span className="material-symbols-outlined">image</span>
+                  </div>
+                  <span className="attach-label">Gallery</span>
+                </button>
+              </div>
+            </>
           )}
 
           {/* Hidden File Inputs */}

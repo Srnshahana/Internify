@@ -16,7 +16,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
   console.log(currentUserId)
   // Use course.sessions (new) or course.classes (legacy)
   const initialSessions = course?.sessions || course?.classes || [
-    { id: 1, title: 'Introduction & Setup', status: 'completed' },
+    { id: 1, title: 'Introduction & Setup', status: 'upcoming' },
     { id: 2, title: 'Components & Props', status: 'upcoming' },
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
   ]

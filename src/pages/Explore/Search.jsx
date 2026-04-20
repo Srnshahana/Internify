@@ -595,7 +595,7 @@ export default function Explore({
           </div>
         ) : (
           <div className="explore-grid">
-            {isLoading ? (
+            {(isLoading || loading) ? (
               <div className="loading-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px' }}>
                 <Loading size="100px" />
                 <p>Loading mentors...</p>
@@ -704,7 +704,7 @@ export default function Explore({
               })
             ) : (
               <div className="no-results">
-                <p>No mentors found for this course.</p>
+                <p>{selectedCourseId ? "No mentors found for this course." : "No mentors found."}</p>
               </div>
             )}
           </div>

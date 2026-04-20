@@ -4,6 +4,16 @@ import supabase from '../../supabaseClient'
 import Loading from '../Loading'
 import '../../App.css'
 
+const SKILLS_BY_FIELD = {
+    'Programming': ['React', 'Node.js', 'Python', 'JavaScript', 'HTML/CSS', 'SQL', 'Git', 'TypeScript'],
+    'Design': ['UI/UX Design', 'Figma', 'Adobe XD', 'Photoshop', 'Branding', 'Prototyping'],
+    'Business': ['Project Management', 'Business Strategy', 'Data Analysis', 'Finance', 'Agile', 'Sales'],
+    'Marketing': ['Digital Marketing', 'SEO', 'Content Creation', 'Social Media', 'Copywriting', 'Analytics'],
+    'Personal Skills': ['Leadership', 'Communication', 'Problem Solving', 'Public Speaking', 'Time Management', 'Teamwork']
+};
+
+const DEFAULT_SKILLS = ['Communication', 'Teamwork', 'Problem Solving', 'Time Management'];
+
 const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -110,6 +120,18 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
         })
     }
 
+    const getAvailableSkills = () => {
+        if (!formData.career_fields || formData.career_fields.length === 0) {
+            return DEFAULT_SKILLS;
+        }
+        const skillsSet = new Set();
+        formData.career_fields.forEach(field => {
+            const fieldSkills = SKILLS_BY_FIELD[field] || [];
+            fieldSkills.forEach(skill => skillsSet.add(skill));
+        });
+        return Array.from(skillsSet);
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true)
         try {
@@ -170,42 +192,45 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                             </div>
                         </div>
 
-                        <div className="onboarding-form-group">
-                            <label>Full Name</label>
+                        <div className="onboarding-form-group floating-label-group">
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                placeholder="Ex: John Doe"
+                                placeholder=" "
                                 className="onboarding-input"
+                                id="onboarding-name"
                             />
+                            <label htmlFor="onboarding-name" className="floating-label">Full Name</label>
                         </div>
-                        <div className="onboarding-form-group">
-                            <label>Location / Address</label>
+                        <div className="onboarding-form-group floating-label-group">
                             <input
                                 type="text"
                                 name="address"
                                 value={formData.address}
                                 onChange={handleChange}
-                                placeholder="Ex: New York, USA"
+                                placeholder=" "
                                 className="onboarding-input"
+                                id="onboarding-address"
                             />
+                            <label htmlFor="onboarding-address" className="floating-label">Location / Address</label>
                         </div>
-                        <div className="onboarding-form-group">
-                            <label>About You</label>
+                        <div className="onboarding-form-group floating-label-group">
                             <textarea
                                 name="about"
                                 value={formData.about}
                                 onChange={handleChange}
-                                placeholder="A brief summary of your background and goals..."
+                                placeholder=" "
                                 className="onboarding-textarea"
+                                id="onboarding-about"
                             />
+                            <label htmlFor="onboarding-about" className="floating-label">About You</label>
                         </div>
                         <div className="onboarding-form-group">
                             <label>Career Fields (Select all that apply)</label>
                             <div className="onboarding-tags-container">
-                                {['Marketing', 'Content Creation', 'Development', 'Design', 'Management'].map(field => (
+                                {['Programming', 'Design', 'Business', 'Marketing', 'Personal Skills'].map(field => (
                                     <button
                                         key={field}
                                         type="button"
@@ -227,28 +252,40 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                         {formData.education.map((edu, idx) => (
                             <div key={idx} className="onboarding-repeatable-card">
                                 {idx > 0 && <button className="remove-item-btn" onClick={() => removeArrayItem('education', idx)}>×</button>}
-                                <input
-                                    type="text"
-                                    placeholder="College / University Name"
-                                    value={edu.college}
-                                    onChange={(e) => handleArrayChange('education', idx, 'college', e.target.value)}
-                                    className="onboarding-input"
-                                />
+                                <div className="onboarding-form-group floating-label-group">
+                                    <input
+                                        type="text"
+                                        placeholder=" "
+                                        value={edu.college}
+                                        onChange={(e) => handleArrayChange('education', idx, 'college', e.target.value)}
+                                        className="onboarding-input"
+                                        id={`edu-college-${idx}`}
+                                    />
+                                    <label htmlFor={`edu-college-${idx}`} className="floating-label">College / University Name</label>
+                                </div>
                                 <div className="onboarding-input-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Degree (e.g. BBA Marketing)"
-                                        value={edu.degree}
-                                        onChange={(e) => handleArrayChange('education', idx, 'degree', e.target.value)}
-                                        className="onboarding-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Graduation Year"
-                                        value={edu.year}
-                                        onChange={(e) => handleArrayChange('education', idx, 'year', e.target.value)}
-                                        className="onboarding-input"
-                                    />
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="text"
+                                            placeholder=" "
+                                            value={edu.degree}
+                                            onChange={(e) => handleArrayChange('education', idx, 'degree', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`edu-degree-${idx}`}
+                                        />
+                                        <label htmlFor={`edu-degree-${idx}`} className="floating-label">Degree</label>
+                                    </div>
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="date"
+                                            placeholder=" "
+                                            value={edu.year}
+                                            onChange={(e) => handleArrayChange('education', idx, 'year', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`edu-year-${idx}`}
+                                        />
+                                        <label htmlFor={`edu-year-${idx}`} className="floating-label">Graduation Date</label>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -265,49 +302,73 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                         {formData.internships.map((intern, idx) => (
                             <div key={idx} className="onboarding-repeatable-card">
                                 {idx > 0 && <button className="remove-item-btn" onClick={() => removeArrayItem('internships', idx)}>×</button>}
-                                <input
-                                    type="text"
-                                    placeholder="Job Title"
-                                    value={intern.job_title}
-                                    onChange={(e) => handleArrayChange('internships', idx, 'job_title', e.target.value)}
-                                    className="onboarding-input"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Company"
-                                    value={intern.company}
-                                    onChange={(e) => handleArrayChange('internships', idx, 'company', e.target.value)}
-                                    className="onboarding-input"
-                                />
-                                <div className="onboarding-input-row">
+                                <div className="onboarding-form-group floating-label-group">
                                     <input
                                         type="text"
-                                        placeholder="Start Date"
-                                        value={intern.start_date}
-                                        onChange={(e) => handleArrayChange('internships', idx, 'start_date', e.target.value)}
+                                        placeholder=" "
+                                        value={intern.job_title}
+                                        onChange={(e) => handleArrayChange('internships', idx, 'job_title', e.target.value)}
                                         className="onboarding-input"
+                                        id={`intern-title-${idx}`}
                                     />
-                                    <input
-                                        type="text"
-                                        placeholder="End Date"
-                                        value={intern.end_date}
-                                        onChange={(e) => handleArrayChange('internships', idx, 'end_date', e.target.value)}
-                                        className="onboarding-input"
-                                    />
+                                    <label htmlFor={`intern-title-${idx}`} className="floating-label">Job Title</label>
                                 </div>
-                                <input
-                                    type="text"
-                                    placeholder="Location (e.g. San Francisco, CA)"
-                                    value={intern.location}
-                                    onChange={(e) => handleArrayChange('internships', idx, 'location', e.target.value)}
-                                    className="onboarding-input"
-                                />
-                                <textarea
-                                    placeholder="Description of your responsibilities..."
-                                    value={intern.description}
-                                    onChange={(e) => handleArrayChange('internships', idx, 'description', e.target.value)}
-                                    className="onboarding-textarea"
-                                />
+                                <div className="onboarding-form-group floating-label-group">
+                                    <input
+                                        type="text"
+                                        placeholder=" "
+                                        value={intern.company}
+                                        onChange={(e) => handleArrayChange('internships', idx, 'company', e.target.value)}
+                                        className="onboarding-input"
+                                        id={`intern-company-${idx}`}
+                                    />
+                                    <label htmlFor={`intern-company-${idx}`} className="floating-label">Company</label>
+                                </div>
+                                <div className="onboarding-input-row">
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="date"
+                                            placeholder=" "
+                                            value={intern.start_date}
+                                            onChange={(e) => handleArrayChange('internships', idx, 'start_date', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`intern-start-${idx}`}
+                                        />
+                                        <label htmlFor={`intern-start-${idx}`} className="floating-label">Start Date</label>
+                                    </div>
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="date"
+                                            placeholder=" "
+                                            value={intern.end_date}
+                                            onChange={(e) => handleArrayChange('internships', idx, 'end_date', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`intern-end-${idx}`}
+                                        />
+                                        <label htmlFor={`intern-end-${idx}`} className="floating-label">End Date</label>
+                                    </div>
+                                </div>
+                                <div className="onboarding-form-group floating-label-group">
+                                    <input
+                                        type="text"
+                                        placeholder=" "
+                                        value={intern.location}
+                                        onChange={(e) => handleArrayChange('internships', idx, 'location', e.target.value)}
+                                        className="onboarding-input"
+                                        id={`intern-location-${idx}`}
+                                    />
+                                    <label htmlFor={`intern-location-${idx}`} className="floating-label">Location (e.g. San Francisco, CA)</label>
+                                </div>
+                                <div className="onboarding-form-group floating-label-group">
+                                    <textarea
+                                        placeholder=" "
+                                        value={intern.description}
+                                        onChange={(e) => handleArrayChange('internships', idx, 'description', e.target.value)}
+                                        className="onboarding-textarea"
+                                        id={`intern-desc-${idx}`}
+                                    />
+                                    <label htmlFor={`intern-desc-${idx}`} className="floating-label">Description of your responsibilities...</label>
+                                </div>
                             </div>
                         ))}
                         <button className="onboarding-add-btn" onClick={() => addArrayItem('internships', { company: '', job_title: '', start_date: '', end_date: '', location: '', description: '' })}>
@@ -324,7 +385,7 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                         <div className="onboarding-form-group">
                             <label>Skills</label>
                             <div className="onboarding-tags-container">
-                                {['Digital Marketing', 'SEO', 'Content Creation', 'React', 'Node.js', 'UI/UX Design'].map(skill => (
+                                {getAvailableSkills().map(skill => (
                                     <button
                                         key={skill}
                                         type="button"
@@ -342,26 +403,38 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                             {formData.projects.map((proj, idx) => (
                                 <div key={idx} className="onboarding-repeatable-card">
                                     {idx > 0 && <button className="remove-item-btn" onClick={() => removeArrayItem('projects', idx)}>×</button>}
-                                    <input
-                                        type="text"
-                                        placeholder="Project Title"
-                                        value={proj.title}
-                                        onChange={(e) => handleArrayChange('projects', idx, 'title', e.target.value)}
-                                        className="onboarding-input"
-                                    />
-                                    <textarea
-                                        placeholder="Description of the project..."
-                                        value={proj.description}
-                                        onChange={(e) => handleArrayChange('projects', idx, 'description', e.target.value)}
-                                        className="onboarding-textarea"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Project Link"
-                                        value={proj.link}
-                                        onChange={(e) => handleArrayChange('projects', idx, 'link', e.target.value)}
-                                        className="onboarding-input"
-                                    />
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="text"
+                                            placeholder=" "
+                                            value={proj.title}
+                                            onChange={(e) => handleArrayChange('projects', idx, 'title', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`proj-title-${idx}`}
+                                        />
+                                        <label htmlFor={`proj-title-${idx}`} className="floating-label">Project Title</label>
+                                    </div>
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <textarea
+                                            placeholder=" "
+                                            value={proj.description}
+                                            onChange={(e) => handleArrayChange('projects', idx, 'description', e.target.value)}
+                                            className="onboarding-textarea"
+                                            id={`proj-desc-${idx}`}
+                                        />
+                                        <label htmlFor={`proj-desc-${idx}`} className="floating-label">Description of the project...</label>
+                                    </div>
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="text"
+                                            placeholder=" "
+                                            value={proj.link}
+                                            onChange={(e) => handleArrayChange('projects', idx, 'link', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`proj-link-${idx}`}
+                                        />
+                                        <label htmlFor={`proj-link-${idx}`} className="floating-label">Project Link</label>
+                                    </div>
                                 </div>
                             ))}
                             <button className="onboarding-add-btn" onClick={() => addArrayItem('projects', { title: '', description: '', link: '' })}>
@@ -374,35 +447,51 @@ const OnboardingModal = ({ user, profile, onComplete, onClose }) => {
                             {formData.certifications.map((cert, idx) => (
                                 <div key={idx} className="onboarding-repeatable-card">
                                     {idx > 0 && <button className="remove-item-btn" onClick={() => removeArrayItem('certifications', idx)}>×</button>}
-                                    <input
-                                        type="text"
-                                        placeholder="Certificate Name"
-                                        value={cert.certificate_name}
-                                        onChange={(e) => handleArrayChange('certifications', idx, 'certificate_name', e.target.value)}
-                                        className="onboarding-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Issuer (e.g. Google, Internify)"
-                                        value={cert.issuer}
-                                        onChange={(e) => handleArrayChange('certifications', idx, 'issuer', e.target.value)}
-                                        className="onboarding-input"
-                                    />
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="text"
+                                            placeholder=" "
+                                            value={cert.certificate_name}
+                                            onChange={(e) => handleArrayChange('certifications', idx, 'certificate_name', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`cert-name-${idx}`}
+                                        />
+                                        <label htmlFor={`cert-name-${idx}`} className="floating-label">Certificate Name</label>
+                                    </div>
+                                    <div className="onboarding-form-group floating-label-group">
+                                        <input
+                                            type="text"
+                                            placeholder=" "
+                                            value={cert.issuer}
+                                            onChange={(e) => handleArrayChange('certifications', idx, 'issuer', e.target.value)}
+                                            className="onboarding-input"
+                                            id={`cert-issuer-${idx}`}
+                                        />
+                                        <label htmlFor={`cert-issuer-${idx}`} className="floating-label">Issuer (e.g. Google, Internify)</label>
+                                    </div>
                                     <div className="onboarding-input-row">
-                                        <input
-                                            type="text"
-                                            placeholder="Issued Date"
-                                            value={cert.issued_date}
-                                            onChange={(e) => handleArrayChange('certifications', idx, 'issued_date', e.target.value)}
-                                            className="onboarding-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Credential ID"
-                                            value={cert.credential_id}
-                                            onChange={(e) => handleArrayChange('certifications', idx, 'credential_id', e.target.value)}
-                                            className="onboarding-input"
-                                        />
+                                        <div className="onboarding-form-group floating-label-group">
+                                            <input
+                                                type="date"
+                                                placeholder=" "
+                                                value={cert.issued_date}
+                                                onChange={(e) => handleArrayChange('certifications', idx, 'issued_date', e.target.value)}
+                                                className="onboarding-input"
+                                                id={`cert-date-${idx}`}
+                                            />
+                                            <label htmlFor={`cert-date-${idx}`} className="floating-label">Issued Date</label>
+                                        </div>
+                                        <div className="onboarding-form-group floating-label-group">
+                                            <input
+                                                type="text"
+                                                placeholder=" "
+                                                value={cert.credential_id}
+                                                onChange={(e) => handleArrayChange('certifications', idx, 'credential_id', e.target.value)}
+                                                className="onboarding-input"
+                                                id={`cert-id-${idx}`}
+                                            />
+                                            <label htmlFor={`cert-id-${idx}`} className="floating-label">Credential ID</label>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

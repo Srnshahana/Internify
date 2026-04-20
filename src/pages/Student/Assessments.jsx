@@ -56,7 +56,7 @@ function StudentAssessments({ onBack }) {
         return
       }
 
-      // 2. Get assessments for these courses
+      // 2. Get assessments for these courses (isolated by student_id)
       const { data: assessmentsData, error: assessError } = await supabase
         .from('assessments')
         .select(`
@@ -67,7 +67,7 @@ function StudentAssessments({ onBack }) {
             assessment_attachments (*)
           )
         `)
-        .in('course_id', courseIds)
+        .eq('student_id', Number(studentId)) // CRITICAL: Isolates student assessments
         .order('created_at', { ascending: false })
 
       if (assessError) throw assessError

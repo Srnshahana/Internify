@@ -80,7 +80,15 @@ export const DashboardDataProvider = ({ children }) => {
                     .order('scheduled_date', { ascending: true })
 
                 if (scheduledError) console.error('Error fetching mentor scheduled classes:', scheduledError)
-                setScheduledSessions(mentorScheduled || [])
+                
+                const enrichedMentorScheduled = (mentorScheduled || []).map(session => {
+                    const match = (enrollments || []).find(e => 
+                        String(e.course_id) === String(session.course_id) && 
+                        String(e.student_id) === String(session.student_id)
+                    )
+                    return { ...session, classroom_name: match?.classroom_name }
+                })
+                setScheduledSessions(enrichedMentorScheduled)
 
                 // Transform mentor courses with student context
                 const transformed = (enrollments || []).map((enrollment, idx) => {
@@ -198,20 +206,23 @@ export const DashboardDataProvider = ({ children }) => {
                     .eq('student_id', authId)
                 if (progressError) console.error('Error fetching student session progress:', progressError)
 
-                // 4. Fetch scheduled classes for student
-                const courseIds = (enrollments || []).map(c => c.course_id)
-                if (courseIds.length > 0) {
-                    const { data: studentScheduled, error: scheduledError } = await supabase
-                        .from('scheduled_classes')
-                        .select('*, courses(title), mentors_details(name)')
-                        .in('course_id', courseIds)
-                        .order('scheduled_date', { ascending: true })
+                // 4. Fetch scheduled classes for student (strictly isolated by student_id)
+                const studentAuthId = Number(authId)
+                const { data: studentScheduled, error: scheduledError } = await supabase
+                    .from('scheduled_classes')
+                    .select('*, courses(title), mentors_details(name)')
+                    .eq('student_id', studentAuthId)
+                    .order('scheduled_date', { ascending: true })
 
-                    if (scheduledError) console.error('Error fetching student scheduled classes:', scheduledError)
-                    setScheduledSessions(studentScheduled || [])
-                } else {
-                    setScheduledSessions([])
-                }
+                if (scheduledError) console.error('Error fetching student scheduled classes:', scheduledError)
+                
+                const enrichedStudentScheduled = (studentScheduled || []).map(session => {
+                    const match = (enrollments || []).find(e => 
+                        String(e.course_id) === String(session.course_id)
+                    )
+                    return { ...session, classroom_name: match?.classroom_name }
+                })
+                setScheduledSessions(enrichedStudentScheduled)
 
                 const transformedCourses = (enrollments || []).map((enrollment, idx) => {
                     const course = enrollment.courses || {}
@@ -267,6 +278,31 @@ export const DashboardDataProvider = ({ children }) => {
         }
     }
 
+    const updateProfile = async (updatedData) => {
+        try {
+            const authId = localStorage.getItem('auth_id')
+            const role = localStorage.getItem('auth_user_role')
+            const table = role === 'mentor' ? 'mentors_details' : 'student_details'
+            const idField = role === 'mentor' ? 'mentor_id' : 'student_id'
+
+            console.log(`📝 Updating ${role} profile:`, updatedData)
+
+            const { error } = await supabase
+                .from(table)
+                .update(updatedData)
+                .eq(idField, authId)
+
+            if (error) throw error
+
+            // Refetch to update UI
+            await fetchDashboardData()
+            return { success: true }
+        } catch (err) {
+            console.error('Error updating profile:', err)
+            return { success: false, error: err.message }
+        }
+    }
+
     // Fetch data on mount
     useEffect(() => {
         fetchDashboardData()
@@ -280,7 +316,8 @@ export const DashboardDataProvider = ({ children }) => {
         scheduledSessions,
         loading,
         error,
-        refetch: fetchDashboardData
+        refetch: fetchDashboardData,
+        updateProfile
     }
 
     return (
@@ -289,3 +326,4 @@ export const DashboardDataProvider = ({ children }) => {
         </DashboardDataContext.Provider>
     )
 }
+

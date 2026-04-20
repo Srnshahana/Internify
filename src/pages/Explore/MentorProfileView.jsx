@@ -12,6 +12,8 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   const [coursesIndex, setCoursesIndex] = useState(0)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [showCourseModal, setShowCourseModal] = useState(false)
+  const [courseSessions, setCourseSessions] = useState([])
+  const [loadingSessions, setLoadingSessions] = useState(false)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
   const [itemsPerView, setItemsPerView] = useState(2)
@@ -206,9 +208,25 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
     setSelectedCourse(null)
   }
 
-  const handleCourseClick = (course) => {
+  const handleCourseClick = async (course) => {
     setSelectedCourse(course)
     setShowCourseModal(true)
+    setLoadingSessions(true)
+    setCourseSessions([])
+    try {
+      const { data, error } = await supabase
+        .from('course_sessions')
+        .select('*')
+        .eq('course_id', course.id)
+        .order('order_index', { ascending: true })
+
+      if (error) throw error
+      setCourseSessions(data || [])
+    } catch (err) {
+      console.error('Error fetching sessions:', err)
+    } finally {
+      setLoadingSessions(false)
+    }
   }
 
   return (
@@ -252,6 +270,41 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               <div className="modal-description-section">
                 <h3>About this course</h3>
                 <p>Master the principles of {selectedCourse.title} with expert guidance from {mentor.name}. This course covers fundamental concepts and advanced techniques to help you excel in your career.</p>
+              </div>
+
+              <div className="modal-curriculum-section">
+                <h3>Course Curriculum</h3>
+                {loadingSessions ? (
+                  <div className="curriculum-loading">
+                    <div className="loading-spinner-small"></div>
+                    <p>Loading sections...</p>
+                  </div>
+                ) : courseSessions.length > 0 ? (
+                  <div className="curriculum-list">
+                    {courseSessions.map((session, index) => (
+                      <div key={session.id} className="curriculum-item">
+                        <div className="curriculum-number-badge">{index + 1}</div>
+                        <div className="curriculum-text">
+                          <h4>{session.title}</h4>
+                          {session.description && <p>{session.description}</p>}
+                          {session.duration_minutes && (
+                            <div className="curriculum-meta">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                              </svg>
+                              <span>{session.duration_minutes} min</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="curriculum-empty">
+                    <p>Detailed curriculum for this course is being finalized.</p>
+                  </div>
+                )}
               </div>
               <div className="modal-actions">
                 <button

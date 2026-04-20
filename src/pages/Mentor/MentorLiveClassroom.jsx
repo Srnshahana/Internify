@@ -19,7 +19,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
   // Use course.sessions (new) or course.classes (legacy)
   const initialSessions = course?.sessions || course?.classes || [
-    { id: 1, title: 'Introduction & Setup', status: 'completed' },
+    { id: 1, title: 'Introduction & Setup', status: 'upcoming' },
     { id: 2, title: 'Components & Props', status: 'upcoming' },
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
   ]
@@ -161,6 +161,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         .from('assessments')
         .select('*, assessment_submissions(count)')
         .eq('course_id', course?.course_id || course?.id)
+        .eq('student_id', Number(course?.student_id)) // ISOLATION: Only show assessments for this student
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -409,6 +410,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     if (!messageInput.trim()) {
       console.warn('❌ Cannot send empty message')
+      return
+    }
+
+    const trimmedInput = messageInput.trim()
+    // Detect Google Meet links
+    if (trimmedInput.includes('meet.google.com')) {
+      console.log('📽️ Google Meet link detected. Redirecting to schedule modal.')
+      setMessageInput('')
+      setScheduleClassData(prev => ({ ...prev, meeting_link: trimmedInput }))
+      setShowScheduleClassModal(true)
+      showModal('Official Scheduler', 'Please use the schedule classroom feature for meeting links. We have pre-filled the link for you.', 'info')
       return
     }
 
@@ -935,6 +947,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           due_date: newAssessment.dueDate,
           course_id: courseId,
           mentor_id: currentUserId,
+          student_id: Number(course?.student_id), // CRITICAL: Links the assessment to this specific student
           created_at: new Date().toISOString()
         })
         .select()
@@ -1502,7 +1515,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
 
-        <div className="live-header-title-v2">{classroom.title}</div>
+        <div className="live-header-title-v2">{classroom.classroom_name || classroom.title}</div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
           {userRole === 'mentor' && (
@@ -1862,21 +1875,54 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           </form>
           {showAttachOptions && (
-            <div className="live-attach-sheet-v2">
-              <button className="attach-option-btn" onClick={handleAttachDocument}>
-                <div className="attach-icon-circle purple">
-                  <span className="material-symbols-outlined">description</span>
-                </div>
-                <span className="attach-label">Document</span>
-              </button>
+            <>
+              <div
+                className="attach-options-overlay"
+                onClick={() => setShowAttachOptions(false)}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 45,
+                  background: 'transparent'
+                }}
+              />
+              <div className="live-attach-sheet-v2" style={{ zIndex: 50 }}>
+                <button
+                  type="button"
+                  className="attach-close-btn"
+                  onClick={() => setShowAttachOptions(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                </button>
 
-              <button className="attach-option-btn" onClick={handleAttachImage}>
-                <div className="attach-icon-circle pink">
-                  <span className="material-symbols-outlined">image</span>
-                </div>
-                <span className="attach-label">Gallery</span>
-              </button>
-            </div>
+                <button className="attach-option-btn" onClick={handleAttachDocument}>
+                  <div className="attach-icon-circle purple">
+                    <span className="material-symbols-outlined">description</span>
+                  </div>
+                  <span className="attach-label">Document</span>
+                </button>
+
+                <button className="attach-option-btn" onClick={handleAttachImage}>
+                  <div className="attach-icon-circle pink">
+                    <span className="material-symbols-outlined">image</span>
+                  </div>
+                  <span className="attach-label">Gallery</span>
+                </button>
+              </div>
+            </>
           )}
 
           {/* Hidden File Inputs */}

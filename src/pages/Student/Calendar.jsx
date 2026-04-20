@@ -27,33 +27,39 @@ function Calendar() {
 
         const courseIds = enrolledCourses.map(c => c.course_id)
 
+        const authId = Number(localStorage.getItem('auth_id'))
         const { data, error } = await supabase
           .from('scheduled_classes')
           .select('*, courses(title), mentors_details(name), reschedule_request, reschedule_role, rescheduled_date, reschedule_reason, is_complete')
           .in('course_id', courseIds)
+          .eq('student_id', authId)
           .order('scheduled_date', { ascending: true })
 
         if (error) throw error
 
         if (data) {
-          const mappedSessions = data.map(session => ({
-            id: session.id,
-            title: session.title,
-            course: session.courses?.title || 'Live Class',
-            mentor: session.mentors_details?.name || 'Mentor',
-            mentor_id: session.mentor_id,
-            course_id: session.course_id,
-            date: new Date(session.scheduled_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
-            time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            scheduled_date: session.scheduled_date,
-            reschedule_request: session.reschedule_request,
-            reschedule_role: session.reschedule_role,
-            rescheduled_date: session.rescheduled_date,
-            reschedule_reason: session.reschedule_reason,
-            is_complete: session.is_complete,
-            type: 'upcoming',
-            joinLink: session.meeting_link
-          }))
+          const mappedSessions = data.map(session => {
+            const match = (enrolledCourses || []).find(e => String(e.course_id) === String(session.course_id))
+            return {
+              id: session.id,
+              title: session.title,
+              classroom_name: match?.classroom_name,
+              course: match?.classroom_name || session.courses?.title || 'Live Class',
+              mentor: session.mentors_details?.name || 'Mentor',
+              mentor_id: session.mentor_id,
+              course_id: session.course_id,
+              date: new Date(session.scheduled_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+              time: new Date(session.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              scheduled_date: session.scheduled_date,
+              reschedule_request: session.reschedule_request,
+              reschedule_role: session.reschedule_role,
+              rescheduled_date: session.rescheduled_date,
+              reschedule_reason: session.reschedule_reason,
+              is_complete: session.is_complete,
+              type: 'upcoming',
+              joinLink: session.meeting_link
+            }
+          })
 
           // Sort: Upcoming (is_complete: false) first, then Completed (is_complete: true)
           mappedSessions.sort((a, b) => {
@@ -507,4 +513,4 @@ function Calendar() {
   )
 }
 
-export default Calendar
+export default Calendar 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import '../../App.css'
 import { studentProfileData } from '../../data/staticData.js'
 import { courses } from '../../data/staticData.js'
@@ -46,12 +46,45 @@ const useDragScroll = () => {
 function Profile({ onLogout, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const CAREER_FIELDS = ['Programming', 'Design', 'Business', 'Marketing', 'Personal Skills']
 
   const coursesDrag = useDragScroll()
   const certDrag = useDragScroll()
 
   // Use global dashboard data from context
-  const { studentProfile, enrolledCourses, scheduledSessions, loading } = useDashboardData()
+  const { studentProfile, enrolledCourses, scheduledSessions, loading, updateProfile } = useDashboardData()
+
+  const [selectedFields, setSelectedFields] = useState([])
+
+  // Initialize selected fields when profile is loaded
+  useEffect(() => {
+    if (studentProfile?.career_fields) {
+      setSelectedFields(studentProfile.career_fields)
+    }
+  }, [studentProfile])
+
+  const handleToggleField = (field) => {
+    setSelectedFields(prev =>
+      prev.includes(field)
+        ? prev.filter(f => f !== field)
+        : [...prev, field]
+    )
+  }
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true)
+    const result = await updateProfile({
+      career_fields: selectedFields
+    })
+    setIsSaving(false)
+    if (result.success) {
+      setIsEditing(false)
+    } else {
+      alert('Failed to save profile: ' + result.error)
+    }
+  }
 
   // Calculate dynamic stats
   const completedCount = enrolledCourses?.filter(c => c.is_complete).length || 0
@@ -156,14 +189,29 @@ function Profile({ onLogout, onNavigate }) {
               zIndex: 10
             }}>
               <button
-                className="profile-edit-btn-icon"
-                onClick={() => setIsEditing(!isEditing)}
-                style={{ position: 'relative', top: 'auto', right: 'auto' }}
+                className={`profile-edit-btn-icon ${isEditing ? 'active' : ''}`}
+                onClick={() => {
+                  if (isEditing) {
+                    handleSaveProfile()
+                  } else {
+                    setIsEditing(true)
+                  }
+                }}
+                disabled={isSaving}
+                style={{ position: 'relative', top: 'auto', right: 'auto', backgroundColor: isEditing ? '#0ea5e9' : '', color: isEditing ? 'white' : '' }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
+                {isSaving ? (
+                  <div className="spinner-tiny"></div>
+                ) : isEditing ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                )}
               </button>
 
               <div style={{ position: 'relative' }}>
@@ -226,12 +274,41 @@ function Profile({ onLogout, onNavigate }) {
           <div className="profile-intro-info">
             <div className="profile-main-details">
               <h1 className="profile-name-linkedin">{profile.name}</h1>
-              <p className="profile-headline-tech">
-                {profile.career_fields && profile.career_fields.length > 0
-                  ? profile.career_fields.join(' | ')
-                  : 'Flutter Developer | React Native Enthusiast | UI/UX Designer'
-                }
-              </p>
+              {isEditing ? (
+                <div className="profile-edit-tags-container" style={{ marginTop: '12px' }}>
+                  <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '600' }}>Career Fields (Select all that apply)</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {CAREER_FIELDS.map(field => (
+                      <button
+                        key={field}
+                        type="button"
+                        onClick={() => handleToggleField(field)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '20px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          border: '1px solid',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          backgroundColor: selectedFields.includes(field) ? '#0ea5e9' : 'transparent',
+                          color: selectedFields.includes(field) ? 'white' : '#64748b',
+                          borderColor: selectedFields.includes(field) ? '#0ea5e9' : '#e2e8f0',
+                        }}
+                      >
+                        {field}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="profile-headline-tech">
+                  {profile.career_fields && profile.career_fields.length > 0
+                    ? profile.career_fields.join(' | ')
+                    : 'Flutter Developer | React Native Enthusiast | UI/UX Designer'
+                  }
+                </p>
+              )}
 
               <div className="profile-location-linkedin">
                 <span className="location-text">
