@@ -21,8 +21,46 @@ import adds2 from '../../assets/images/adds2.png'
 import adds3 from '../../assets/images/adds3.png'
 import { SearchIcon, CalendarIcon } from '../../components/Icons.jsx'
 
+const useDragScroll = () => {
+  const ref = useRef(null)
+  const isDown = useRef(false)
+  const startX = useRef(0)
+  const scrollLeft = useRef(0)
+
+  const onMouseDown = (e) => {
+    isDown.current = true
+    ref.current.classList.add('is-dragging')
+    startX.current = e.pageX - ref.current.offsetLeft
+    scrollLeft.current = ref.current.scrollLeft
+  }
+  const onMouseLeave = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseUp = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseMove = (e) => {
+    if (!isDown.current) return
+    e.preventDefault()
+    const x = e.pageX - ref.current.offsetLeft
+    const walk = (x - startX.current) * 2 // Scroll speed multiplier
+    ref.current.scrollLeft = scrollLeft.current - walk
+  }
+
+  const scroll = (direction) => {
+    if (ref.current) {
+      const amount = direction === 'left' ? -320 : 320
+      ref.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
+
+  return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
+}
+
 function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive }) {
-  const { userProfile, enrolledCourses: taughtCourses, scheduledSessions, loading, refetch } = useDashboardData()
+  const { userProfile, providedCourses, mentorshipEnrollments, scheduledSessions, loading, refetch } = useDashboardData()
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState('Overview')
@@ -42,16 +80,17 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
     }
   }, [showCourseDetail, setIsCourseDetailActive])
 
-  // Unique the taught courses to avoid duplicates if multiple students are enrolled
-  const uniqueTaughtCourses = taughtCourses ? Array.from(new Map(taughtCourses.map(c => [c.id, c])).values()) : []
+  // The actual templates the mentor offers (from onboarding)
+  const offeredCoursesTemplates = providedCourses || []
 
-  // Calculate metrics for summary
-  const activeTaughtCourses = uniqueTaughtCourses.filter(c => c.status === 'active')
-  const overallClassProgress = activeTaughtCourses.length > 0
-    ? Math.round(activeTaughtCourses.reduce((acc, c) => acc + (c.progress || 0), 0) / activeTaughtCourses.length)
+  // Active student enrollments (classrooms)
+  const activeClassrooms = mentorshipEnrollments || []
+
+  // Calculate metrics
+  const totalStudents = Array.from(new Set(activeClassrooms.map(c => c.student_id))).length
+  const avgProgress = activeClassrooms.length > 0
+    ? Math.round(activeClassrooms.reduce((acc, c) => acc + (c.progress || 0), 0) / activeClassrooms.length)
     : 0
-
-  const totalStudents = Array.from(new Set(taughtCourses.map(c => c.student_id))).length
 
   // New Modal states
   const [showUpcomingSessionsModal, setShowUpcomingSessionsModal] = useState(false)
@@ -120,6 +159,8 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   // Featured items logic
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0)
   const featuredRef = useRef(null)
+  const coursesDrag = useDragScroll()
+  const resourcesDrag = useDragScroll()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -338,15 +379,19 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
 
       <section className="dashboard-courses-section-v2">
         <div className="dashboard-section-header-v2">
-          <h2 className="dashboard-section-title-v2">Taught Courses</h2>
+          <h2 className="dashboard-section-title-v2">Active & Pending Classes</h2>
           <span className="dashboard-view-all-v2" onClick={() => setShowMyCourses(true)}>View All</span>
         </div>
 
-        <div className="dashboard-carousel-v2">
-          {uniqueTaughtCourses && uniqueTaughtCourses.length > 0 ? (
-            uniqueTaughtCourses.map((course) => (
+        <div 
+          className="dashboard-carousel-v2 draggable-carousel"
+          ref={coursesDrag.ref}
+          {...coursesDrag.events}
+        >
+          {activeClassrooms.length > 0 ? (
+            activeClassrooms.map((course) => (
               <div
-                key={course.id}
+                key={course.id || course.classroom_id}
                 className="dashboard-course-card-v2"
                 onClick={() => {
                   if (course.status === 'pending') {
@@ -392,14 +437,24 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
               </div>
             ))
           ) : (
-            <div style={{ padding: '0 20px', color: '#64748b' }}>No courses taught yet.</div>
+            <div className="profile-empty-state" style={{ margin: '20px 0', background: 'white' }}>
+              <div className="empty-state-icon">
+                <span className="material-symbols-outlined">school</span>
+              </div>
+              <p>No courses taught yet.</p>
+            </div>
           )}
         </div>
       </section>
 
       <div className="dashboard-section dashboard-featured-section-v2">
         <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Mentor Resources</h2>
-        <div className="featured-sessions-carousel" ref={featuredRef} style={{ background: 'transparent' }}>
+        <div 
+          className="featured-sessions-carousel draggable-carousel" 
+          ref={resourcesDrag.ref}
+          {...resourcesDrag.events}
+          style={{ background: 'transparent' }}
+        >
           <div className="featured-session-card" style={{ background: 'white' }}>
             <h3 className="featured-session-title">Teaching Guide</h3>
             <p className="featured-session-description">Best practices for hosting engaging live sessions and providing effective feedback.</p>
@@ -730,94 +785,98 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                 {/* Stylized Progress Curve */}
                 <path
                   className="graph-area"
-                  style={{ fill: 'url(#graphGradientMentor)' }}
-                  d={`M 0 120 L 0 100 C 100 90, 200 ${110 - (overallClassProgress * 0.8)}, 400 ${100 - (overallClassProgress * 0.9)} L 400 120 Z`}
+                  d={`M 0 120 L 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)} L 400 120 Z`}
+                  fill="url(#graphGradient)"
                 />
                 <path
-                  className="graph-path"
-                  d={`M 0 100 C 100 90, 200 ${110 - (overallClassProgress * 0.8)}, 400 ${100 - (overallClassProgress * 0.9)}`}
+                  className="graph-stroke"
+                  d={`M 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)}`}
+                  fill="none"
+                  stroke="#0ea5e9"
+                  strokeWidth="3"
+                  strokeLinecap="round"
                 />
 
-                {/* Data Points */}
-                <circle className="graph-point" cx="0" cy="100" r="4" style={{ animationDelay: '0.1s' }} />
-                <circle className="graph-point" cx="200" cy={110 - (overallClassProgress * 0.8)} r="4" style={{ animationDelay: '0.3s' }} />
-                <circle className="graph-point" cx="400" cy={100 - (overallClassProgress * 0.9)} r="4" style={{ animationDelay: '0.5s' }} />
+                <circle className="graph-point" cx="200" cy={110 - (avgProgress * 0.8)} r="4" style={{ animationDelay: '0.3s' }} />
+                <circle className="graph-point" cx="400" cy={100 - (avgProgress * 0.9)} r="4" style={{ animationDelay: '0.5s' }} />
               </svg>
-
-              <div style={{ position: 'absolute', top: '15px', right: '20px', textAlign: 'right' }}>
-                <span style={{ fontSize: '24px', fontWeight: '800', color: '#0ea5e9', display: 'block' }}>{overallClassProgress}%</span>
-                <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Global Mastery</span>
-              </div>
             </div>
+            <div className="summary-mini-stats-v2">
+              <span style={{ fontSize: '24px', fontWeight: '800', color: '#0ea5e9', display: 'block' }}>{avgProgress}%</span>
+              <p style={{ color: '#64748b', fontSize: '12px' }}>Class Progress</p>
+            </div>
+          </div>
+          <div className="hover-info-v2">
+            <p>Average {avgProgress}% completion across active classes</p>
+          </div>
 
-            {/* Overall Progress List Section */}
-            <div className="comparison-chart-container">
-              <div className="modal-summary-text" style={{ marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '18px', fontWeight: '700' }}>Overall Progress</h4>
-                <p>Average {overallClassProgress}% completion across active classes</p>
+          {/* Overall Progress List Section */}
+          <div className="comparison-chart-container">
+            <div className="modal-summary-text" style={{ marginBottom: '16px' }}>
+              <h4 style={{ fontSize: '18px', fontWeight: '700' }}>Overall Progress</h4>
+              <p>Average {avgProgress}% completion across active classes</p>
+            </div>
+            {activeTaughtCourses.length > 0 ? (
+              activeTaughtCourses.map((course, idx) => (
+                <div key={course.id || idx} className="chart-row">
+                  <div className="chart-info">
+                    <span className="chart-label">{course.title}</span>
+                    <span className="chart-value">{course.progress || 0}%</span>
+                  </div>
+                  <div className="chart-bar-wrapper">
+                    <div className="chart-fill" style={{ width: `${course.progress || 0}%` }}></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '14px' }}>
+                No active classes to display.
               </div>
-              {activeTaughtCourses.length > 0 ? (
-                activeTaughtCourses.map((course, idx) => (
-                  <div key={course.id || idx} className="chart-row">
-                    <div className="chart-info">
-                      <span className="chart-label">{course.title}</span>
-                      <span className="chart-value">{course.progress || 0}%</span>
+            )}
+          </div>
+
+          <div className="graph-container" style={{ padding: '0 0 20px' }}>
+            <h4 style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', fontWeight: '600' }}>Detailed Breakdown</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {activeClassrooms.filter(c => c.status === 'active').map((course, idx) => {
+                const progress = course.progress || 0;
+                return (
+                  <div key={course.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{course.title}</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0ea5e9' }}>{progress}%</span>
                     </div>
-                    <div className="chart-bar-wrapper">
-                      <div className="chart-fill" style={{ width: `${course.progress || 0}%` }}></div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '3px',
+                      width: '100%',
+                      height: '24px',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      {[...Array(40)].map((_, i) => {
+                        const isFilled = progress >= ((i + 1) / 40) * 100;
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              flex: 1,
+                              maxWidth: '6px',
+                              height: '100%',
+                              background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
+                              borderRadius: '3px',
+                              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                              transform: isFilled ? 'scaleY(1)' : 'scaleY(0.6)',
+                              boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                              opacity: isFilled ? 1 : 0.4
+                            }}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
-                ))
-              ) : (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '14px' }}>
-                  No active classes to display.
-                </div>
-              )}
-            </div>
-
-            <div className="graph-container" style={{ padding: '0 0 20px' }}>
-              <h4 style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', fontWeight: '600' }}>Detailed Breakdown</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {uniqueTaughtCourses.filter(c => c.status === 'active').map((course, idx) => {
-                  const progress = course.progress || 0;
-                  return (
-                    <div key={course.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{course.title}</span>
-                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#0ea5e9' }}>{progress}%</span>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        gap: '3px',
-                        width: '100%',
-                        height: '24px',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}>
-                        {[...Array(40)].map((_, i) => {
-                          const isFilled = progress >= ((i + 1) / 40) * 100;
-                          return (
-                            <div
-                              key={i}
-                              style={{
-                                flex: 1,
-                                maxWidth: '6px',
-                                height: '100%',
-                                background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
-                                borderRadius: '3px',
-                                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                                transform: isFilled ? 'scaleY(1)' : 'scaleY(0.6)',
-                                boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
-                                opacity: isFilled ? 1 : 0.4
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -926,7 +985,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       </div>
                     ) : (
                       <div className="detailed-list-v2">
-                        {uniqueTaughtCourses.map(course => (
+                        {offeredCoursesTemplates.map(course => (
                           <div
                             key={course.id}
                             className="material-item-v2"
@@ -1085,7 +1144,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                 </div>
               ) : (
                 <div className="materials-grid-v2">
-                  {uniqueTaughtCourses.map(course => (
+                  {offeredCoursesTemplates.map(course => (
                     <div
                       key={course.id}
                       className="material-course-card-v2"
@@ -1105,7 +1164,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       </div>
                     </div>
                   ))}
-                  {uniqueTaughtCourses.length === 0 && (
+                  {offeredCoursesTemplates.length === 0 && (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '48px', opacity: 0.2 }}>auto_stories</span>
                       <p style={{ marginTop: '16px', fontSize: '16px' }}>No courses found to display materials.</p>

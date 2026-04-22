@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import supabase from '../../supabaseClient'
 import MessageModal from '../../components/shared/MessageModal.jsx'
 import Loading from '../../components/Loading'
+import { storeAuthData } from '../../utils/auth.js'
 import '../../App.css'
 
 export default function ApplyMentor() {
     const navigate = useNavigate()
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [authUserId, setAuthUserId] = useState(null)
+    const [legacyId, setLegacyId] = useState(null)
     const [availableCourses, setAvailableCourses] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
 
@@ -16,18 +19,24 @@ export default function ApplyMentor() {
         isOpen: false,
         title: '',
         message: '',
-        type: 'info'
+        type: 'info',
+        onConfirm: null
     })
 
     const [formData, setFormData] = useState({
         name: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
         profile_image: '',
         title: '',
         about: '',
         address: '',
-        rating: 8,
-        is_verified: true,
+        rating: 5,
+        is_verified: false,
         is_platformAssured: false,
+        is_mentor_approved: 'pending',
         experties_in: [],
         category: [],
         education: [
@@ -49,9 +58,38 @@ export default function ApplyMentor() {
 
     useEffect(() => {
         fetchCourses()
-        // Try to pre-fill name if logged in
-        const userName = localStorage.getItem('auth_user_name')
-        if (userName) setFormData(prev => ({ ...prev, name: userName }))
+        const setupInitialData = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+                setAuthUserId(user.id)
+                // Check if this user already exists in our 'users' table
+                const { data: existingUser } = await supabase
+                    .from('users')
+                    .select('user_id, email, phone_number, role')
+                    .eq('id', user.id)
+                    .maybeSingle()
+
+                if (existingUser) {
+                    setLegacyId(existingUser.user_id)
+                    localStorage.setItem('auth_id', existingUser.user_id)
+                    
+                    // Only pre-fill if it's not the name the user wants removed
+                    setFormData(prev => ({
+                        ...prev,
+                        email: existingUser.email || user.email || '',
+                        phone: existingUser.phone_number || ''
+                    }))
+                } else {
+                    setFormData(prev => ({
+                        ...prev,
+                        email: user.email || '',
+                        phone: ''
+                    }))
+                }
+            }
+        }
+        setupInitialData()
     }, [])
 
     const fetchCourses = async () => {
@@ -71,8 +109,8 @@ export default function ApplyMentor() {
         }
     }
 
-    const showModal = (title, message, type = 'info') => {
-        setModalConfig({ isOpen: true, title, message, type })
+    const showModal = (title, message, type = 'info', onConfirm = null) => {
+        setModalConfig({ isOpen: true, title, message, type, onConfirm })
     }
 
     const handleInputChange = (field, value) => {
@@ -119,68 +157,157 @@ export default function ApplyMentor() {
             return
         }
 
-        const authId = localStorage.getItem('auth_id')
-
-        if (!authId) {
-            showModal('Auth Required', 'Please login to submit your mentor application.', 'error')
+        if (!legacyId) {
+            showModal('Session Error', 'Please go back to Step 1 and re-verify your account details.', 'error')
             return
         }
 
         setIsSubmitting(true)
 
         try {
-            // Prepare data: ensure experties_in is populated from skills if empty
+            // Prepare mentor data
             const submissionData = {
                 ...formData,
-                experties_in: formData.experties_in.length > 0 
-                    ? formData.experties_in 
+                experties_in: formData.experties_in.length > 0
+                    ? formData.experties_in
                     : formData.skills.filter(s => s.name.trim() !== '').map(s => s.name)
             }
 
-            // 1. Update/Insert Mentor Profile
+            // 1. Update/Insert into 'mentors_details'
+            // We use upsert to prevent "duplicate key" errors if the user retries the final step
+            const { email, phone, password, confirmPassword, ...dataToSubmit } = submissionData
             const { error: profileError } = await supabase
                 .from('mentors_details')
                 .upsert({
-                    mentor_id: Number(authId),
-                    ...submissionData,
-                    updated_at: new Date().toISOString()
-                })
+                    mentor_id: legacyId,
+                    ...dataToSubmit,
+                    is_mentor_approved: 'pending'
+                }, { onConflict: 'mentor_id' })
 
             if (profileError) throw profileError
 
-            // 2. Update User Role to 'mentor'
-            const { error: roleError } = await supabase
-                .from('users')
-                .update({ role: 'mentor' })
-                .eq('id', authId)
+            // 2. Success
+            showModal(
+                'Application Submitted!',
+                'Your mentor account has been created and your application is now under review.',
+                'success',
+                () => navigate('/mentor-dashboard')
+            )
 
-            if (roleError) console.warn('Note: Profile saved but role update failed.', roleError)
-
-            showModal('Congratulations!', 'Your mentor profile is now active. Welcome to the team!', 'success')
-
-            localStorage.setItem('auth_user_role', 'mentor')
-
-            setTimeout(() => {
-                navigate('/mentor/home')
-            }, 2000)
-
-        } catch (err) {
-            console.error('Submission Error:', err)
-            showModal('Error', 'Failed to save profile: ' + err.message, 'error')
+        } catch (error) {
+            console.error('Final submission failed:', error)
+            showModal('Submission Failed', error.message || 'An error occurred during final submission.', 'error')
         } finally {
             setIsSubmitting(false)
         }
     }
 
-    const nextStep = () => {
+    const nextStep = async () => {
         if (step === 1) {
-            if (!formData.name.trim() || !formData.address.trim() || !formData.title.trim() || !formData.about.trim()) {
-                showModal('Required Fields', 'Please fill in all basic details to continue.', 'warning')
+            if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.password || !formData.confirmPassword) {
+                showModal('Required Account Info', 'Please fill in your name and login credentials to continue.', 'warning')
                 return
+            }
+            if (!formData.email.includes('@')) {
+                showModal('Invalid Email', 'Please enter a valid email address.', 'warning')
+                return
+            }
+            if (formData.password.length < 6) {
+                showModal('Weak Password', 'Password must be at least 6 characters long.', 'warning')
+                return
+            }
+            if (formData.password !== formData.confirmPassword) {
+                showModal('Password Mismatch', 'Passwords do not match.', 'warning')
+                return
+            }
+
+            setIsSubmitting(true)
+            try {
+                let userId = authUserId
+                let randomLegacyId = legacyId
+
+                // 1. Handle Auth and ID Generation
+                if (!userId) {
+                    // Sign up new user
+                    const { data: authData, error: signupError } = await supabase.auth.signUp({
+                        email: formData.email,
+                        password: formData.password,
+                        options: { data: { name: formData.name } }
+                    })
+
+                    if (signupError) {
+                        if (signupError.message?.toLowerCase().includes('already registered')) {
+                            const { data: existingUser } = await supabase
+                                .from('users')
+                                .select('id, user_id')
+                                .eq('email', formData.email)
+                                .maybeSingle()
+                            
+                            if (existingUser) {
+                                userId = existingUser.id
+                                randomLegacyId = existingUser.user_id
+                            } else {
+                                throw signupError
+                            }
+                        } else {
+                            throw signupError
+                        }
+                    } else {
+                        userId = authData.user.id
+                        randomLegacyId = Math.floor(100000 + Math.random() * 900000)
+                    }
+                } else if (!randomLegacyId) {
+                    // Logged in but missing legacy numeric ID? Check DB or generate
+                    const { data: existingUser } = await supabase
+                        .from('users')
+                        .select('user_id')
+                        .eq('id', userId)
+                        .maybeSingle()
+                    
+                    if (existingUser?.user_id) {
+                        randomLegacyId = existingUser.user_id
+                    } else {
+                        randomLegacyId = Math.floor(100000 + Math.random() * 900000)
+                    }
+                }
+
+                // 2. Ensure record in 'users' table with 'mentor' role
+                const { error: userError } = await supabase
+                    .from('users')
+                    .upsert({
+                        id: userId,
+                        user_id: randomLegacyId,
+                        email: formData.email,
+                        phone_number: formData.phone,
+                        role: 'mentor',
+                        password: formData.password
+                    }, { onConflict: 'id' })
+
+                if (userError) throw userError
+
+                setAuthUserId(userId)
+                setLegacyId(randomLegacyId)
+                localStorage.setItem('auth_id', randomLegacyId)
+                localStorage.setItem('auth_user_role', 'mentor')
+                storeAuthData({ id: userId, role: 'mentor' })
+
+            } catch (error) {
+                console.error('Step 1 account creation failed:', error)
+                showModal('Account Creation Failed', error.message || 'Could not create account. Please try again.', 'error')
+                return
+            } finally {
+                setIsSubmitting(false)
             }
         }
 
         if (step === 2) {
+            if (!formData.address.trim() || !formData.title.trim() || !formData.about.trim()) {
+                showModal('Profile Incomplete', 'Please provide your location, title, and bio to continue.', 'warning')
+                return
+            }
+        }
+
+        if (step === 3) {
             const skillsCount = formData.skills?.filter(s => s.name.trim() !== '').length || 0
             if (skillsCount < 3) {
                 showModal('Skills Required', 'Please add at least 3 skills with proficiency levels to continue.', 'warning')
@@ -192,19 +319,15 @@ export default function ApplyMentor() {
             }
         }
 
-        if (step === 3) {
+        if (step === 4) {
             const hasExperience = formData.experience.some(exp => exp.role.trim() !== '' && exp.company.trim() !== '')
             if (!hasExperience) {
                 showModal('Experience Required', 'Please add at least one professional experience.', 'warning')
                 return
             }
-            if (!formData.testimonial[0].from.trim() || !formData.testimonial[0].text.trim()) {
-                showModal('Testimonial Required', 'Please provide a featured testimonial.', 'warning')
-                return
-            }
         }
 
-        if (step === 4) {
+        if (step === 5) {
             const hasEducation = formData.education.some(edu => edu.degree.trim() !== '' && edu.institution.trim() !== '')
             if (!hasEducation) {
                 showModal('Education Required', 'Please add at least one education entry.', 'warning')
@@ -212,8 +335,9 @@ export default function ApplyMentor() {
             }
         }
 
-        setStep(prev => Math.min(prev + 1, 5))
+        setStep(prev => Math.min(prev + 1, 6))
     }
+
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1))
 
     const renderStepContent = () => {
@@ -221,18 +345,40 @@ export default function ApplyMentor() {
             case 1:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
-                        <h2 className="step-title">Tell us about yourself</h2>
-                        <p className="step-subtitle">Your basic details and profile appearance.</p>
-                        
+                        <h2 className="step-title">Account Details</h2>
+                        <p className="step-subtitle">Create your mentor account credentials.</p>
+
                         <div className="form-grid">
                             <div className="input-group">
                                 <label>Full Name <span className="required-star">*</span></label>
-                                <input type="text" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} required />
+                                <input type="text" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="Full Name" required />
                             </div>
                             <div className="input-group">
-                                <label>Profile Image URL</label>
-                                <input type="url" value={formData.profile_image} onChange={(e) => handleInputChange('profile_image', e.target.value)} placeholder="https://unsplash.com/..." />
+                                <label>Email Address <span className="required-star">*</span></label>
+                                <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder="your@email.com" required />
                             </div>
+                            <div className="input-group">
+                                <label>Phone Number <span className="required-star">*</span></label>
+                                <input type="tel" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} placeholder="+1 234 567 890" required />
+                            </div>
+                            <div className="input-group">
+                                <label>Password <span className="required-star">*</span></label>
+                                <input type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} placeholder="Min 6 characters" required />
+                            </div>
+                            <div className="input-group">
+                                <label>Confirm Password <span className="required-star">*</span></label>
+                                <input type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} placeholder="Re-enter password" required />
+                            </div>
+                        </div>
+                    </div>
+                )
+            case 2:
+                return (
+                    <div key={step} className="onboarding-step-content fade-in-up">
+                        <h2 className="step-title">Profile Appearance</h2>
+                        <p className="step-subtitle">How your profile will look to students.</p>
+
+                        <div className="form-grid">
                             <div className="input-group">
                                 <label>Location <span className="required-star">*</span></label>
                                 <input type="text" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder="City, Country" required />
@@ -248,12 +394,12 @@ export default function ApplyMentor() {
                         </div>
                     </div>
                 )
-            case 2:
+            case 3:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
                         <h2 className="step-title">Expertise & Skills</h2>
                         <p className="step-subtitle">Select your categories and key skills with proficiency levels.</p>
-                        
+
                         <div className="input-group full-width mb-20">
                             <label>Professional Categories</label>
                             <div className="tag-input-wrapper">
@@ -280,11 +426,11 @@ export default function ApplyMentor() {
                             <div className="dynamic-list-inline mt-10">
                                 {formData.skills.map((skill, index) => (
                                     <div key={index} className="pill-input-card">
-                                        <input 
-                                            type="text" 
-                                            placeholder="e.g. Flutter" 
-                                            value={skill.name} 
-                                            onChange={(e) => updateListItem('skills', index, { name: e.target.value })} 
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Flutter"
+                                            value={skill.name}
+                                            onChange={(e) => updateListItem('skills', index, { name: e.target.value })}
                                         />
                                         <select value={skill.level} onChange={(e) => updateListItem('skills', index, { level: e.target.value })}>
                                             <option value="Beginner">Beginner</option>
@@ -299,7 +445,7 @@ export default function ApplyMentor() {
                         </div>
                     </div>
                 )
-            case 3:
+            case 4:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
                         <div className="section-header-row">
@@ -326,8 +472,22 @@ export default function ApplyMentor() {
                                         <input type="date" value={exp.start_date} onChange={(e) => updateListItem('experience', index, { start_date: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
-                                        <label>End Date</label>
-                                        <input type="text" placeholder="Date or 'Present'" value={exp.end_date} onChange={(e) => updateListItem('experience', index, { end_date: e.target.value })} />
+                                        <div className="label-with-action">
+                                            <label>End Date</label>
+                                            <label className="checkbox-pill">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={exp.end_date === 'Present'}
+                                                    onChange={(e) => updateListItem('experience', index, { end_date: e.target.checked ? 'Present' : '' })}
+                                                />
+                                                <span>Present</span>
+                                            </label>
+                                        </div>
+                                        {exp.end_date === 'Present' ? (
+                                            <input type="text" value="Present" readOnly className="present-active-input" />
+                                        ) : (
+                                            <input type="date" value={exp.end_date} onChange={(e) => updateListItem('experience', index, { end_date: e.target.value })} />
+                                        )}
                                     </div>
                                     <div className="input-group full-width">
                                         <label>Description</label>
@@ -336,41 +496,9 @@ export default function ApplyMentor() {
                                 </div>
                             </div>
                         ))}
-
-                        <div className="input-group full-width mt-20">
-                            <label>Featured Testimonial</label>
-                            <div className="list-item-card step-card">
-                                <div className="form-grid">
-                                    <div className="input-group">
-                                        <label>From (Name)</label>
-                                        <input type="text" value={formData.testimonial[0].from} onChange={(e) => {
-                                            const newTest = [...formData.testimonial];
-                                            newTest[0].from = e.target.value;
-                                            setFormData(prev => ({ ...prev, testimonial: newTest }));
-                                        }} />
-                                    </div>
-                                    <div className="input-group">
-                                        <label>Designation</label>
-                                        <input type="text" value={formData.testimonial[0].title} onChange={(e) => {
-                                            const newTest = [...formData.testimonial];
-                                            newTest[0].title = e.target.value;
-                                            setFormData(prev => ({ ...prev, testimonial: newTest }));
-                                        }} placeholder="e.g. Student, CEO" />
-                                    </div>
-                                    <div className="input-group full-width">
-                                        <label>Testimonial Text</label>
-                                        <textarea value={formData.testimonial[0].text} onChange={(e) => {
-                                            const newTest = [...formData.testimonial];
-                                            newTest[0].text = e.target.value;
-                                            setFormData(prev => ({ ...prev, testimonial: newTest }));
-                                        }} rows="3" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 )
-            case 4:
+            case 5:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
                         <div className="section-header-row">
@@ -394,18 +522,28 @@ export default function ApplyMentor() {
                                     </div>
                                     <div className="input-group">
                                         <label>Start Year</label>
-                                        <input type="number" value={edu.start_year} onChange={(e) => updateListItem('education', index, { start_year: e.target.value })} />
+                                        <select value={edu.start_year} onChange={(e) => updateListItem('education', index, { start_year: e.target.value })}>
+                                            <option value="">Year</option>
+                                            {Array.from({ length: 51 }, (_, i) => 2030 - i).map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="input-group">
                                         <label>End Year</label>
-                                        <input type="number" value={edu.end_year} onChange={(e) => updateListItem('education', index, { end_year: e.target.value })} />
+                                        <select value={edu.end_year} onChange={(e) => updateListItem('education', index, { end_year: e.target.value })}>
+                                            <option value="">Year</option>
+                                            {Array.from({ length: 51 }, (_, i) => 2030 - i).map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 )
-            case 5:
+            case 6:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
                         <h2 className="step-title">Course Ready to Offer</h2>
@@ -439,9 +577,9 @@ export default function ApplyMentor() {
             <div className="onboarding-content-card multi-step-onboarding">
                 <div className="onboarding-header-v2">
                     <div className="progress-container">
-                        <div className="progress-bar-onboarding" style={{ width: `${(step / 5) * 100}%` }}></div>
+                        <div className="progress-bar-onboarding" style={{ width: `${(step / 6) * 100}%` }}></div>
                     </div>
-                    <div className="step-indicator-text">Step {step} of 5</div>
+                    <div className="step-indicator-text">Step {step} of 6</div>
                     <h1>Apply as a Mentor</h1>
                 </div>
 
@@ -458,9 +596,16 @@ export default function ApplyMentor() {
                     >
                         Back
                     </button>
-                    {step < 5 ? (
-                        <button type="button" className="onboarding-next-btn" onClick={nextStep}>
-                            Next Step <span className="material-symbols-outlined">arrow_forward</span>
+                    {step < 6 ? (
+                        <button
+                            type="button"
+                            className="onboarding-next-btn"
+                            onClick={nextStep}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting && step === 1 ? 'Creating Account...' : (
+                                <>Next Step <span className="material-symbols-outlined">arrow_forward</span></>
+                            )}
                         </button>
                     ) : (
                         <button
@@ -475,7 +620,7 @@ export default function ApplyMentor() {
                 </div>
             </div>
 
-            <MessageModal 
+            <MessageModal
                 isOpen={modalConfig.isOpen}
                 onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
                 {...modalConfig}
@@ -483,4 +628,3 @@ export default function ApplyMentor() {
         </div>
     )
 }
-

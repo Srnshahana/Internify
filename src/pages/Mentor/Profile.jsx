@@ -41,7 +41,7 @@ const useDragScroll = () => {
 }
 
 function MentorProfile({ onLogout }) {
-  const { userProfile, enrolledCourses: taughtCourses, loading } = useDashboardData()
+  const { userProfile, providedCourses, mentorshipEnrollments: taughtCourses, loading } = useDashboardData()
   const [isEditing, setIsEditing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const coursesDrag = useDragScroll()
@@ -54,8 +54,8 @@ function MentorProfile({ onLogout }) {
     )
   }
 
-  // Calculate unique courses taught for the "Courses Offered" section
-  const uniqueTaughtCourses = taughtCourses ? Array.from(new Map(taughtCourses.map(c => [c.course_id, c])).values()) : []
+  // Courses the mentor offers (templates from onboarding)
+  const uniqueTaughtCourses = providedCourses || []
 
   const mentorDisplayData = {
     name: userProfile?.name || userProfile?.full_name || 'Expert Mentor',

@@ -15,7 +15,9 @@ export const useDashboardData = () => {
 export const DashboardDataProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null) // Generic profile
     const [authUser, setAuthUser] = useState(null) // Auth user object
-    const [enrolledCourses, setEnrolledCourses] = useState([])
+    const [enrolledCourses, setEnrolledCourses] = useState([]) // For students: courses they take
+    const [mentorshipEnrollments, setMentorshipEnrollments] = useState([]) // For mentors: students they teach
+    const [providedCourses, setProvidedCourses] = useState([]) // For mentors: courses they offer
     const [scheduledSessions, setScheduledSessions] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -151,28 +153,23 @@ export const DashboardDataProvider = ({ children }) => {
                     }
                 })
 
-                console.log("transformed", transformed)
+                // 4. Fetch the actual course templates for Offered Courses
+                if (profileData?.coursesOffered && profileData.coursesOffered.length > 0) {
+                    const { data: baseCourses, error: baseCoursesError } = await supabase
+                        .from('courses')
+                        .select('*')
+                        .in('course_id', profileData.coursesOffered.map(id => Number(id)))
 
-                // DEBUG: Inject dummy course for testing if empty
-                if (transformed.length === 0) {
-                    transformed.push({
-                        id: 99999, // Integer to avoid Number() NaN crash
-                        enrollment_id: 99999,
-                        student_id: 'dummy-student',
-                        student_name: 'Test Student',
-                        mentor_id: authId,
-                        course_id: 88888, // Integer
-                        status: 'active',
-                        title: 'Debug React Course',
-                        description: 'A temporary course for debugging.',
-                        category: 'Development',
-                        mentor: 'Test Mentor',
-                        sessions: [],
-                        progress: 0
-                    })
+                    if (baseCoursesError) {
+                        console.error('Error fetching base courses for mentor:', baseCoursesError)
+                    } else {
+                        setProvidedCourses(baseCourses || [])
+                    }
+                } else {
+                    setProvidedCourses([])
                 }
 
-                setEnrolledCourses(transformed)
+                setMentorshipEnrollments(transformed)
 
             } else {
                 // --- STUDENT FLOW ---
@@ -310,9 +307,12 @@ export const DashboardDataProvider = ({ children }) => {
 
     const value = {
         authUser,
-        userProfile, // Replaces studentProfile to be generic
-        studentProfile: userProfile, // Legacy support
-        enrolledCourses,
+        userProfile, 
+        studentProfile: userProfile, 
+        enrolledCourses, // Use this for student role
+        mentorshipEnrollments, // Use this for mentor role
+        providedCourses, // Mentor's offered templates
+        uniqueOfferedCourses: Array.from(new Map(mentorshipEnrollments.map(c => [c.course_id, c])).values()),
         scheduledSessions,
         loading,
         error,

@@ -11,12 +11,73 @@ import '../../App.css'
 
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 
+function ApprovalPendingView({ onLogout }) {
+  return (
+    <div className="approval-status-screen">
+      <div className="approval-status-card glass-morphism">
+        <div className="status-icon-wrapper pending">
+          <span className="material-symbols-outlined">schedule</span>
+        </div>
+        <h2>Application Under Review</h2>
+        <p>Your mentor profile has been successfully submitted! Our team is currently reviewing your expertise and certifications. You'll receive full access once verified.</p>
+
+        <div className="status-badge pending">
+          <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>sync_saved_locally</span>
+          Status: Pending Review
+        </div>
+
+        <div className="status-footer">
+          <span>Expected review time: 24-48 hours</span>
+          <span>We'll notify you via email once approved.</span>
+        </div>
+
+        <button onClick={onLogout} className="status-logout-btn">
+          Sign Out of Account
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ApprovalRejectedView({ onLogout }) {
+  return (
+    <div className="approval-status-screen">
+      <div className="approval-status-card glass-morphism">
+        <div className="status-icon-wrapper rejected">
+          <span className="material-symbols-outlined">error</span>
+        </div>
+        <h1>Application Not Approved</h1>
+        <p>Thank you for your interest in joining Internify. After careful review, we are unable to approve your mentor application at this time.</p>
+
+        <div className="status-badge rejected">
+          <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>cancel</span>
+          Status: Not Approved
+        </div>
+
+        <div className="status-footer">
+          <span>If you believe this is a mistake, please reach out.</span>
+          <span>Contact: support@internify.com</span>
+        </div>
+
+        <button onClick={onLogout} className="status-logout-btn">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems }) {
-  const { loading, enrolledCourses } = useDashboardData()
+  const { loading, mentorshipEnrollments, userProfile } = useDashboardData()
 
   if (loading) {
     return <Loading fullScreen={true} />
   }
+
+  // Approval logic check: handle boolean true/false and string approved/pending/rejected
+  const approvalValue = userProfile?.is_mentor_approved
+  const isApproved = approvalValue === true || (typeof approvalValue === 'string' && approvalValue.toLowerCase() === 'approved')
+  const isRejected = typeof approvalValue === 'string' && approvalValue.toLowerCase() === 'rejected'
 
   const renderPage = (page) => {
     switch (page) {
@@ -32,7 +93,7 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
       case 'Classrooms':
         return (
           <MyCourses
-            courses={enrolledCourses}
+            courses={mentorshipEnrollments}
             onBack={() => setActivePage('Home')}
             onEnterClassroom={() => setIsLiveClassroomActive(true)}
             setIsCourseDetailActive={setIsCourseDetailActive}
@@ -53,7 +114,12 @@ function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroom
 
   return (
     <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
-      {!isLiveClassroomActive && !isCourseDetailActive && (
+      {!isApproved && (
+        <div className="approval-status-modal">
+          {isRejected ? <ApprovalRejectedView onLogout={onLogout} /> : <ApprovalPendingView onLogout={onLogout} />}
+        </div>
+      )}
+      {!isLiveClassroomActive && !isCourseDetailActive && isApproved && (
         <>
           {/* Bottom Navigation Bar */}
           <nav className="premium-bottom-nav">

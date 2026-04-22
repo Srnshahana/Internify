@@ -9,7 +9,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
   const [activeTab, setActiveTab] = useState('active')
 
   // Use global dashboard data from context
-  const { enrolledCourses: taughtCourses, loading, userProfile } = useDashboardData()
+  const { mentorshipEnrollments: taughtCourses, loading, userProfile } = useDashboardData()
 
   // Filter courses based on active tab
   const filteredTaughtCourses = taughtCourses ? taughtCourses.filter(c => (c.status || 'active') === activeTab) : []
