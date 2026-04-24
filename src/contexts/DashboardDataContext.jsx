@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import supabase from '../supabaseClient'
-import Loading from '../components/Loading'
+import supabase from '../supabaseClient.js'
+import Loading from '../components/Loading.jsx'
 
 const DashboardDataContext = createContext(null)
 
@@ -30,18 +30,39 @@ export const DashboardDataProvider = ({ children }) => {
             const { data: { session }, error: sessionError } = await supabase.auth.getSession()
             const user = session?.user || null
             setAuthUser(user)
+            console.log('🔑 Supabase Session User:', user?.id)
 
-            const authId = localStorage.getItem('auth_id') // Numeric ID from our 'users' table
+            let authId = localStorage.getItem('auth_id')
             const role = localStorage.getItem('auth_user_role')
+            console.log('📋 Storage Check:', { authId, role })
 
             if (!authId) {
-                console.error('No numeric auth ID found in localStorage. Checking if we can fetch it...')
-                // fallback logic if needed
+                console.log('🔍 AuthId missing in localStorage, searching fallbacks...')
+                if (user) {
+                    const { data: userData } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .maybeSingle()
+                    
+                    if (userData) {
+                        authId = String(userData.id)
+                        localStorage.setItem('auth_id', authId)
+                        console.log('✅ Found fallback AuthId:', authId)
+                    }
+                }
+            }
+
+            if (!authId) {
+                console.warn('❌ CRITICAL: No numeric auth ID found. Dashboard cannot load.')
                 setLoading(false)
                 return
             }
 
+            console.log('💎 Final AuthId for queries:', authId)
+
             if (role === 'mentor') {
+                console.log('🚀 INITIALIZING MENTOR DATA FLOW')
                 // --- MENTOR FLOW ---
                 // 1. Fetch mentor profile
                 console.log('🔍 Fetching mentor profile with authId:', authId)
@@ -82,10 +103,10 @@ export const DashboardDataProvider = ({ children }) => {
                     .order('scheduled_date', { ascending: true })
 
                 if (scheduledError) console.error('Error fetching mentor scheduled classes:', scheduledError)
-                
+
                 const enrichedMentorScheduled = (mentorScheduled || []).map(session => {
-                    const match = (enrollments || []).find(e => 
-                        String(e.course_id) === String(session.course_id) && 
+                    const match = (enrollments || []).find(e =>
+                        String(e.course_id) === String(session.course_id) &&
                         String(e.student_id) === String(session.student_id)
                     )
                     return { ...session, classroom_name: match?.classroom_name }
@@ -153,18 +174,33 @@ export const DashboardDataProvider = ({ children }) => {
                     }
                 })
 
-                // 4. Fetch the actual course templates for Offered Courses
-                if (profileData?.coursesOffered && profileData.coursesOffered.length > 0) {
-                    const { data: baseCourses, error: baseCoursesError } = await supabase
-                        .from('courses')
-                        .select('*')
-                        .in('course_id', profileData.coursesOffered.map(id => Number(id)))
+                // 4. Fetch the actual course templates for Offered Courses from mentor_courses table with CUSTOM DETAILS
+                const { data: mentorCourseDetails, error: mentorCoursesError } = await supabase
+                    .from('mentor_courses')
+                    .select('*, courses(*)')
+                    .eq('mentor_id', authId)
 
-                    if (baseCoursesError) {
-                        console.error('Error fetching base courses for mentor:', baseCoursesError)
-                    } else {
-                        setProvidedCourses(baseCourses || [])
-                    }
+                if (mentorCoursesError) {
+                    console.error('Error fetching mentor course details:', mentorCoursesError)
+                    setProvidedCourses([])
+                } else if (mentorCourseDetails) {
+                    console.log('📦 DATACORE: Raw Mentor Course Details:', mentorCourseDetails)
+                    // Merge mentor-specific fields (like course_provide) with base course data
+                    const mergedCourses = mentorCourseDetails.map(mc => {
+                        const base = Array.isArray(mc.courses) ? (mc.courses[0] || {}) : (mc.courses || {})
+                        return {
+                            ...base,
+                            // Use mentor's specific description if available, otherwise use base
+                            description: mc.course_provide || base.description,
+                            course_provide: mc.course_provide,
+                            duration: mc.duration || base.duration,
+                            course_fee: mc.course_fee || base.course_fee,
+                            id: mc.course_id, 
+                            course_id: mc.course_id
+                        }
+                    })
+                    console.log('✅ Mentor provided courses with custom data:', mergedCourses)
+                    setProvidedCourses(mergedCourses)
                 } else {
                     setProvidedCourses([])
                 }
@@ -212,9 +248,9 @@ export const DashboardDataProvider = ({ children }) => {
                     .order('scheduled_date', { ascending: true })
 
                 if (scheduledError) console.error('Error fetching student scheduled classes:', scheduledError)
-                
+
                 const enrichedStudentScheduled = (studentScheduled || []).map(session => {
-                    const match = (enrollments || []).find(e => 
+                    const match = (enrollments || []).find(e =>
                         String(e.course_id) === String(session.course_id)
                     )
                     return { ...session, classroom_name: match?.classroom_name }
@@ -307,8 +343,8 @@ export const DashboardDataProvider = ({ children }) => {
 
     const value = {
         authUser,
-        userProfile, 
-        studentProfile: userProfile, 
+        userProfile,
+        studentProfile: userProfile,
         enrolledCourses, // Use this for student role
         mentorshipEnrollments, // Use this for mentor role
         providedCourses, // Mentor's offered templates

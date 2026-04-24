@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import supabase from '../../supabaseClient'
+import supabase from '../../supabaseClient.js'
 import MessageModal from '../../components/shared/MessageModal.jsx'
-import Loading from '../../components/Loading'
-import { storeAuthData } from '../../utils/auth.js'
+import Loading from '../../components/Loading.jsx'
+import { storeAuthData, clearAuthData } from '../../utils/auth.js'
 import '../../App.css'
 
 export default function ApplyMentor() {
@@ -11,6 +11,7 @@ export default function ApplyMentor() {
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [authUserId, setAuthUserId] = useState(null)
+    const [isAuthLoading, setIsAuthLoading] = useState(true)
     const [legacyId, setLegacyId] = useState(null)
     const [availableCourses, setAvailableCourses] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
@@ -56,6 +57,19 @@ export default function ApplyMentor() {
         coursesOffered: []
     })
 
+    const [detailModal, setDetailModal] = useState({
+        isOpen: false,
+        courseId: null,
+        courseTitle: '',
+        data: {
+            duration: '',
+            timings: '',
+            projects: '',
+            deliverables: '',
+            additional: ''
+        }
+    })
+
     useEffect(() => {
         fetchCourses()
         const setupInitialData = async () => {
@@ -66,20 +80,59 @@ export default function ApplyMentor() {
                 // Check if this user already exists in our 'users' table
                 const { data: existingUser } = await supabase
                     .from('users')
-                    .select('user_id, email, phone_number, role')
+                    .select('user_id, email, phone_number, role, name')
                     .eq('id', user.id)
                     .maybeSingle()
 
                 if (existingUser) {
                     setLegacyId(existingUser.user_id)
                     localStorage.setItem('auth_id', existingUser.user_id)
-                    
-                    // Only pre-fill if it's not the name the user wants removed
+
+                    // Pre-fill existing data
                     setFormData(prev => ({
                         ...prev,
+                        name: existingUser.name || prev.name,
                         email: existingUser.email || user.email || '',
                         phone: existingUser.phone_number || ''
                     }))
+
+                    // Fetch existing courses they might have already selected
+                    const { data: existingCourses } = await supabase
+                        .from('mentor_courses')
+                        .select('course_id, course_provide')
+                        .eq('mentor_id', existingUser.user_id)
+
+                    if (existingCourses && existingCourses.length > 0) {
+                        setFormData(prev => ({
+                            ...prev,
+                            coursesOffered: existingCourses.map(c => ({
+                                course_id: String(c.course_id),
+                                description: c.course_provide || ''
+                            }))
+                        }))
+                    }
+
+                    // Recovery logic: If they are already a 'mentor' role, check if they finished the profile
+                    if (existingUser.role === 'mentor') {
+                        const { data: mentorDetails } = await supabase
+                            .from('mentors_details')
+                            .select('onboarding_completed')
+                            .eq('mentor_id', existingUser.user_id)
+                            .maybeSingle()
+
+                        if (mentorDetails?.onboarding_completed) {
+                            // Already fully submitted
+                            showModal('Application Status', 'You have already submitted an application. Check your dashboard for updates.', 'info', () => navigate('/mentor-dashboard'))
+                        } else {
+                            // "Half-way trap": Finished Step 1 (users record) but not full onboarding
+                            setStep(2) // Jump to profile details
+                            showModal(
+                                'Resume Application',
+                                `Welcome back! Let's finish your professional profile to complete your application.`,
+                                'info'
+                            )
+                        }
+                    }
                 } else {
                     setFormData(prev => ({
                         ...prev,
@@ -88,6 +141,7 @@ export default function ApplyMentor() {
                     }))
                 }
             }
+            setIsAuthLoading(false)
         }
         setupInitialData()
     }, [])
@@ -109,12 +163,31 @@ export default function ApplyMentor() {
         }
     }
 
-    const showModal = (title, message, type = 'info', onConfirm = null) => {
-        setModalConfig({ isOpen: true, title, message, type, onConfirm })
+    const showModal = (title, message, type = 'info', onConfirm = null, secondaryAction = null) => {
+        setModalConfig({ isOpen: true, title, message, type, onConfirm, secondaryAction })
     }
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }))
+    }
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut()
+        } catch (error) {
+            console.error('Error signing out:', error)
+        } finally {
+            clearAuthData()
+            // Clear specific Supabase token matching dashboard logic
+            localStorage.removeItem('sb-zupzvpepzkjeaelxczlz-auth-token')
+            // Hard redirect to landing page to ensure state refresh
+            window.location.href = '/'
+        }
+    }
+
+    const handleLeave = () => {
+        // Direct logout and exit as requested to prevent any modal-related crashes
+        handleLogout()
     }
 
     // --- Dynamic List Helpers ---
@@ -138,6 +211,76 @@ export default function ApplyMentor() {
             newList[index] = { ...newList[index], ...value }
             return { ...prev, [field]: newList }
         })
+    }
+
+    const toggleCourse = (courseId) => {
+        if (!courseId) return
+        const strId = String(courseId)
+        setFormData(prev => {
+            const currentOffered = prev.coursesOffered || []
+            const exists = currentOffered.find(c => String(c.course_id) === strId)
+            if (exists) {
+                return {
+                    ...prev,
+                    coursesOffered: currentOffered.filter(c => String(c.course_id) !== strId)
+                }
+            } else {
+                return {
+                    ...prev,
+                    coursesOffered: [...currentOffered, { course_id: strId, description: '' }]
+                }
+            }
+        })
+    }
+
+    const updateCourseDescription = (courseId, description) => {
+        setFormData(prev => ({
+            ...prev,
+            coursesOffered: prev.coursesOffered.map(c =>
+                c.course_id === courseId ? { ...c, description } : c
+            )
+        }))
+    }
+
+    const openDetailModal = (courseId, title) => {
+        const selection = (formData.coursesOffered || []).find(c => String(c.course_id) === String(courseId))
+        setDetailModal({
+            isOpen: true,
+            courseId,
+            courseTitle: title,
+            data: selection ? {
+                // If it's a generated description, we might not be able to parse it back easily 
+                // but we can at least show it or let them start fresh.
+                // For now, if it's already set, we just keep the prev data if we had it, 
+                // but since state is lost on refresh, we'll just start fresh or try to find it.
+                duration: '',
+                timings: '',
+                projects: '',
+                deliverables: '',
+                additional: ''
+            } : {
+                duration: '',
+                timings: '',
+                projects: '',
+                deliverables: '',
+                additional: ''
+            }
+        })
+    }
+
+    const saveDetails = () => {
+        const { duration, timings, projects, deliverables, additional } = detailModal.data
+        const generatedDescription = `Approximate Duration: ${duration}\n\nWeekly Timings (IST): ${timings}\n\nLive Projects provided: ${projects}\n\nFocus Area: ${deliverables}${additional ? `\n\nTarget Audience: ${additional}` : ''}`
+
+        updateCourseDescription(detailModal.courseId, generatedDescription)
+        setDetailModal(prev => ({ ...prev, isOpen: false }))
+    }
+
+    const handleDetailChange = (field, value) => {
+        setDetailModal(prev => ({
+            ...prev,
+            data: { ...prev.data, [field]: value }
+        }))
     }
 
     const toggleArrayItem = (field, value) => {
@@ -173,18 +316,39 @@ export default function ApplyMentor() {
                     : formData.skills.filter(s => s.name.trim() !== '').map(s => s.name)
             }
 
+            const {
+                email, phone, password, confirmPassword, coursesOffered,
+                title, ...dataToSubmit
+            } = submissionData
+
             // 1. Update/Insert into 'mentors_details'
             // We use upsert to prevent "duplicate key" errors if the user retries the final step
-            const { email, phone, password, confirmPassword, ...dataToSubmit } = submissionData
             const { error: profileError } = await supabase
                 .from('mentors_details')
                 .upsert({
                     mentor_id: legacyId,
                     ...dataToSubmit,
-                    is_mentor_approved: 'pending'
+                    is_mentor_approved: 'pending',
+                    onboarding_completed: true
                 }, { onConflict: 'mentor_id' })
 
             if (profileError) throw profileError
+
+            // 2. Insert/Update 'mentor_courses'
+            // Delete old selections first to ensure clean state on retry
+            await supabase.from('mentor_courses').delete().eq('mentor_id', legacyId)
+
+            const mentorCoursesData = coursesOffered.map(course => ({
+                mentor_id: legacyId,
+                course_id: parseInt(course.course_id),
+                course_provide: course.description
+            }))
+
+            const { error: coursesError } = await supabase
+                .from('mentor_courses')
+                .insert(mentorCoursesData)
+
+            if (coursesError) throw coursesError
 
             // 2. Success
             showModal(
@@ -204,21 +368,33 @@ export default function ApplyMentor() {
 
     const nextStep = async () => {
         if (step === 1) {
-            if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.password || !formData.confirmPassword) {
-                showModal('Required Account Info', 'Please fill in your name and login credentials to continue.', 'warning')
+            // Check if we're still waiting for auth data
+            if (isAuthLoading) return;
+
+            // If already authenticated, we only need name, email, and phone. Password is only needed for new signups.
+            const isPasswordRequired = !authUserId
+
+            if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim() || (isPasswordRequired && (!formData.password || !formData.confirmPassword))) {
+                const message = isPasswordRequired
+                    ? 'Please fill in your name and login credentials to continue.'
+                    : 'Please fill in your name and phone number to continue.'
+                showModal('Required Info', message, 'warning')
                 return
             }
             if (!formData.email.includes('@')) {
                 showModal('Invalid Email', 'Please enter a valid email address.', 'warning')
                 return
             }
-            if (formData.password.length < 6) {
-                showModal('Weak Password', 'Password must be at least 6 characters long.', 'warning')
-                return
-            }
-            if (formData.password !== formData.confirmPassword) {
-                showModal('Password Mismatch', 'Passwords do not match.', 'warning')
-                return
+
+            if (isPasswordRequired) {
+                if (formData.password.length < 6) {
+                    showModal('Weak Password', 'Password must be at least 6 characters long.', 'warning')
+                    return
+                }
+                if (formData.password !== formData.confirmPassword) {
+                    showModal('Password Mismatch', 'Passwords do not match.', 'warning')
+                    return
+                }
             }
 
             setIsSubmitting(true)
@@ -237,17 +413,45 @@ export default function ApplyMentor() {
 
                     if (signupError) {
                         if (signupError.message?.toLowerCase().includes('already registered')) {
-                            const { data: existingUser } = await supabase
+                            // User exists in Supabase. Try to sign in with these credentials.
+                            const { data: logInData, error: logInError } = await supabase.auth.signInWithPassword({
+                                email: formData.email,
+                                password: formData.password
+                            })
+
+                            if (logInError) {
+                                // If login fails, they probably gave the wrong password for an existing account
+                                throw new Error('This email is already registered. Please check your password or log in via the Login page.')
+                            }
+
+                            // Logged in successfully! Now fetch their name and IDs
+                            userId = logInData.user.id
+                            const { data: dbUser } = await supabase
                                 .from('users')
-                                .select('id, user_id')
-                                .eq('email', formData.email)
+                                .select('user_id, name, role')
+                                .or(`id.eq.${userId},auth_uid.eq.${userId}`)
                                 .maybeSingle()
-                            
-                            if (existingUser) {
-                                userId = existingUser.id
-                                randomLegacyId = existingUser.user_id
+
+                            if (dbUser) {
+                                setAuthUserId(userId)
+                                setLegacyId(dbUser.user_id)
+                                localStorage.setItem('auth_id', dbUser.user_id)
+                                localStorage.setItem('auth_user_role', dbUser.role || 'mentor')
+                                storeAuthData({ id: userId, role: dbUser.role || 'mentor' })
+
+                                // Show specific "Welcome back" modal per user request
+                                showModal(
+                                    'Account Found!',
+                                    `Welcome back, ${dbUser.name || formData.name}! Please complete your professional profile to access your dashboard.`,
+                                    'info',
+                                    () => setStep(2)
+                                )
+                                setIsSubmitting(false)
+                                return // EXIT EARLY - Do not change user table values
                             } else {
-                                throw signupError
+                                // Ghost case: account exists in Auth but not in users table yet.
+                                // We need a legacy numeric ID for them.
+                                randomLegacyId = Math.floor(100000 + Math.random() * 900000)
                             }
                         } else {
                             throw signupError
@@ -263,7 +467,7 @@ export default function ApplyMentor() {
                         .select('user_id')
                         .eq('id', userId)
                         .maybeSingle()
-                    
+
                     if (existingUser?.user_id) {
                         randomLegacyId = existingUser.user_id
                     } else {
@@ -271,25 +475,71 @@ export default function ApplyMentor() {
                     }
                 }
 
-                // 2. Ensure record in 'users' table with 'mentor' role
-                const { error: userError } = await supabase
+                // 2. Passive Persistence Check: 
+                // We try to find the user. If they exist, we use their data and STOP.
+                // If they don't exist, we try to create them ONE TIME and carry on even if RLS blocks it (trigger might be active).
+                const { data: existingDbUser } = await supabase
                     .from('users')
-                    .upsert({
-                        id: userId,
-                        user_id: randomLegacyId,
-                        email: formData.email,
-                        phone_number: formData.phone,
-                        role: 'mentor',
-                        password: formData.password
-                    }, { onConflict: 'id' })
+                    .select('user_id, role, name, email')
+                    .or(`id.eq.${userId},auth_uid.eq.${userId},email.ilike.${formData.email}`)
+                    .maybeSingle()
 
-                if (userError) throw userError
+                if (existingDbUser) {
+                    // Shield: Found them! Use existing data. DO NOT attempt to write.
+                    const finalId = userId || existingDbUser.id || existingDbUser.auth_uid
+                    const finalLegacyId = existingDbUser.user_id
 
+                    setAuthUserId(finalId)
+                    setLegacyId(finalLegacyId)
+                    localStorage.setItem('auth_id', finalLegacyId)
+                    localStorage.setItem('auth_user_role', existingDbUser.role || 'mentor')
+                    storeAuthData({ id: finalId, role: existingDbUser.role || 'mentor' })
+
+                    showModal('Account Found!', `Welcome back, ${existingDbUser.name || formData.name}! Proceeding to complete your profile.`, 'info', () => setStep(2))
+                    setIsSubmitting(false)
+                    return
+                }
+
+                // 3. Fallback: Only try to insert if not found. 
+                // We use .insert() instead of .upsert() to avoid RLS Update conflicts.
+                if (!existingDbUser) {
+                    const { error: insertError } = await supabase
+                        .from('users')
+                        .insert({
+                            id: userId,
+                            user_id: randomLegacyId,
+                            email: formData.email,
+                            role: 'mentor',
+                            name: formData.name,
+                            phone_number: formData.phone,
+                            password: formData.password
+                        })
+
+                    if (insertError) {
+                        // If it's an RLS error or Duplicate error, a trigger might have already handled it.
+                        // We log it but don't crash Step 1 if we have a userId.
+                        console.warn('Users table insert suppressed (likely handled by trigger or exists):', insertError)
+                        if (!insertError.message?.toLowerCase().includes('security policy')) {
+                            // If it's NOT an RLS error, it might be a real issue
+                            // but for "User Already There", we should just proceed
+                        }
+                    }
+                }
+
+                // Final state sync
                 setAuthUserId(userId)
                 setLegacyId(randomLegacyId)
                 localStorage.setItem('auth_id', randomLegacyId)
                 localStorage.setItem('auth_user_role', 'mentor')
                 storeAuthData({ id: userId, role: 'mentor' })
+
+                showModal(
+                    'Account Ready!',
+                    'Now, let\'s complete your professional profile to attract students.',
+                    'success',
+                    () => setStep(2)
+                )
+                return
 
             } catch (error) {
                 console.error('Step 1 account creation failed:', error)
@@ -302,7 +552,7 @@ export default function ApplyMentor() {
 
         if (step === 2) {
             if (!formData.address.trim() || !formData.title.trim() || !formData.about.trim()) {
-                showModal('Profile Incomplete', 'Please provide your location, title, and bio to continue.', 'warning')
+                showModal('Profile Incomplete', 'Please provide your location, title, and "About" overview to continue.', 'warning')
                 return
             }
         }
@@ -346,29 +596,67 @@ export default function ApplyMentor() {
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
                         <h2 className="step-title">Account Details</h2>
-                        <p className="step-subtitle">Create your mentor account credentials.</p>
+                        <p className="step-subtitle">
+                            {authUserId ? 'Verify your contact information.' : 'Create or verify your mentor account credentials.'}
+                        </p>
 
                         <div className="form-grid">
                             <div className="input-group">
                                 <label>Full Name <span className="required-star">*</span></label>
-                                <input type="text" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="Full Name" required />
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => handleInputChange('name', e.target.value)}
+                                    placeholder="Full Name"
+                                    required
+                                />
                             </div>
                             <div className="input-group">
                                 <label>Email Address <span className="required-star">*</span></label>
-                                <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder="your@email.com" required />
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => !authUserId && handleInputChange('email', e.target.value)}
+                                    placeholder="your@email.com"
+                                    required
+                                    readOnly={!!authUserId}
+                                    className={authUserId ? 'readonly-input' : ''}
+                                />
                             </div>
                             <div className="input-group">
                                 <label>Phone Number <span className="required-star">*</span></label>
-                                <input type="tel" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} placeholder="+1 234 567 890" required />
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    placeholder="+1 234 567 890"
+                                    required
+                                />
                             </div>
-                            <div className="input-group">
-                                <label>Password <span className="required-star">*</span></label>
-                                <input type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} placeholder="Min 6 characters" required />
-                            </div>
-                            <div className="input-group">
-                                <label>Confirm Password <span className="required-star">*</span></label>
-                                <input type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} placeholder="Re-enter password" required />
-                            </div>
+                            {!authUserId && (
+                                <>
+                                    <div className="input-group">
+                                        <label>Password <span className="required-star">*</span></label>
+                                        <input
+                                            type="password"
+                                            value={formData.password}
+                                            onChange={(e) => handleInputChange('password', e.target.value)}
+                                            placeholder="Min 6 characters"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>Confirm Password <span className="required-star">*</span></label>
+                                        <input
+                                            type="password"
+                                            value={formData.confirmPassword}
+                                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                                            placeholder="Re-enter password"
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )
@@ -546,23 +834,69 @@ export default function ApplyMentor() {
             case 6:
                 return (
                     <div key={step} className="onboarding-step-content fade-in-up">
-                        <h2 className="step-title">Course Ready to Offer</h2>
-                        <p className="step-subtitle">Select the programs you are prepared to mentor students in.</p>
-                        <div className="course-grid-selector onboarding-grid">
+                        <h2 className="step-title">Courses You Offer</h2>
+                        <p className="step-subtitle">Select programs and provide a detailed description of what you will provide (timings, projects, duration, etc.)</p>
+
+                        <div className="offered-courses-container">
                             {loadingCourses ? <Loading size="40px" /> : (
-                                availableCourses.map(course => (
-                                    <button
-                                        key={course.course_id}
-                                        type="button"
-                                        className={`course-selection-card ${formData.coursesOffered.includes(String(course.course_id)) ? 'active' : ''}`}
-                                        onClick={() => toggleArrayItem('coursesOffered', String(course.course_id))}
-                                    >
-                                        <div className="course-title-mini">{course.title}</div>
-                                        <div className="selection-indicator">
-                                            {formData.coursesOffered.includes(String(course.course_id)) ? '✓ Ready' : 'Add Course'}
-                                        </div>
-                                    </button>
-                                ))
+                                <div className="detailed-course-list">
+                                    {availableCourses.map(course => {
+                                        const cid = String(course.course_id)
+                                        const isSelected = (formData.coursesOffered || []).some(c => String(c.course_id) === cid)
+                                        const selection = (formData.coursesOffered || []).find(c => String(c.course_id) === cid)
+
+                                        return (
+                                            <div 
+                                                key={course.course_id} 
+                                                className={`course-detail-card ${isSelected ? 'active' : ''}`}
+                                                onClick={() => toggleCourse(String(course.course_id))}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <div className="course-card-header">
+                                                    <div className="course-info" style={{ pointerEvents: 'none' }}>
+                                                        <span className="material-symbols-outlined icon">
+                                                            {isSelected ? 'check_circle' : 'add_circle'}
+                                                        </span>
+                                                        <span className="title">{course.title}</span>
+                                                    </div>
+                                                    <span className="status-badge" style={{ pointerEvents: 'none' }}>
+                                                        {isSelected ? 'Selected' : 'Click to add'}
+                                                    </span>
+                                                </div>
+
+                                                {isSelected && (
+                                                    <div className="course-card-body fade-in" onClick={(e) => e.stopPropagation()}>
+                                                        <div className="details-header-row">
+                                                            <label>Course Offer Details <span className="required-star">*</span></label>
+                                                            <button
+                                                                type="button"
+                                                                className="edit-details-btn"
+                                                                onClick={() => openDetailModal(String(course.course_id), course.title)}
+                                                            >
+                                                                <span className="material-symbols-outlined">edit_note</span>
+                                                                {selection.description ? 'Update Details' : 'Configure Offer'}
+                                                            </button>
+                                                        </div>
+
+                                                        {selection.description ? (
+                                                            <div className="course-provide-preview">
+                                                                {selection.description.split('\n').map((line, i) => (
+                                                                    <p key={i}>{line}</p>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="empty-details-box" onClick={() => openDetailModal(String(course.course_id), course.title)}>
+                                                                <span className="material-symbols-outlined">info</span>
+                                                                <p>Click "Configure Offer" to add duration, timings, project details, and more.</p>
+                                                            </div>
+                                                        )}
+                                                        <p className="input-hint">Students need specific details about your timings and projects to enroll.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -588,14 +922,37 @@ export default function ApplyMentor() {
                 </div>
 
                 <div className="onboarding-footer-v2">
-                    <button
-                        type="button"
-                        className="onboarding-back-btn"
-                        onClick={prevStep}
-                        style={{ visibility: step === 1 ? 'hidden' : 'visible' }}
-                    >
-                        Back
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <button
+                            type="button"
+                            className="onboarding-exit-btn"
+                            onClick={handleLeave}
+                            style={{
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: 'white',
+                                color: '#64748b',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                            Exit
+                        </button>
+                        <button
+                            type="button"
+                            className="onboarding-back-btn"
+                            onClick={prevStep}
+                            style={{ visibility: step === 1 ? 'hidden' : 'visible' }}
+                        >
+                            Back
+                        </button>
+                    </div>
                     {step < 6 ? (
                         <button
                             type="button"
@@ -625,6 +982,79 @@ export default function ApplyMentor() {
                 onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
                 {...modalConfig}
             />
+
+            {/* Structured Course Details Modal */}
+            {detailModal.isOpen && (
+                <div className="course-modal-overlay" onClick={() => setDetailModal(prev => ({ ...prev, isOpen: false }))} style={{ zIndex: 10000 }}>
+                    <div className="course-modal-content detailed-offer-modal fade-in-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header-elegant">
+                            <h3>Configure Your {detailModal.courseTitle} Offer</h3>
+                            <button className="close-btn" onClick={() => setDetailModal(prev => ({ ...prev, isOpen: false }))}>×</button>
+                        </div>
+                        <div className="modal-body-elegant">
+                            <p className="modal-instruction">Provide specific details to help students understand exactly what you offer.</p>
+
+                            <div className="modal-form-grid">
+                                <div className="input-group">
+                                    <label>Approximate Duration <span className="required-star">*</span></label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. 12 Weeks (3 Months)"
+                                        value={detailModal.data.duration}
+                                        onChange={(e) => handleDetailChange('duration', e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Weekly Timings - preferred in IST <span className="required-star">*</span></label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Sat-Sun 10:00 AM - 12:00 PM IST"
+                                        value={detailModal.data.timings}
+                                        onChange={(e) => handleDetailChange('timings', e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group full-width">
+                                    <label>Live Projects which you provide <span className="required-star">*</span></label>
+                                    <textarea
+                                        placeholder="Describe the real-world projects and hands-on work students will complete..."
+                                        rows="3"
+                                        value={detailModal.data.projects}
+                                        onChange={(e) => handleDetailChange('projects', e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group full-width">
+                                    <label>Key focus on where will you focus your work <span className="required-star">*</span></label>
+                                    <textarea
+                                        placeholder="Detail the core concepts, tools, and outcomes you will prioritize..."
+                                        rows="2"
+                                        value={detailModal.data.deliverables}
+                                        onChange={(e) => handleDetailChange('deliverables', e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group full-width">
+                                    <label>Who should choose this course</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Beginners, Final year students, Professionals switching careers..."
+                                        value={detailModal.data.additional}
+                                        onChange={(e) => handleDetailChange('additional', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer-elegant">
+                            <button className="cancel-btn" onClick={() => setDetailModal(prev => ({ ...prev, isOpen: false }))}>Cancel</button>
+                            <button
+                                className="save-btn"
+                                onClick={saveDetails}
+                                disabled={!detailModal.data.duration || !detailModal.data.timings || !detailModal.data.projects || !detailModal.data.deliverables}
+                            >
+                                Generate Full Description
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

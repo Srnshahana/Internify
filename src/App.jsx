@@ -105,8 +105,8 @@ function ExplorePage() {
         const linkedMentors = mentorsFromApi.map(mentor => {
           const mentorCourseIds = mentor.coursesOffered || mentor.courses || []
           const fullCourses = coursesFromApi.filter(c =>
-            mentorCourseIds.includes(c.id) ||
-            mentorCourseIds.includes(String(c.id))
+            mentorCourseIds.includes(c.course_id) ||
+            mentorCourseIds.includes(String(c.course_id))
           )
           return {
             ...mentor,
@@ -166,6 +166,32 @@ function ResourcesPage() {
   )
 }
 
+// Helper to normalize mentor data from Supabase
+const normalizeMentorData = (data) => {
+  if (!data) return null;
+  return {
+    id: data.mentor_id || data.id,
+    mentor_id: data.mentor_id || data.id,
+    name: data.name || data.full_name || 'Mentor',
+    bio: data.about || data.bio || '',
+    location: data.address || data.location || '',
+    profileImage: data.profile_image || data.image || '',
+    category: Array.isArray(data.category) ? data.category.join(', ') : data.category || '',
+    coursesOffered: data.coursesOffered || data.courses || [],
+    expertise: data.experties_in || [],
+    skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || s.skill_name || '')).filter(Boolean),
+    education: data.education || [],
+    experience: data.experience || [],
+    testimonials: data.testimonial || data.testimonials || [],
+    isVerified: data.is_verified || data.assured || false,
+    platformAssured: data.is_platformAssured || false,
+    role: data.role || (data.experience?.[0]?.role || ''),
+    company: data.company || (data.experience?.[0]?.company || ''),
+    experienceYears: data.experience?.[0]?.years || 5,
+    rating: data.rating || data.avg_rating || 5.0,
+  }
+}
+
 // Mentor Profile Page Wrapper
 function MentorProfilePage() {
   const { id } = useParams()
@@ -196,44 +222,29 @@ function MentorProfilePage() {
       }
 
       // If not in static, fetch from Supabase
-      try {
+        const isNumeric = /^\d+$/.test(id);
         const { data, error } = await supabase
           .from('mentors_details')
           .select('*')
-          .or(`mentor_id.eq.${id}, id.eq.${id}`)
-          .single()
+          .or(isNumeric ? `mentor_id.eq.${id},id.eq.${id}` : `mentor_id.eq.${id}`)
+          .maybeSingle()
 
-        if (error) throw error
-
-        if (data) {
-          // Normalize the data using a similar logic as getMentorData
-          const normalized = {
-            id: data.mentor_id || data.id,
-            name: data.name || data.full_name || 'Mentor',
-            bio: data.about || data.bio || '',
-            location: data.address || data.location || '',
-            profileImage: data.profile_image || data.image || '',
-            category: Array.isArray(data.category) ? data.category.join(', ') : data.category || '',
-            coursesOffered: data.coursesOffered || data.courses || [],
-            expertise: data.experties_in || [],
-            skills: (data.skills || []).map(s => typeof s === 'string' ? s : (s.name || '')).filter(Boolean),
-            education: data.education || [],
-            experience: data.experience || [],
-            testimonials: data.testimonial || data.testimonials || [],
-            isVerified: data.is_verified || data.assured || false,
-            platformAssured: data.is_platformAssured || false,
-            role: data.role || (data.experience?.[0]?.role || ''),
-            company: data.company || (data.experience?.[0]?.company || ''),
-            experienceYears: data.experience?.[0]?.years || 5,
-            rating: data.rating || data.avg_rating || 5.0,
-          }
-          setMentor(normalized)
+        if (error) {
+        console.error('Supabase fetch error:', error)
+        // Fallback to searching by name if ID search fails
+        const { data: nameData } = await supabase
+          .from('mentors_details')
+          .select('*')
+          .eq('name', id)
+          .maybeSingle()
+        
+        if (nameData) {
+          setMentor(normalizeMentorData(nameData))
         }
-      } catch (err) {
-        console.error('Error fetching mentor details:', err)
-      } finally {
-        setLoading(false)
+      } else if (data) {
+        setMentor(normalizeMentorData(data))
       }
+      setLoading(false)
     }
 
     fetchMentor()
@@ -296,7 +307,15 @@ function SignupPage() {
     console.log('Signup success:', user)
     setUserRole('student')
     setIsLoggedIn(true)
-    navigate('/dashboard')
+    
+    const pendingCourse = sessionStorage.getItem('pendingCourse')
+    if (pendingCourse && user.role !== 'mentor') {
+      const course = JSON.parse(pendingCourse)
+      sessionStorage.removeItem('pendingCourse')
+      navigate('/payment', { state: { course } })
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   if (isLoggedIn) {

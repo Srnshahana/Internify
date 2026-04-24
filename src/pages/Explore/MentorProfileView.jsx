@@ -1,4 +1,42 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+
+const useDragScroll = () => {
+  const ref = useRef(null)
+  const isDown = useRef(false)
+  const startX = useRef(0)
+  const scrollLeft = useRef(0)
+
+  const onMouseDown = (e) => {
+    isDown.current = true
+    ref.current?.classList.add('is-dragging')
+    startX.current = e.pageX - ref.current.offsetLeft
+    scrollLeft.current = ref.current.scrollLeft
+  }
+  const onMouseLeave = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseUp = () => {
+    isDown.current = false
+    ref.current?.classList.remove('is-dragging')
+  }
+  const onMouseMove = (e) => {
+    if (!isDown.current) return
+    e.preventDefault()
+    const x = e.pageX - ref.current.offsetLeft
+    const walk = (x - startX.current) * 2
+    ref.current.scrollLeft = scrollLeft.current - walk
+  }
+
+  const scroll = (direction) => {
+    if (ref.current) {
+      const amount = direction === 'left' ? -320 : 320
+      ref.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
+
+  return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll, onMouseDown, onMouseLeave, onMouseUp, onMouseMove }
+}
 import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import { getCourseById } from '../../data/staticData.js'
@@ -9,23 +47,12 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   const navigate = useNavigate()
   const [mentorData, setMentorData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [coursesIndex, setCoursesIndex] = useState(0)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [showCourseModal, setShowCourseModal] = useState(false)
   const [courseSessions, setCourseSessions] = useState([])
   const [loadingSessions, setLoadingSessions] = useState(false)
-  const [touchStart, setTouchStart] = useState(0)
-  const [touchEnd, setTouchEnd] = useState(0)
-  const [itemsPerView, setItemsPerView] = useState(2)
+  const coursesDrag = useDragScroll()
 
-  useEffect(() => {
-    const handleResize = () => {
-      setItemsPerView(window.innerWidth <= 640 ? 1 : 2)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   useEffect(() => {
     // Self-healing: Check for inconsistent auth state
@@ -55,51 +82,74 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   async function fetchMentorDetails() {
     try {
       setLoading(true);
-      const targetId = propMentor?.mentor_id
-      const { data, error } = await supabase
-        .from('mentors_details')
-        .select(`
-          mentor_id,
-          name,
-          about,
-          profile_image,
-          is_verified,
-          experties_in,
-          category,
-          education,
-          skills,
-          experience,
-          testimonial,
-          id,
-          is_platformAssured,
-          address,
-          coursesOffered,
-          rating
-        `)
-        .eq('mentor_id', targetId)
-        .single();
+      const targetId = propMentor?.mentor_id || propMentor?.id
+      const isNumeric = /^\d+$/.test(targetId);
 
-      if (error) {
-        console.error('Supabase mentor fetch error:', error);
-        setLoading(false)
-        return;
+      let mentorResponse;
+      if (isNumeric) {
+        mentorResponse = await supabase
+          .from('mentors_details')
+          .select('*')
+          .or(`mentor_id.eq.${targetId},id.eq.${targetId}`)
+          .maybeSingle();
+      } else {
+        mentorResponse = await supabase
+          .from('mentors_details')
+          .select('*')
+          .eq('name', targetId)
+          .maybeSingle();
       }
 
+      const { data, error } = mentorResponse;
 
-      // Fetch course details if coursesOffered has values
-      let coursesData = [];
-      if (data.coursesOffered && data.coursesOffered.length > 0) {
-        const courseIds = data.coursesOffered.map((id) => Number(id));
-        const { data: courses, error: coursesError } = await supabase
-          .from('courses')
+      if (error || !data) {
+        if (error) console.error('Supabase mentor fetch error:', error);
+        // Second fallback: search by name just in case
+        const { data: nameData } = await supabase
+          .from('mentors_details')
           .select('*')
-          .in('course_id', courseIds);
+          .eq('name', propMentor?.name)
+          .maybeSingle();
 
-        if (coursesError) {
-          console.error('Supabase courses fetch error:', coursesError);
-        } else {
-          coursesData = courses;
+        if (!nameData) {
+          setLoading(false);
+          return;
         }
+        // If we found it by name, proceed with nameData
+        fetchCourseAndRender(nameData);
+      } else {
+        fetchCourseAndRender(data);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching mentor details:', err);
+      setLoading(false)
+    }
+  }
+
+  async function fetchCourseAndRender(data) {
+    try {
+      const targetId = data.mentor_id || data.id;
+
+
+      // Fetch course details from mentor_courses junction table
+      const { data: offeredData, error: offeredError } = await supabase
+        .from('mentor_courses')
+        .select(`
+          *,
+          courses (*)
+        `)
+        .eq('mentor_id', targetId);
+
+      let coursesData = [];
+      if (!offeredError && offeredData) {
+        coursesData = offeredData.map(od => ({
+          ...od.courses,
+          course_id: od.course_id,
+          // Original course description
+          description: od.courses?.description || '',
+          // Mentor specific content
+          mentor_provide: od.course_provide || ''
+        }));
       }
 
       // Normalize data for UI
@@ -142,7 +192,9 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           rating: c.rating || 4.8,
           students: c.students || 50,
           image: c.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
-          level: c.skill_level || c.level || ""
+          level: c.skill_level || c.level || "",
+          description: c.description || "",
+          mentor_provide: c.mentor_provide || ""
         }))
       }
 
@@ -155,7 +207,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   }
 
   if (loading) return <div className="loading-container" style={{ padding: '100px', textAlign: 'center' }}>Loading mentor profile...</div>
-  if (!mentorData) return <div className="error-container" style={{ padding: '100px', textAlign: 'center' }}>Mentor not found</div>
+  if (!mentorData) return <div className="error-container" style={{ padding: '100px', textAlign: 'center' }}>Mentor njcbdkjhbcot found</div>
 
   const mentor = mentorData
   const stats = [
@@ -165,43 +217,6 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
     { label: 'Reviews', value: `${mentor.testimonials?.length || 0}` },
   ]
 
-  const handleNextCourse = () => {
-    if (coursesIndex < mentor.courses_offered.length - itemsPerView) {
-      setCoursesIndex(coursesIndex + 1)
-    }
-  }
-
-  const handlePrevCourse = () => {
-    if (coursesIndex > 0) {
-      setCoursesIndex(coursesIndex - 1)
-    }
-  }
-
-  // Touch Handlers
-  const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
-
-    if (isLeftSwipe) {
-      handleNextCourse()
-    }
-    if (isRightSwipe) {
-      handlePrevCourse()
-    }
-
-    setTouchStart(0)
-    setTouchEnd(0)
-  }
 
   const handleCloseModal = () => {
     setShowCourseModal(false)
@@ -209,6 +224,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   }
 
   const handleCourseClick = async (course) => {
+
     setSelectedCourse(course)
     setShowCourseModal(true)
     setLoadingSessions(true)
@@ -269,7 +285,18 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               </div>
               <div className="modal-description-section">
                 <h3>About this course</h3>
-                <p>Master the principles of {selectedCourse.title} with expert guidance from {mentor.name}. This course covers fundamental concepts and advanced techniques to help you excel in your career.</p>
+                <p style={{ whiteSpace: 'pre-line', color: '#475569', lineHeight: '1.6' }}>
+                  {selectedCourse.description || `Master the principles of ${selectedCourse.title} with expert guidance from ${mentor.name}. This course covers fundamental concepts and advanced techniques to help you excel in your career.`}
+                </p>
+
+                {selectedCourse.mentor_provide && (
+                  <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e2e8f0' }}>
+                    <h3 style={{ marginBottom: '12px' }}>What the mentor provides</h3>
+                    <p style={{ whiteSpace: 'pre-line', color: '#475569', lineHeight: '1.6' }}>
+                      {selectedCourse.mentor_provide}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="modal-curriculum-section">
@@ -518,83 +545,63 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           </div>
         </div>
 
-        {/* Courses Offered Section - Carousel Fix */}
+        {/* Courses Offered Section - carousel Sync */}
         {mentor.courses_offered?.length > 0 && (
           <div className="profile-section-elegant">
             <div className="profile-section-header-elegant">
-              <h2 className="profile-section-title-elegant">Courses Offered</h2>
+              <h2 className="profile-section-title-elegant">Mentorship Programs</h2>
             </div>
 
-            <div
-              className="carousel-container"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              style={{ position: 'relative', touchAction: 'pan-y' }}
-            >
-              {mentor.courses_offered.length > itemsPerView && (
-                <>
-                  <button
-                    className="carousel-nav-btn prev"
-                    onClick={handlePrevCourse}
-                    disabled={coursesIndex === 0}
-                    style={{ zIndex: 20 }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-
-                  <button
-                    className="carousel-nav-btn next"
-                    onClick={handleNextCourse}
-                    disabled={coursesIndex >= mentor.courses_offered.length - itemsPerView}
-                    style={{ zIndex: 20 }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
-                </>
-              )}
-
-              <div className="carousel-wrapper" style={{
-                transform: `translateX(-${coursesIndex * (itemsPerView === 1 ? 70 : 50)}%)`,
-              }}>
+            <div className="carousel-container" style={{ position: 'relative' }}>
+              <button className="carousel-nav-btn prev" onClick={() => coursesDrag.scroll('left')}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              
+              <div
+                className="draggable-carousel"
+                ref={coursesDrag.ref}
+                onMouseDown={coursesDrag.onMouseDown}
+                onMouseLeave={coursesDrag.onMouseLeave}
+                onMouseUp={coursesDrag.onMouseUp}
+                onMouseMove={coursesDrag.onMouseMove}
+              >
                 {mentor.courses_offered.map((course) => (
                   <div
                     key={course.id}
                     className="carousel-slide"
-                    style={{ cursor: 'pointer' }}
                     onClick={() => handleCourseClick(course)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <div className="course-card-elegant">
                       <div className="course-image-elegant">
-                        <img
-                          src={course.image}
-                          alt={course.title}
-                        />
+                        <img src={course.image} alt={course.title} />
+                        <div className="course-rating-box">
+                          <span className="star-icon">★</span>
+                          <span>{course.rating}</span>
+                        </div>
                       </div>
                       <div className="course-body-elegant">
                         <div className="course-header-elegant">
                           <span className="course-category-elegant">{course.category}</span>
-                          <div className="course-rating-box">
-                            <span className="star-icon">★</span>
-                            <span>{course.rating}</span>
-                          </div>
+                          <span className="course-students-elegant">{course.students} Learners</span>
                         </div>
                         <h3 className="course-name-elegant">{course.title}</h3>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                          {course.mentor_provide || course.description || 'Premium mentorship program.'}
+                        </p>
                         <div className="course-footer-elegant">
-                          <span className="course-status-badge-elegant" data-status="enrolled">
-                            {course.students} Mentees
-                          </span>
-                          <span className="course-level-elegant">{course.level}</span>
+                          <span className="course-level-elegant">{course.level || 'Expert'}</span>
+                          <span className="course-action-elegant">View Details →</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
+
+              <button className="carousel-nav-btn next" onClick={() => coursesDrag.scroll('right')}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
             </div>
           </div>
         )}

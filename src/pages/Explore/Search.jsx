@@ -189,37 +189,29 @@ export default function Explore({
       if (mentorsError) console.error('Error fetching mentors:', mentorsError)
       if (coursesError) console.error('Error fetching courses:', coursesError)
 
-      if (mentorsData && coursesData) {
+      if (mentorsData) {
         const resolvedMentors = mentorsData.map(mentorItem => {
-          const courseIds = Array.isArray(mentorItem.coursesOffered)
+          const mentorCourseIds = Array.isArray(mentorItem.coursesOffered)
             ? mentorItem.coursesOffered.map(String)
             : []
 
           // Match course_id from courses table with IDs in mentor's coursesOffered array
-          const fullCourses = coursesData.filter(c =>
-            courseIds.includes(String(c.course_id))
-          )
+          const fullCourses = coursesData 
+            ? coursesData.filter(c => mentorCourseIds.includes(String(c.course_id)))
+            : []
 
           return new Mentor({
+            ...mentorItem,
             mentor_id: mentorItem.mentor_id,
             id: mentorItem.mentor_id,
-            name: mentorItem.name,
-            profile_image: mentorItem.profile_image,
-            category: mentorItem.category,
-            about: mentorItem.about,
-            address: mentorItem.address,
-            is_verified: mentorItem.is_verified,
-            is_platformAssured: mentorItem.is_platformAssured,
-            rating: mentorItem.rating,
             coursesOffered: fullCourses
           })
         })
         setApiMentors(resolvedMentors)
+      }
+      
+      if (coursesData) {
         setApiCourses(coursesData)
-
-      } else {
-        if (mentorsData) setApiMentors(mentorsData.map(m => new Mentor({ ...m, id: m.mentor_id })))
-        if (coursesData) setApiCourses(coursesData)
       }
     } catch (err) {
       console.error('Unexpected error in fetchAllData:', err)

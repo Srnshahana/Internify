@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import Loading from '../../components/Loading'
+import { useNavigate } from 'react-router-dom'
+import Loading from '../../components/Loading.jsx'
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import Home from './Home.jsx'
 import Calendar from './Calendar.jsx'
@@ -69,8 +70,17 @@ function ApprovalRejectedView({ onLogout }) {
 
 function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems }) {
   const { loading, mentorshipEnrollments, userProfile } = useDashboardData()
+  const navigate = useNavigate()
 
-  if (loading) {
+  useEffect(() => {
+    // If user is a mentor but hasn't completed onboarding or profile is missing, send them back to the application page
+    if (!loading && (!userProfile || !userProfile.onboarding_completed)) {
+      console.log('🔄 Mentor onboarding incomplete or profile missing. Redirecting to ApplyMentor.')
+      navigate('/apply-mentor')
+    }
+  }, [loading, userProfile, navigate])
+
+  if (loading || (!userProfile || !userProfile.onboarding_completed)) {
     return <Loading fullScreen={true} />
   }
 

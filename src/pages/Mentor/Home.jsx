@@ -383,7 +383,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
           <span className="dashboard-view-all-v2" onClick={() => setShowMyCourses(true)}>View All</span>
         </div>
 
-        <div 
+        <div
           className="dashboard-carousel-v2 draggable-carousel"
           ref={coursesDrag.ref}
           {...coursesDrag.events}
@@ -449,8 +449,8 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
 
       <div className="dashboard-section dashboard-featured-section-v2">
         <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Mentor Resources</h2>
-        <div 
-          className="featured-sessions-carousel draggable-carousel" 
+        <div
+          className="featured-sessions-carousel draggable-carousel"
           ref={resourcesDrag.ref}
           {...resourcesDrag.events}
           style={{ background: 'transparent' }}

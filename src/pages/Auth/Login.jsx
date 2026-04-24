@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import '../../App.css'
 import supabase from '../../supabaseClient.js'
 import { fetchUserRole, storeAuthData } from '../../utils/auth.js'
-import MessageModal from '../../components/shared/MessageModal'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 function Login({ onBack, onShowSignup, onLogin }) {
   const navigate = useNavigate()
@@ -39,80 +39,48 @@ function Login({ onBack, onShowSignup, onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setError(''); // Removed
-
     if (!email || !password) {
       showModal('Missing Information', 'Please fill in all fields.', 'error')
       return;
     }
 
     setIsLoading(true);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
 
-    // 1️⃣ Log in with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim()
-    });
-
-    setIsLoading(false);
-
-    console.log('Supabase Auth Response:', authData);
-    console.log('Supabase Auth Error:', authError);
-
-    if (authError) {
-      showModal('Login Failed', authError.message, 'error')
-      return;
-    }
-
-    if (!authData.user) {
-      showModal('User Not Found', 'No user found with these credentials.', 'error')
-      return;
-    }
-
-    // 2️⃣ Fetch the app-specific role from users table
-    console.log('User role:', authData.user.email)
-    const role = await fetchUserRole(authData.user.email);
-
-    if (!role) {
-      showModal('Role Error', 'Failed to fetch user role. Please contact support.', 'error')
-      return;
-    }
-
-    // 3️⃣ Store auth data
-    storeAuthData({ id: authData.user.id, role });
-
-    // 4️⃣ Check for pending course purchase and navigate
-    const pendingCourse = sessionStorage.getItem('pendingCourse')
-    console.log('Checking for pending course:', pendingCourse)
-
-    if (pendingCourse) {
-      // Security Check: If user is a mentor, they cannot buy courses per business logic
-      if (role === 'mentor') {
-        showModal(
-          'Action Restricted',
-          "Mentors cannot enroll in courses. You have been redirected to your dashboard.",
-          'error',
-          () => {
-            sessionStorage.removeItem('pendingCourse')
-            navigate('/mentor-dashboard')
-          }
-        )
-        return
+      if (authError) {
+        showModal('Login Failed', authError.message, 'error')
+        return;
       }
 
-      // Clear the pending course and navigate to payment
-      const course = JSON.parse(pendingCourse)
-      console.log('Found pending course, navigating to payment:', course)
-      sessionStorage.removeItem('pendingCourse')
-      navigate('/payment', { state: { course } })
-    } else {
-      // No pending purchase - navigate to dashboard
-      console.log('No pending course, navigating to dashboard')
-      if (role === 'mentor') {
-        navigate('/mentor-dashboard')
+      const role = await fetchUserRole(authData.user.email);
+      if (!role) {
+        showModal('Role Error', 'Could not determine user role.', 'error')
+        return;
+      }
+
+      storeAuthData({ id: authData.user.id, role });
+
+      const pendingCourse = sessionStorage.getItem('pendingCourse')
+      console.log('Post-login check - role:', role, 'pendingCourse:', pendingCourse)
+
+      if (pendingCourse && role !== 'mentor') {
+        const course = JSON.parse(pendingCourse)
+        console.log('Redirecting to payment with course:', course)
+        sessionStorage.removeItem('pendingCourse')
+        navigate('/payment', { state: { course } })
       } else {
-        navigate('/dashboard')
+        console.log('Navigating to dashboard')
+        navigate(role === 'mentor' ? '/mentor-dashboard' : '/dashboard')
       }
+    } catch (err) {
+      console.error('Login error:', err)
+      showModal('Login Error', 'An unexpected error occurred.', 'error')
+    } finally {
+      setIsLoading(false)
     }
   };
 

@@ -101,16 +101,23 @@ function Signup({ onBack, onSignup }) {
         // Store auth data with role
         storeAuthData({ id: userId, role: role })
 
-        // Show success modal, then trigger navigation on close/confirm
+        // Check for pending course before redirecting
         showModal(
             'Welcome to Internify!',
-            'Your account has been created successfully. Click continue to go to your dashboard.',
+            'Your account has been created successfully. Click continue to get started.',
             'success',
             () => {
-                onSignup?.({
-                    ...data.user,
-                    role: role
-                })
+                const pendingCourse = sessionStorage.getItem('pendingCourse')
+                if (pendingCourse && role !== 'mentor') {
+                    const course = JSON.parse(pendingCourse)
+                    sessionStorage.removeItem('pendingCourse')
+                    navigate('/payment', { state: { course } })
+                } else {
+                    onSignup?.({
+                        ...data.user,
+                        role: role
+                    })
+                }
             }
         )
     }

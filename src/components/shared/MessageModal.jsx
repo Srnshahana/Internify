@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../App.css'; // Ensure we have access to global styles
 
-const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfirm }) => {
+const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfirm, secondaryAction }) => {
     if (!isOpen) return null;
 
     const isSuccess = type === 'success';
@@ -62,26 +62,49 @@ const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfir
                         {message}
                     </p>
 
-                    <button
-                        onClick={() => {
-                            if (onConfirm) onConfirm();
-                            onClose();
-                        }}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            backgroundColor: isError ? '#ef4444' : '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.2s'
-                        }}
-                    >
-                        {isSuccess ? 'Continue' : 'Okay'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        {secondaryAction && (
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    if (secondaryAction.onClick) secondaryAction.onClick();
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    backgroundColor: secondaryAction.color || '#f1f5f9',
+                                    color: secondaryAction.textColor || '#475569',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '15px',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                {secondaryAction.text}
+                            </button>
+                        )}
+                        <button
+                            onClick={() => {
+                                onClose();
+                                if (onConfirm) onConfirm();
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                backgroundColor: isError ? '#ef4444' : '#2563eb',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '15px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'background-color 0.2s'
+                            }}
+                        >
+                            {isSuccess ? 'Continue' : (onConfirm ? 'Confirm' : 'Okay')}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

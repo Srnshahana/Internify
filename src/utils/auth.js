@@ -12,7 +12,7 @@ export async function fetchUserRole(email) {
     const { data, error } = await supabase
       .from('users')
       .select('user_id, role')
-      .eq('email', email)
+      .ilike('email', email)
       .maybeSingle();
 
     console.log('📊 Users table response:', { data, error });
@@ -114,8 +114,29 @@ export async function getAuthenticatedUser() {
     return null
   }
 
-  // Fetch role from database using user email
-  const role = await fetchUserRole(user.email)
+  // 2️⃣ Fetch the app-specific role from users table
+  console.log('User role:', user.email)
+  let role = await fetchUserRole(user.email);
+
+  // Fallback: If fetch by email failed, try to fetch by auth_uid (unique ID)
+  if (!role) {
+    console.log('🕵️ Role not found by email, trying auth_uid lookup...');
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('user_id, role')
+      .eq('auth_uid', user.id)
+      .maybeSingle();
+      
+    if (userRecord) {
+      role = userRecord.role;
+      localStorage.setItem('auth_id', userRecord.user_id);
+    }
+  }
+
+  if (!role) {
+    console.error('Failed to fetch user role. Please contact support.');
+    return null;
+  }
 
   // Store in localStorage for persistence
   storeAuthData({ id: user.id, role })
@@ -125,4 +146,3 @@ export async function getAuthenticatedUser() {
     role
   }
 }
-
