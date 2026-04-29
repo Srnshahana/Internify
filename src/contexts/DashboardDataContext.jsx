@@ -24,7 +24,10 @@ export const DashboardDataProvider = ({ children }) => {
 
     const fetchDashboardData = async () => {
         try {
-            setLoading(true)
+            // Only show full screen loading on initial fetch
+            if (!userProfile) {
+                setLoading(true)
+            }
             setError(null)
 
             const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -44,7 +47,7 @@ export const DashboardDataProvider = ({ children }) => {
                         .select('id')
                         .eq('user_id', user.id)
                         .maybeSingle()
-                    
+
                     if (userData) {
                         authId = String(userData.id)
                         localStorage.setItem('auth_id', authId)
@@ -195,7 +198,7 @@ export const DashboardDataProvider = ({ children }) => {
                             course_provide: mc.course_provide,
                             duration: mc.duration || base.duration,
                             course_fee: mc.course_fee || base.course_fee,
-                            id: mc.course_id, 
+                            id: mc.course_id,
                             course_id: mc.course_id
                         }
                     })

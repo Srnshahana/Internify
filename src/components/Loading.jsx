@@ -11,8 +11,7 @@ const Loading = ({ fullScreen = false, size = "150px" }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#ffffff',
-        backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
         zIndex: 9999
     } : {
         display: 'flex',

@@ -199,12 +199,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   // Home Drawer state (Starts collapsed, then expands)
   const [isHomeDrawerExpanded, setIsHomeDrawerExpanded] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsHomeDrawerExpanded(true)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+  // Ad Banner auto-play removed for stability
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startY, setStartY] = useState(0)
@@ -341,14 +336,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
     }
   }
 
-  useEffect(() => {
-    adCarouselTimerRef.current = setInterval(() => {
-      handleNextAd()
-    }, 4000)
-    return () => {
-      if (adCarouselTimerRef.current) clearInterval(adCarouselTimerRef.current)
-    }
-  }, [currentAdIndex])
+  // Ad Banner handlers (auto-play removed for stability)
 
 
   // Upcoming Sessions handlers
@@ -807,7 +795,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       {/* Featured Sessions */}
       <div className="dashboard-section dashboard-featured-section-v2">
         <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Featured Sessions</h2>
-        <div className="featured-sessions-carousel" ref={featuredSessionsRef} style={{ background: 'transparent' }}>
+        <div className="featured-sessions-carousel featured-sessions-grid" ref={featuredSessionsRef} style={{ background: 'transparent' }}>
           <div
             className="featured-session-card"
             style={{ background: 'white', cursor: 'pointer' }}

@@ -314,7 +314,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
       <header className="dashboard-header-v2">
         <div className="dashboard-profile-group">
           <img
-            src={userProfile?.profile_image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop"}
+            src={userProfile?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile?.name || 'Mentor')}&background=0D0D0D&color=fff`}
             alt="Profile"
             className="dashboard-profile-img-v2"
           />
@@ -450,7 +450,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
       <div className="dashboard-section dashboard-featured-section-v2">
         <h2 className="dashboard-section-title-v2" style={{ marginBottom: '1rem' }}>Mentor Resources</h2>
         <div
-          className="featured-sessions-carousel draggable-carousel"
+          className="featured-sessions-carousel featured-sessions-grid draggable-carousel"
           ref={resourcesDrag.ref}
           {...resourcesDrag.events}
           style={{ background: 'transparent' }}
@@ -627,7 +627,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                   onMouseLeave={(e) => e.currentTarget.style.background = '#f8fafc'}
                 >
                   <img
-                    src={approvalCourse.student_image || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&h=100&fit=crop"}
+                    src={approvalCourse.student_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(approvalCourse.student_name || 'Student')}&background=0ea5e9&color=fff`}
                     alt={approvalCourse.student_name || 'Student'}
                     style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
                   />
@@ -761,122 +761,110 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
         </div>
       )}
 
-      {/* Class Progress Graph Modal */}
+      {/* Redesigned Class Progress Graph Modal */}
       {showProgressGraphModal && (
         <div className="modal-overlay" onClick={() => setShowProgressGraphModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 className="modal-title" style={{ margin: 0 }}>Classroom Progress</h2>
-              <button className="progress-modal-close" onClick={() => setShowProgressGraphModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <div className="modal-content-centered"
+            style={{
+              maxWidth: '1000px',
+              width: '95%',
+              padding: '40px',
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(25px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+              borderRadius: '32px'
+            }}
+            onClick={(e) => e.stopPropagation()}>
+
+            <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div>
+                <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Classroom Analytics</h2>
+                <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Real-time student progress tracking across all active programs</p>
+              </div>
+              <button onClick={() => setShowProgressGraphModal(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', transition: 'all 0.2s' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
 
-            {/* Actual Visual Graph Section */}
-            <div className="svg-graph-container">
-              <svg className="graph-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="graphGradientMentor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Stylized Progress Curve */}
-                <path
-                  className="graph-area"
-                  d={`M 0 120 L 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)} L 400 120 Z`}
-                  fill="url(#graphGradient)"
-                />
-                <path
-                  className="graph-stroke"
-                  d={`M 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)}`}
-                  fill="none"
-                  stroke="#0ea5e9"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-
-                <circle className="graph-point" cx="200" cy={110 - (avgProgress * 0.8)} r="4" style={{ animationDelay: '0.3s' }} />
-                <circle className="graph-point" cx="400" cy={100 - (avgProgress * 0.9)} r="4" style={{ animationDelay: '0.5s' }} />
-              </svg>
-            </div>
-            <div className="summary-mini-stats-v2">
-              <span style={{ fontSize: '24px', fontWeight: '800', color: '#0ea5e9', display: 'block' }}>{avgProgress}%</span>
-              <p style={{ color: '#64748b', fontSize: '12px' }}>Class Progress</p>
-            </div>
-          </div>
-          <div className="hover-info-v2">
-            <p>Average {avgProgress}% completion across active classes</p>
-          </div>
-
-          {/* Overall Progress List Section */}
-          <div className="comparison-chart-container">
-            <div className="modal-summary-text" style={{ marginBottom: '16px' }}>
-              <h4 style={{ fontSize: '18px', fontWeight: '700' }}>Overall Progress</h4>
-              <p>Average {avgProgress}% completion across active classes</p>
-            </div>
-            {activeTaughtCourses.length > 0 ? (
-              activeTaughtCourses.map((course, idx) => (
-                <div key={course.id || idx} className="chart-row">
-                  <div className="chart-info">
-                    <span className="chart-label">{course.title}</span>
-                    <span className="chart-value">{course.progress || 0}%</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.8fr)', gap: '32px', alignItems: 'start' }}>
+              {/* Left Column: Visual Graph & Main Stat */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ background: '#ffffff', padding: '32px', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Progress Overview</h3>
+                      <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>Cumulative learning trajectory</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '32px', fontWeight: '800', color: '#0ea5e9', display: 'block', lineHeight: '1' }}>{avgProgress}%</span>
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Avg. Completion</span>
+                    </div>
                   </div>
-                  <div className="chart-bar-wrapper">
-                    <div className="chart-fill" style={{ width: `${course.progress || 0}%` }}></div>
+
+                  <div className="svg-graph-container" style={{ margin: '0', background: 'transparent', height: '180px' }}>
+                    <svg className="graph-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="graphGradientMentorNew" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d={`M 0 120 L 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)} L 400 120 Z`}
+                        fill="url(#graphGradientMentorNew)"
+                      />
+                      <path
+                        d={`M 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)}`}
+                        fill="none"
+                        stroke="#0ea5e9"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="200" cy={110 - (avgProgress * 0.8)} r="6" fill="#ffffff" stroke="#0ea5e9" strokeWidth="3" />
+                      <circle cx="400" cy={100 - (avgProgress * 0.9)} r="6" fill="#ffffff" stroke="#0ea5e9" strokeWidth="3" />
+                    </svg>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '14px' }}>
-                No active classes to display.
-              </div>
-            )}
-          </div>
 
-          <div className="graph-container" style={{ padding: '0 0 20px' }}>
-            <h4 style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', fontWeight: '600' }}>Detailed Breakdown</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {activeClassrooms.filter(c => c.status === 'active').map((course, idx) => {
-                const progress = course.progress || 0;
-                return (
-                  <div key={course.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{course.title}</span>
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0ea5e9' }}>{progress}%</span>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      gap: '3px',
-                      width: '100%',
-                      height: '24px',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}>
-                      {[...Array(40)].map((_, i) => {
-                        const isFilled = progress >= ((i + 1) / 40) * 100;
-                        return (
-                          <div
-                            key={i}
-                            style={{
-                              flex: 1,
-                              maxWidth: '6px',
-                              height: '100%',
-                              background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
-                              borderRadius: '3px',
-                              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                              transform: isFilled ? 'scaleY(1)' : 'scaleY(0.6)',
-                              boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
-                              opacity: isFilled ? 1 : 0.4
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.6)', padding: '20px', borderRadius: '20px', border: '1px solid #ffffff' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>Active Classes</span>
+                    <h4 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: '800', color: '#1e293b' }}>{activeClassrooms.filter(c => c.status === 'active').length}</h4>
                   </div>
-                );
-              })}
+                  <div style={{ background: 'rgba(255,255,255,0.6)', padding: '20px', borderRadius: '20px', border: '1px solid #ffffff' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>Total Students</span>
+                    <h4 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: '800', color: '#1e293b' }}>{totalStudents}</h4>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Detailed Breakdown */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', maxHeight: '420px', overflowY: 'auto', paddingRight: '8px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#0ea5e9' }}>bar_chart</span>
+                  Course Breakdown
+                </h3>
+
+                {activeClassrooms.filter(c => c.status === 'active').length > 0 ? (
+                  activeClassrooms.filter(c => c.status === 'active').map((course, idx) => (
+                    <div key={course.id || idx} style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{course.title}</span>
+                        <span style={{ fontSize: '14px', fontWeight: '800', color: '#0ea5e9' }}>{course.progress || 0}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', background: '#f1f5f9', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: `${course.progress || 0}%`, height: '100%', background: 'linear-gradient(90deg, #0ea5e9, #6366f1)', borderRadius: '100px', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: 'rgba(255,255,255,0.4)', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '32px', marginBottom: '8px' }}>analytics</span>
+                    <p style={{ fontSize: '14px', margin: 0 }}>No active classes to track</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

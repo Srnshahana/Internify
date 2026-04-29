@@ -55,7 +55,7 @@ function MentorProfile({ onLogout }) {
     console.log('Mentor Profile: Course Card Clicked:', course)
     setSelectedCourse(course)
     setShowCourseModal(true)
-    
+
     const cid = course.course_id || course.id;
     if (!cid) return;
 
@@ -98,7 +98,7 @@ function MentorProfile({ onLogout }) {
     role: Array.isArray(safeUserProfile.category) ? safeUserProfile.category[0] : (safeUserProfile.category || 'Mentor'),
     title: safeUserProfile.title || 'Professional Educator & Industry Expert',
     location: safeUserProfile.address || 'Worldwide',
-    profilePicture: safeUserProfile.profile_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+    profilePicture: safeUserProfile.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(safeUserProfile.name || safeUserProfile.full_name || 'Expert')}&background=0D0D0D&color=fff`,
     bio: safeUserProfile.about || 'Experienced professional dedicated to helping students and mentees achieve their full potential through personalized guidance and real-world project experience.',
     experienceYears: safeUserProfile.experience_years || 8,
     menteesCoached: (taughtCourses || []).length,
@@ -226,9 +226,14 @@ function MentorProfile({ onLogout }) {
             <div className="profile-avatar-linkedin">
               <img src={mentorDisplayData.profilePicture} alt={mentorDisplayData.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <button className="profile-edit-btn-icon" onClick={() => setIsEditing(!isEditing)} title="Edit Profile">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            </button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="profile-edit-btn-icon" onClick={() => setIsEditing(!isEditing)} title="Edit Profile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button className="profile-edit-btn-icon" onClick={() => { localStorage.clear(); window.location.href = '/' }} title="Logout" style={{ color: '#ef4444', borderColor: '#fee2e2', background: '#fef2f2' }}>
+                <LogoutIcon />
+              </button>
+            </div>
           </div>
 
           <div className="profile-intro-info">
@@ -237,7 +242,7 @@ function MentorProfile({ onLogout }) {
                 <h1 className="profile-name-linkedin">{mentorDisplayData.name}</h1>
                 {userProfile?.is_verified && (
                   <span style={{ color: '#0ea5e9', display: 'flex' }} title="Verified Mentor">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                   </span>
                 )}
               </div>
@@ -249,29 +254,6 @@ function MentorProfile({ onLogout }) {
               </div>
               <div className="profile-connections-linkedin">
                 <span>★ {mentorDisplayData.averageRating} Rating • {mentorDisplayData.totalReviews} Reviews • {mentorDisplayData.menteesCoached} Mentees</span>
-              </div>
-            </div>
-
-            <div className="profile-actions-linkedin" style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-              <button 
-                className="btn-linkedin-primary" 
-                onClick={() => setIsEditing(!isEditing)}
-                style={{ background: isEditing ? '#004182' : '#0a66c2' }}
-              >
-                Manage Profile
-              </button>
-              <div style={{ position: 'relative' }}>
-                <button className="btn-linkedin-secondary" onClick={() => setShowSettings(!showSettings)}>Options</button>
-                {showSettings && (
-                  <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'white', border: '1px solid #ebebeb', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, width: '180px' }}>
-                    <button 
-                      onClick={() => { localStorage.clear(); window.location.href = '/' }}
-                      style={{ width: '100%', padding: '12px', textAlign: 'left', border: 'none', background: 'transparent', color: '#ef4444', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      Logout Account
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -369,8 +351,8 @@ function MentorProfile({ onLogout }) {
             <button className="carousel-nav-btn prev" onClick={() => coursesDrag.scroll('left')}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
-            <div 
-              className="draggable-carousel" 
+            <div
+              className="draggable-carousel"
               ref={coursesDrag.ref}
               onMouseDown={coursesDrag.onMouseDown}
               onMouseLeave={coursesDrag.onMouseLeave}
