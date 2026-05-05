@@ -148,6 +148,13 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
     .filter(s => !s.is_complete && !s.completed)
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
     .slice(0, 10)
+    .map(session => {
+      const enrollment = mentorshipEnrollments?.find(e => 
+        String(e.course_id) === String(session.course_id) && 
+        String(e.student_id) === String(session.student_id)
+      )
+      return { ...session, enrollmentStatus: enrollment?.status }
+    })
 
   // Calculate session completion progress
   const completedCount = allScheduled.filter(s => s.is_complete || s.completed).length
@@ -394,15 +401,8 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                 key={course.id || course.classroom_id}
                 className="dashboard-course-card-v2"
                 onClick={() => {
-                  if (course.status === 'pending') {
-                    setApprovalCourse(course);
-                    setClassroomName('');
-                    setIsApprovedSuccessfully(false);
-                    setShowApprovalModal(true);
-                  } else {
-                    setSelectedCourse(course);
-                    setShowCourseDetail(true);
-                  }
+                  setSelectedCourse(course);
+                  setShowCourseDetail(true);
                 }}
               >
                 <div className="course-card-v2" style={{ cursor: 'pointer' }}>
@@ -547,7 +547,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                         disabled={!session.meeting_link}
                         style={{ padding: '8px 16px', fontSize: '14px', opacity: session.meeting_link ? 1 : 0.5 }}
                       >
-                        {session.meeting_link ? 'Start Session' : 'TBA'}
+                        {session.enrollmentStatus === 'pending' ? 'Pending' : (session.meeting_link ? 'Start Session' : 'TBA')}
                       </button>
                     </div>
                   </div>
@@ -663,6 +663,10 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
                     onClick={async () => {
+                      if (!classroomName.trim()) {
+                        showModal('Missing Information', 'Please provide a classroom name before approving.', 'error')
+                        return
+                      }
                       try {
                         const { error } = await supabase
                           .from('classes_enrolled')
@@ -679,6 +683,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                         showModal('Error', 'Failed to approve request: ' + (err.message || 'Unknown error'), 'error')
                       }
                     }}
+                    disabled={!classroomName.trim()}
                     style={{
                       flex: 1,
                       background: '#10b981',
@@ -688,8 +693,9 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       borderRadius: '10px',
                       fontWeight: 600,
                       fontSize: '0.95rem',
-                      cursor: 'pointer',
-                      transition: 'background 0.2s'
+                      cursor: classroomName.trim() ? 'pointer' : 'not-allowed',
+                      transition: 'background 0.2s',
+                      opacity: classroomName.trim() ? 1 : 0.6
                     }}
                   >
                     Approve

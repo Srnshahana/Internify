@@ -349,6 +349,7 @@ function StudentRequests({ onBack }) {
 
                         <button
                           onClick={() => handleApprove(selectedRequest.id)}
+                          disabled={!classroomName.trim()}
                           className="session-btn"
                           style={{
                             width: '100%',
@@ -363,7 +364,9 @@ function StudentRequests({ onBack }) {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '12px',
-                            boxShadow: '0 10px 20px -5px rgba(65, 86, 140, 0.3)'
+                            boxShadow: classroomName.trim() ? '0 10px 20px -5px rgba(65, 86, 140, 0.3)' : 'none',
+                            opacity: classroomName.trim() ? 1 : 0.6,
+                            cursor: classroomName.trim() ? 'pointer' : 'not-allowed'
                           }}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>check_circle</span>

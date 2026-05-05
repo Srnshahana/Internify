@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RingsIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
-import { checkAuthSession, clearAuthData } from '../../utils/auth.js'
+import { getAuthenticatedUser, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
 import CourseModal from '../../components/CourseModal';
@@ -206,7 +206,7 @@ export const InteractiveGrid = ({ type = "repel" }) => {
           if (type === "attract") {
             p.x += directionX
             p.y += directionY
-            
+
             // Draw Constellation Line
             ctx.beginPath()
             ctx.moveTo(mouse.current.x, mouse.current.y)
@@ -285,6 +285,7 @@ export default function LandingPage({
 }) {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -317,12 +318,44 @@ export default function LandingPage({
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
+
+  useEffect(() => {
+    // Scroll to top on mount
+    window.scrollTo(0, 0)
+
+    const checkUser = async () => {
+      try {
+        const authData = await getAuthenticatedUser()
+        if (authData) {
+          setIsLoggedIn(true)
+          // Redirect if already logged in
+          if (authData.role === 'mentor') {
+            navigate('/mentor-dashboard', { replace: true })
+          } else {
+            navigate('/dashboard', { replace: true })
+          }
+        } else {
+          setIsLoggedIn(false)
+          setIsLoadingAuth(false)
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error)
+        setIsLoadingAuth(false)
+      }
+    }
+    checkUser()
+  }, [navigate])
+
   const [activeFaq, setActiveFaq] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
 
   const auraRef = useRef(null);
   const coursesCarouselRef = useRef(null);
+
+  if (isLoadingAuth) {
+    return <Loading />
+  }
 
   const handleMouseMove = (e) => {
     if (!auraRef.current) return
@@ -345,17 +378,6 @@ export default function LandingPage({
     navigate(`/explore?q=${encodeURIComponent(q)}`)
   }
 
-  useEffect(() => {
-    // Scroll to top on mount
-    window.scrollTo(0, 0)
-
-    const checkUser = async () => {
-      const user = await checkAuthSession()
-      setIsLoggedIn(!!user)
-    }
-    checkUser()
-  }, [])
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
     clearAuthData()
@@ -367,27 +389,37 @@ export default function LandingPage({
     {
       id: 1,
       question: "What is Internify?",
-      answer: "Internify is an AI-native professional growth platform that bridges the gap between leaning and industry by connecting students with expert mentors for real-world projects, direct referrals, and career acceleration."
+      answer: "Internify is a platform that connects students with experienced professionals for 1-on-1 mentorship and internship-based learning, focused on practical skills and real-world experience."
     },
     {
       id: 2,
-      question: "Is Internify free of charge?",
-      answer: "Internify offers a range of free introductory content and mentorship sessions. Our specialized project tracks and verified certification programs are premium offerings designed to support our expert mentor network."
+      question: "Who is this program for?",
+      answer: "This program is for students who want to build real skills, work on practical tasks, and gain internship experience. Beginners can join as long as they are willing to learn."
     },
     {
       id: 3,
-      question: "Where is Internify available?",
-      answer: "Internify is available globally. Our mentors come from leading tech hubs like Silicon Valley, London, and Bangalore, providing students with world-class industry exposure regardless of their location."
-    },
-    {
-      id: 4,
-      question: "Can I export my project code?",
-      answer: "Absolutely. All code written during your industry projects is yours to keep and export. We provide automated GitHub integration so you can easily showcase your work to potential recruiters."
+      question: "Who are the mentors?",
+      answer: "Mentors are experienced professionals from different fields with practical industry experience. They guide students through learning, tasks, and projects."
     },
     {
       id: 5,
-      question: "Does it guarantee working placement?",
-      answer: "While we provide direct referrals and recruitment help through our mentor network and partners, placement depends on your performance in projects and interviews. Our goal is to make you the most competitive candidate in the market."
+      question: "How does the internship work?",
+      answer: "You will be guided by a mentor, work on tasks or mini projects, and use the platform to track your progress. The focus is on learning by doing."
+    },
+    {
+      id: 6,
+      question: "Will I get a certificate?",
+      answer: "Yes, you will receive a certificate upon successful completion. Students who perform well may also receive a referral letter from their mentor."
+    },
+    {
+      id: 7,
+      question: "Do I need prior experience?",
+      answer: "No prior experience is required for beginner-level programs. Basic interest and consistency are enough to get started."
+    },
+    {
+      id: 8,
+      question: "Is placement support guaranteed?",
+      answer: "Placement is not guaranteed. However, we support you with mock interviews with real HR/recruiters and help in building a strong profile to improve your chances."
     }
   ];
 
@@ -507,7 +539,7 @@ export default function LandingPage({
         <section className="stitch-courses-section" id="courses">
           <InteractiveGrid />
           <div className="stitch-courses-header">
-            <h2 className="stitch-courses-title">Get started with templates</h2>
+            <h2 className="stitch-courses-title">Get started with Popular courses</h2>
             <div className="stitch-carousel-nav">
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
                 <span className="material-symbols-outlined">arrow_back</span>

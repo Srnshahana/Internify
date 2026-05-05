@@ -4,6 +4,7 @@ import supabase from '../../supabaseClient'
 import '../../App.css'
 import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import Assessments from './Assessments.jsx'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   const [showLiveClassroom, setShowLiveClassroom] = useState(false)
@@ -14,6 +15,23 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   const contextCourse = enrolledCourses?.find(c => course?.id ? (String(c.id) === String(course.id)) : (String(c.course_id) === String(course?.course_id)))
   const [courseDetails, setCourseDetails] = useState(contextCourse || course)
   const [loading, setLoading] = useState(true)
+  const [classroomName, setClassroomName] = useState(courseDetails.classroom_name || '')
+  const [isApprovedSuccessfully, setIsApprovedSuccessfully] = useState(false)
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
+
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    })
+  }
 
   useEffect(() => {
     if (contextCourse) {
@@ -34,7 +52,50 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   }
 
   const handleEnterClassroom = () => {
+    if (courseDetails.status === 'pending') return
     setShowLiveClassroom(true)
+  }
+
+  const handleApprove = async () => {
+    if (!classroomName.trim()) {
+      showModal('Missing Information', 'Please provide a classroom name before approving.', 'error')
+      return
+    }
+    try {
+      const { error } = await supabase
+        .from('classes_enrolled')
+        .update({
+          status: 'active',
+          classroom_name: classroomName
+        })
+        .eq('id', Number(courseDetails.id || courseDetails.enrollment_id))
+
+      if (error) throw error
+      setIsApprovedSuccessfully(true)
+      showModal('Success', 'Course approved successfully!', 'success')
+      // Update local state
+      setCourseDetails(prev => ({ ...prev, status: 'active', classroom_name: classroomName }))
+    } catch (err) {
+      console.error('Error approving:', err)
+      showModal('Error', 'Failed to approve request: ' + (err.message || 'Unknown error'), 'error')
+    }
+  }
+
+  const handleReject = async () => {
+    if (!confirm('Are you sure you want to reject this request?')) return;
+    try {
+      const { error } = await supabase
+        .from('classes_enrolled')
+        .update({ status: 'rejected' })
+        .eq('id', Number(courseDetails.id || courseDetails.enrollment_id))
+
+      if (error) throw error
+      showModal('Success', 'Request rejected.', 'success')
+      onBack() // Go back after rejection
+    } catch (err) {
+      console.error('Error rejecting:', err)
+      showModal('Error', 'Failed to reject request: ' + (err.message || 'Unknown error'), 'error')
+    }
   }
 
   if (showAssessments) {
@@ -51,6 +112,13 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
 
   return (
     <div className="course-detail-page-v2">
+      <MessageModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+      />
       {/* V2 Header (Glass) */}
       <div className="course-detail-header-v2">
         <button className="back-btn-v2" onClick={onBack}>
@@ -122,12 +190,82 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
                 </div>
               </div>
 
-              <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
-                Start Session
+              <button 
+                className="enter-classroom-btn-v2" 
+                onClick={handleEnterClassroom}
+                disabled={courseDetails.status === 'pending'}
+                style={{ 
+                  background: courseDetails.status === 'pending' ? '#f59e0b' : '', 
+                  opacity: courseDetails.status === 'pending' ? 0.9 : 1,
+                  cursor: courseDetails.status === 'pending' ? 'default' : 'pointer'
+                }}
+              >
+                {courseDetails.status === 'pending' ? 'Pending' : 'Start Session'}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Approval Section if Pending */}
+        {courseDetails.status === 'pending' && !isApprovedSuccessfully && (
+          <div className="course-section-elegant" style={{ background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '20px', padding: '24px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ width: '40px', height: '40px', background: '#fef3c7', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+                <span className="material-symbols-outlined">pending_actions</span>
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#92400e' }}>Enrollment Pending</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#b45309' }}>Review this student's request to join your class.</p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>Assign Classroom Name</label>
+              <input
+                type="text"
+                value={classroomName}
+                onChange={(e) => setClassroomName(e.target.value)}
+                placeholder="e.g. React Mastery - Batch A"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  background: 'white',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={handleApprove}
+                disabled={!classroomName.trim()}
+                style={{ 
+                  flex: 1, 
+                  background: '#10b981', 
+                  color: 'white', 
+                  border: 'none', 
+                  padding: '12px', 
+                  borderRadius: '12px', 
+                  fontWeight: '600', 
+                  cursor: classroomName.trim() ? 'pointer' : 'not-allowed',
+                  opacity: classroomName.trim() ? 1 : 0.6
+                }}
+              >
+                Approve Request
+              </button>
+              <button 
+                onClick={handleReject}
+                style={{ flex: 1, background: '#ef4444', color: 'white', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Course Statistics Grid */}
         <div className="course-grid-elegant">
