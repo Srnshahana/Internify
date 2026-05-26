@@ -50,6 +50,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const imageInputRef = useRef(null)
   const studyMaterialInputRef = useRef(null)
   const assessmentFileInputRef = useRef(null)
+  const channelRef = useRef(null)
 
   const [dbAssessments, setDbAssessments] = useState([])
   const [selectedAssessment, setSelectedAssessment] = useState(null)
@@ -257,7 +258,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     console.log('📡 Setting up subscription for chatId:', chatId)
     const channel = supabase
-      .channel(`chat:${chatId}`)
+      .channel(`chat:${chatId}`, {
+        config: {
+          broadcast: { self: true },
+        },
+      })
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -316,6 +321,13 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           return [...prev, msgForState]
         })
       })
+      .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
+        console.log('🚀 Mentor Broadcast received:', payload)
+        setMessages((prev) => {
+          if (prev.some(m => (m.tempId && m.tempId === payload.tempId) || String(m.id) === String(payload.id))) return prev
+          return [...prev, { ...payload, from: 'learner' }].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
+        })
+      })
       .subscribe((status) => {
         console.log('📡 Subscription status update:', status)
         if (status === 'CHANNEL_ERROR') {
@@ -323,9 +335,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         }
       })
 
+    channelRef.current = channel
+
     return () => {
       console.log('🔌 Cleaning up subscription for chatId:', chatId)
       supabase.removeChannel(channel)
+      channelRef.current = null
     }
   }, [chatId])
 
@@ -450,6 +465,15 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
     }
     setMessages(prev => [...prev, optimisticMsg])
+
+    // 1. BROADCAST (Instant Path)
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'chat-message',
+        payload: { ...optimisticMsg, from: 'mentor' } // Recipient sees message from 'mentor'
+      })
+    }
 
     // Insert to Supabase
     const { error } = await supabase
@@ -2461,37 +2485,29 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             </span>
           </button>
         ))}
+          {userRole === 'mentor' && (
+          <button
+            type="button"
+            className="live-course-complete-btn"
+            style={{ backgroundColor: '#8b5cf6', color: '#ffffff', marginLeft: '12px', border: 'none' }}
+            onClick={() => {
+              setShowAssessmentListModal(true)
+              setShowAttachOptions(false)
+            }}
+          >
+            <span className="live-session-title">Test</span>
+          </button>
+        )}
         <button
           type="button"
           className="live-course-complete-btn"
+          style={{ backgroundColor: '#10b981', color: '#ffffff', marginLeft: '12px', border: 'none' }}
           onClick={() => setShowCompletionModal(true)}
         >
           <span className="live-session-title">Course Complete</span>
         </button>
 
-        {userRole === 'mentor' && (
-          <>
-            <button
-              type="button"
-              className="live-course-complete-btn" // Reuse style or add new class
-              style={{ backgroundColor: '#22c55e', marginLeft: '12px' }}
-              onClick={() => {
-                setShowAssessmentListModal(true)
-                setShowAttachOptions(false)
-              }}
-            >
-              <span className="live-session-title">Create Poll</span>
-            </button>
-            <button
-              type="button"
-              className="live-course-complete-btn"
-              style={{ backgroundColor: '#eab308', marginLeft: '12px' }}
-              onClick={handleAttachStudyMaterial}
-            >
-              <span className="live-session-title">Study Material</span>
-            </button>
-          </>
-        )}
+      
       </div>
 
       {/* Course Completion Modal */}
@@ -2512,20 +2528,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               <button
                 type="button"
                 className="live-completion-modal-primary"
-                onClick={onBack}
-              >
-                ✅ Close Classroom
-              </button>
-              <button
-                type="button"
-                className="live-completion-modal-secondary"
                 onClick={() => {
-                  setShowCompletionModal(false)
-                  // Navigate to dashboard - you may need to adjust this based on your routing
                   if (onBack) onBack()
+                  window.location.reload()
                 }}
               >
-                ⬅️ Go to Dashboard
+                ✅ Close Classroom
               </button>
             </div>
           </div>

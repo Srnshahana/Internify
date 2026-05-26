@@ -138,7 +138,7 @@ function PendingWork({ onBack }) {
   const selectedWork = selectedWorkId ? pendingWork.find(w => w.id === selectedWorkId) : null
 
   return (
-    <div className="dashboard-page-v2 font-sans animate-fade-in">
+    <div className="dashboard-page-v2 font-sans animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
       <div className="dashboard-background-v2">
         <div className="grain-texture absolute inset-0"></div>
         <div className="dashboard-blob-1"></div>
@@ -147,21 +147,21 @@ function PendingWork({ onBack }) {
 
       <header className="dashboard-header-v2" style={{ marginBottom: '24px' }}>
         <div className="dashboard-profile-group">
-            <button 
-              onClick={onBack}
-              className="dashboard-card-icon-wrapper"
-              style={{ padding: '8px', width: '40px', height: '40px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: 'none', cursor: 'pointer', borderRadius: '12px' }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            </button>
-            <div className="dashboard-welcome-text-v2" style={{ marginLeft: '16px' }}>
-                <h1 style={{ fontSize: '24px' }}>Pending Reviews</h1>
-                <p className="dashboard-date-v2">Review and give feedback on student submissions</p>
-            </div>
+          <button
+            onClick={onBack}
+            className="dashboard-card-icon-wrapper"
+            style={{ padding: '8px', width: '40px', height: '40px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: 'none', cursor: 'pointer', borderRadius: '12px' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          </button>
+          <div className="dashboard-welcome-text-v2" style={{ marginLeft: '16px' }}>
+            <h1 style={{ fontSize: '24px' }}>Pending Reviews</h1>
+            <p className="dashboard-date-v2">Review and give feedback on student submissions</p>
+          </div>
         </div>
       </header>
 
-      <div className="dashboard-content-v2" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+      <div className="dashboard-content-v2" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '40px 24px 0', position: 'relative', zIndex: 1, minHeight: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
         {selectedWork ? (
           /* Glassmorphic Review View */
           <div className="animate-slide-up">
@@ -248,7 +248,7 @@ function PendingWork({ onBack }) {
           </div>
         ) : (
           /* Glassmorphic List View */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px', flex: 1 }}>
             {pendingWork.length > 0 ? (
                 <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -298,7 +298,7 @@ function PendingWork({ onBack }) {
                 </div>
                 </>
             ) : (
-              <div className="dashboard-glass-card-v2" style={{ textAlign: 'center', padding: '100px 40px', cursor: 'default' }}>
+              <div className="dashboard-glass-card-v2 animate-fade-in" style={{ textAlign: 'center', padding: '100px 40px', cursor: 'default', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: '50vh' }}>
                 <div className="dashboard-card-icon-wrapper" style={{ margin: '0 auto 24px', width: '64px', height: '64px', background: '#f8fafc', color: '#cbd5e1' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>task</span>
                 </div>
