@@ -154,11 +154,12 @@ export default function Explore({
   onBack,
   renderStars,
   initialQuery,
+  initialTab,
   onMentorClick,
   onBookSession,
   isLoading = false,
 }) {
-  const [activeTab, setActiveTab] = useState('mentors')
+  const [activeTab, setActiveTab] = useState(initialTab || 'mentors')
   const [term, setTerm] = useState(initialQuery || '')
   const [query, setQuery] = useState(initialQuery || '')
   const [selectedCourseId, setSelectedCourseId] = useState(null)
@@ -170,7 +171,10 @@ export default function Explore({
     fetchAllData()
     setTerm(initialQuery || '')
     setQuery(initialQuery || '')
-  }, [initialQuery])
+    if (initialTab) {
+      setActiveTab(initialTab)
+    }
+  }, [initialQuery, initialTab])
 
   const fetchAllData = async () => {
     setLoading(true)

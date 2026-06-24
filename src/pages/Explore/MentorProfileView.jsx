@@ -207,7 +207,33 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   }
 
   if (loading) return <div className="loading-container" style={{ padding: '100px', textAlign: 'center' }}>Loading mentor profile...</div>
-  if (!mentorData) return <div className="error-container" style={{ padding: '100px', textAlign: 'center' }}>Mentor njcbdkjhbcot found</div>
+  if (!mentorData) return (
+    <div className="resources-page-container font-sans" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', background: '#f8fafc' }}>
+      <button 
+        className="back-button-floating-premium" 
+        onClick={onBack || (() => navigate(-1))} 
+        style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 100, background: 'white', color: '#0f172a', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: '1px solid #e2e8f0', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <div className="resource-glass-card" style={{ padding: '4rem 3rem', textAlign: 'center', maxWidth: '500px', background: 'white', border: '1px solid rgba(15,23,42,0.05)', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05)' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1.5rem', opacity: 0.5 }}>🔍</div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 1rem 0' }}>Mentor Not Found</h1>
+        <p style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+          We couldn't find the mentor you're looking for. They might have updated their profile or no longer be available.
+        </p>
+        <button 
+          className="book-session-btn" 
+          style={{ margin: '0 auto', width: 'auto', padding: '0.75rem 2rem' }} 
+          onClick={() => navigate('/explore')}
+        >
+          Browse Mentors
+        </button>
+      </div>
+    </div>
+  )
 
   const mentor = mentorData
   const stats = [

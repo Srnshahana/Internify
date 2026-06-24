@@ -12,9 +12,26 @@ import classroomImg from '../../assets/images/clasroom.png'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
 import featMentors from '../../assets/images/feature-mentors.png'
 import featCareer from '../../assets/images/feature-career.png'
+
+import aiVideo from '../../assets/video/ai&machine learning.mp4'
+import cyberVideo from '../../assets/video/cybersecurity.mp4'
+import dataScienceVideo from '../../assets/video/datascience.mp4'
+import digitalMarketingVideo from '../../assets/video/digitalmarketing.mp4'
 // Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
+  {
+    id: 'fp-3',
+    title: 'Digital Security Specialist',
+    category: 'Mobile Template',
+    growthStat: '4M+ job shortage',
+    badge: 'High Demand',
+    ribbon: 'Limited seats — act fast',
+    tags: ['Penetration Testing', 'Linux', 'OSINT', 'Firewalls'],
+    image: ethicalHackingImg,
+    video: cyberVideo,
+    accentColor: '#2abfa3'
+  },
   {
     id: 'fp-1',
     title: 'Artificial Intelligence & Machine Learning',
@@ -24,6 +41,7 @@ const featuredPrograms = [
     ribbon: 'Free access until 30/06/2026',
     tags: ['Python', 'Neural Nets', 'ChatGPT', 'TensorFlow'],
     image: dashboardImg,
+    video: aiVideo,
     accentColor: '#5b8dee'
   },
   {
@@ -35,18 +53,8 @@ const featuredPrograms = [
     ribbon: 'Enroll before 15/05/2026',
     tags: ['SEO', 'Analytics', 'Ad Campaigns', 'Content AI'],
     image: classroomImg,
+    video: digitalMarketingVideo,
     accentColor: '#e05fa0'
-  },
-  {
-    id: 'fp-3',
-    title: 'Digital Security Specialist',
-    category: 'Mobile Template',
-    growthStat: '4M+ job shortage',
-    badge: 'High Demand',
-    ribbon: 'Limited seats — act fast',
-    tags: ['Penetration Testing', 'Linux', 'OSINT', 'Firewalls'],
-    image: ethicalHackingImg,
-    accentColor: '#2abfa3'
   },
   {
     id: 'fp-4',
@@ -57,13 +65,15 @@ const featuredPrograms = [
     ribbon: 'Batch starting 01/04/2026',
     tags: ['SQL', 'Python', 'Tableau', 'Statistics'],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+    video: dataScienceVideo,
     accentColor: '#f59e42'
   }
 ]
 const stitchFeatures = [
   {
     id: 'feat-1',
-    title: '5+ year experienced mentors ',
+    title: '5+ Year Experienced Mentors',
+    label: 'EXPERT GUIDANCE',
     type: 'easy-edits',
     description: 'Learn directly from industry experts with 5+ years of hands-on experience in their respective fields.',
     image: classroomImg,
@@ -72,7 +82,8 @@ const stitchFeatures = [
   },
   {
     id: 'feat-2',
-    title: '1-on-1 Guidance & flexibility ',
+    title: '1-on-1 Guidance & Flexibility',
+    label: 'PERSONALIZED LEARNING',
     type: 'guidance',
     description: 'Work on real-world projects with personal mentorship to bridge the theory-practice gap.',
     Icon: RingsIcon,
@@ -81,7 +92,8 @@ const stitchFeatures = [
   },
   {
     id: 'feat-3',
-    title: 'Verified certificates and direct referals ',
+    title: 'Verified Certificates and Direct Referrals',
+    label: 'CAREER ACCELERATION',
     type: 'verified',
     description: 'Earn industry-recognized certificates and personalized referral letters for your career.',
     Icon: BadgeCheckIcon,
@@ -90,7 +102,8 @@ const stitchFeatures = [
   },
   {
     id: 'feat-4',
-    title: 'Career support',
+    title: 'Career Support',
+    label: 'END-TO-END SUPPORT',
     type: 'accelerator',
     description: 'Get exclusive networking opportunities, mock interview prep, and end-to-end recruitment support.',
     image: featCareer,
@@ -443,7 +456,7 @@ export default function LandingPage({
           <div className="nav-links-center">
             <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Mentors</a>
             <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Courses</a>
-            <a href="#faq">Resources</a>
+            <a href="/resources" onClick={(e) => { e.preventDefault(); navigate('/resources'); }}>Resources</a>
             <a href="#faq">FAQ</a>
           </div>
 
@@ -539,7 +552,7 @@ export default function LandingPage({
         <section className="stitch-courses-section" id="courses">
           <InteractiveGrid />
           <div className="stitch-courses-header">
-            <h2 className="stitch-courses-title">Get started with Popular courses</h2>
+            <h2 className="stitch-courses-title">Get Started With Popular Courses</h2>
             <div className="stitch-carousel-nav">
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
                 <span className="material-symbols-outlined">arrow_back</span>
@@ -555,14 +568,18 @@ export default function LandingPage({
               <div
                 key={program.id}
                 className={`stitch-course-card ${index === 0 ? 'is-first' : ''}`}
-                onClick={() => navigate(`/course/${program.id}`)}
+                onClick={() => navigate(`/explore?q=${encodeURIComponent(program.title)}&tab=courses`)}
               >
                 {/* Background Blur Layer */}
                 <img src={program.image} alt="" className="stitch-card-bg-blur" />
 
-                {/* Centered Main Image Layer */}
+                {/* Centered Main Image/Video Layer */}
                 <div className="stitch-card-inner">
-                  <img src={program.image} alt={program.title} className="stitch-course-main-img" />
+                  {program.video ? (
+                    <video src={program.video} autoPlay loop muted playsInline className="stitch-course-main-img" />
+                  ) : (
+                    <img src={program.image} alt={program.title} className="stitch-course-main-img" />
+                  )}
                 </div>
 
                 {/* Bottom Text Overlay */}
@@ -583,7 +600,6 @@ export default function LandingPage({
                 key={feat.id}
                 className={`feature-card ${feat.size} feat-${feat.type}`}
               >
-                Background Blur Layer (Stitch Aesthetic)
                 {feat.type !== 'easy-edits' && (
                   <img src={feat.image} alt="" className="feature-bg-blur" />
                 )}
@@ -621,7 +637,7 @@ export default function LandingPage({
 
                 {/* Text Layer (Bottom Left) */}
                 <div className="feature-content">
-                  <span className="feature-label">INTERNIFY FEATURE</span>
+                  <span className="feature-label">{feat.label || 'INTERNIFY FEATURE'}</span>
                   <h3 className="feature-title">{feat.title}</h3>
                   <p className="feature-desc">{feat.description}</p>
                 </div>

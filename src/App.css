@@ -511,8 +511,8 @@ h4,
 }
 
 .stitch-search-pill.active:hover {
-  background: #0f172a !important;
-  color: #ffffff !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
   border-color: #0f172a !important;
 }
 
@@ -23387,8 +23387,7 @@ h1 span {
 
 .mentor-recommendations-footer {
   text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
 }
 
 .mentor-recommendations-footer p {
@@ -41153,8 +41152,8 @@ html {
   font-family: 'Inter', sans-serif;
   font-size: clamp(1.8rem, 3.5vw, 2.5rem);
   /* Balanced hierarchy */
-  font-weight: 500;
-  color: #0f172a;
+  font-weight: 800;
+  color: #475569;
   letter-spacing: -0.02em;
 }
 
@@ -41211,8 +41210,8 @@ html {
 
 /* Reduced Card Sizes for 3.5 peek effect */
 .stitch-course-card {
-  min-width: 380px;
-  max-width: 380px;
+  min-width: 420px;
+  max-width: 420px;
   height: 540px;
   border-radius: 32px;
   overflow: hidden;
@@ -41228,8 +41227,8 @@ html {
 }
 
 .stitch-course-card.is-first {
-  min-width: 480px;
-  max-width: 480px;
+  min-width: 540px;
+  max-width: 540px;
 }
 
 .stitch-course-card:hover {
@@ -41280,12 +41279,13 @@ html {
     0 10px 30px rgba(0, 0, 0, 0.2),
     0 80px 160px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(255, 255, 255, 0.15);
+  transform: scale(1.02);
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .stitch-course-card:hover .stitch-course-main-img {
-  transform: scale(1.08) translateY(-20px);
+  transform: scale(2.5);
 }
 
 /* Overlay Typography - Compact for smaller card */
@@ -49102,6 +49102,14 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   color: inherit;
 }
 
+.feature-inner-img {
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 1rem;
+}
+
 .feature-card:hover .feature-inner-svg {
   transform: scale(1.1) rotate(2deg);
   opacity: 1;
@@ -49190,7 +49198,15 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   z-index: 10 !important;
 }
 
-.feat-guidance .feature-content,
+.feat-guidance .feature-content {
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
 .feat-verified .feature-content {
   background: transparent !important;
   display: flex;
@@ -51515,4 +51531,197 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   .mentor-modal-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+/* --- Resources UI Polish --- */
+
+.resource-glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.resource-glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.resource-category-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+  margin-bottom: 1.5rem;
+  border: 1px solid #e0e7ff;
+}
+
+.resource-material-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.resource-material-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.resource-material-icon-box {
+  background: #eff6ff;
+  color: #3b82f6;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.resource-badge {
+  background: #eff6ff;
+  color: #3b82f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.resource-type-badge {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.75rem;
+}
+
+.resource-download-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #0f172a;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.resource-download-btn:hover {
+  background: #1e293b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.book-session-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #41568c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.book-session-btn:hover {
+  background: #2d3e6d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px -1px rgba(65, 86, 140, 0.3);
+}
+
+.resources-page-container {
+  background: #f8fafc;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+
+.handwriting-font {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+/* --- Responsive Resources Grids --- */
+
+.resources-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, max-content));
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .resources-responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.mentor-horizontal-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  /* Hide scrollbar for a cleaner look */
+  scrollbar-width: none; /* Firefox */
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.mentor-horizontal-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.mentor-horizontal-scroll > div {
+  flex: 0 0 380px; /* Decent width for mentor cards */
+  max-width: 420px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  .mentor-horizontal-scroll > div {
+    flex: 0 0 85%; /* 1 card taking most of the width */
+    min-width: 260px;
+  }
+}
+
+.handwriting-font {
+  font-family: 'Caveat', cursive;
+  font-size: 1.35rem;
+  line-height: 1.4;
 }
