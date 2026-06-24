@@ -552,7 +552,7 @@ export default function LandingPage({
         <section className="stitch-courses-section" id="courses">
           <InteractiveGrid />
           <div className="stitch-courses-header">
-            <h2 className="stitch-courses-title">Get Started With Popular Courses</h2>
+            {/* <h2 className="stitch-courses-title"> Popular Courses</h2> */}
             <div className="stitch-carousel-nav">
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
                 <span className="material-symbols-outlined">arrow_back</span>
