@@ -287,6 +287,35 @@ export const InteractiveGrid = ({ type = "repel" }) => {
   return <canvas ref={canvasRef} className="stitch-canvas-grid" />
 }
 
+const StarRating = ({ rating }) => {
+  return (
+    <div className="star-rating-container" style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+      {[1, 2, 3, 4, 5].map((star) => {
+        const fillPercentage = Math.min(Math.max(rating - (star - 1), 0), 1) * 100;
+        const gradientId = `star-grad-${star}-${rating}`;
+
+        return (
+          <svg key={star} width="16" height="16" viewBox="0 0 24 24" style={{ display: 'block' }}>
+            <defs>
+              <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset={`${fillPercentage}%`} stopColor="#FBBF24" />
+                <stop offset={`${fillPercentage}%`} stopColor="#E5E7EB" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              fill={`url(#${gradientId})`}
+            />
+          </svg>
+        );
+      })}
+      <span style={{ marginLeft: '6px', fontSize: '0.9rem', fontWeight: '600', color: '#0f172a' }}>
+        {rating}
+      </span>
+    </div>
+  );
+};
+
 export default function LandingPage({
   onOpenExplore,
   onOpenResources,
@@ -484,7 +513,7 @@ export default function LandingPage({
 
           <div className="stitch-hero-content">
             <h1 className="stitch-hero-heading">
-              Launch Your Career with <br />Industry Mentors
+              Launch Your Career With <br />Industry Mentors
             </h1>
             <p className="stitch-hero-subheading">
               Experience real-world projects, get direct referrals,
@@ -660,7 +689,7 @@ export default function LandingPage({
           </div>
 
           <div className="stitch-cta-content">
-            <h2 className="stitch-cta-title">Empower the Next Generation</h2>
+            <h2 className="stitch-cta-title">Empower The Next Generation</h2>
             <p className="stitch-cta-subtitle">
               Share your industry expertise and help students bridge the gap to their dream careers.
               Join Internify's global network of expert mentors today.
@@ -687,26 +716,27 @@ export default function LandingPage({
 
             <div className="stitch-mentors-grid">
               {[
-                { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" },
-                { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80" },
-                { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80" },
-                { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff" }
+                { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
+                { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80", rating: 4.8 },
+                { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
+                { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 }
               ].map((mentor) => (
                 <div key={mentor.id} className="mentor-stitch-card">
-                  {/* Layer 1: Dot Grid Texture */}
-                  <div className="card-dot-grid"></div>
-
-                  {/* Layer 3: Floating Profile Module */}
                   <div className="mentor-card-inner">
                     <div className="mentor-image-frame">
                       <img src={mentor.image} alt={mentor.name} className="mentor-profile-img" />
+                      <div className="mentor-card-image-overlay"></div>
                     </div>
                   </div>
 
-                  {/* Layer 4: Minimalist Content */}
                   <div className="stitch-mentor-content">
                     <div className="mentor-meta">
-                      <span className="mentor-company-pill">{mentor.company}</span>
+                      <div className="mentor-company-and-rating">
+                        <span className="mentor-company-pill">{mentor.company}</span>
+                        <div className="mentor-card-rating-inline">
+                          <StarRating rating={mentor.rating} />
+                        </div>
+                      </div>
                       <span className="material-symbols-outlined verified-icon">verified</span>
                     </div>
                     <h3 className="mentor-name">{mentor.name}</h3>

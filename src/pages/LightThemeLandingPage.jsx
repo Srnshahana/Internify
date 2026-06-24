@@ -692,14 +692,56 @@ export default function LightThemeLandingPage({
                 >
                   <div className="light-theme-mentor-card-image-wrapper">
                     <img src={mentor.image || 'https://via.placeholder.com/400x280?text=Mentor'} alt={mentor.name} className="light-theme-mentor-card-image" />
+                    <div className="light-theme-mentor-card-image-overlay"></div>
+                    {mentor.assured && (
+                      <div className="light-theme-mentor-card-verified">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Top Mentor
+                      </div>
+                    )}
+                    <div className="light-theme-mentor-card-rating-badge">
+                      <svg width="14" height="14" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                      {mentor.rating || 4.5}
+                    </div>
                   </div>
                   <div className="light-theme-mentor-card-content">
-                    <h3 className="light-theme-mentor-card-name">{mentor.name}</h3>
-                    <p className="light-theme-mentor-card-role">{mentor.role}</p>
+                    <div>
+                      <h3 className="light-theme-mentor-card-name">{mentor.name}</h3>
+                      <p className="light-theme-mentor-card-role">{mentor.role}</p>
+                      {mentor.company && (
+                        <p className="light-theme-mentor-card-company">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line>
+                            <line x1="15" y1="1" x2="15" y2="4"></line>
+                            <line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line>
+                            <line x1="20" y1="9" x2="23" y2="9"></line>
+                            <line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line>
+                            <line x1="1" y1="14" x2="4" y2="14"></line>
+                          </svg>
+                          {mentor.company}
+                        </p>
+                      )}
+                    </div>
                     <p className="light-theme-mentor-card-description">{mentor.focus || mentor.bio?.substring(0, 100) || 'Experienced mentor'}</p>
                     <div className="light-theme-mentor-card-footer">
-                      <span className="light-theme-mentor-card-rating">{renderStarsFunc(mentor.rating || 4.5)}</span>
-                      <span className="light-theme-mentor-card-price">${mentor.hourlyRate || '50'}/h</span>
+                      <div className="light-theme-mentor-card-price">
+                        ${mentor.hourlyRate || '50'}<span>/hr</span>
+                      </div>
+                      <div className="light-theme-mentor-card-action">
+                        View Profile
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
