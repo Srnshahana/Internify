@@ -127,7 +127,7 @@ function Earnings() {
             <div className="progress-card-icon">📅</div>
             <div className="progress-card-content">
               <h3 className="progress-card-title">This Month</h3>
-              <p className="progress-card-value" style={{ color: '#3b82f6' }}>
+              <p className="progress-card-value" style={{ color: '#2a7eff' }}>
                 {formatCurrency(earningsData.thisMonth)}
               </p>
             </div>
@@ -202,7 +202,7 @@ function Earnings() {
                       </td>
                       <td>{transaction.description}</td>
                       <td style={{ 
-                        color: isEarning ? '#22c55e' : '#3b82f6',
+                        color: isEarning ? '#22c55e' : '#2a7eff',
                         fontWeight: '600'
                       }}>
                         {isEarning ? '+' : '-'}{formatCurrency(transaction.amount)}

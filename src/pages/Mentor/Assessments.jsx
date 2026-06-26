@@ -294,7 +294,7 @@ function Assessments({ onBack }) {
                     <p className="assessment-course">
                       {assessment.courses?.title || 'General'}
                       {assessment.student_details?.name && (
-                        <span style={{ color: '#0ea5e9', fontWeight: '600' }}> • {assessment.student_details.name}</span>
+                        <span style={{ color: '#2a7eff', fontWeight: '600' }}> • {assessment.student_details.name}</span>
                       )}
                     </p>
                   </div>

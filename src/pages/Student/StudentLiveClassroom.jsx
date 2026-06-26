@@ -1317,7 +1317,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             className="live-complete-btn-v2"
             onClick={() => setShowSessionsModal(true)}
             title="Upcoming Sessions"
-            style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', border: '1px solid rgba(14, 165, 233, 0.2)' }}
+            style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
           >
             <span className="material-symbols-outlined">event_list</span>
           </button>
@@ -1349,7 +1349,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               className="live-complete-btn-v2"
               onClick={() => setShowAssessmentListModal(true)}
               title="View All Assessments"
-              style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+              style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
             >
               <span className="material-symbols-outlined">assignment_ind</span>
             </button>
@@ -1455,7 +1455,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                   )}
                   {message.type === 'scheduled_class' && (
-                    <div className="live-assessment-card" style={{ borderColor: '#3b82f6', background: '#eff6ff' }}>
+                    <div className="live-assessment-card" style={{ borderColor: '#2a7eff', background: '#eff6ff' }}>
                       <div className="assessment-card-header">
                         <div className="assessment-icon">📅</div>
                         <div className="assessment-badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Scheduled Class</div>
@@ -1471,7 +1471,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           target="_blank"
                           rel="noreferrer"
                           className="assessment-view-btn"
-                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#3b82f6' }}
+                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#2a7eff' }}
                         >
                           Join Class
                         </a>
@@ -1747,7 +1747,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#0ea5e9'
+                      color: '#2a7eff'
                     }}>
                       <span className="material-symbols-outlined">assignment</span>
                     </div>
@@ -1856,7 +1856,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                         </div>
                                       )
                                     }
-                                    return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline', fontWeight: '500' }}>{alt || url}</a>
+                                    return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#2a7eff', textDecoration: 'underline', fontWeight: '500' }}>{alt || url}</a>
                                   }
 
                                   // For non-markdown parts, handle raw URLs
@@ -1884,7 +1884,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                               target="_blank"
                                               rel="noopener noreferrer"
                                               style={{
-                                                color: '#3b82f6',
+                                                color: '#2a7eff',
                                                 textDecoration: 'none',
                                                 background: '#eff6ff',
                                                 padding: '2px 8px',
@@ -1982,7 +1982,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                           style={{
                                             padding: '8px 16px',
                                             background: '#eff6ff',
-                                            color: '#3b82f6',
+                                            color: '#2a7eff',
                                             borderRadius: '8px',
                                             fontSize: '12px',
                                             fontWeight: '700',
@@ -2197,7 +2197,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#0ea5e9'
+                      color: '#2a7eff'
                     }}>
                       <span className="material-symbols-outlined">assignment</span>
                     </div>
@@ -2248,7 +2248,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                             background: '#fff',
                             transition: 'all 0.2s'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                          onMouseEnter={(e) => e.currentTarget.style.borderColor = '#2a7eff'}
                           onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2301,7 +2301,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#0ea5e9'
+                      color: '#2a7eff'
                     }}>
                       <span className="material-symbols-outlined">event_list</span>
                     </div>
@@ -2357,7 +2357,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                             </div>
                             <span style={{
                               background: session.is_complete ? '#f1f5f9' : '#e0f2fe',
-                              color: session.is_complete ? '#64748b' : '#0369a1',
+                              color: session.is_complete ? '#64748b' : '#2a7eff',
                               padding: '4px 8px',
                               borderRadius: '6px',
                               fontSize: '11px',
@@ -2397,7 +2397,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                     width: '100%',
                                     padding: '8px',
                                     fontSize: '12px',
-                                    background: '#3b82f6',
+                                    background: '#2a7eff',
                                     border: 'none',
                                     borderRadius: '6px',
                                     color: 'white',

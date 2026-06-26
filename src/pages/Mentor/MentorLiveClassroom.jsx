@@ -1547,7 +1547,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                 className="live-complete-btn-v2"
                 onClick={() => setShowScheduleClassModal(true)}
                 title="Schedule Class"
-                style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+                style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
               >
                 <span className="material-symbols-outlined">calendar_month</span>
               </button>
@@ -1555,7 +1555,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                 className="live-complete-btn-v2"
                 onClick={() => setShowSessionsModal(true)}
                 title="Upcoming Sessions"
-                style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', border: '1px solid rgba(14, 165, 233, 0.2)' }}
+                style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
               >
                 <span className="material-symbols-outlined">event_list</span>
               </button>
@@ -1574,7 +1574,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               className="live-complete-btn-v2"
               onClick={() => setShowAssessmentListModal(true)}
               title="View All Assessments"
-              style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+              style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
             >
               <span className="material-symbols-outlined">assignment_ind</span>
             </button>
@@ -1690,7 +1690,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                   )}
                   {message.type === 'scheduled_class' && (
-                    <div className="live-assessment-card" style={{ borderColor: '#3b82f6', background: '#eff6ff' }}>
+                    <div className="live-assessment-card" style={{ borderColor: '#2a7eff', background: '#eff6ff' }}>
                       <div className="assessment-card-header">
                         <div className="assessment-icon">📅</div>
                         <div className="assessment-badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Scheduled Class</div>
@@ -1706,7 +1706,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                           target="_blank"
                           rel="noreferrer"
                           className="assessment-view-btn"
-                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#3b82f6' }}
+                          style={{ width: '100%', textAlign: 'center', textDecoration: 'none', background: '#2a7eff' }}
                         >
                           Join Class
                         </a>
@@ -1992,7 +1992,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#3b82f6'
+                      color: '#2a7eff'
                     }}>
                       <span className="material-symbols-outlined">assignment_add</span>
                     </div>
@@ -2079,7 +2079,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#3b82f6'
+                      color: '#2a7eff'
                     }}>
                       <span className="material-symbols-outlined">assignment</span>
                     </div>
@@ -2094,7 +2094,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       }}
                       title="Create New Assessment"
                       style={{
-                        background: '#3b82f6',
+                        background: '#2a7eff',
                         color: 'white',
                         border: 'none',
                         borderRadius: '20px',
@@ -2105,7 +2105,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         cursor: 'pointer',
                         fontSize: '14px',
                         fontWeight: '600',
-                        boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)'
+                        boxShadow: '0 4px 6px -1px rgba(42, 126, 255, 0.2)'
                       }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
@@ -2173,7 +2173,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         }}
                         style={{
                           marginTop: '12px',
-                          color: '#3b82f6',
+                          color: '#2a7eff',
                           background: 'none',
                           border: 'none',
                           cursor: 'pointer',
@@ -2195,7 +2195,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               <div className="live-assessment-modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
                 <div className="assessment-modal-header" style={{ justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>event_list</span>
+                    <span className="material-symbols-outlined" style={{ color: '#2a7eff' }}>event_list</span>
                     <h2 style={{ margin: 0 }}>Upcoming Sessions</h2>
                   </div>
                   <button className="modal-close-btn" onClick={() => setShowSessionsModal(false)}>
@@ -2245,7 +2245,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                             </div>
                             <span style={{
                               background: session.is_complete ? '#f1f5f9' : '#e0f2fe',
-                              color: session.is_complete ? '#64748b' : '#0369a1',
+                              color: session.is_complete ? '#64748b' : '#2a7eff',
                               padding: '4px 8px',
                               borderRadius: '6px',
                               fontSize: '11px',
@@ -2285,7 +2285,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                     width: '100%',
                                     padding: '8px',
                                     fontSize: '12px',
-                                    background: '#3b82f6',
+                                    background: '#2a7eff',
                                     border: 'none',
                                     borderRadius: '6px',
                                     color: 'white',
@@ -2453,7 +2453,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                 </div>
                 <div className="assessment-modal-actions">
                   <button className="btn-secondary" onClick={() => setShowScheduleClassModal(false)}>Cancel</button>
-                  <button className="btn-primary" onClick={handleScheduleClass} style={{ background: '#3b82f6' }}>
+                  <button className="btn-primary" onClick={handleScheduleClass} style={{ background: '#2a7eff' }}>
                     Save & Schedule
                   </button>
                 </div>
@@ -2566,7 +2566,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#3b82f6'
+                    color: '#2a7eff'
                   }}>
                     <span className="material-symbols-outlined">
                       {selectedSubmission ? 'rate_review' : 'assignment'}
@@ -2636,7 +2636,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                     </div>
                                   )
                                 }
-                                return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>{alt || url}</a>
+                                return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#2a7eff', textDecoration: 'underline' }}>{alt || url}</a>
                               }
 
                               // For non-markdown parts, handle raw URLs
@@ -2664,7 +2664,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           style={{
-                                            color: '#3b82f6',
+                                            color: '#2a7eff',
                                             textDecoration: 'none',
                                             background: '#eff6ff',
                                             padding: '4px 12px',
@@ -2748,7 +2748,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                           display: 'flex',
                                           alignItems: 'center',
                                           justifyContent: 'center',
-                                          color: isImage ? '#f59e0b' : '#3b82f6',
+                                          color: isImage ? '#f59e0b' : '#2a7eff',
                                           flexShrink: 0
                                         }}>
                                           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
@@ -2771,7 +2771,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                         className="mentor-view-file-btn"
                                         style={{
                                           background: '#eff6ff',
-                                          color: '#3b82f6',
+                                          color: '#2a7eff',
                                           padding: '8px 16px',
                                           borderRadius: '8px',
                                           fontSize: '12px',

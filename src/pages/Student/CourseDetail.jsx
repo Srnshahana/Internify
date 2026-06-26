@@ -165,7 +165,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
               <div className="hero-progress-group" style={{ width: '100%', maxWidth: '400px' }}>
                 <div className="progress-info-v2" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span className="progress-label-v2" style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>Your Progress</span>
-                  <span className="progress-percent-v2" style={{ fontSize: '12px', fontWeight: '700', color: '#0ea5e9' }}>{courseDetails.progress}%</span>
+                  <span className="progress-percent-v2" style={{ fontSize: '12px', fontWeight: '700', color: '#2a7eff' }}>{courseDetails.progress}%</span>
                 </div>
                 <div style={{
                   display: 'flex',
@@ -184,11 +184,11 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                           flex: 1,
                           maxWidth: '8px',
                           height: '100%',
-                          background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : 'rgba(15, 23, 42, 0.05)',
+                          background: isFilled ? 'linear-gradient(180deg, #2a7eff 0%, #06b6d4 100%)' : 'rgba(15, 23, 42, 0.05)',
                           borderRadius: '3px',
                           transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                           transform: isFilled ? 'scaleY(1)' : 'scaleY(0.7)',
-                          boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                          boxShadow: isFilled ? '0 2px 8px rgba(42, 126, 255, 0.25)' : 'none',
                           opacity: isFilled ? 1 : 0.4
                         }}
                       />

@@ -506,7 +506,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                             <span
                               style={{
                                 background: "#eff6ff",
-                                color: "#3b82f6",
+                                color: "#2a7eff",
                                 padding: "0.25rem 0.75rem",
                                 borderRadius: "6px",
                                 fontSize: "0.75rem",
@@ -518,7 +518,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                             {mentor.assured && (
                               <span
                                 className="material-symbols-outlined"
-                                style={{ fontSize: "18px", color: "#3b82f6" }}
+                                style={{ fontSize: "18px", color: "#2a7eff" }}
                               >
                                 verified
                               </span>
@@ -899,7 +899,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                 <div
                   className="category-arrow"
                   style={{
-                    color: "#3b82f6",
+                    color: "#2a7eff",
                     marginTop: "1.5rem",
                     transition: "transform 0.3s ease",
                   }}
@@ -1033,7 +1033,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                           <span
                             style={{
                               background: "#eff6ff",
-                              color: "#3b82f6",
+                              color: "#2a7eff",
                               padding: "0.25rem 0.75rem",
                               borderRadius: "6px",
                               fontSize: "0.75rem",
@@ -1045,7 +1045,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
                           {mentor.assured && (
                             <span
                               className="material-symbols-outlined"
-                              style={{ fontSize: "18px", color: "#3b82f6" }}
+                              style={{ fontSize: "18px", color: "#2a7eff" }}
                             >
                               verified
                             </span>

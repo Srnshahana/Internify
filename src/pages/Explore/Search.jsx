@@ -462,7 +462,7 @@ export default function Explore({
             alignItems: 'center',
             gap: '8px',
             background: '#f0f9ff',
-            color: '#0369a1',
+            color: '#2a7eff',
             padding: '6px 12px',
             borderRadius: '20px',
             fontSize: '13px',
@@ -477,7 +477,7 @@ export default function Explore({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#0369a1',
+                color: '#2a7eff',
                 cursor: 'pointer',
                 padding: '2px',
                 display: 'flex',
@@ -549,7 +549,7 @@ export default function Explore({
                         borderRadius: '20px',
                         fontSize: '10px',
                         fontWeight: '700',
-                        color: '#0ea5e9',
+                        color: '#2a7eff',
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         backdropFilter: 'blur(4px)'
@@ -591,7 +591,7 @@ export default function Explore({
                         )}
                       </div>
                       <button style={{
-                        background: '#0ea5e9',
+                        background: '#2a7eff',
                         color: 'white',
                         border: 'none',
                         padding: '8px 16px',
@@ -659,24 +659,45 @@ export default function Explore({
                             </span>
                           )}
                           {mentorData.category && (
-                            <span style={{ fontSize: '11px', color: '#0ea5e9', fontWeight: '500' }}>• {mentorData.category}</span>
+                            <span style={{ fontSize: '11px', color: '#2a7eff', fontWeight: '500' }}>• {mentorData.category}</span>
                           )}
                         </div>
                         {/* Star Rating Section */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
                           <div style={{ display: 'flex', gap: '2px' }}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <svg
-                                key={star}
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill={star <= (mentorData.rating || 0) ? "#facc15" : "#e2e8f0"}
-                                style={{ transition: 'fill 0.2s ease' }}
-                              >
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                              </svg>
-                            ))}
+                            {(() => {
+                              const rating = mentorData.rating || 0;
+                              const fullStars = Math.floor(rating);
+                              const hasHalfStar = rating % 1 >= 0.5;
+                              const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
+                              const gradId = `halfStar-${mentorData.mentor_id || mentorData.id || Math.random()}`;
+
+                              return (
+                                <>
+                                  {Array.from({ length: fullStars }).map((_, i) => (
+                                    <svg key={`full-${i}`} width="14" height="14" viewBox="0 0 24 24" fill="#facc15">
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                  ))}
+                                  {hasHalfStar && (
+                                    <svg key="half" width="14" height="14" viewBox="0 0 24 24">
+                                      <defs>
+                                        <linearGradient id={gradId}>
+                                          <stop offset="50%" stopColor="#facc15" />
+                                          <stop offset="50%" stopColor="#e2e8f0" />
+                                        </linearGradient>
+                                      </defs>
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={`url(#${gradId})`} />
+                                    </svg>
+                                  )}
+                                  {Array.from({ length: emptyStars }).map((_, i) => (
+                                    <svg key={`empty-${i}`} width="14" height="14" viewBox="0 0 24 24" fill="#e2e8f0">
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                  ))}
+                                </>
+                              );
+                            })()}
                           </div>
                           {(mentorData.rating > 0) && (
                             <span style={{ fontSize: '12px', color: '#475569', fontWeight: '600', marginLeft: '2px' }}>
@@ -700,7 +721,7 @@ export default function Explore({
                             Courses Provided
                           </p>
                           {mentorData.coursesOffered.slice(0, 3).map((course, idx) => (
-                            <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #e0f2fe' }}>
+                            <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#2a7eff', border: '1px solid #e0f2fe' }}>
                               {typeof course === 'object' ? course.title : 'Course'}
                             </span>
                           ))}

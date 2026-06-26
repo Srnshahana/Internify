@@ -286,7 +286,7 @@ function StudentAssessments({ onBack }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#3b82f6'
+                color: '#2a7eff'
               }}>
                 <span className="material-symbols-outlined">assignment</span>
               </div>
@@ -332,7 +332,7 @@ function StudentAssessments({ onBack }) {
             {isSubmitted ? (
               <div className="work-description-section" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#3b82f6' }}>history_edu</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#2a7eff' }}>history_edu</span>
                   <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Your Submission</h3>
                 </div>
 
@@ -363,7 +363,7 @@ function StudentAssessments({ onBack }) {
                                 </div>
                               )
                             }
-                            return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline', fontWeight: '500' }}>{alt || url}</a>
+                            return <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#2a7eff', textDecoration: 'underline', fontWeight: '500' }}>{alt || url}</a>
                           }
 
                           // For non-markdown parts, handle raw URLs
@@ -391,7 +391,7 @@ function StudentAssessments({ onBack }) {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       style={{
-                                        color: '#3b82f6',
+                                        color: '#2a7eff',
                                         textDecoration: 'none',
                                         background: '#eff6ff',
                                         padding: '2px 8px',
@@ -484,7 +484,7 @@ function StudentAssessments({ onBack }) {
                                     style={{
                                       padding: '8px 14px',
                                       background: '#eff6ff',
-                                      color: '#3b82f6',
+                                      color: '#2a7eff',
                                       borderRadius: '8px',
                                       fontSize: '12px',
                                       fontWeight: '700',
@@ -556,7 +556,7 @@ function StudentAssessments({ onBack }) {
                   })()}
                 </div>
 
-                <div style={{ marginTop: '20px', padding: '12px 16px', background: '#f8fafc', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
+                <div style={{ marginTop: '20px', padding: '12px 16px', background: '#f8fafc', borderRadius: '8px', borderLeft: '4px solid #2a7eff' }}>
                   <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
                     <strong>Submitted on:</strong> {formatDate(assessment.submission.submitted_at)}
                   </p>
@@ -565,7 +565,7 @@ function StudentAssessments({ onBack }) {
             ) : (
               <div className="submission-form">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#3b82f6' }}>add_task</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#2a7eff' }}>add_task</span>
                   <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Submit Your Work</h3>
                 </div>
 
@@ -598,13 +598,13 @@ function StudentAssessments({ onBack }) {
                       alignItems: 'center',
                       gap: '6px',
                       padding: '8px 16px',
-                      background: '#3b82f6',
+                      background: '#2a7eff',
                       color: 'white',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       fontSize: '13px',
                       fontWeight: '600',
-                      boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)'
+                      boxShadow: '0 4px 6px -1px rgba(42, 126, 255, 0.2)'
                     }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>upload_file</span>
                       Attach Files
@@ -674,12 +674,12 @@ function StudentAssessments({ onBack }) {
                       padding: '10px 24px',
                       borderRadius: '10px',
                       border: 'none',
-                      background: '#3b82f6',
+                      background: '#2a7eff',
                       color: 'white',
                       fontSize: '14px',
                       fontWeight: '700',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)'
+                      boxShadow: '0 4px 6px -1px rgba(42, 126, 255, 0.2)'
                     }}
                   >
                     Submit Assignment

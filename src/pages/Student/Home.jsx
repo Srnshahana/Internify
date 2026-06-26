@@ -863,7 +863,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
             {/* Progress Graph Section */}
             <div className="modal-stats-summary">
               <div className="mini-stat-circle">
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#0ea5e9' }}>calendar_today</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#2a7eff' }}>calendar_today</span>
               </div>
               <div className="modal-summary-text">
                 <h4>{liveUpcomingSessions.length} sessions upcoming</h4>
@@ -951,8 +951,8 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
               <svg className="graph-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="graphGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#2a7eff" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#2a7eff" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
@@ -973,7 +973,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
               </svg>
 
               <div style={{ position: 'absolute', top: '15px', right: '20px', textAlign: 'right' }}>
-                <span style={{ fontSize: '24px', fontWeight: '800', color: '#0ea5e9', display: 'block' }}>{overallLearningProgress}%</span>
+                <span style={{ fontSize: '24px', fontWeight: '800', color: '#2a7eff', display: 'block' }}>{overallLearningProgress}%</span>
                 <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Velocity</span>
               </div>
             </div>
@@ -1004,7 +1004,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                   <div key={course.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{course.title}</span>
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#0ea5e9' }}>{course.progress || 0}%</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#2a7eff' }}>{course.progress || 0}%</span>
                     </div>
                     <div style={{
                       display: 'flex',
@@ -1023,11 +1023,11 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                               flex: 1,
                               maxWidth: '6px',
                               height: '100%',
-                              background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
+                              background: isFilled ? 'linear-gradient(180deg, #2a7eff 0%, #06b6d4 100%)' : '#f1f5f9',
                               borderRadius: '3px',
                               transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                               transform: isFilled ? 'scaleY(1)' : 'scaleY(0.6)',
-                              boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                              boxShadow: isFilled ? '0 2px 8px rgba(42, 126, 255, 0.25)' : 'none',
                               opacity: isFilled ? 1 : 0.4
                             }}
                           />
@@ -1048,12 +1048,12 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+              background: 'linear-gradient(135deg, #2a7eff 0%, #06b6d4 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 24px',
-              boxShadow: '0 10px 20px rgba(14, 165, 233, 0.2)'
+              boxShadow: '0 10px 20px rgba(42, 126, 255, 0.2)'
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '40px', color: 'white' }}>rocket_launch</span>
             </div>

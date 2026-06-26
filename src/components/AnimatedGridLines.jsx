@@ -27,7 +27,7 @@ export const AnimatedGridLines = () => {
       const mouseRadius = 150;
       const distortionStrength = 15;
 
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.25)'; // Sky blue, slightly more visible
+      ctx.strokeStyle = 'rgba(42, 126, 255, 0.25)'; // Sky blue, slightly more visible
       ctx.lineWidth = 1;
 
       // Draw vertical lines

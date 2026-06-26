@@ -8,7 +8,7 @@ const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfir
 
     // Determine icon and color based on type
     let icon = 'info';
-    let iconColor = '#3b82f6'; // blue-500
+    let iconColor = '#2a7eff'; // blue-500
     let typeClass = 'info';
 
     if (isSuccess) {
@@ -91,7 +91,7 @@ const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfir
                             style={{
                                 flex: 1,
                                 padding: '12px',
-                                backgroundColor: isError ? '#ef4444' : '#2563eb',
+                                backgroundColor: isError ? '#ef4444' : '#2a7eff',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',

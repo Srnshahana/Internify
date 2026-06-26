@@ -465,7 +465,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           onClick={onBack}
           style={{ top: '20px', left: '20px', position: 'absolute', zIndex: 10 }}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -495,7 +495,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   </span>
                 )}
                 {mentor.platformVerified && (
-                  <span className="assured-badge-premium" title="Platform Verified" style={{ background: '#0ea5e9', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span className="assured-badge-premium" title="Platform Verified" style={{ background: '#2a7eff', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>
                     ASSURED
                   </span>
                 )}
@@ -510,7 +510,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               <div className="profile-location-linkedin">
                 <span className="location-text">{mentor.location}</span>
                 <span className="bullet-separator">•</span>
-                <span className="category-text" style={{ color: '#0ea5e9', fontWeight: '500' }}>{mentor.category}</span>
+                <span className="category-text" style={{ color: '#2a7eff', fontWeight: '500' }}>{mentor.category}</span>
               </div>
 
               <div className="profile-connections-linkedin">
@@ -536,7 +536,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           <div className="profile-stats-linkedin">
             {stats.map((stat, idx) => (
               <div key={idx} className="stat-item-linkedin">
-                <div className="stat-icon-wrapper" style={{ color: '#0ea5e9' }}>
+                <div className="stat-icon-wrapper" style={{ color: '#2a7eff' }}>
                   {stat.label === 'Experience' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>}
                   {stat.label === 'Rating' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>}
                   {stat.label === 'Completed Internship' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>}
@@ -581,7 +581,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           <div className="timeline-elegant">
             {mentor.experience?.length > 0 ? mentor.experience.map((exp, idx) => (
               <div key={idx} className="timeline-item-elegant">
-                <div className="timeline-icon-elegant" style={{ background: '#0ea5e9' }}>
+                <div className="timeline-icon-elegant" style={{ background: '#2a7eff' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <div className="timeline-content-elegant">
@@ -693,7 +693,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                 <div key={idx} className="review-card" style={{ padding: '20px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ width: '44px', height: '44px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#0ea5e9', border: '1px solid #e2e8f0' }}>
+                      <div style={{ width: '44px', height: '44px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#2a7eff', border: '1px solid #e2e8f0' }}>
                         {review.name.charAt(0)}
                       </div>
                       <div>

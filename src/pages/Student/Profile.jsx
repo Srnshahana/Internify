@@ -197,7 +197,7 @@ function Profile({ onLogout, onNavigate }) {
                   }
                 }}
                 disabled={isSaving}
-                style={{ position: 'relative', top: 'auto', right: 'auto', backgroundColor: isEditing ? '#0ea5e9' : '', color: isEditing ? 'white' : '' }}
+                style={{ position: 'relative', top: 'auto', right: 'auto', backgroundColor: isEditing ? '#2a7eff' : '', color: isEditing ? 'white' : '' }}
               >
                 {isSaving ? (
                   <div className="spinner-tiny"></div>
@@ -290,9 +290,9 @@ function Profile({ onLogout, onNavigate }) {
                           border: '1px solid',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
-                          backgroundColor: selectedFields.includes(field) ? '#0ea5e9' : 'transparent',
+                          backgroundColor: selectedFields.includes(field) ? '#2a7eff' : 'transparent',
                           color: selectedFields.includes(field) ? 'white' : '#64748b',
-                          borderColor: selectedFields.includes(field) ? '#0ea5e9' : '#e2e8f0',
+                          borderColor: selectedFields.includes(field) ? '#2a7eff' : '#e2e8f0',
                         }}
                       >
                         {field}

@@ -177,7 +177,7 @@ function PendingWork({ onBack }) {
                   <div>
                     <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0' }}>{selectedWork.student_details?.name}</h2>
                     <p style={{ color: '#64748b', fontWeight: '600', fontSize: '14px', marginTop: '4px' }}>
-                      Submission for <strong style={{ color: '#0ea5e9' }}>{selectedWork.assessments?.title}</strong>
+                      Submission for <strong style={{ color: '#2a7eff' }}>{selectedWork.assessments?.title}</strong>
                     </p>
                   </div>
                 </div>
@@ -253,7 +253,7 @@ function PendingWork({ onBack }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b' }}>
                         Active Submissions 
-                        <span style={{ marginLeft: '12px', fontSize: '14px', fontWeight: '600', color: '#0ea5e9', background: '#e0f2fe', padding: '4px 12px', borderRadius: '100px' }}>
+                        <span style={{ marginLeft: '12px', fontSize: '14px', fontWeight: '600', color: '#2a7eff', background: '#e0f2fe', padding: '4px 12px', borderRadius: '100px' }}>
                             {pendingWork.length} Submissions
                         </span>
                     </h2>

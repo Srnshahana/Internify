@@ -219,7 +219,7 @@ function StudentRequests({ onBack }) {
                   fontWeight: '700',
                   textTransform: 'capitalize',
                   cursor: 'pointer',
-                  background: filter === type ? '#0ea5e9' : 'transparent',
+                  background: filter === type ? '#2a7eff' : 'transparent',
                   color: filter === type ? '#ffffff' : '#64748b',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
@@ -239,9 +239,9 @@ function StudentRequests({ onBack }) {
                   style={{
                     padding: '16px',
                     cursor: 'pointer',
-                    borderLeft: `4px solid ${req.id === selectedRequestId ? '#0ea5e9' : getStatusColor(req.status)}`,
+                    borderLeft: `4px solid ${req.id === selectedRequestId ? '#2a7eff' : getStatusColor(req.status)}`,
                     transition: 'all 0.2s',
-                    background: req.id === selectedRequestId ? 'rgba(14, 165, 233, 0.05)' : 'rgba(255,255,255,0.4)',
+                    background: req.id === selectedRequestId ? 'rgba(42, 126, 255, 0.05)' : 'rgba(255,255,255,0.4)',
                     scale: req.id === selectedRequestId ? '1.02' : '1'
                   }}
                 >
@@ -280,7 +280,7 @@ function StudentRequests({ onBack }) {
                     </div>
                     <div>
                       <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', margin: '0' }}>{selectedRequest.studentName}</h2>
-                      <p style={{ color: '#0ea5e9', fontWeight: '700', fontSize: '18px', marginTop: '6px' }}>{selectedRequest.studentEmail}</p>
+                      <p style={{ color: '#2a7eff', fontWeight: '700', fontSize: '18px', marginTop: '6px' }}>{selectedRequest.studentEmail}</p>
                       <div style={{ marginTop: '16px' }}>
                         <span style={{ fontSize: '11px', fontWeight: '900', color: '#ffffff', background: getStatusColor(selectedRequest.status), padding: '6px 16px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                           {selectedRequest.status}
@@ -298,7 +298,7 @@ function StudentRequests({ onBack }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '60px' }}>
                   <div className="detail-info-block">
                     <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#0ea5e9' }}>info</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#2a7eff' }}>info</span>
                       Enrollment Information
                     </h3>
 
@@ -320,7 +320,7 @@ function StudentRequests({ onBack }) {
 
                   <div className="detail-action-block">
                     <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#0ea5e9' }}>bolt</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#2a7eff' }}>bolt</span>
                       Decision Panel
                     </h3>
 

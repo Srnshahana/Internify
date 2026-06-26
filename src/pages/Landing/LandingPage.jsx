@@ -478,7 +478,7 @@ export default function LandingPage({
           {/* Main Links (Center) */}
           <div className="nav-links-center">
             <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Mentors</a>
-            <a href="/explore" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>Explore Courses</a>
+            <a href="/explore?tab=courses" onClick={(e) => { e.preventDefault(); navigate('/explore?tab=courses'); }}>Explore Courses</a>
             <a href="/resources" onClick={(e) => { e.preventDefault(); navigate('/resources'); }}>Resources</a>
             <a href="#faq">FAQ</a>
           </div>

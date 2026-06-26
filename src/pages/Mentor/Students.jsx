@@ -81,7 +81,7 @@ function Students() {
       case 'Active':
         return '#22c55e'
       case 'Completed':
-        return '#3b82f6'
+        return '#2a7eff'
       default:
         return '#6b7280'
     }

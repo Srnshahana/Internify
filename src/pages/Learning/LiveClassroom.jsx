@@ -962,7 +962,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
               className="live-complete-btn-v2"
               onClick={() => setShowAssessmentListModal(true)}
               title="View All Assessments"
-              style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+              style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
             >
               <span className="material-symbols-outlined">assignment_ind</span>
             </button>
@@ -1486,7 +1486,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
                         cursor: 'pointer',
                         transition: 'all 0.2s'
                       }}
-                      onMouseEnter={(e) => e.target.style.borderColor = '#3b82f6'}
+                      onMouseEnter={(e) => e.target.style.borderColor = '#2a7eff'}
                       onMouseLeave={(e) => e.target.style.borderColor = '#e2e8f0'}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>

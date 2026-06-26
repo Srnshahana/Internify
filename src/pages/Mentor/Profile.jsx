@@ -85,7 +85,7 @@ function MentorProfile({ onLogout }) {
   if (loading) {
     return (
       <div className="profile-page-elegant" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <p style={{ color: '#0ea5e9', fontWeight: '500' }}>Loading profile...</p>
+        <p style={{ color: '#2a7eff', fontWeight: '500' }}>Loading profile...</p>
       </div>
     )
   }
@@ -191,7 +191,7 @@ function MentorProfile({ onLogout }) {
               <div className="mentor-modal-curriculum">
                 <h3 className="mentor-modal-section-title">Course Curriculum</h3>
                 {loadingSessions ? (
-                  <div style={{ textAlign: 'center', padding: '40px', color: '#0ea5e9' }}>Loading...</div>
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#2a7eff' }}>Loading...</div>
                 ) : courseSessions.length > 0 ? (
                   <div className="mentor-modal-sessions-list">
                     {courseSessions.map((session, sidx) => (
@@ -241,7 +241,7 @@ function MentorProfile({ onLogout }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <h1 className="profile-name-linkedin">{mentorDisplayData.name}</h1>
                 {userProfile?.is_verified && (
-                  <span style={{ color: '#0ea5e9', display: 'flex' }} title="Verified Mentor">
+                  <span style={{ color: '#2a7eff', display: 'flex' }} title="Verified Mentor">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                   </span>
                 )}
@@ -250,7 +250,7 @@ function MentorProfile({ onLogout }) {
               <div className="profile-location-linkedin">
                 <span>{mentorDisplayData.location}</span>
                 <span className="bullet-separator">•</span>
-                <span style={{ color: '#0ea5e9', fontWeight: 600 }}>{mentorDisplayData.role}</span>
+                <span style={{ color: '#2a7eff', fontWeight: 600 }}>{mentorDisplayData.role}</span>
               </div>
               <div className="profile-connections-linkedin">
                 <span>★ {mentorDisplayData.averageRating} Rating • {mentorDisplayData.totalReviews} Reviews • {mentorDisplayData.menteesCoached} Mentees</span>
@@ -304,7 +304,7 @@ function MentorProfile({ onLogout }) {
           <div className="timeline-elegant">
             {mentorDisplayData.experience.length > 0 ? mentorDisplayData.experience.map((exp, idx) => (
               <div key={idx} className="timeline-item-elegant">
-                <div className="timeline-icon-elegant" style={{ background: '#0ea5e9' }}>
+                <div className="timeline-icon-elegant" style={{ background: '#2a7eff' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <div className="timeline-content-elegant">
@@ -402,7 +402,7 @@ function MentorProfile({ onLogout }) {
               <div key={review.id} style={{ padding: '20px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0ea5e9' }}>
+                    <div style={{ width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2a7eff' }}>
                       {review.studentName.charAt(0)}
                     </div>
                     <div>

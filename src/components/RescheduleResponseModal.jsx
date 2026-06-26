@@ -50,7 +50,7 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
                             </div>
                             <div>
                                 <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Proposed New Time</p>
-                                <p style={{ fontSize: '15px', fontWeight: '700', color: '#0ea5e9', margin: 0 }}>
+                                <p style={{ fontSize: '15px', fontWeight: '700', color: '#2a7eff', margin: 0 }}>
                                     {formatDate(sessionDetails.rescheduled_date)} <br />
                                     at {formatTime(sessionDetails.rescheduled_date)}
                                 </p>

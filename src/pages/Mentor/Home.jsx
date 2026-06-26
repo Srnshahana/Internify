@@ -492,7 +492,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             {/* Progress Graph Section */}
             <div className="modal-stats-summary">
               <div className="mini-stat-circle">
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#0ea5e9' }}>calendar_today</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#2a7eff' }}>calendar_today</span>
               </div>
               <div className="modal-summary-text">
                 <h4>{allCombinedSessions.length} sessions upcoming</h4>
@@ -521,7 +521,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       <div className="session-info-elegant">
                         <h4 style={{ margin: 0 }}>{session.title}</h4>
                         <div className="session-meta-elegant">
-                          <span style={{ fontWeight: '600', color: '#0ea5e9' }}>{session.student_details?.name || 'Batch'}</span>
+                          <span style={{ fontWeight: '600', color: '#2a7eff' }}>{session.student_details?.name || 'Batch'}</span>
                           <span style={{ margin: '0 8px', opacity: 0.3 }}>•</span>
                           <span>{session.courses?.title || session.courseTitle}</span>
                         </div>
@@ -752,7 +752,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
             </div>
             {loadingProfile ? (
               <div style={{ background: 'white', padding: '40px', borderRadius: '16px', textAlign: 'center' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #0ea5e9', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #2a7eff', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 <p style={{ color: '#64748b' }}>Loading student profile...</p>
               </div>
@@ -802,7 +802,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>Cumulative learning trajectory</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '32px', fontWeight: '800', color: '#0ea5e9', display: 'block', lineHeight: '1' }}>{avgProgress}%</span>
+                      <span style={{ fontSize: '32px', fontWeight: '800', color: '#2a7eff', display: 'block', lineHeight: '1' }}>{avgProgress}%</span>
                       <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Avg. Completion</span>
                     </div>
                   </div>
@@ -811,8 +811,8 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                     <svg className="graph-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
                       <defs>
                         <linearGradient id="graphGradientMentorNew" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                          <stop offset="0%" stopColor="#2a7eff" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="#2a7eff" stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <path
@@ -822,12 +822,12 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       <path
                         d={`M 0 100 C 100 90, 200 ${110 - (avgProgress * 0.8)}, 400 ${100 - (avgProgress * 0.9)}`}
                         fill="none"
-                        stroke="#0ea5e9"
+                        stroke="#2a7eff"
                         strokeWidth="4"
                         strokeLinecap="round"
                       />
-                      <circle cx="200" cy={110 - (avgProgress * 0.8)} r="6" fill="#ffffff" stroke="#0ea5e9" strokeWidth="3" />
-                      <circle cx="400" cy={100 - (avgProgress * 0.9)} r="6" fill="#ffffff" stroke="#0ea5e9" strokeWidth="3" />
+                      <circle cx="200" cy={110 - (avgProgress * 0.8)} r="6" fill="#ffffff" stroke="#2a7eff" strokeWidth="3" />
+                      <circle cx="400" cy={100 - (avgProgress * 0.9)} r="6" fill="#ffffff" stroke="#2a7eff" strokeWidth="3" />
                     </svg>
                   </div>
                 </div>
@@ -847,7 +847,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
               {/* Right Column: Detailed Breakdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', maxHeight: '420px', overflowY: 'auto', paddingRight: '8px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#0ea5e9' }}>bar_chart</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#2a7eff' }}>bar_chart</span>
                   Course Breakdown
                 </h3>
 
@@ -856,10 +856,10 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                     <div key={course.id || idx} style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{course.title}</span>
-                        <span style={{ fontSize: '14px', fontWeight: '800', color: '#0ea5e9' }}>{course.progress || 0}%</span>
+                        <span style={{ fontSize: '14px', fontWeight: '800', color: '#2a7eff' }}>{course.progress || 0}%</span>
                       </div>
                       <div style={{ width: '100%', height: '8px', background: '#f1f5f9', borderRadius: '100px', overflow: 'hidden' }}>
-                        <div style={{ width: `${course.progress || 0}%`, height: '100%', background: 'linear-gradient(90deg, #0ea5e9, #6366f1)', borderRadius: '100px', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+                        <div style={{ width: `${course.progress || 0}%`, height: '100%', background: 'linear-gradient(90deg, #2a7eff, #6366f1)', borderRadius: '100px', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
                       </div>
                     </div>
                   ))
@@ -1153,7 +1153,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                         </p>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>arrow_forward</span>
+                        <span className="material-symbols-outlined" style={{ color: '#2a7eff' }}>arrow_forward</span>
                       </div>
                     </div>
                   ))}

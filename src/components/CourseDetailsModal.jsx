@@ -35,7 +35,7 @@ const CourseDetailsModal = ({ isOpen, onClose, course, onSearchMentors }) => {
                         <span style={{
                             position: 'absolute', bottom: '16px', left: '16px', background: 'rgba(255, 255, 255, 0.95)',
                             padding: '6px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: '700',
-                            color: '#0ea5e9', textTransform: 'uppercase', letterSpacing: '0.05em'
+                            color: '#2a7eff', textTransform: 'uppercase', letterSpacing: '0.05em'
                         }}>
                             {course.career_field}
                         </span>

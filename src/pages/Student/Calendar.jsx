@@ -420,7 +420,7 @@ function Calendar() {
                             className="session-btn"
                             onClick={() => handleResponseClick(session)}
                             style={{
-                              background: '#0ea5e9',
+                              background: '#2a7eff',
                               color: 'white',
                               border: 'none',
                               padding: '10px 16px',
@@ -457,9 +457,9 @@ function Calendar() {
                         className="session-btn"
                         onClick={() => handleJoin(session.joinLink)}
                         style={{
-                          background: session.reschedule_request && session.reschedule_role !== 'student' ? '#fff' : '#0ea5e9',
-                          color: session.reschedule_request && session.reschedule_role !== 'student' ? '#0ea5e9' : '#fff',
-                          border: session.reschedule_request && session.reschedule_role !== 'student' ? '1px solid #0ea5e9' : 'none',
+                          background: session.reschedule_request && session.reschedule_role !== 'student' ? '#fff' : '#2a7eff',
+                          color: session.reschedule_request && session.reschedule_role !== 'student' ? '#2a7eff' : '#fff',
+                          border: session.reschedule_request && session.reschedule_role !== 'student' ? '1px solid #2a7eff' : 'none',
                           padding: '10px 16px',
                           borderRadius: '8px',
                           cursor: 'pointer',

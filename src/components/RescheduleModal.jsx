@@ -117,7 +117,7 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                                         e.stopPropagation();
                                         e.target.showPicker?.();
                                     }}
-                                    onFocus={(e) => e.target.style.borderColor = '#0ea5e9'}
+                                    onFocus={(e) => e.target.style.borderColor = '#2a7eff'}
                                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                 />
                             </div>
@@ -161,7 +161,7 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                                         e.stopPropagation();
                                         e.target.showPicker?.();
                                     }}
-                                    onFocus={(e) => e.target.style.borderColor = '#0ea5e9'}
+                                    onFocus={(e) => e.target.style.borderColor = '#2a7eff'}
                                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                 />
                             </div>
@@ -208,11 +208,11 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                                     padding: '12px',
                                     borderRadius: '100px',
                                     border: 'none',
-                                    background: '#0ea5e9',
+                                    background: '#2a7eff',
                                     color: 'white',
                                     fontWeight: '600',
                                     cursor: 'pointer',
-                                    boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.2)'
+                                    boxShadow: '0 4px 6px -1px rgba(42, 126, 255, 0.2)'
                                 }}
                             >
                                 Send Request

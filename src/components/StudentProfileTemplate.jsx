@@ -25,7 +25,7 @@ const StudentProfileTemplate = ({ profileData, onClose }) => {
     return (
         <div className="profile-page-elegant" style={{ background: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxWidth: '800px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
             {/* Profile Cover */}
-            <div className="profile-cover-elegant" style={{ height: '150px', background: 'linear-gradient(to right, #3b82f6, #6366f1)' }}></div>
+            <div className="profile-cover-elegant" style={{ height: '150px', background: 'linear-gradient(to right, #2a7eff, #6366f1)' }}></div>
 
             <div className="profile-content-wrapper" style={{ padding: '0 24px 32px' }}>
                 {/* Intro Card */}
@@ -49,7 +49,7 @@ const StudentProfileTemplate = ({ profileData, onClose }) => {
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                             {location}
                             <span style={{ margin: '0 8px' }}>•</span>
-                            <span style={{ color: '#3b82f6', fontWeight: 600 }}>{email}</span>
+                            <span style={{ color: '#2a7eff', fontWeight: 600 }}>{email}</span>
                         </div>
                     </div>
                 </div>
@@ -122,7 +122,7 @@ const StudentProfileTemplate = ({ profileData, onClose }) => {
                         <div style={{ display: 'grid', gap: '20px' }}>
                             {certifications.map((cert, index) => (
                                 <div key={index} style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', color: '#3b82f6' }}>
+                                    <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', color: '#2a7eff' }}>
                                         <CertificateIcon />
                                     </div>
                                     <div>

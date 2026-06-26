@@ -64,12 +64,12 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
           <div style={{
             width: '36px',
             height: '36px',
-            background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+            background: 'linear-gradient(135deg, #2a7eff 0%, #0284c7 100%)',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 8px rgba(14, 165, 233, 0.2)'
+            boxShadow: '0 4px 8px rgba(42, 126, 255, 0.2)'
           }}>
             <span className="material-symbols-outlined" style={{ color: 'white', fontSize: '20px' }}>school</span>
           </div>
@@ -110,14 +110,14 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                 padding: '10px 24px',
                 borderRadius: '10px',
                 border: 'none',
-                background: activeTab === tab ? '#0ea5e9' : 'transparent',
+                background: activeTab === tab ? '#2a7eff' : 'transparent',
                 color: activeTab === tab ? 'white' : '#64748b',
                 fontWeight: '600',
                 fontSize: '14px',
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 textTransform: 'capitalize',
-                boxShadow: activeTab === tab ? '0 4px 12px rgba(14, 165, 233, 0.2)' : 'none'
+                boxShadow: activeTab === tab ? '0 4px 12px rgba(42, 126, 255, 0.2)' : 'none'
               }}
             >
               {tab}
@@ -191,8 +191,8 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(14, 165, 233, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                e.currentTarget.style.boxShadow = '0 20px 40px rgba(42, 126, 255, 0.1)';
+                e.currentTarget.style.borderColor = 'rgba(42, 126, 255, 0.2)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
@@ -244,7 +244,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                   alignItems: 'center',
                   padding: '4px 10px',
                   background: '#e0f2fe',
-                  color: '#0369a1',
+                  color: '#2a7eff',
                   borderRadius: '8px',
                   fontSize: '11px',
                   fontWeight: '700',
@@ -277,7 +277,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                   <div style={{ marginTop: 'auto' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>Student Progress</span>
-                      <span style={{ fontSize: '12px', fontWeight: '700', color: '#0ea5e9' }}>{course.progress || 0}%</span>
+                      <span style={{ fontSize: '12px', fontWeight: '700', color: '#2a7eff' }}>{course.progress || 0}%</span>
                     </div>
                     <div style={{
                       display: 'flex',
@@ -296,11 +296,11 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
                               flex: 1,
                               maxWidth: '6px',
                               height: '100%',
-                              background: isFilled ? 'linear-gradient(180deg, #0ea5e9 0%, #06b6d4 100%)' : '#f1f5f9',
+                              background: isFilled ? 'linear-gradient(180deg, #2a7eff 0%, #06b6d4 100%)' : '#f1f5f9',
                               borderRadius: '3px',
                               transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                               transform: isFilled ? 'scaleY(1)' : 'scaleY(0.7)',
-                              boxShadow: isFilled ? '0 2px 8px rgba(14, 165, 233, 0.25)' : 'none',
+                              boxShadow: isFilled ? '0 2px 8px rgba(42, 126, 255, 0.25)' : 'none',
                               opacity: isFilled ? 1 : 0.4
                             }}
                           />
