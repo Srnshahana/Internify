@@ -539,36 +539,35 @@ export default function Explore({
                         e.target.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBdt2bdOr6yNUso2UGqXJRcNpnjWeSlpumaw&s';
                       }}
                     />
-                    {course.career_field && (
-                      <span style={{
-                        position: 'absolute',
-                        top: '12px',
-                        left: '12px',
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        padding: '4px 10px',
-                        borderRadius: '20px',
-                        fontSize: '10px',
-                        fontWeight: '700',
-                        color: '#333333',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        backdropFilter: 'blur(4px)'
-                      }}>
-                        {course.career_field}
-                      </span>
-                    )}
                   </div>
                   <div className="explore-course-content" style={{ padding: '16px', flex: '1', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ marginTop: 'auto' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '4px', lineHeight: '1.4' }}>
+                      {course.career_field && (
+                        <span style={{
+                          display: 'inline-block',
+                          background: '#f1f5f9',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '10px',
+                          fontWeight: '700',
+                          color: '#333333',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          marginBottom: '8px'
+                        }}>
+                          {course.career_field}
+                        </span>
+                      )}
+                      <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#333333', marginBottom: '2px', lineHeight: '1.3' }}>
                         {course.title}
                       </h3>
 
                       <p style={{
                         fontSize: '13px',
-                        color: '#64748b',
-                        marginBottom: '16px',
-                        lineHeight: '1.6',
+                        color: '#6b7280',
+                        fontWeight: '400',
+                        marginBottom: '12px',
+                        lineHeight: '1.5',
                         display: '-webkit-box',
                         WebkitLineClamp: '2',
                         WebkitBoxOrient: 'vertical',
@@ -587,7 +586,7 @@ export default function Explore({
                           </div>
                         )}
                         {course.price_range && (
-                          <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '800', color: '#2563eb' }}>
                             {course.price_range.replace(/\$/g, '').trim().includes('₹') ? course.price_range.replace(/\$/g, '').trim() : `₹ ${course.price_range.replace(/\$/g, '').trim()}`}
                           </div>
                         )}
@@ -661,7 +660,7 @@ export default function Explore({
                             </span>
                           )}
                           {mentorData.category && (
-                            <span style={{ fontSize: '11px', color: '#2a7eff', fontWeight: '500' }}>• {mentorData.category}</span>
+                            <span style={{ fontSize: '11px', color: '#475569', fontWeight: '600' }}>• {mentorData.category}</span>
                           )}
                         </div>
                         {/* Star Rating Section */}
@@ -669,37 +668,26 @@ export default function Explore({
                           <div style={{ display: 'flex', gap: '2px' }}>
                             {(() => {
                               const rating = mentorData.rating || 0;
-                              const fullStars = Math.floor(rating);
-                              const hasHalfStar = rating % 1 >= 0.5;
-                              const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
-                              const gradId = `halfStar-${mentorData.mentor_id || mentorData.id || Math.random()}`;
-
                               return (
                                 <>
-                                  {Array.from({ length: fullStars }).map((_, i) => (
-                                    <svg key={`full-${i}`} width="14" height="14" viewBox="0 0 24 24" fill="#facc15">
-                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                  ))}
-                                  {hasHalfStar && (
-                                    <div key="half" style={{ position: 'relative', width: '14px', height: '14px' }}>
-                                      {/* Background empty star */}
-                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#e2e8f0" style={{ position: 'absolute', top: 0, left: 0 }}>
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                  {[1, 2, 3, 4, 5].map((star) => {
+                                    const fillPercentage = Math.min(Math.max(rating - (star - 1), 0), 1) * 100;
+                                    const gradId = `star-grad-${star}-${mentorData.mentor_id || mentorData.id}-${Math.random().toString(36).substring(7)}`;
+                                    return (
+                                      <svg key={star} width="14" height="14" viewBox="0 0 24 24" style={{ display: 'block' }}>
+                                        <defs>
+                                          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset={`${fillPercentage}%`} stopColor="#facc15" />
+                                            <stop offset={`${fillPercentage}%`} stopColor="#e2e8f0" />
+                                          </linearGradient>
+                                        </defs>
+                                        <path
+                                          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                          fill={`url(#${gradId})`}
+                                        />
                                       </svg>
-                                      {/* Foreground half star */}
-                                      <div style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: '100%', overflow: 'hidden' }}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#facc15">
-                                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {Array.from({ length: emptyStars }).map((_, i) => (
-                                    <svg key={`empty-${i}`} width="14" height="14" viewBox="0 0 24 24" fill="#e2e8f0">
-                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                  ))}
+                                    );
+                                  })}
                                 </>
                               );
                             })()}
@@ -727,7 +715,7 @@ export default function Explore({
                               Courses Provided
                             </p>
                             {mentorData.coursesOffered.slice(0, 3).map((course, idx) => (
-                              <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#2a7eff', border: '1px solid #e0f2fe' }}>
+                              <span key={idx} className="soft-skill-pill" style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
                                 {typeof course === 'object' ? course.title : 'Course'}
                               </span>
                             ))}

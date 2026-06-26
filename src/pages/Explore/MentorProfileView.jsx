@@ -510,11 +510,11 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
               <div className="profile-location-linkedin">
                 <span className="location-text">{mentor.location}</span>
                 <span className="bullet-separator">•</span>
-                <span className="category-text" style={{ color: '#2a7eff', fontWeight: '500' }}>{mentor.category}</span>
+                <span className="category-text" style={{ color: '#475569', fontWeight: '600' }}>{mentor.category}</span>
               </div>
 
-              <div className="profile-connections-linkedin">
-                <span className="connection-count" style={{ color: '#64748b' }}>
+              <div style={{ marginTop: '8px' }}>
+                <span className="profile-stats-text" style={{ color: '#64748b', fontSize: '14px', fontWeight: '600' }}>
                   {mentor.rating ? mentor.rating.toFixed(1) : "4.9"} Rating • {mentor.testimonials?.length || 0} Reviews
                 </span>
               </div>
@@ -585,7 +585,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <div className="timeline-content-elegant">
-                  <h3 className="timeline-title-elegant">{exp.title}</h3>
+                  <h3 className="timeline-title-elegant" style={{ textTransform: 'capitalize' }}>{exp.title}</h3>
                   <p className="timeline-subtitle-elegant">{exp.company}</p>
                   <div className="timeline-meta-elegant">
                     <span className="timeline-period-elegant">{exp.duration}</span>
