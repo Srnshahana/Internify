@@ -680,7 +680,7 @@ export default function Explore({
                           </div>
                           {(mentorData.rating > 0) && (
                             <span style={{ fontSize: '12px', color: '#475569', fontWeight: '600', marginLeft: '2px' }}>
-                              {mentorData.rating}.0
+                              {Number(mentorData.rating) % 1 === 0 ? mentorData.rating : Number(mentorData.rating).toFixed(1)}
                             </span>
                           )}
                         </div>
