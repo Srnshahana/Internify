@@ -326,8 +326,8 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   </div>
                 </div>
                 <div className="modal-stat">
-                  <span className="stat-label">Students</span>
-                  <span className="stat-value">{selectedCourse.students}+</span>
+                  <span className="stat-label">Completed Internship</span>
+                  <span className="stat-value">100+</span>
                 </div>
                 <div className="modal-stat">
                   <span className="stat-label">Level</span>
