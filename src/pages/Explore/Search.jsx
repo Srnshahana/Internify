@@ -549,7 +549,7 @@ export default function Explore({
                         borderRadius: '20px',
                         fontSize: '10px',
                         fontWeight: '700',
-                        color: '#2a7eff',
+                        color: '#333333',
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         backdropFilter: 'blur(4px)'
@@ -559,24 +559,26 @@ export default function Explore({
                     )}
                   </div>
                   <div className="explore-course-content" style={{ padding: '16px', flex: '1', display: 'flex', flexDirection: 'column' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', lineHeight: '1.4' }}>
-                      {course.title}
-                    </h3>
+                    <div style={{ marginTop: 'auto' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '4px', lineHeight: '1.4' }}>
+                        {course.title}
+                      </h3>
 
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#64748b',
-                      marginBottom: '16px',
-                      lineHeight: '1.6',
-                      display: '-webkit-box',
-                      WebkitLineClamp: '2',
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {course.description || 'Master professional skills with expert-led training and real-world projects.'}
-                    </p>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginBottom: '16px',
+                        lineHeight: '1.6',
+                        display: '-webkit-box',
+                        WebkitLineClamp: '2',
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {course.description || 'Master professional skills with expert-led training and real-world projects.'}
+                      </p>
+                    </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         {course.estimated_time && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#94a3b8' }}>
@@ -586,7 +588,7 @@ export default function Explore({
                         )}
                         {course.price_range && (
                           <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-                            {course.price_range.includes('$') ? course.price_range.replace(/\$/g, '₹') : (!course.price_range.includes('₹') ? `₹ ${course.price_range}` : course.price_range)}
+                            {course.price_range.replace(/\$/g, '').trim().includes('₹') ? course.price_range.replace(/\$/g, '').trim() : `₹ ${course.price_range.replace(/\$/g, '').trim()}`}
                           </div>
                         )}
                       </div>
@@ -680,15 +682,18 @@ export default function Explore({
                                     </svg>
                                   ))}
                                   {hasHalfStar && (
-                                    <svg key="half" width="14" height="14" viewBox="0 0 24 24">
-                                      <defs>
-                                        <linearGradient id={gradId}>
-                                          <stop offset="50%" stopColor="#facc15" />
-                                          <stop offset="50%" stopColor="#e2e8f0" />
-                                        </linearGradient>
-                                      </defs>
-                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={`url(#${gradId})`} />
-                                    </svg>
+                                    <div key="half" style={{ position: 'relative', width: '14px', height: '14px' }}>
+                                      {/* Background empty star */}
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#e2e8f0" style={{ position: 'absolute', top: 0, left: 0 }}>
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                      </svg>
+                                      {/* Foreground half star */}
+                                      <div style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: '100%', overflow: 'hidden' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#facc15">
+                                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                      </div>
+                                    </div>
                                   )}
                                   {Array.from({ length: emptyStars }).map((_, i) => (
                                     <svg key={`empty-${i}`} width="14" height="14" viewBox="0 0 24 24" fill="#e2e8f0">
@@ -709,27 +714,29 @@ export default function Explore({
                     </div>
 
                     <div className="soft-card-body">
-                      {/* Bio / About */}
-                      <p className="soft-bio" style={{ marginBottom: '12px' }}>
-                        {mentorData.about?.substring(0, 80) || 'Experienced mentor ready to help you grow.'}{mentorData.about?.length > 80 ? '...' : ''}
-                      </p>
+                      <div style={{ marginTop: 'auto' }}>
+                        {/* Bio / About */}
+                        <p className="soft-bio" style={{ marginBottom: '12px' }}>
+                          {mentorData.about?.substring(0, 80) || 'Experienced mentor ready to help you grow.'}{mentorData.about?.length > 80 ? '...' : ''}
+                        </p>
 
-                      {/* Courses Provided */}
-                      {mentorData.coursesOffered && mentorData.coursesOffered.length > 0 && (
-                        <div className="soft-skills-list" style={{ marginBottom: '12px' }}>
-                          <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '100%' }}>
-                            Courses Provided
-                          </p>
-                          {mentorData.coursesOffered.slice(0, 3).map((course, idx) => (
-                            <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#2a7eff', border: '1px solid #e0f2fe' }}>
-                              {typeof course === 'object' ? course.title : 'Course'}
-                            </span>
-                          ))}
-                          {mentorData.coursesOffered.length > 3 && (
-                            <span className="soft-more-pill">+{mentorData.coursesOffered.length - 3}</span>
-                          )}
-                        </div>
-                      )}
+                        {/* Courses Provided */}
+                        {mentorData.coursesOffered && mentorData.coursesOffered.length > 0 && (
+                          <div className="soft-skills-list" style={{ marginBottom: '12px' }}>
+                            <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '100%' }}>
+                              Courses Provided
+                            </p>
+                            {mentorData.coursesOffered.slice(0, 3).map((course, idx) => (
+                              <span key={idx} className="soft-skill-pill" style={{ background: '#f0f9ff', color: '#2a7eff', border: '1px solid #e0f2fe' }}>
+                                {typeof course === 'object' ? course.title : 'Course'}
+                              </span>
+                            ))}
+                            {mentorData.coursesOffered.length > 3 && (
+                              <span className="soft-more-pill">+{mentorData.coursesOffered.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* <div className="soft-card-footer">

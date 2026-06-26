@@ -42,37 +42,38 @@ const CourseDetailsModal = ({ isOpen, onClose, course, onSearchMentors }) => {
                     )}
                 </div>
 
-                <div style={{ padding: '32px', overflowY: 'auto' }}>
-                    <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', marginBottom: '16px', lineHeight: '1.3' }}>
-                        {course.title}
-                    </h2>
-                    
-                    <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                        {course.estimated_time && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                {course.estimated_time}
-                            </div>
-                        )}
-                        {course.price_range && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                {course.price_range.includes('$') ? course.price_range.replace(/\$/g, '₹') : (!course.price_range.includes('₹') ? `₹ ${course.price_range}` : course.price_range)}
-                            </div>
-                        )}
-                        {course.skill_level && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                {course.skill_level}
-                            </div>
-                        )}
-                    </div>
+                <div style={{ padding: '32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ marginTop: 'auto' }}>
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                            {course.estimated_time && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    {course.estimated_time}
+                                </div>
+                            )}
+                            {course.price_range && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+                                    {course.price_range.replace(/\$/g, '').trim().includes('₹') ? course.price_range.replace(/\$/g, '').trim() : `₹ ${course.price_range.replace(/\$/g, '').trim()}`}
+                                </div>
+                            )}
+                            {course.skill_level && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    {course.skill_level}
+                                </div>
+                            )}
+                        </div>
 
-                    <div style={{ marginBottom: '32px' }}>
-                        <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>About this course</h3>
-                        <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6' }}>
-                            {course.description || 'Master professional skills with expert-led training and real-world projects. Connect with top industry mentors to guide your learning journey and accelerate your career growth.'}
-                        </p>
+                        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', marginBottom: '16px', lineHeight: '1.3' }}>
+                            {course.title}
+                        </h2>
+
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '8px' }}>About this course</h3>
+                            <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6' }}>
+                                {course.description || 'Master professional skills with expert-led training and real-world projects. Connect with top industry mentors to guide your learning journey and accelerate your career growth.'}
+                            </p>
+                        </div>
                     </div>
 
                     <button 

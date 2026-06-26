@@ -31607,11 +31607,11 @@ h1 span {
   color: #0a66c2;
   font-weight: 600;
   margin-top: 8px;
-  cursor: pointer;
+  cursor: default;
 }
 
 .profile-connections-linkedin:hover {
-  text-decoration: underline;
+  text-decoration: none !important;
 }
 
 .profile-actions-linkedin {
@@ -32074,8 +32074,8 @@ h1 span {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #41568c;
-  background: rgba(42, 126, 255, 0.1);
+  color: #475569;
+  background: #f1f5f9;
   padding: 4px 10px;
   border-radius: 100px;
 }
@@ -48912,13 +48912,7 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   overflow: hidden;
 }
 
-.feat-easy-edits .feature-label {
-  color: #2356c6 !important;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  font-size: 0.85rem;
-  margin-bottom: 0.8rem;
-}
+
 
 .feat-easy-edits .feature-title {
   color: #020617 !important;
@@ -49355,13 +49349,16 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
 }
 
 .feature-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 800;
+  display: block !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
   color: #2a7eff !important;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.8rem;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  margin-bottom: 0.8rem !important;
+  line-height: 1.5 !important;
+  opacity: 1 !important;
 }
 
 .feature-title {
@@ -49990,14 +49987,7 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   text-align: center;
 }
 
-.stitch-mentors-header .feature-label {
-  color: #2356c6 !important;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
-  /* Reduced from 1.5rem */
-  display: block;
-}
+
 
 .stitch-mentors-section .stitch-faq-title {
   color: #0f172a !important;

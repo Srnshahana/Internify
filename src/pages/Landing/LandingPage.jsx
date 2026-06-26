@@ -16,6 +16,7 @@ import aiVideo from '../../assets/video/ai&machine learning.mp4'
 import cyberVideo from '../../assets/video/cybersecurity.mp4'
 import dataScienceVideo from '../../assets/video/datascience.mp4'
 import digitalMarketingVideo from '../../assets/video/digitalmarketing.mp4'
+import heroVideoUrl from '../../assets/video/herovideo.mp4'
 // Category data with icons
 // Featured Programs Data
 const featuredPrograms = [
@@ -509,7 +510,7 @@ export default function LandingPage({
             preload="auto"
             className="stitch-bg-video"
           >
-            <source src="https://storage.googleapis.com/gweb-gemini-cdn/gemini/uploads/89e9004d716a7803fc7c9aab18c985af783f5a36.mp4" type="video/mp4" />
+            <source src={heroVideoUrl} type="video/mp4" />
           </video>
           <InteractiveGrid />
 
@@ -709,8 +710,8 @@ export default function LandingPage({
           <div className="stitch-mentors-container">
             <div className="stitch-mentors-header">
               <span className="feature-label">EXPERT GUIDANCE</span>
-              <h2 className="stitch-faq-title">Professionals </h2>
-              <p className="stitch-faq-a" style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+              <h2 className="feature-title">Professionals </h2>
+              <p className="feature-desc" style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
                 Our mentors are industry experts with 5+ years of real-world
                 experience at leading companies like Google, Meta, and Netflix.
               </p>
