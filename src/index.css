@@ -412,7 +412,7 @@ h4,
   z-index: 1;
   pointer-events: none;
   opacity: 0.7;
-  background-color: white;
+  background-color: black;
   filter: invert(1) hue-rotate(160deg) saturate(1.8) brightness(1.1);
   /* Smooth bottom fade to eliminate the "cut" line between sections */
   mask-image: linear-gradient(to bottom, black 80%, transparent 100%);

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RingsIcon, BadgeCheckIcon, ArrowBackIcon, ArrowForwardIcon } from '../../components/Icons.jsx'
-import { getAuthenticatedUser, clearAuthData } from '../../utils/auth.js'
+import { getAuthenticatedUser, clearAuthData, getStoredAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
 import CourseModal from '../../components/CourseModal';
@@ -329,8 +329,8 @@ export default function LandingPage({
   showNavbar = true
 }) {
   const navigate = useNavigate()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!getStoredAuthData())
+  const [userRole, setUserRole] = useState(() => getStoredAuthData()?.role || null)
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -373,19 +373,12 @@ export default function LandingPage({
         const authData = await getAuthenticatedUser()
         if (authData) {
           setIsLoggedIn(true)
-          // Redirect if already logged in
-          if (authData.role === 'mentor') {
-            navigate('/mentor-dashboard', { replace: true })
-          } else {
-            navigate('/dashboard', { replace: true })
-          }
+          setUserRole(authData.role)
         } else {
           setIsLoggedIn(false)
-          setIsLoadingAuth(false)
         }
       } catch (error) {
         console.error("Auth check failed:", error)
-        setIsLoadingAuth(false)
       }
     }
     checkUser()
@@ -398,13 +391,7 @@ export default function LandingPage({
   const auraRef = useRef(null);
   const coursesCarouselRef = useRef(null);
 
-  if (isLoadingAuth) {
-    return (
-      <div style={{ minHeight: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-        <Loading />
-      </div>
-    )
-  }
+
 
   const handleMouseMove = (e) => {
     if (!auraRef.current) return
@@ -498,8 +485,14 @@ export default function LandingPage({
 
           {/* Auxiliary Links (Right) */}
           <div className="nav-links-right">
-            <button className="nav-aux-link" onClick={() => navigate('/apply-mentor')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Apply as Mentor</button>
-            <button className="nav-login-btn-new" onClick={() => navigate('/login')}>Log in</button>
+            {isLoggedIn ? (
+              <button className="nav-login-btn-new" onClick={() => navigate(userRole === 'mentor' ? '/mentor-dashboard' : '/dashboard')}>Dashboard</button>
+            ) : (
+              <>
+                <button className="nav-aux-link" onClick={() => navigate('/apply-mentor')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Apply as Mentor</button>
+                <button className="nav-login-btn-new" onClick={() => navigate('/login')}>Log in</button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -513,6 +506,7 @@ export default function LandingPage({
             loop
             muted
             playsInline
+            preload="auto"
             className="stitch-bg-video"
           >
             <source src="https://storage.googleapis.com/gweb-gemini-cdn/gemini/uploads/89e9004d716a7803fc7c9aab18c985af783f5a36.mp4" type="video/mp4" />
