@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Loading from '../../components/Loading'
 import { searchCourses, searchMentors, getMentorsByCourse } from '../../data/staticData.js'
 import { Mentor } from '../../models/Mentor.js'
-import '../../App.css'
+import CourseDetailsModal from '../../components/CourseDetailsModal'
 
 const heroSectionImage = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80'
 
@@ -163,6 +163,7 @@ export default function Explore({
   const [term, setTerm] = useState(initialQuery || '')
   const [query, setQuery] = useState(initialQuery || '')
   const [selectedCourseId, setSelectedCourseId] = useState(null)
+  const [selectedCourseForModal, setSelectedCourseForModal] = useState(null)
   const [apiMentors, setApiMentors] = useState([])
   const [apiCourses, setApiCourses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -179,35 +180,54 @@ export default function Explore({
   const fetchAllData = async () => {
     setLoading(true)
     try {
-      // Fetch mentors and courses in parallel
-      const [mentorsRes, coursesRes] = await Promise.all([
+      // Fetch mentors, courses, and mentor_courses mapping in parallel
+      const [mentorsRes, coursesRes, mentorCoursesRes] = await Promise.all([
         supabase
           .from('mentors_details')
-          .select('mentor_id, name, profile_image, category, about, address, is_verified, is_platformAssured, coursesOffered, rating'),
-        supabase.from('courses').select('course_id, title, image, description, estimated_time, career_field, price_range').order('title', { ascending: true })
+          .select('id, mentor_id, name, profile_image, category, about, address, is_verified, is_platformAssured, rating'),
+        supabase.from('courses').select('course_id, title, image, description, estimated_time, career_field, price_range').order('title', { ascending: true }),
+        supabase.from('mentor_courses').select('mentor_id, course_id')
       ])
 
       const { data: mentorsData, error: mentorsError } = mentorsRes
       const { data: coursesData, error: coursesError } = coursesRes
+      const { data: mentorCoursesData, error: mentorCoursesError } = mentorCoursesRes
 
       if (mentorsError) console.error('Error fetching mentors:', mentorsError)
       if (coursesError) console.error('Error fetching courses:', coursesError)
+      if (mentorCoursesError) console.error('Error fetching mentor_courses:', mentorCoursesError)
 
       if (mentorsData) {
         const resolvedMentors = mentorsData.map(mentorItem => {
-          const mentorCourseIds = Array.isArray(mentorItem.coursesOffered)
+          // Get course IDs mapped in mentor_courses junction table
+          const dbCourseIds = mentorCoursesData 
+            ? mentorCoursesData.filter(mc => String(mc.mentor_id) === String(mentorItem.mentor_id || mentorItem.id)).map(mc => String(mc.course_id))
+            : []
+            
+          if (mentorItem.name?.toLowerCase().includes('shahira')) {
+            console.log('DEBUG Shahira mapping:', { id: mentorItem.id, mentor_id: mentorItem.mentor_id, dbCourseIds, mentorCoursesDataCount: mentorCoursesData?.length })
+          }
+
+          // Fallback from legacy coursesOffered array
+          const fallbackCourseIds = Array.isArray(mentorItem.coursesOffered)
             ? mentorItem.coursesOffered.map(String)
             : []
 
-          // Match course_id from courses table with IDs in mentor's coursesOffered array
+          const combinedIdsOrTitles = [...new Set([...dbCourseIds, ...fallbackCourseIds])]
+
+          // Match course_id or title from courses table with IDs/titles in mentor's courses array
           const fullCourses = coursesData 
-            ? coursesData.filter(c => mentorCourseIds.includes(String(c.course_id)))
+            ? coursesData.filter(c => {
+                const matchById = combinedIdsOrTitles.includes(String(c.course_id));
+                const matchByTitle = combinedIdsOrTitles.some(mc => String(mc).toLowerCase() === String(c.title).toLowerCase());
+                return matchById || matchByTitle;
+              })
             : []
 
           return new Mentor({
             ...mentorItem,
-            mentor_id: mentorItem.mentor_id,
-            id: mentorItem.mentor_id,
+            mentor_id: mentorItem.mentor_id || mentorItem.id,
+            id: mentorItem.id || mentorItem.mentor_id,
             coursesOffered: fullCourses
           })
         })
@@ -284,6 +304,7 @@ export default function Explore({
   }
 
 
+  const coursesToUse = apiCourses.length > 0 ? apiCourses : courses
 
   const filteredMentors = useMemo(() => {
     // Prioritize apiMentors fetched in this component
@@ -298,11 +319,22 @@ export default function Explore({
     if (selectedCourseId) {
       result = result.filter(mentor => {
         const mentorData = getMentorData(mentor)
+        if (!mentorData) return false
+        
         const mentorCourses = mentorData.coursesOffered || []
 
+        if (String(selectedCourseId) === '1' && (mentorData.mentor_id === 842996 || mentorData.id === 50)) {
+           console.log('DEBUG Mentor filter:', { mentorId: mentorData.mentor_id, mentorCourses, selectedCourseId })
+        }
         return mentorCourses.some(course => {
-          const cId = typeof course === 'object' ? (course.course_id || course.id) : course
-          return String(cId) === String(selectedCourseId)
+          const cId = typeof course === 'object' ? (course?.course_id || course?.id) : course
+          const cTitle = typeof course === 'object' ? course?.title : course
+          const selectedCourse = coursesToUse.find(c => String(c?.course_id || c?.id) === String(selectedCourseId))
+          
+          const matchById = String(cId) === String(selectedCourseId)
+          const matchByTitle = selectedCourse && cTitle && String(cTitle).toLowerCase() === String(selectedCourse?.title || '').toLowerCase()
+          
+          return matchById || matchByTitle
         })
       })
     }
@@ -318,20 +350,9 @@ export default function Explore({
           if (!mentorData) return false
 
           const name = String(mentorData.name || '').toLowerCase()
-          const role = String(mentorData.role || '').toLowerCase()
-          const company = String(mentorData.company || '').toLowerCase()
-          const bio = String(mentorData.bio || '').toLowerCase()
-          const expertise = (Array.isArray(mentorData.expertise) ? mentorData.expertise : []).join(' ').toLowerCase()
-          const skills = (Array.isArray(mentorData.skills) ? mentorData.skills : []).join(' ').toLowerCase()
-          const category = String(mentorData.category || '').toLowerCase()
+          const offeredCourses = (mentorData.coursesOffered || []).map(c => typeof c === 'object' ? (c?.title || '') : c).join(' ').toLowerCase()
 
-          return name.includes(lowerQuery) ||
-            role.includes(lowerQuery) ||
-            company.includes(lowerQuery) ||
-            bio.includes(lowerQuery) ||
-            expertise.includes(lowerQuery) ||
-            skills.includes(lowerQuery) ||
-            category.includes(lowerQuery)
+          return name.includes(lowerQuery) || offeredCourses.includes(lowerQuery)
         })
       } else {
         try {
@@ -348,8 +369,6 @@ export default function Explore({
     return result
   }, [mentors, query, selectedCourseId])
 
-  // Use API courses if available, otherwise fall back to prop courses
-  const coursesToUse = apiCourses.length > 0 ? apiCourses : courses
 
   const filteredCourses = useMemo(() => {
     if (!query) return coursesToUse
@@ -452,7 +471,7 @@ export default function Explore({
             margin: '0 auto 20px auto',
             border: '1px solid #e0f2fe'
           }}>
-            <span>Showing mentors for: {coursesToUse.find((c) => (c.course_id || c.id) === selectedCourseId)?.title}</span>
+            <span>Showing mentors for: {coursesToUse.find((c) => String(c?.course_id || c?.id) === String(selectedCourseId))?.title}</span>
             <button
               onClick={() => setSelectedCourseId(null)}
               style={{
@@ -489,7 +508,7 @@ export default function Explore({
                 <div
                   className="explore-course-card"
                   key={course.course_id || course.id}
-                  onClick={() => handleCourseClick(course.course_id || course.id)}
+                  onClick={() => setSelectedCourseForModal(course)}
                   style={{
                     cursor: 'pointer',
                     background: '#fff',
@@ -567,7 +586,7 @@ export default function Explore({
                         )}
                         {course.price_range && (
                           <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-                            {course.price_range}
+                            {course.price_range.includes('$') ? course.price_range.replace(/\$/g, '₹') : (!course.price_range.includes('₹') ? `₹ ${course.price_range}` : course.price_range)}
                           </div>
                         )}
                       </div>
@@ -706,6 +725,13 @@ export default function Explore({
           </div>
         )}
       </div>
+
+      <CourseDetailsModal 
+        isOpen={!!selectedCourseForModal} 
+        course={selectedCourseForModal} 
+        onClose={() => setSelectedCourseForModal(null)} 
+        onSearchMentors={handleCourseClick} 
+      />
     </div>
   )
 }

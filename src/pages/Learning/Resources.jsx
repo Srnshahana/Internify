@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import supabase from "../../supabaseClient.js";
 import { AnimatedGridLines } from "../../components/AnimatedGridLines";
-import "../../App.css";
 
 const renderStars = (rating) => {
   const stars = [];

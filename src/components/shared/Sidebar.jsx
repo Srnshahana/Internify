@@ -1,6 +1,5 @@
 import React from 'react'
 import { LogoutIcon } from '../Icons'
-import '../../App.css'
 
 const Sidebar = ({ activePage, setActivePage, navItems, onLogout }) => {
     return (

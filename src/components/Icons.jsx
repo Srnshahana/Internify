@@ -264,3 +264,17 @@ export const BadgeCheckIcon = ({ className = "" }) => (
     <path d="m9 12 2 2 4-4" />
   </svg>
 )
+
+export const ArrowBackIcon = ({ className = "", style = {} }) => (
+  <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 19-7-7 7-7"/>
+    <path d="M19 12H5"/>
+  </svg>
+)
+
+export const ArrowForwardIcon = ({ className = "", style = {} }) => (
+  <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14"/>
+    <path d="m12 5 7 7-7 7"/>
+  </svg>
+)

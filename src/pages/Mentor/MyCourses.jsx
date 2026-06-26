@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import '../../App.css'
 import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'

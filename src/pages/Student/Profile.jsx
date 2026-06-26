@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import '../../App.css'
 import { studentProfileData } from '../../data/staticData.js'
 import { courses } from '../../data/staticData.js'
 import { CertificateIcon, SettingsIcon, LogoutIcon } from '../../components/Icons.jsx'

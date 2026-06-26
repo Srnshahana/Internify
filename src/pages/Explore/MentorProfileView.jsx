@@ -38,10 +38,10 @@ const useDragScroll = () => {
   return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll, onMouseDown, onMouseLeave, onMouseUp, onMouseMove }
 }
 import { useNavigate } from 'react-router-dom'
-import '../../App.css'
 import { getCourseById } from '../../data/staticData.js'
 import supabase from '../../supabaseClient.js'
 import { getStoredAuthData } from '../../utils/auth.js'
+import MessageModal from '../../components/shared/MessageModal.jsx'
 
 export default function MentorProfile({ mentor: propMentor, onBack, renderStars, courses = [] }) {
   const navigate = useNavigate()
@@ -52,6 +52,29 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
   const [courseSessions, setCourseSessions] = useState([])
   const [loadingSessions, setLoadingSessions] = useState(false)
   const coursesDrag = useDragScroll()
+
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalMessage, setModalMessage] = useState('')
+  const [modalType, setModalType] = useState('info')
+  const [pendingAction, setPendingAction] = useState(null)
+
+  const showModal = (title, message, type = 'info', action = null) => {
+    setModalTitle(title)
+    setModalMessage(message)
+    setModalType(type)
+    setPendingAction(() => action)
+    setModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setModalOpen(false)
+    if (pendingAction) {
+      pendingAction()
+      setPendingAction(null)
+    }
+  }
 
 
   useEffect(() => {
@@ -273,6 +296,14 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
   return (
     <div className="profile-page-elegant">
+      <MessageModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        title={modalTitle}
+        message={modalMessage}
+        type={modalType}
+        onConfirm={pendingAction}
+      />
       {/* Course Detail Modal */}
       {showCourseModal && selectedCourse && (
         <div className="course-modal-overlay" onClick={handleCloseModal}>
@@ -291,7 +322,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                   <span className="stat-label">Rating</span>
                   <div className="stat-value-row">
                     <span className="star-icon">★</span>
-                    <span className="stat-value">{selectedCourse.rating}</span>
+                    <span className="stat-value">{mentor.rating ? mentor.rating.toFixed(1) : "4.8"}</span>
                   </div>
                 </div>
                 <div className="modal-stat">
@@ -380,7 +411,7 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                     // NEW: Check for mentor role
                     const storedAuth = getStoredAuthData()
                     if (storedAuth && storedAuth.role === 'mentor') {
-                      alert("Mentors cannot book courses. Please login as a student account to enroll.")
+                      showModal('Action Denied', 'Mentors cannot book courses. Please login as a student account to enroll.', 'error')
                       return
                     }
 
@@ -393,6 +424,26 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
                       sessionStorage.setItem('pendingCourse', JSON.stringify(course))
                       navigate('/login', { state: { returnTo: '/payment' } })
                     } else {
+                      // Check for existing enrollment
+                      console.log('Checking for existing enrollment...', { authId, mId, cId })
+                      const { data: existingEnrollment, error: checkError } = await supabase
+                        .from('classes_enrolled')
+                        .select('id')
+                        .eq('student_id', authId)
+                        .eq('mentor_id', mId)
+                        .eq('course_id', cId)
+                        .limit(1)
+
+                      if (existingEnrollment && existingEnrollment.length > 0) {
+                        showModal(
+                          'Already Enrolled', 
+                          'You have already purchased this course. Redirecting to your dashboard.', 
+                          'info', 
+                          () => navigate('/dashboard')
+                        )
+                        return
+                      }
+
                       // Already logged in - go directly to payment
                       console.log('User logged in - navigating to payment')
                       navigate('/payment', { state: { course } })

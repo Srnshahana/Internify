@@ -1,5 +1,4 @@
 import React from 'react';
-import '../../App.css'; // Ensure we have access to global styles
 
 const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfirm, secondaryAction }) => {
     if (!isOpen) return null;

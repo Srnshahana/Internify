@@ -1,12 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RingsIcon, BadgeCheckIcon } from '../../components/Icons.jsx'
+import { RingsIcon, BadgeCheckIcon, ArrowBackIcon, ArrowForwardIcon } from '../../components/Icons.jsx'
 import { getAuthenticatedUser, clearAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
 import CourseModal from '../../components/CourseModal';
 import supabase from '../../supabaseClient'
-import '../../App.css'
 import dashboardImg from '../../assets/images/dashboard.png'
 import classroomImg from '../../assets/images/clasroom.png'
 import ethicalHackingImg from '../../assets/images/ethicalhacking.jpg'
@@ -202,7 +201,6 @@ export const InteractiveGrid = ({ type = "repel" }) => {
       // Use the actual CSS dimensions for clearing since ctx is scaled
       const rect = canvas.getBoundingClientRect()
       ctx.clearRect(0, 0, rect.width, rect.height)
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.32)' // Restored to subtle "normal" color
 
       particles.forEach(p => {
         let dx = mouse.current.x - p.x
@@ -241,12 +239,17 @@ export const InteractiveGrid = ({ type = "repel" }) => {
             p.y -= dy / 10
           }
         }
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.closePath()
-        ctx.fill()
       })
+
+      // Batch draw all particles for extreme performance boost
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.32)' // Restored to subtle "normal" color
+      ctx.beginPath()
+      particles.forEach(p => {
+        ctx.moveTo(p.x + p.size, p.y)
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+      })
+      ctx.fill()
+
       animationFrameId = requestAnimationFrame(animate)
     }
 
@@ -396,7 +399,11 @@ export default function LandingPage({
   const coursesCarouselRef = useRef(null);
 
   if (isLoadingAuth) {
-    return <Loading />
+    return (
+      <div style={{ minHeight: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
+        <Loading />
+      </div>
+    )
   }
 
   const handleMouseMove = (e) => {
@@ -501,6 +508,7 @@ export default function LandingPage({
 
         <section className="stitch-hero" id="home" onMouseMove={handleMouseMove}>
           <video
+            ref={videoRef}
             autoPlay
             loop
             muted
@@ -584,10 +592,10 @@ export default function LandingPage({
             {/* <h2 className="stitch-courses-title"> Popular Courses</h2> */}
             <div className="stitch-carousel-nav">
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
-                <span className="material-symbols-outlined">arrow_back</span>
+                <ArrowBackIcon />
               </button>
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('right')}>
-                <span className="material-symbols-outlined">arrow_forward</span>
+                <ArrowForwardIcon />
               </button>
             </div>
           </div>

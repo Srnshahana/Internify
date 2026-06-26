@@ -5,7 +5,6 @@ import { SunIcon, MoonIcon, ProgrammingIcon, DesignIcon, AIIcon, BusinessIcon, D
 import backgroundImage from '../assets/background.png'
 import heroSectionImage from '../assets/herosection.jpg'
 import supabase from '../supabaseClient'
-import '../App.css'
 
 // Map courses to skills format
 const latestSkills = courses.slice(0, 8).map((course) => ({

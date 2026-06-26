@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import '../../App.css'
 import supabase from '../../supabaseClient.js'
 import { storeAuthData } from '../../utils/auth.js'
 import MessageModal from '../../components/shared/MessageModal' // Import Modal

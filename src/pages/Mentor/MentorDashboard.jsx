@@ -8,7 +8,6 @@ import Profile from './Profile.jsx'
 import Notification from './Notification.jsx'
 import MyCourses from './MyCourses.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, ClassroomIcon } from '../../components/Icons.jsx'
-import '../../App.css'
 
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 

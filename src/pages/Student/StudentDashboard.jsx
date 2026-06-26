@@ -15,7 +15,6 @@ import OnboardingModal from '../../components/shared/OnboardingModal.jsx'
 import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 // import Sidebar from '../../components/shared/Sidebar.jsx' // Removed
-import '../../App.css'
 
 const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) => {
   const { loading, enrolledCourses, studentProfile, authUser, refetch } = useDashboardData()

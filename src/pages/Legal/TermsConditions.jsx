@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../App.css';
 
 const TermsConditions = () => {
   const navigate = useNavigate();

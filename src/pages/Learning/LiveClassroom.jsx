@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import '../../App.css'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 

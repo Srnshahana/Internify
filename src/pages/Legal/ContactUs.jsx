@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InteractiveGrid } from '../Landing/LandingPage';
-import '../../App.css';
 
 const ContactUs = () => {
   const navigate = useNavigate();

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import Loading from '../../components/Loading'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
-import '../../App.css'
 import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavigate }) {

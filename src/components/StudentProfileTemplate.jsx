@@ -1,5 +1,4 @@
 import React from 'react';
-import '../App.css';
 import { CertificateIcon } from './Icons.jsx';
 
 const StudentProfileTemplate = ({ profileData, onClose }) => {

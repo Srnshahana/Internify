@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
-import '../../App.css'
 import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import Assessments from './Assessments.jsx'
 import MessageModal from '../../components/shared/MessageModal.jsx'

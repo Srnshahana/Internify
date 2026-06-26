@@ -2,7 +2,6 @@
 import React, { useState } from 'react'
 import supabase from '../../supabaseClient'
 import Loading from '../Loading'
-import '../../App.css'
 
 const SKILLS_BY_FIELD = {
     'Programming': ['React', 'Node.js', 'Python', 'JavaScript', 'HTML/CSS', 'SQL', 'Git', 'TypeScript'],

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import Loading from '../../components/Loading'
-import '../../App.css'
 import MyCourses from './MyCourses.jsx'
 import CourseDetail from './CourseDetail.jsx'
 import StudentRequests from './StudentRequests.jsx'
@@ -84,7 +83,7 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
   const offeredCoursesTemplates = providedCourses || []
 
   // Active student enrollments (classrooms)
-  const activeClassrooms = mentorshipEnrollments || []
+  const activeClassrooms = (mentorshipEnrollments || []).filter(c => c.status === 'active' || c.status === 'pending')
 
   // Calculate metrics
   const totalStudents = Array.from(new Set(activeClassrooms.map(c => c.student_id))).length

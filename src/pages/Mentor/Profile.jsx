@@ -167,7 +167,7 @@ function MentorProfile({ onLogout }) {
               <div className="mentor-modal-stats-grid">
                 <div className="mentor-modal-stat-card">
                   <span className="mentor-modal-stat-label">Rating</span>
-                  <span className="mentor-modal-stat-value">★ {selectedCourse.rating || 4.8}</span>
+                  <span className="mentor-modal-stat-value">★ {mentorDisplayData.averageRating ? mentorDisplayData.averageRating.toFixed(1) : "4.8"}</span>
                 </div>
                 <div className="mentor-modal-stat-card">
                   <span className="mentor-modal-stat-label">Mentees</span>

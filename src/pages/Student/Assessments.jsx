@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import Loading from '../../components/Loading'
-import '../../App.css'
 import supabase from '../../supabaseClient'
 import MessageModal from '../../components/shared/MessageModal.jsx'
 

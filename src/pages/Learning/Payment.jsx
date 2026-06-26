@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import supabase from '../../supabaseClient'
 import { getAuthenticatedUser } from '../../utils/auth.js'
-import '../../App.css'
 
 // Lucide-inspired SVG Icons
 const ShieldCheckIcon = ({ className = "" }) => (

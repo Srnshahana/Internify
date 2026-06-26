@@ -18,7 +18,6 @@ import ContactUs from './pages/Legal/ContactUs.jsx'
 import { courses, mentors } from './data/staticData.js'
 import supabase from './supabaseClient'
 import { getAuthenticatedUser, getStoredAuthData, clearAuthData } from './utils/auth.js'
-import './App.css'
 
 // Helper function to render stars
 const renderStars = (score) => {
@@ -469,25 +468,57 @@ function ProfilePage() {
   );
 }
 
+// Landing Page Wrapper
+function LandingPageWrapper() {
+  const [userRole, setUserRole] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const storedAuth = getStoredAuthData()
+      if (storedAuth) {
+        const authUser = await getAuthenticatedUser()
+        if (authUser) {
+          setIsLoggedIn(true)
+          setUserRole(authUser.role)
+        }
+      }
+      setLoading(false)
+    }
+    checkAuth()
+  }, [])
+
+  if (loading) {
+    return null
+  }
+
+  if (isLoggedIn) {
+    if (userRole === 'mentor') {
+      return <Navigate to="/mentor-dashboard" replace />
+    }
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return (
+    <LandingPage
+      onOpenExplore={() => { }}
+      onOpenResources={() => { }}
+      onOpenLogin={() => { }}
+      onMentorClick={() => { }}
+      onBookSession={() => { }}
+      renderStars={renderStars}
+    />
+  )
+}
+
 // Main App Component
 function App() {
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <LandingPage
-              onOpenExplore={() => { }}
-              onOpenResources={() => { }}
-              onOpenLogin={() => { }}
-              onMentorClick={() => { }}
-              onBookSession={() => { }}
-              renderStars={renderStars}
-            />
-          }
-        />
+        <Route path="/" element={<LandingPageWrapper />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/login" element={<LoginPage />} />

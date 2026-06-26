@@ -4,7 +4,6 @@ import supabase from '../../supabaseClient.js'
 import MessageModal from '../../components/shared/MessageModal.jsx'
 import Loading from '../../components/Loading.jsx'
 import { storeAuthData, clearAuthData } from '../../utils/auth.js'
-import '../../App.css'
 
 export default function ApplyMentor() {
     const navigate = useNavigate()

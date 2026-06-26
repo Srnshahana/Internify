@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import '../../App.css'
 import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 import CourseDetail from './CourseDetail.jsx'
 import MyCourses from './MyCourses.jsx'
