@@ -7658,7 +7658,7 @@ h1 span {
   background: #ffffff;
   border-radius: 20px;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.01);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
@@ -7669,7 +7669,7 @@ h1 span {
 
 .light-theme-mentor-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.1), 0 10px 20px -10px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   border-color: #e2e8f0;
 }
 
@@ -28886,7 +28886,7 @@ h1 span {
 
 .explore-course-card p {
   background: transparent !important;
-  color: #475569 !important;
+  color: #64748b !important;
 }
 
 .explore-course-meta span {
@@ -32076,7 +32076,7 @@ h1 span {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #475569;
+  color: #333333 !important;
   background: #f1f5f9;
   padding: 4px 10px;
   border-radius: 100px;
@@ -32134,7 +32134,7 @@ h1 span {
 
 .course-category-elegant {
   font-size: clamp(13px, 2vw, 14px);
-  color: #64748b;
+  color: #333333 !important;
   margin: 0 0 16px 0;
 }
 
@@ -34187,7 +34187,7 @@ html {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #475569;
+  color: #333333 !important;
   background: #f1f5f9;
   padding: 6px 12px;
   border-radius: 100px;
@@ -50020,7 +50020,7 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
 
 .stitch-mentors-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 2rem;
   max-width: 1400px;
   margin: 0 auto;

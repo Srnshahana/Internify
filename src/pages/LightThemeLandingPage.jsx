@@ -391,20 +391,22 @@ export default function LightThemeLandingPage({
     return stars
   })
 
-  const mentorsToDisplay = apiMentors.length > 0 
-    ? apiMentors.map(mentor => ({
-        id: mentor.mentor_id || mentor.id,
-        name: mentor.name || 'Mentor',
-        role: mentor.career_field || mentor.role || 'Mentor',
-        company: mentor.company || '',
-        focus: mentor.bio || mentor.description || '',
-        rating: mentor.rating || 4.5,
-        assured: true,
-        experience: mentor.experience || 0,
-        hourlyRate: mentor.hourly_rate || 50,
-        image: mentor.profile_image || mentor.image || 'https://via.placeholder.com/150',
-      }))
-    : mentors.slice(0, 5)
+  const formattedApiMentors = apiMentors.map(mentor => ({
+    id: mentor.mentor_id || mentor.id,
+    name: mentor.name || 'Mentor',
+    role: mentor.career_field || mentor.role || 'Mentor',
+    company: mentor.company || '',
+    focus: mentor.bio || mentor.description || '',
+    rating: mentor.rating || 4.5,
+    assured: true,
+    experience: mentor.experience || 0,
+    hourlyRate: mentor.hourly_rate || 50,
+    image: mentor.profile_image || mentor.image || 'https://via.placeholder.com/150',
+  }));
+
+  const mentorsToDisplay = formattedApiMentors.length > 0 
+    ? [...formattedApiMentors, ...mentors.filter(m => !formattedApiMentors.find(am => am.id === m.id))].slice(0, 5)
+    : mentors.slice(0, 5);
 
   const scrollMentors = (dir) => {
     const el = mentorTrackRef.current

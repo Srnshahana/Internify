@@ -722,7 +722,8 @@ export default function LandingPage({
                 { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
                 { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80", rating: 4.8 },
                 { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-                { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 }
+                { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 },
+                { id: 5, name: "Alex Johnson", role: "Cloud Architect", company: "Amazon", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80", rating: 4.9 }
               ].map((mentor) => (
                 <div key={mentor.id} className="mentor-stitch-card">
                   <div className="mentor-card-inner">

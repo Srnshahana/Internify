@@ -307,8 +307,20 @@ export default function Explore({
   const coursesToUse = apiCourses.length > 0 ? apiCourses : courses
 
   const filteredMentors = useMemo(() => {
-    // Prioritize apiMentors fetched in this component
-    let result = apiMentors.length > 0 ? apiMentors : mentors
+    // Prioritize apiMentors fetched in this component, but ensure we have at least 5
+    let result = [...apiMentors]
+    
+    // Fill remaining slots with static mentors to make it exactly 5 if fewer are available
+    if (result.length < 5) {
+      const remainingSlots = 5 - result.length;
+      const staticMentorsToAdd = mentors
+        .filter(m => !result.find(am => am.mentor_id === m.id || am.id === m.id))
+        .slice(0, remainingSlots);
+      result = [...result, ...staticMentorsToAdd];
+    } else if (result.length > 5) {
+      // Optional: if the user specifically wanted exactly 5 cards displayed:
+      result = result.slice(0, 5);
+    }
 
     if (!result) return []
 
@@ -558,15 +570,15 @@ export default function Explore({
                           {course.career_field}
                         </span>
                       )}
-                      <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#333333', marginBottom: '2px', lineHeight: '1.3' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111827', margin: '0', lineHeight: '1.3' }}>
                         {course.title}
                       </h3>
 
                       <p style={{
                         fontSize: '13px',
-                        color: '#6b7280',
+                        color: '#9ca3af',
                         fontWeight: '400',
-                        marginBottom: '12px',
+                        margin: '0 0 0 0',
                         lineHeight: '1.5',
                         display: '-webkit-box',
                         WebkitLineClamp: '2',
@@ -577,7 +589,7 @@ export default function Explore({
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         {course.estimated_time && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#94a3b8' }}>

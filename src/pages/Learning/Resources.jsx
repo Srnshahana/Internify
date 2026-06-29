@@ -59,7 +59,7 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
   }, []);
 
   // Get recommended mentors (first 4 mentors for display)
-  const recommendedMentors = mentors.slice(0, 4);
+  const recommendedMentors = mentors.slice(0, 5);
 
   const handleBookSession = (mentor, e) => {
     e?.stopPropagation();
@@ -155,10 +155,10 @@ function Resources({ onBack, mentors = [], onBookSession, onMentorClick }) {
       ),
     );
 
-    // Return top 4 relevant mentors, or fallback to first 4 if none match
+    // Return top 5 relevant mentors, or fallback to first 5 if none match
     return relevantMentors.length > 0
-      ? relevantMentors.slice(0, 4)
-      : mentors.slice(0, 4);
+      ? relevantMentors.slice(0, 5)
+      : mentors.slice(0, 5);
   };
 
   const handleDownload = (material) => {

@@ -299,11 +299,6 @@ export default function ApplyMentor() {
             return
         }
 
-        if (!legacyId) {
-            showModal('Session Error', 'Please go back to Step 1 and re-verify your account details.', 'error')
-            return
-        }
-
         setIsSubmitting(true)
 
         try {
@@ -320,12 +315,59 @@ export default function ApplyMentor() {
                 title, ...dataToSubmit
             } = submissionData
 
-            // 1. Update/Insert into 'mentors_details'
-            // We use upsert to prevent "duplicate key" errors if the user retries the final step
+            let finalAuthId = authUserId
+            let finalLegacyId = legacyId
+
+            // 0. Handle Supabase Auth (Sign Up or Sign In) if we don't have authUserId
+            if (!finalAuthId) {
+                const { data: authData, error: signupError } = await supabase.auth.signUp({
+                    email: formData.email,
+                    password: formData.password
+                })
+
+                if (signupError) {
+                    if (signupError.message?.toLowerCase().includes('already registered')) {
+                        const { data: logInData, error: logInError } = await supabase.auth.signInWithPassword({
+                            email: formData.email,
+                            password: formData.password
+                        })
+                        if (logInError) {
+                            throw new Error('This email is already registered. Please check your password.')
+                        }
+                        finalAuthId = logInData.user.id
+                    } else {
+                        throw signupError
+                    }
+                } else {
+                    finalAuthId = authData.user.id
+                }
+            }
+            
+            if (!finalLegacyId) {
+                finalLegacyId = Math.floor(100000 + Math.random() * 900000)
+                setLegacyId(finalLegacyId)
+            }
+            setAuthUserId(finalAuthId)
+
+            // 1. Insert/Update users table FIRST
+            const numericPhone = phone.replace('+91', '').replace(/\s+/g, '')
+            
+            const { error: userError } = await supabase.from('users').upsert({
+                id: finalAuthId,
+                user_id: finalLegacyId,
+                email: email,
+                role: 'mentor',
+                phone_number: numericPhone,
+                password: password
+            }, { onConflict: 'id' })
+            
+            if (userError) throw userError
+
+            // 2. Insert/Update mentors_details SECOND
             const { error: profileError } = await supabase
                 .from('mentors_details')
                 .upsert({
-                    mentor_id: legacyId,
+                    mentor_id: finalLegacyId,
                     ...dataToSubmit,
                     is_mentor_approved: 'pending',
                     onboarding_completed: true
@@ -333,12 +375,11 @@ export default function ApplyMentor() {
 
             if (profileError) throw profileError
 
-            // 2. Insert/Update 'mentor_courses'
-            // Delete old selections first to ensure clean state on retry
-            await supabase.from('mentor_courses').delete().eq('mentor_id', legacyId)
+            // 3. Insert/Update mentor_courses THIRD
+            await supabase.from('mentor_courses').delete().eq('mentor_id', finalLegacyId)
 
             const mentorCoursesData = coursesOffered.map(course => ({
-                mentor_id: legacyId,
+                mentor_id: finalLegacyId,
                 course_id: parseInt(course.course_id),
                 course_provide: course.description
             }))
@@ -380,8 +421,16 @@ export default function ApplyMentor() {
                 showModal('Required Info', message, 'warning')
                 return
             }
+            if (!/^[a-zA-Z\s]+$/.test(formData.name.trim())) {
+                showModal('Invalid Name', 'Name must contain only letters and spaces.', 'warning')
+                return
+            }
             if (!formData.email.includes('@')) {
                 showModal('Invalid Email', 'Please enter a valid email address.', 'warning')
+                return
+            }
+            if (!/^\+91\d{10}$/.test(formData.phone.trim())) {
+                showModal('Invalid Phone', 'Phone number must start with +91 and be followed by 10 digits.', 'warning')
                 return
             }
 
@@ -398,151 +447,28 @@ export default function ApplyMentor() {
 
             setIsSubmitting(true)
             try {
-                let userId = authUserId
-                let randomLegacyId = legacyId
-
-                // 1. Handle Auth and ID Generation
-                if (!userId) {
-                    // Sign up new user
-                    const { data: authData, error: signupError } = await supabase.auth.signUp({
-                        email: formData.email,
-                        password: formData.password,
-                        options: { data: { name: formData.name } }
-                    })
-
-                    if (signupError) {
-                        if (signupError.message?.toLowerCase().includes('already registered')) {
-                            // User exists in Supabase. Try to sign in with these credentials.
-                            const { data: logInData, error: logInError } = await supabase.auth.signInWithPassword({
-                                email: formData.email,
-                                password: formData.password
-                            })
-
-                            if (logInError) {
-                                // If login fails, they probably gave the wrong password for an existing account
-                                throw new Error('This email is already registered. Please check your password or log in via the Login page.')
-                            }
-
-                            // Logged in successfully! Now fetch their name and IDs
-                            userId = logInData.user.id
-                            const { data: dbUser } = await supabase
-                                .from('users')
-                                .select('user_id, name, role')
-                                .or(`id.eq.${userId},auth_uid.eq.${userId}`)
-                                .maybeSingle()
-
-                            if (dbUser) {
-                                setAuthUserId(userId)
-                                setLegacyId(dbUser.user_id)
-                                localStorage.setItem('auth_id', dbUser.user_id)
-                                localStorage.setItem('auth_user_role', dbUser.role || 'mentor')
-                                storeAuthData({ id: userId, role: dbUser.role || 'mentor' })
-
-                                // Show specific "Welcome back" modal per user request
-                                showModal(
-                                    'Account Found!',
-                                    `Welcome back, ${dbUser.name || formData.name}! Please complete your professional profile to access your dashboard.`,
-                                    'info',
-                                    () => setStep(2)
-                                )
-                                setIsSubmitting(false)
-                                return // EXIT EARLY - Do not change user table values
-                            } else {
-                                // Ghost case: account exists in Auth but not in users table yet.
-                                // We need a legacy numeric ID for them.
-                                randomLegacyId = Math.floor(100000 + Math.random() * 900000)
-                            }
-                        } else {
-                            throw signupError
-                        }
-                    } else {
-                        userId = authData.user.id
-                        randomLegacyId = Math.floor(100000 + Math.random() * 900000)
-                    }
-                } else if (!randomLegacyId) {
-                    // Logged in but missing legacy numeric ID? Check DB or generate
-                    const { data: existingUser } = await supabase
-                        .from('users')
-                        .select('user_id')
-                        .eq('id', userId)
-                        .maybeSingle()
-
-                    if (existingUser?.user_id) {
-                        randomLegacyId = existingUser.user_id
-                    } else {
-                        randomLegacyId = Math.floor(100000 + Math.random() * 900000)
-                    }
-                }
-
-                // 2. Passive Persistence Check: 
-                // We try to find the user. If they exist, we use their data and STOP.
-                // If they don't exist, we try to create them ONE TIME and carry on even if RLS blocks it (trigger might be active).
+                // Just check if the user already exists in the database by email
                 const { data: existingDbUser } = await supabase
                     .from('users')
-                    .select('user_id, role, name, email')
-                    .or(`id.eq.${userId},auth_uid.eq.${userId},email.ilike.${formData.email}`)
+                    .select('id, user_id, role')
+                    .ilike('email', formData.email)
                     .maybeSingle()
 
                 if (existingDbUser) {
-                    // Shield: Found them! Use existing data. DO NOT attempt to write.
-                    const finalId = userId || existingDbUser.id || existingDbUser.auth_uid
-                    const finalLegacyId = existingDbUser.user_id
-
-                    setAuthUserId(finalId)
-                    setLegacyId(finalLegacyId)
-                    localStorage.setItem('auth_id', finalLegacyId)
+                    setAuthUserId(existingDbUser.id)
+                    setLegacyId(existingDbUser.user_id)
+                    localStorage.setItem('auth_id', existingDbUser.user_id)
                     localStorage.setItem('auth_user_role', existingDbUser.role || 'mentor')
-                    storeAuthData({ id: finalId, role: existingDbUser.role || 'mentor' })
-
-                    showModal('Account Found!', `Welcome back, ${existingDbUser.name || formData.name}! Proceeding to complete your profile.`, 'info', () => setStep(2))
-                    setIsSubmitting(false)
-                    return
+                    storeAuthData({ id: existingDbUser.id, role: existingDbUser.role || 'mentor' })
                 }
 
-                // 3. Fallback: Only try to insert if not found. 
-                // We use .insert() instead of .upsert() to avoid RLS Update conflicts.
-                if (!existingDbUser) {
-                    const { error: insertError } = await supabase
-                        .from('users')
-                        .insert({
-                            id: userId,
-                            user_id: randomLegacyId,
-                            email: formData.email,
-                            role: 'mentor',
-                            name: formData.name,
-                            phone_number: formData.phone,
-                            password: formData.password
-                        })
-
-                    if (insertError) {
-                        // If it's an RLS error or Duplicate error, a trigger might have already handled it.
-                        // We log it but don't crash Step 1 if we have a userId.
-                        console.warn('Users table insert suppressed (likely handled by trigger or exists):', insertError)
-                        if (!insertError.message?.toLowerCase().includes('security policy')) {
-                            // If it's NOT an RLS error, it might be a real issue
-                            // but for "User Already There", we should just proceed
-                        }
-                    }
-                }
-
-                // Final state sync
-                setAuthUserId(userId)
-                setLegacyId(randomLegacyId)
-                localStorage.setItem('auth_id', randomLegacyId)
-                localStorage.setItem('auth_user_role', 'mentor')
-                storeAuthData({ id: userId, role: 'mentor' })
-
-                showModal(
-                    'Account Ready!',
-                    'Now, let\'s complete your professional profile to attract students.',
-                    'success',
-                    () => setStep(2)
-                )
+                // Proceed smoothly to Step 2 without any modal
+                setStep(2)
                 return
 
             } catch (error) {
-                console.error('Step 1 account creation failed:', error)
-                showModal('Account Creation Failed', error.message || 'Could not create account. Please try again.', 'error')
+                console.error('Step 1 account check failed:', error)
+                showModal('Check Failed', error.message || 'Could not verify account. Please try again.', 'error')
                 return
             } finally {
                 setIsSubmitting(false)
@@ -552,6 +478,10 @@ export default function ApplyMentor() {
         if (step === 2) {
             if (!formData.address.trim() || !formData.title.trim() || !formData.about.trim()) {
                 showModal('Profile Incomplete', 'Please provide your location, title, and "About" overview to continue.', 'warning')
+                return
+            }
+            if (formData.about.trim().length < 50 || formData.about.trim().length > 500) {
+                showModal('Bio Length', 'About / Bio must be between 50 and 500 characters.', 'warning')
                 return
             }
         }
@@ -572,6 +502,11 @@ export default function ApplyMentor() {
             const hasExperience = formData.experience.some(exp => exp.role.trim() !== '' && exp.company.trim() !== '')
             if (!hasExperience) {
                 showModal('Experience Required', 'Please add at least one professional experience.', 'warning')
+                return
+            }
+            const invalidDesc = formData.experience.find(exp => exp.description.trim().length < 50 || exp.description.trim().length > 500)
+            if (invalidDesc) {
+                showModal('Description Length', 'All experience descriptions must be between 50 and 500 characters.', 'warning')
                 return
             }
         }
@@ -626,9 +561,15 @@ export default function ApplyMentor() {
                                 <label>Phone Number <span className="required-star">*</span></label>
                                 <input
                                     type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                                    placeholder="+1 234 567 890"
+                                    value={formData.phone.startsWith('+91') ? formData.phone : '+91' + formData.phone.replace(/^\+?9?1?/, '')}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (!val.startsWith('+91')) {
+                                            val = '+91' + val.replace(/^\+?9?1?/, '');
+                                        }
+                                        handleInputChange('phone', val);
+                                    }}
+                                    placeholder="+91 9876543210"
                                     required
                                 />
                             </div>
@@ -675,8 +616,13 @@ export default function ApplyMentor() {
                                 <input type="text" value={formData.title} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g. Lead UI Designer" required />
                             </div>
                             <div className="input-group full-width">
-                                <label>About / Bio <span className="required-star">*</span></label>
-                                <textarea value={formData.about} onChange={(e) => handleInputChange('about', e.target.value)} rows="4" placeholder="Brief overview of your expertise..." required />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <label style={{ marginBottom: 0 }}>About / Bio <span className="required-star">*</span></label>
+                                    <span style={{ fontSize: '12px', fontWeight: '500', color: formData.about.length < 50 ? '#ef4444' : (formData.about.length >= 500 ? '#ef4444' : '#10b981') }}>
+                                        {formData.about.length} / 500 {formData.about.length < 50 && `(Min 50)`}
+                                    </span>
+                                </div>
+                                <textarea style={{ resize: 'vertical', maxWidth: '100%', boxSizing: 'border-box' }} value={formData.about} onChange={(e) => handleInputChange('about', e.target.value)} rows="4" placeholder="Brief overview of your expertise... (50 to 500 characters)" maxLength={500} required />
                             </div>
                         </div>
                     </div>
@@ -725,7 +671,7 @@ export default function ApplyMentor() {
                                             <option value="Advanced">Advanced</option>
                                             <option value="Expert">Expert</option>
                                         </select>
-                                        {index > 0 && <button type="button" onClick={() => removeListItem('skills', index)}>×</button>}
+                                        {formData.skills.length > 3 && <button type="button" onClick={() => removeListItem('skills', index)}>×</button>}
                                     </div>
                                 ))}
                             </div>
@@ -747,20 +693,20 @@ export default function ApplyMentor() {
                                 {index > 0 && <button type="button" className="remove-item-btn" onClick={() => removeListItem('experience', index)}>×</button>}
                                 <div className="form-grid">
                                     <div className="input-group">
-                                        <label>Role / Title</label>
+                                        <label>Role / Title <span className="required-star">*</span></label>
                                         <input type="text" value={exp.role} onChange={(e) => updateListItem('experience', index, { role: e.target.value })} placeholder="e.g. Senior Developer" required />
                                     </div>
                                     <div className="input-group">
-                                        <label>Company</label>
+                                        <label>Company <span className="required-star">*</span></label>
                                         <input type="text" value={exp.company} onChange={(e) => updateListItem('experience', index, { company: e.target.value })} placeholder="e.g. Google" required />
                                     </div>
                                     <div className="input-group">
-                                        <label>Start Date</label>
+                                        <label>Start Date <span className="required-star">*</span></label>
                                         <input type="date" value={exp.start_date} onChange={(e) => updateListItem('experience', index, { start_date: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
                                         <div className="label-with-action">
-                                            <label>End Date</label>
+                                            <label>End Date <span className="required-star">*</span></label>
                                             <label className="checkbox-pill">
                                                 <input
                                                     type="checkbox"
@@ -777,8 +723,13 @@ export default function ApplyMentor() {
                                         )}
                                     </div>
                                     <div className="input-group full-width">
-                                        <label>Description</label>
-                                        <textarea value={exp.description} onChange={(e) => updateListItem('experience', index, { description: e.target.value })} rows="2" placeholder="Key responsibilities..." />
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <label style={{ marginBottom: 0 }}>Description <span className="required-star">*</span></label>
+                                            <span style={{ fontSize: '12px', fontWeight: '500', color: exp.description.length < 50 ? '#ef4444' : (exp.description.length >= 500 ? '#ef4444' : '#10b981') }}>
+                                                {exp.description.length} / 500 {exp.description.length < 50 && `(Min 50)`}
+                                            </span>
+                                        </div>
+                                        <textarea style={{ resize: 'vertical', maxWidth: '100%', boxSizing: 'border-box' }} value={exp.description} onChange={(e) => updateListItem('experience', index, { description: e.target.value })} rows="2" placeholder="Key responsibilities... (50 to 500 characters)" maxLength={500} required />
                                     </div>
                                 </div>
                             </div>
@@ -800,27 +751,28 @@ export default function ApplyMentor() {
                                 {index > 0 && <button type="button" className="remove-item-btn" onClick={() => removeListItem('education', index)}>×</button>}
                                 <div className="form-grid">
                                     <div className="input-group">
-                                        <label>Degree</label>
+                                        <label>Degree <span className="required-star">*</span></label>
                                         <input type="text" value={edu.degree} onChange={(e) => updateListItem('education', index, { degree: e.target.value })} placeholder="e.g. BSc Computer Science" required />
                                     </div>
                                     <div className="input-group">
-                                        <label>Institution</label>
+                                        <label>Institution <span className="required-star">*</span></label>
                                         <input type="text" value={edu.institution} onChange={(e) => updateListItem('education', index, { institution: e.target.value })} placeholder="e.g. MIT" required />
                                     </div>
                                     <div className="input-group">
-                                        <label>Start Year</label>
+                                        <label>Start Year <span className="required-star">*</span></label>
                                         <select value={edu.start_year} onChange={(e) => updateListItem('education', index, { start_year: e.target.value })}>
                                             <option value="">Year</option>
-                                            {Array.from({ length: 51 }, (_, i) => 2030 - i).map(year => (
+                                            {Array.from({ length: 51 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                                 <option key={year} value={year}>{year}</option>
                                             ))}
                                         </select>
                                     </div>
                                     <div className="input-group">
-                                        <label>End Year</label>
+                                        <label>End Year <span className="required-star">*</span></label>
                                         <select value={edu.end_year} onChange={(e) => updateListItem('education', index, { end_year: e.target.value })}>
                                             <option value="">Year</option>
-                                            {Array.from({ length: 51 }, (_, i) => 2030 - i).map(year => (
+                                            <option value="Ongoing">Ongoing (Present)</option>
+                                            {Array.from({ length: 51 }, (_, i) => new Date().getFullYear() + 4 - i).map(year => (
                                                 <option key={year} value={year}>{year}</option>
                                             ))}
                                         </select>
@@ -1015,6 +967,7 @@ export default function ApplyMentor() {
                                 <div className="input-group full-width">
                                     <label>Live Projects which you provide <span className="required-star">*</span></label>
                                     <textarea
+                                        style={{ resize: 'vertical', maxWidth: '100%', boxSizing: 'border-box' }}
                                         placeholder="Describe the real-world projects and hands-on work students will complete..."
                                         rows="3"
                                         value={detailModal.data.projects}
@@ -1024,6 +977,7 @@ export default function ApplyMentor() {
                                 <div className="input-group full-width">
                                     <label>Key focus on where will you focus your work <span className="required-star">*</span></label>
                                     <textarea
+                                        style={{ resize: 'vertical', maxWidth: '100%', boxSizing: 'border-box' }}
                                         placeholder="Detail the core concepts, tools, and outcomes you will prioritize..."
                                         rows="2"
                                         value={detailModal.data.deliverables}
