@@ -1,0 +1,19 @@
+--- src/index.css
++++ src/index.css
+@@ -48823,7 +48823,7 @@
+   display: flex;
+   justify-content: center;
+   position: sticky;
+-  top: 0;
++  top: 70px;
+   z-index: 20;
+   box-shadow: 0 -15px 40px rgba(0,0,0,0.06) !important;
+   border: none !important;
+@@ -51566,7 +51566,7 @@
+   display: flex;
+   flex-direction: column;
+   position: sticky;
+-  top: 0;
++  top: 70px;
+   z-index: 10;
+ }

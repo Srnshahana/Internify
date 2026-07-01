@@ -1,0 +1,13 @@
+--- src/index.css
++++ src/index.css
+@@ -51559,6 +51559,10 @@
+   }
+ }
+ 
++.stack-scroll-wrapper {
++  position: relative;
++}
++
+ /* Popular Courses Split Layout */
+ .course-split-section {
+   background-color: #e5e7eb; /* Light grey from mockup */

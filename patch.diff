@@ -1,0 +1,18 @@
+--- src/pages/Landing/LandingPage.jsx
++++ src/pages/Landing/LandingPage.jsx
+@@ -594,6 +594,7 @@
+         </div> */}
+ 
+         {/* New Split Layout Popular Courses Section (Slider Format) */}
++        <div className="stack-scroll-wrapper">
+         <section className="course-split-section stitch-courses-section" id="courses">
+           <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0', marginBottom: '1.5rem' }}>
+             <h2 className="stitch-courses-title" style={{ margin: 0, padding: 0 }}>Get Started with Popular Courses</h2>
+@@ -695,6 +696,7 @@
+             ))}
+           </div>
+         </section>
++        </div>
+ 
+         {/* ─── STITCH MENTOR CTA SECTION (Vibe Aesthetic) ─── */}
+         <section className="stitch-cta-section">

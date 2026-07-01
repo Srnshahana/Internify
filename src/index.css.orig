@@ -48823,8 +48823,10 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   background: #ffffff !important;
   display: flex;
   justify-content: center;
-  position: relative;
-  box-shadow: none !important;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 -15px 40px rgba(0,0,0,0.06) !important;
   border: none !important;
 }
 
@@ -48885,26 +48887,14 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   padding: 48px;
-  
-  /* Initial state for reveal animation */
-  opacity: 0;
-  transform: scale(0.95) translateY(30px);
-  /* The transition will use inline transition-delay from JS for stagger */
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
-.stitch-features-grid .feature-card.revealed {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-.stitch-features-grid .feature-card.revealed:hover {
-  transform: translateY(-8px) scale(1.01);
+.stitch-features-grid .feature-card:hover {
+  transform: translateY(-8px);
   box-shadow: 0 8px 12px -2px rgba(15, 23, 42, 0.05), 0 20px 32px -4px rgba(15, 23, 42, 0.1), 0 32px 64px -12px rgba(15, 23, 42, 0.15); /* Hover elevation */
   border-color: #94a3b8; /* Slate-400 on hover */
-  /* Remove transition delay on hover so it reacts instantly */
-  transition-delay: 0s !important; 
 }
 
 .stitch-features-grid .feature-card.large {
@@ -49572,7 +49562,7 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
 .mentor-card-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 0%, transparent 40%, transparent 60%, rgba(15, 23, 42, 0.05) 100%);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 0%, transparent 40%, transparent 60%, rgba(255, 255, 255, 1) 100%);
   pointer-events: none;
 }
 
@@ -49645,9 +49635,9 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
 
 .stitch-mentors-section {
   background: #ffffff;
-  padding: 6rem 0;
+  padding: 8rem 0;
   position: relative;
-  margin-top: -40px;
+  margin-top: -80px;
   z-index: 1;
   box-shadow: none !important;
   border: none !important;
@@ -49655,8 +49645,8 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
 
 @media (max-width: 768px) {
   .stitch-mentors-section {
-    padding: 4rem 0;
-    margin-top: -20px;
+    padding: 5rem 0;
+    margin-top: -40px;
   }
 }
 
@@ -51579,7 +51569,9 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   padding: 80px 0;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .course-split-card {

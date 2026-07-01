@@ -124,10 +124,10 @@ export const DashboardDataProvider = ({ children }) => {
 
                     // Filter progress for this specific course AND student
                     const studentCourseProgress = progressData?.filter(p =>
-                        p.course_id === course.course_id &&
-                        p.student_id === enrollment.student_id
+                        String(p.course_id) === String(enrollment.course_id) &&
+                        String(p.student_id) === String(enrollment.student_id)
                     ) || []
-                    const progressMap = new Map(studentCourseProgress.map(p => [p.session_id, p.is_completed]))
+                    const progressMap = new Map(studentCourseProgress.map(p => [String(p.session_id), p.is_completed]))
 
                     return {
                         // Enrollment context
@@ -159,7 +159,7 @@ export const DashboardDataProvider = ({ children }) => {
                         sessions: sessionsFromDb
                             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
                             .map((session) => {
-                                const isCompleted = progressMap.get(session.id) || false
+                                const isCompleted = progressMap.get(String(session.id)) || false
                                 return {
                                     id: session.id,
                                     sessionId: session.id,
@@ -172,7 +172,7 @@ export const DashboardDataProvider = ({ children }) => {
                                 }
                             }),
                         progress: sessionsFromDb.length > 0
-                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(s.id)).length / sessionsFromDb.length) * 100)
+                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(String(s.id))).length / sessionsFromDb.length) * 100)
                             : (enrollment.progress || 0)
                     }
                 })
@@ -229,7 +229,7 @@ export const DashboardDataProvider = ({ children }) => {
                     .select(`
                         *,
                         courses (*, course_sessions (*)),
-                        mentors_details (mentor_id, name, profile_image)
+                        mentors_details (mentor_id, name, profile_image, total_experience)
                     `)
                     .eq('student_id', authId)
 
@@ -266,14 +266,14 @@ export const DashboardDataProvider = ({ children }) => {
                     const sessionsFromDb = course.course_sessions || []
 
                     // Filter progress for this specific course
-                    const courseProgress = progressData?.filter(p => p.course_id === course.course_id) || []
-                    const progressMap = new Map(courseProgress.map(p => [p.session_id, p.is_completed]))
+                    const courseProgress = progressData?.filter(p => String(p.course_id) === String(enrollment.course_id)) || []
+                    const progressMap = new Map(courseProgress.map(p => [String(p.session_id), p.is_completed]))
 
                     return {
                         ...enrollment,
                         id: enrollment.id, // Explicitly set to enrollment ID
                         enrollment_id: enrollment.id,
-                        course_id: course.course_id,
+                        course_id: enrollment.course_id,
                         mentor_id: mentor.mentor_id,
                         title: course.title || 'Unknown Course',
                         category: course.category || 'General',
@@ -282,14 +282,15 @@ export const DashboardDataProvider = ({ children }) => {
                         level: course.level || 'Beginner',
                         mentor: mentor.name || 'Expert Mentor',
                         mentorImage: mentor.profile_image,
+                        mentorExperience: mentor.total_experience,
                         progress: sessionsFromDb.length > 0
-                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(s.id)).length / sessionsFromDb.length) * 100)
+                            ? Math.round((sessionsFromDb.filter(s => progressMap.get(String(s.id))).length / sessionsFromDb.length) * 100)
                             : (enrollment.progress || 0),
                         status: enrollment.status || 'active',
                         sessions: sessionsFromDb
                             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
                             .map((session) => {
-                                const isCompleted = progressMap.get(session.id) || false
+                                const isCompleted = progressMap.get(String(session.id)) || false
                                 return {
                                     id: session.id,
                                     sessionId: session.id,

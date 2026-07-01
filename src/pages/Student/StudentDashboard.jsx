@@ -32,17 +32,22 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
     return <Loading fullScreen={true} />
   }
 
+  const handleMentorClick = (mentor) => {
+    setSelectedMentor(mentor)
+    setActivePage('Explore')
+  }
+
   const renderPage = (page) => {
     switch (page) {
       case 'Home':
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
+        return <Home onNavigate={setActivePage} onMentorClick={handleMentorClick} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
       case 'Classrooms':
         return (
           <MyCourses
             courses={enrolledCourses}
             onBack={() => setActivePage('Home')}
             onEnterClassroom={() => setIsLiveClassroomActive(true)}
-            onMentorClick={setSelectedMentor}
+            onMentorClick={handleMentorClick}
             setIsCourseDetailActive={setIsCourseDetailActive}
             onNavigate={setActivePage}
           />
@@ -54,7 +59,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
           <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
         ) : (
           <Explore
-            onMentorClick={setSelectedMentor}
+            onMentorClick={handleMentorClick}
             initialQuery={searchQuery}
             onBack={() => {
               setActivePage('Home');
@@ -70,7 +75,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
       case 'Assessments':
         return <Assessments onBack={() => setActivePage('Home')} />
       default:
-        return <Home onNavigate={setActivePage} onMentorClick={setSelectedMentor} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
+        return <Home onNavigate={setActivePage} onMentorClick={handleMentorClick} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
     }
   }
 

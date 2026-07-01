@@ -1,0 +1,11 @@
+--- src/index.css
++++ src/index.css
+@@ -48825,7 +48825,7 @@
+   position: sticky;
+   top: 0;
+   z-index: 20;
+-  box-shadow: none !important;
++  box-shadow: 0 -15px 40px rgba(0,0,0,0.06) !important;
+   border: none !important;
+ 
+   /* Added subtle texture */

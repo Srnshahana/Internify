@@ -25,7 +25,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
       try {
         setLoading(true)
         const currentUserId = localStorage.getItem('auth_id')
-        const courseId = course.id // or course.course_id
+        const courseId = course.course_id || course.id // Use course_id from enrollment if available
 
         // 1. Fetch Basic Course Details
         const { data: detailsData, error: detailsError } = await supabase
@@ -62,14 +62,15 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
           console.log('Fetching detailed info from Supabase (optional)...')
         }
 
-        const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0
+        const contextProg = contextCourse?.progress || course?.progress || prev?.progress || 0
+        const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : contextProg
 
         setCourseDetails(prev => ({
           ...prev,
           ...(detailsData || {}),
           progress: progress,
-          assignmentsCount: totalAssessments || 0,
-          classesCount: totalSessions || 0
+          assignmentsCount: totalAssessments || prev?.assignmentsCount || 0,
+          classesCount: totalSessions || prev?.classesCount || 0
         }))
 
       } catch (err) {
@@ -83,13 +84,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
   }, [course, contextCourse])
 
   const renderStars = (rating) => {
-    const full = Math.floor(rating)
-    const half = rating - full >= 0.5
-    return Array(5).fill(0).map((_, i) => {
-      if (i < full) return '★'
-      if (i === full && half) return '½'
-      return '☆'
-    }).join('')
+    const full = Math.round(rating)
+    return Array(5).fill(0).map((_, i) => i < full ? '★' : '☆').join('')
   }
 
   const handleEnterClassroom = () => {
@@ -101,7 +97,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
       const mentor = {
         name: course.mentor,
         image: course.mentorImage,
-        role: 'Mobile Application Developer',
+        role: course.mentorRole || course.mentor_role || course.mentor_designation || 'Senior Mentor',
         rating: course.rating || 4.0,
         focus: course.description,
       }
@@ -138,9 +134,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
         <div className="course-hero-v2 single-column">
           <div className="hero-info-column">
             <div className="course-badges-v2">
-              <span className="course-badge-v2 badge-category-v2">{courseDetails.category}</span>
-              <span className="course-badge-v2 badge-level-v2">{courseDetails.level}</span>
-              <span className="course-badge-v2 badge-type-v2">{courseDetails.type}</span>
+              {courseDetails.level && <span className="course-badge-v2 badge-level-v2">{courseDetails.level} Level</span>}
+              {courseDetails.type && <span className="course-badge-v2 badge-type-v2">{courseDetails.type} Internship</span>}
             </div>
 
             <h1 className="course-title-v2">{courseDetails.title}</h1>
@@ -157,8 +152,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                   </div>
                 </div> */}
                 <div className="course-rating-v2">
-                  <span className="rating-star-icon-v2">★</span>
-                  <span className="rating-value-v2">{courseDetails.rating || 4.0}</span>
+                  <span className="rating-star-icon-v2">{renderStars(courseDetails.rating || 4.8)}</span>
+                  <span className="rating-value-v2">{courseDetails.rating || 4.8}</span>
                 </div>
               </div>
 
@@ -223,15 +218,31 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
         <div className="course-section-elegant">
           <h3 className="section-title-elegant">Your Mentor</h3>
           <div className="mentor-card-elegant" onClick={handleMentorClick}>
-            <div className="mentor-avatar-elegant">
-              <img src={courseDetails.mentorImage} alt={courseDetails.mentor} />
+            <div className="mentor-avatar-elegant" style={{ backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontWeight: 'bold', fontSize: '24px' }}>
+              {courseDetails.mentorImage ? (
+                <img 
+                  src={courseDetails.mentorImage} 
+                  alt={courseDetails.mentor} 
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <span style={{ display: courseDetails.mentorImage ? 'none' : 'block' }}>
+                {courseDetails.mentor ? courseDetails.mentor.charAt(0).toUpperCase() : 'M'}
+              </span>
             </div>
             <div className="mentor-info-elegant">
               <h4 className="mentor-name-elegant">{courseDetails.mentor}</h4>
-              <p className="mentor-role-elegant">Mobile Application Developer</p>
+              <p className="mentor-role-elegant">
+                {courseDetails.mentorExperience 
+                  ? `${courseDetails.mentorExperience} Years Experience` 
+                  : (courseDetails.mentorRole || courseDetails.mentor_role || courseDetails.mentor_designation || 'Senior Mentor')}
+              </p>
               <div className="mentor-rating-elegant">
-                <span className="rating-stars-elegant">{renderStars(courseDetails.rating || 4.0)}</span>
-                <span>{courseDetails.rating || 4.0} Rating</span>
+                <span className="rating-stars-elegant">★</span>
+                <span>{courseDetails.rating || 4.8} Rating</span>
               </div>
             </div>
             <div className="mentor-view-icon">
@@ -263,7 +274,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
             <h3 className="section-title-elegant">Course Stats</h3>
             <div className="info-card-elegant">
               <div className="info-item-elegant">
-                <span className="info-label-elegant">Assignments:</span>
+                <span className="info-label-elegant">Assignments live:</span>
                 <span className="info-value-elegant">{courseDetails.assignmentsCount || 0}</span>
               </div>
               <div className="info-item-elegant">
@@ -283,7 +294,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                 <div className="session-header-elegant">
                   <h4 className="session-title-elegant">{session.title}</h4>
                   <span className={`session-status-elegant ${session.completed ? 'status-completed' : 'status-pending'}`}>
-                    {session.completed ? '✓ Completed' : '○ Pending'}
+                    {session.completed ? '✓ COMPLETED' : '○ PENDING'}
                   </span>
                 </div>
 
@@ -305,8 +316,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                 {session.duration && (
                   <div className="session-meta-elegant">
                     <span>{session.duration}</span>
-                    <span>•</span>
-                    <span>{session.type}</span>
+                    {session.type && <span>•</span>}
+                    {session.type && <span>{session.type}</span>}
                   </div>
                 )}
               </div>

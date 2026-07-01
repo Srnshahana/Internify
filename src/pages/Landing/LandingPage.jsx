@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RingsIcon, BadgeCheckIcon, ArrowBackIcon, ArrowForwardIcon } from '../../components/Icons.jsx'
+import { RingsIcon, BadgeCheckIcon, ArrowBackIcon, ArrowForwardIcon, ResumeIcon } from '../../components/Icons.jsx'
 import { getAuthenticatedUser, clearAuthData, getStoredAuthData } from '../../utils/auth.js'
 // Hero section images removed as assets - using inline styles or URLs if needed
 import Loading from '../../components/Loading';
@@ -76,8 +76,7 @@ const stitchFeatures = [
     label: 'EXPERT GUIDANCE',
     type: 'easy-edits',
     description: 'Learn directly from industry experts with 5+ years of hands-on experience in their respective fields.',
-    image: classroomImg,
-    mockupGrid: true,
+    Icon: ResumeIcon,
     size: 'large'
   },
   {
@@ -142,6 +141,15 @@ const topCourses = [
     type: 'small'
   }
 ]
+
+const mentorsList = [
+  { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
+  { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80", rating: 4.8 },
+  { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
+  { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 },
+  { id: 5, name: "Jessica Lee", role: "Data Scientist", company: "Amazon", image: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
+  { id: 6, name: "Robert Fox", role: "Backend Developer", company: "Stripe", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80", rating: 4.8 }
+];
 
 
 // Interactive Particle Grid Component
@@ -332,6 +340,31 @@ export default function LandingPage({
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!getStoredAuthData())
   const [userRole, setUserRole] = useState(() => getStoredAuthData()?.role || null)
+  // --- BENEFITS SECTION REVEAL ANIMATION ---
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 } // Trigger when 10% of the card is visible
+    );
+
+    // Apply observer and set transition delay for stagger effect
+    const cards = document.querySelectorAll('.stitch-features-grid .feature-card');
+    cards.forEach((card, index) => {
+      // Stagger: 0.1s delay per card
+      card.style.transitionDelay = `${index * 0.1}s`;
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -391,6 +424,11 @@ export default function LandingPage({
 
   const auraRef = useRef(null);
   const coursesCarouselRef = useRef(null);
+  const mentorsCarouselRef = useRef(null);
+
+  useEffect(() => {
+    // We moved the carousel animation to pure CSS for buttery smooth performance.
+  }, []);
 
 
 
@@ -580,12 +618,11 @@ export default function LandingPage({
           </div>
         </div> */}
 
-        {/* Stitch-Inspired Featured Courses Section */}
-        <section className="stitch-courses-section" id="courses">
-          <InteractiveGrid />
-          <div className="stitch-courses-header">
-            {/* <h2 className="stitch-courses-title"> Popular Courses</h2> */}
-            <div className="stitch-carousel-nav">
+        {/* Popular Courses Section */}
+        <section className="course-split-section stitch-courses-section" id="courses" style={{ backgroundColor: '#e5e7eb', margin: 0, paddingBottom: '60px', paddingTop: '60px' }}>
+          <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0', marginBottom: '1.5rem', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <h2 className="stitch-courses-title" style={{ margin: 0, padding: '0 2rem' }}>Get Started with Popular Courses</h2>
+            <div className="stitch-carousel-nav" style={{ padding: '0 2rem' }}>
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
                 <ArrowBackIcon />
               </button>
@@ -596,55 +633,54 @@ export default function LandingPage({
           </div>
 
           <div className="stitch-courses-carousel" ref={coursesCarouselRef}>
-            {featuredPrograms.map((program, index) => (
-              <div
-                key={program.id}
-                className={`stitch-course-card ${index === 0 ? 'is-first' : ''}`}
-                onClick={() => navigate(`/explore?q=${encodeURIComponent(program.title)}&tab=courses`)}
-              >
-                {/* Background Blur Layer */}
-                <img src={program.image} alt="" className="stitch-card-bg-blur" />
+            {featuredPrograms.map((program, index) => {
+              const isReverse = index % 2 !== 0;
+              // Split title for styling (first word green, rest white/black)
+              const titleWords = program.title.split(' ');
+              const firstWord = titleWords[0];
+              const restOfTitle = titleWords.slice(1).join(' ');
 
-                {/* Centered Main Image/Video Layer */}
-                <div className="stitch-card-inner">
-                  {program.video ? (
-                    <video src={program.video} autoPlay loop muted playsInline className="stitch-course-main-img" />
-                  ) : (
-                    <img src={program.image} alt={program.title} className="stitch-course-main-img" />
-                  )}
-                </div>
+              return (
+                <div 
+                  key={program.id} 
+                  className={`course-split-card`}
+                  onClick={() => navigate(`/explore?q=${encodeURIComponent(program.title)}&tab=courses`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="course-split-image">
+                    {program.video ? (
+                      <video src={program.video} autoPlay loop muted playsInline />
+                    ) : (
+                      <img src={program.image} alt={program.title} />
+                    )}
+                  </div>
 
-                {/* Bottom Text Overlay */}
-                <div className="stitch-course-overlay">
-                  <span className="stitch-course-label">{program.category}</span>
-                  <h3 className="stitch-course-title-card">{program.title}</h3>
+                  <div className="course-split-content">
+                    <h4 className="course-split-category">{program.category}</h4>
+                    <h2 className="course-split-title">
+                      {firstWord} <span style={{ color: '#000' }}>{restOfTitle}</span>
+                    </h2>
+                    <p className="course-split-desc">
+                      {program.growthStat}. Master {program.tags.join(', ')}. {program.ribbon}.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
-        {/* ─── STITCH FEATURES BENTO GRID ─── */}
-        <section className="stitch-features-section">
+        {/* Benefits Section */}
+        <section className="stitch-features-section" style={{ margin: 0, backgroundColor: '#ffffff', padding: '100px 0' }}>
           <div className="stitch-features-grid">
             {stitchFeatures.map((feat) => (
               <div
                 key={feat.id}
                 className={`feature-card ${feat.size} feat-${feat.type}`}
               >
-                {feat.type !== 'easy-edits' && (
-                  <img src={feat.image} alt="" className="feature-bg-blur" />
-                )}
-
                 {/* Sharp Floating Inner UI Module (Mockup Grid Reconstruction) */}
                 <div className="feature-card-inner">
-                  {feat.mockupGrid ? (
-                    <div className="mockup-grid">
-                      <div className="mockup-slot m1"><img src={feat.image} alt="" /></div>
-                      <div className="mockup-slot m2"><img src={feat.image} alt="" /></div>
-                      <div className="mockup-slot m3"><img src={feat.image} alt="" /></div>
-                    </div>
-                  ) : feat.promptBar ? (
+                  {feat.promptBar ? (
                     <div className="prompt-bar-mockup">
                       <div className="figma-grid-lines">
                         <div className="line-v v1"></div>
@@ -707,47 +743,58 @@ export default function LandingPage({
 
         {/* ─── STITCH MENTORS SECTION ─── */}
         <section className="stitch-mentors-section" id="mentors">
-          <div className="stitch-mentors-container">
-            <div className="stitch-mentors-header">
-              <span className="feature-label">EXPERT GUIDANCE</span>
-              <h2 className="feature-title">Professionals </h2>
-              <p className="feature-desc" style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
-                Our mentors are industry experts with 5+ years of real-world
-                experience at leading companies like Google, Meta, and Netflix.
-              </p>
+          <div className="stitch-mentors-container" style={{ maxWidth: '100%' }}>
+            <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0', marginBottom: '1.5rem' }}>
+              <div>
+                <h2 className="stitch-courses-title" style={{ margin: 0, padding: 0, textAlign: 'left', color: '#f8fafc' }}>Meet Our Mentors</h2>
+              </div>
             </div>
 
-            <div className="stitch-mentors-grid">
-              {[
-                { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-                { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80", rating: 4.8 },
-                { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-                { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 },
-                { id: 5, name: "Alex Johnson", role: "Cloud Architect", company: "Amazon", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80", rating: 4.9 }
-              ].map((mentor) => (
-                <div key={mentor.id} className="mentor-stitch-card">
-                  <div className="mentor-card-inner">
-                    <div className="mentor-image-frame">
-                      <img src={mentor.image} alt={mentor.name} className="mentor-profile-img" />
-                      <div className="mentor-card-image-overlay"></div>
-                    </div>
-                  </div>
-
-                  <div className="stitch-mentor-content">
-                    <div className="mentor-meta">
-                      <div className="mentor-company-and-rating">
-                        <span className="mentor-company-pill">{mentor.company}</span>
-                        <div className="mentor-card-rating-inline">
-                          <StarRating rating={mentor.rating} />
-                        </div>
+            <div style={{ padding: '4rem 1rem 6rem 1rem', position: 'relative', overflow: 'visible' }}>
+              <div 
+                className="stitch-mentors-carousel-wrapper" 
+                ref={mentorsCarouselRef} 
+                style={{ 
+                  display: 'flex', 
+                  gap: '2rem',
+                  width: 'max-content',
+                  overflow: 'visible'
+                }}
+              >
+                {[...mentorsList, ...mentorsList].map((mentor, index) => {
+                  return (
+                  <div 
+                    key={`${mentor.id}-${index}`} 
+                    className="mentor-stitch-card"
+                    style={{
+                      width: '320px',
+                      flexShrink: 0
+                    }}
+                  >
+                    <div className="mentor-card-inner">
+                      <div className="mentor-image-frame">
+                        <img src={mentor.image} alt={mentor.name} className="mentor-profile-img" />
+                        <div className="mentor-card-image-overlay"></div>
                       </div>
-                      <span className="material-symbols-outlined verified-icon">verified</span>
                     </div>
-                    <h3 className="mentor-name">{mentor.name}</h3>
-                    <p className="mentor-role">{mentor.role}</p>
+
+                    <div className="stitch-mentor-content">
+                      <div className="mentor-meta">
+                        <div className="mentor-company-and-rating">
+                          <span className="mentor-company-pill">{mentor.company}</span>
+                          <div className="mentor-card-rating-inline">
+                            <StarRating rating={mentor.rating} />
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined verified-icon">verified</span>
+                      </div>
+                      <h3 className="mentor-name">{mentor.name}</h3>
+                      <p className="mentor-role">{mentor.role}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>

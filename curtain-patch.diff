@@ -1,0 +1,126 @@
+--- src/pages/Landing/LandingPage.jsx
++++ src/pages/Landing/LandingPage.jsx
+@@ -595,7 +595,14 @@
+ 
+         {/* New Split Layout Popular Courses Section (Slider Format) */}
+-        <div className="stack-scroll-wrapper">
+-        <section className="course-split-section stitch-courses-section" id="courses">
++        <div className="stack-scroll-wrapper" style={{ position: 'relative' }}>
++
++          {/* BACKGROUND LAYER: Benefits Section */}
++          <div className="benefits-layer" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1 }}>
++            <section className="stitch-features-section" style={{ position: 'sticky', top: '70px' }}>
++              <div className="stitch-features-grid">
++                {stitchFeatures.map((feat) => (
++                  <div
++                    key={feat.id}
++                    className={`feature-card ${feat.size} feat-${feat.type}`}
++                  >
++                    {/* Sharp Floating Inner UI Module (Mockup Grid Reconstruction) */}
++                    <div className="feature-card-inner">
++                      {feat.promptBar ? (
++                        <div className="prompt-bar-mockup">
++                          <div className="figma-grid-lines">
++                            <div className="line-v v1"></div>
++                            <div className="line-v v2"></div>
++                            <div className="line-h h1"></div>
++                            <div className="line-h h2"></div>
++                          </div>
++                          <div className="prompt-bar-capsule">
++                            <span className="prompt-text">your dream internship</span>
++                            <div className="prompt-btn">
++                              <span className="material-symbols-outlined">keyboard_return</span>
++                              <span className="prompt-return-text">_RETURN</span>
++                            </div>
++                          </div>
++                        </div>
++                      ) : feat.Icon ? (
++                        <feat.Icon className="feature-inner-svg" />
++                      ) : (
++                        feat.image && <img src={feat.image} alt="" className="feature-inner-img" />
++                      )}
++                    </div>
++
++                    {/* Text Layer (Bottom Left) */}
++                    <div className="feature-content">
++                      <span className="feature-label">{feat.label || 'INTERNIFY FEATURE'}</span>
++                      <h3 className="feature-title">{feat.title}</h3>
++                      <p className="feature-desc">{feat.description}</p>
++                    </div>
++
++                    {/* Subtle Dot Grid Background */}
++                    <div className="card-dot-grid"></div>
++                  </div>
++                ))}
++              </div>
++            </section>
++          </div>
++
++          {/* FOREGROUND LAYER: Courses Section */}
++          <div className="courses-layer" style={{ position: 'relative', zIndex: 2, paddingBottom: '30vh' }}>
++            <section className="course-split-section stitch-courses-section" id="courses" style={{ position: 'sticky', top: '70px', minHeight: '100vh', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+               <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0', marginBottom: '1.5rem' }}>
+                 <h2 className="stitch-courses-title" style={{ margin: 0, padding: 0 }}>Get Started with Popular Courses</h2>
+@@ -647,56 +654,12 @@
+                 );
+               })}
+             </div>
+-        </section>
++            </section>
++          </div>
+ 
+-        {/* ─── STITCH FEATURES BENTO GRID ─── */}
+-        <section className="stitch-features-section">
+-          <div className="stitch-features-grid">
+-            {stitchFeatures.map((feat) => (
+-              <div
+-                key={feat.id}
+-                className={`feature-card ${feat.size} feat-${feat.type}`}
+-              >
+-                {/* {feat.type !== 'easy-edits' && (
+-                  <img src={feat.image} alt="" className="feature-bg-blur" />
+-                )} */}
+-
+-                {/* Sharp Floating Inner UI Module (Mockup Grid Reconstruction) */}
+-                <div className="feature-card-inner">
+-                  {feat.promptBar ? (
+-                    <div className="prompt-bar-mockup">
+-                      <div className="figma-grid-lines">
+-                        <div className="line-v v1"></div>
+-                        <div className="line-v v2"></div>
+-                        <div className="line-h h1"></div>
+-                        <div className="line-h h2"></div>
+-                      </div>
+-                      <div className="prompt-bar-capsule">
+-                        <span className="prompt-text">your dream internship</span>
+-                        <div className="prompt-btn">
+-                          <span className="material-symbols-outlined">keyboard_return</span>
+-                          <span className="prompt-return-text">_RETURN</span>
+-                        </div>
+-                      </div>
+-                    </div>
+-                  ) : feat.Icon ? (
+-                    <feat.Icon className="feature-inner-svg" />
+-                  ) : (
+-                    feat.image && <img src={feat.image} alt="" className="feature-inner-img" />
+-                  )}
+-                </div>
+-
+-                {/* Text Layer (Bottom Left) */}
+-                <div className="feature-content">
+-                  <span className="feature-label">{feat.label || 'INTERNIFY FEATURE'}</span>
+-                  <h3 className="feature-title">{feat.title}</h3>
+-                  <p className="feature-desc">{feat.description}</p>
+-                </div>
+-
+-                {/* Subtle Dot Grid Background */}
+-                <div className="card-dot-grid"></div>
+-              </div>
+-            ))}
+-          </div>
+-        </section>
++          {/* SPACER LAYER: Gives enough scroll distance for the Courses curtain to fully slide up and reveal Benefits */}
++          <div className="reveal-spacer" style={{ height: '100vh', position: 'relative', zIndex: 0 }}></div>
++
+         </div>
+ 

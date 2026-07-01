@@ -1355,15 +1355,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           )}
 
-          <button
+          <div
             className={`live-complete-btn-v2 ${activeSession.status === 'completed' ? 'completed' : ''}`}
-            onClick={handleCompleteSession}
+            style={{ cursor: 'default' }}
           >
             <span className="material-symbols-outlined">
-              {activeSession.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'}
+              {activeSession.status === 'completed' ? 'check_circle' : 'hourglass_empty'}
             </span>
-            {activeSession.status === 'completed' ? 'Completed' : 'Mark Complete'}
-          </button>
+            {activeSession.status === 'completed' ? 'Completed' : 'Pending'}
+          </div>
         </div>
       </header>
 
@@ -2536,13 +2536,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               </span>
             </button>
           ))}
-          <button
-            type="button"
+          <div
             className="live-course-complete-btn"
-            onClick={() => setShowCompletionModal(true)}
+            style={{ cursor: 'default', opacity: 0.8 }}
           >
             <span className="live-session-title">Course Complete</span>
-          </button>
+          </div>
 
 
         </div>

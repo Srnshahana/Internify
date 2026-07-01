@@ -1,0 +1,11 @@
+--- src/index.css
++++ src/index.css
+@@ -44136,7 +44136,7 @@
+ 
+ html,
+ body {
+-  overflow-y: auto !important;
++  /* overflow-y: auto !important; */
+   overflow-x: clip !important;
+   height: auto !important;
+   min-height: 100% !important;

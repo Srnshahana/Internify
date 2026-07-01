@@ -1,0 +1,28 @@
+--- src/pages/Landing/LandingPage.jsx
++++ src/pages/Landing/LandingPage.jsx
+@@ -194,6 +194,22 @@
+     }
+   }, []);
+ 
++  // Benefits Section Reveal Animation
++  useEffect(() => {
++    const observer = new IntersectionObserver((entries) => {
++      entries.forEach(entry => {
++        if (entry.isIntersecting) {
++          entry.target.classList.add('revealed');
++          observer.unobserve(entry.target);
++        }
++      });
++    }, { threshold: 0.1 });
++
++    document.querySelectorAll('.stitch-features-grid .feature-card').forEach((card, index) => {
++      card.style.transitionDelay = `${index * 0.1}s`;
++      observer.observe(card);
++    });
++    
++    return () => observer.disconnect();
++  }, []);
++
+   const scrollToSignup = () => {
+     navigate('/onboarding');
+   }
