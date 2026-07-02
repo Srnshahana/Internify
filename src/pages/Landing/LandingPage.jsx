@@ -641,7 +641,7 @@ export default function LandingPage({
                   className="stitch-search-field"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   style={{
                     background: 'none',
                     border: 'none',

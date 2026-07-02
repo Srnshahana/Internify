@@ -614,6 +614,22 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleSearch}
           />
+          <button 
+            className="dashboard-search-btn-v2" 
+            onClick={handleSearchClick}
+            style={{
+              background: '#0ca5e9',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              marginLeft: '8px'
+            }}
+          >
+            Search
+          </button>
         </div>
       </section>
 

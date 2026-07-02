@@ -237,7 +237,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
               <h4 className="mentor-name-elegant">{courseDetails.mentor}</h4>
               <p className="mentor-role-elegant">
                 {courseDetails.mentorExperience 
-                  ? `${courseDetails.mentorExperience} Years Experience` 
+                  ? `${Array.isArray(courseDetails.mentorExperience) ? (courseDetails.mentorExperience[0]?.years || 5) : courseDetails.mentorExperience} Years Experience` 
                   : (courseDetails.mentorRole || courseDetails.mentor_role || courseDetails.mentor_designation || 'Senior Mentor')}
               </p>
               <div className="mentor-rating-elegant">

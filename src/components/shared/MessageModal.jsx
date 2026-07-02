@@ -22,7 +22,7 @@ const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfir
     }
 
     return (
-        <div className="course-modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
+        <div className="course-modal-overlay" onClick={onClose} style={{ zIndex: 100000 }}>
             <div
                 className={`course-modal-content message-modal ${typeClass}`}
                 onClick={(e) => e.stopPropagation()}

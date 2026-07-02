@@ -19,6 +19,7 @@ import { DashboardDataProvider, useDashboardData } from '../../contexts/Dashboar
 const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) => {
   const { loading, enrolledCourses, studentProfile, authUser, refetch } = useDashboardData()
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [previousPage, setPreviousPage] = useState(null)
 
   useEffect(() => {
     if (!loading && (!studentProfile || !studentProfile.onboarding_completed)) {
@@ -34,7 +35,6 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
 
   const handleMentorClick = (mentor) => {
     setSelectedMentor(mentor)
-    setActivePage('Explore')
   }
 
   const renderPage = (page) => {
@@ -55,9 +55,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
       case 'Calendar':
         return <Calendar />
       case 'Explore':
-        return selectedMentor ? (
-          <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
-        ) : (
+        return (
           <Explore
             onMentorClick={handleMentorClick}
             initialQuery={searchQuery}
@@ -105,8 +103,19 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
       )}
 
       {/* Main Content - Full Width */}
-      <main className="dashboard-main-new full-width-main">
-        <div className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} style={activePage === 'Home' || activePage === 'Classrooms' || activePage === 'Calendar' ? { padding: 0, maxWidth: '100%' } : {}}>
+      <main className="dashboard-main-new full-width-main" >
+        {selectedMentor && (
+          <div className="dashboard-content-new" style={{ padding: 0, maxWidth: '100%' }}>
+            <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
+          </div>
+        )}
+        <div 
+          className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} 
+          style={{
+            ...(activePage === 'Home' || activePage === 'Classrooms' || activePage === 'Calendar' ? { padding: 0, maxWidth: '100%' } : activePage === 'Explore' ? { padding: '0 20px', maxWidth: '100%' } : {}),
+            display: selectedMentor ? 'none' : 'block'
+          }}
+        >
           {renderPage(activePage)}
         </div>
       </main>

@@ -118,9 +118,9 @@ export const DashboardDataProvider = ({ children }) => {
 
                 // Transform mentor courses with student context
                 const transformed = (enrollments || []).map((enrollment, idx) => {
-                    const course = enrollment.courses || {}
+                    const course = Array.isArray(enrollment.courses) ? enrollment.courses[0] || {} : enrollment.courses || {}
                     const sessionsFromDb = course.course_sessions || []
-                    const student = enrollment.student_details || {}
+                    const student = Array.isArray(enrollment.student_details) ? enrollment.student_details[0] || {} : enrollment.student_details || {}
 
                     // Filter progress for this specific course AND student
                     const studentCourseProgress = progressData?.filter(p =>
@@ -229,7 +229,7 @@ export const DashboardDataProvider = ({ children }) => {
                     .select(`
                         *,
                         courses (*, course_sessions (*)),
-                        mentors_details (mentor_id, name, profile_image, total_experience)
+                        mentors_details (mentor_id, name, profile_image, experience)
                     `)
                     .eq('student_id', authId)
 
@@ -243,11 +243,10 @@ export const DashboardDataProvider = ({ children }) => {
                 if (progressError) console.error('Error fetching student session progress:', progressError)
 
                 // 4. Fetch scheduled classes for student (strictly isolated by student_id)
-                const studentAuthId = Number(authId)
                 const { data: studentScheduled, error: scheduledError } = await supabase
                     .from('scheduled_classes')
                     .select('*, courses(title), mentors_details(name)')
-                    .eq('student_id', studentAuthId)
+                    .eq('student_id', authId)
                     .order('scheduled_date', { ascending: true })
 
                 if (scheduledError) console.error('Error fetching student scheduled classes:', scheduledError)
@@ -261,8 +260,8 @@ export const DashboardDataProvider = ({ children }) => {
                 setScheduledSessions(enrichedStudentScheduled)
 
                 const transformedCourses = (enrollments || []).map((enrollment, idx) => {
-                    const course = enrollment.courses || {}
-                    const mentor = enrollment.mentors_details || {}
+                    const course = Array.isArray(enrollment.courses) ? enrollment.courses[0] || {} : enrollment.courses || {}
+                    const mentor = Array.isArray(enrollment.mentors_details) ? enrollment.mentors_details[0] || {} : enrollment.mentors_details || {}
                     const sessionsFromDb = course.course_sessions || []
 
                     // Filter progress for this specific course
@@ -282,7 +281,7 @@ export const DashboardDataProvider = ({ children }) => {
                         level: course.level || 'Beginner',
                         mentor: mentor.name || 'Expert Mentor',
                         mentorImage: mentor.profile_image,
-                        mentorExperience: mentor.total_experience,
+                        mentorExperience: mentor.experience,
                         progress: sessionsFromDb.length > 0
                             ? Math.round((sessionsFromDb.filter(s => progressMap.get(String(s.id))).length / sessionsFromDb.length) * 100)
                             : (enrollment.progress || 0),

@@ -102,7 +102,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const { data, error } = await supabase
         .from('scheduled_classes')
         .select('*, courses(title), reschedule_request, reschedule_role, rescheduled_date, reschedule_reason, is_complete')
-        .eq('student_id', Number(currentUserId)) // ISOLATION: Only show sessions for this student
+        .eq('student_id', currentUserId) // ISOLATION: Only show sessions for this student
         .order('scheduled_date', { ascending: true })
 
       if (error) throw error
@@ -166,7 +166,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const { data: assessments, error: asmError } = await supabase
         .from('assessments')
         .select('*')
-        .eq('student_id', Number(currentUserId)) // ISOLATION: Only show assessments for this student
+        .eq('student_id', currentUserId) // ISOLATION: Only show assessments for this student
         .order('created_at', { ascending: false })
 
       if (asmError) throw asmError
@@ -232,7 +232,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         const { data, error } = await supabase
           .from('messages')
           .select('*')
-          .eq('chat_id', Number(chatId))
+          .eq('chat_id', chatId)
           .order('created_at', { ascending: true })
 
         if (error) {
@@ -390,7 +390,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
   // Filter messages by activeSessionId
   const visibleMessages = messages.filter(m =>
-    Number(m.session_id) === Number(activeSessionId)
+    String(m.session_id) === String(activeSessionId)
   )
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
@@ -439,10 +439,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         }
 
         if (data && data.length > 0) {
-          const progressMap = new Map(data.map(p => [Number(p.session_id), p.is_completed]))
+          const progressMap = new Map(data.map(p => [p.session_id, p.is_completed]))
 
           setSessions(prev => prev.map(session => {
-            const sid = Number(session.id || session.sessionId)
+            const sid = String(session.id || session.sessionId)
             const isCompleted = progressMap.get(sid)
             return {
               ...session,
@@ -498,10 +498,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
         // 3. Send a confirmation message
         const confirmationMsg = {
-          chat_id: Number(chatId),
-          session_id: Number(activeSessionId),
+          chat_id: chatId,
+          session_id: activeSessionId,
           role: 'student',
-          sender_id: Number(currentUserId),
+          sender_id: currentUserId,
           content: `Reschedule ${action}d. The session is now set for ${new Date(data.new_date).toLocaleDateString()} at ${data.new_time}.`,
           type: 'text',
           read: false
@@ -511,10 +511,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       } else {
         // Send rejection message
         const rejectionMsg = {
-          chat_id: Number(chatId),
-          session_id: Number(activeSessionId),
+          chat_id: chatId,
+          session_id: activeSessionId,
           role: 'student',
-          sender_id: Number(currentUserId),
+          sender_id: currentUserId,
           content: `Reschedule request rejected.`,
           type: 'text',
           read: false
@@ -552,10 +552,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       await supabase
         .from('messages')
         .insert([{
-          chat_id: Number(chatId),
+          chat_id: chatId,
           session_id: selectedSession.id,
           role: 'student',
-          sender_id: Number(currentUserId),
+          sender_id: currentUserId,
           content: JSON.stringify(rescheduleData),
           type: 'reschedule_request',
           read: false
@@ -591,7 +591,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const { data: messages, error: msgFetchError } = await supabase
         .from('messages')
         .select('*')
-        .eq('chat_id', Number(chatId))
+        .eq('chat_id', chatId)
         .eq('session_id', session.id)
         .eq('type', 'reschedule_request')
         .order('created_at', { ascending: false })
@@ -667,10 +667,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
     const tempId = Date.now().toString()
     const pendingMsg = {
-      chat_id: Number(chatId),
-      session_id: Number(activeSessionId),
+      chat_id: chatId,
+      session_id: activeSessionId,
       role: userRole === 'mentor' ? 'mentor' : 'student',
-      sender_id: Number(currentUserId),
+      sender_id: currentUserId,
       content: messageInput.trim(),
       read: false,
       tempId: tempId
@@ -829,10 +829,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       console.log('💬 [Step 3] Sending Message')
       // STRICT DB SCHEMA PAYLOAD
       const messagePayload = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
+        chat_id: chatId,
+        session_id: activeSessionId,
         role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: Number(currentUserId),
+        sender_id: currentUserId,
         content: file.name, // Storing filename in content
         file_url: publicUrl,
         read: false
@@ -937,10 +937,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       console.log('💬 [Step 3] Sending Message')
       const messagePayload = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
+        chat_id: chatId,
+        session_id: activeSessionId,
         role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: Number(currentUserId),
+        sender_id: currentUserId,
         content: file.name, // Filename as content
         file_url: publicUrl,
         read: false
@@ -1015,10 +1015,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       console.log('💬 [Step 3] Sending Link Message')
       const messagePayload = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
+        chat_id: chatId,
+        session_id: activeSessionId,
         role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: Number(currentUserId),
+        sender_id: currentUserId,
         content: linkUrl, // URL as content
         file_url: linkUrl, // Use file_url for link too? Or just content. Let's use file_url for consistency if schema allows text there.
         read: false
@@ -1197,10 +1197,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       // 3. Post confirmation to Chat
       const submissionMessage = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
+        chat_id: chatId,
+        session_id: activeSessionId,
         role: 'student',
-        sender_id: Number(currentUserId),
+        sender_id: currentUserId,
         type: 'text',
         content: `✅ Submitted assessment: "${selectedAssessment.assessmentTitle}"\n\n${assessmentSubmission.textSubmission ? 'Note: ' + assessmentSubmission.textSubmission : ''}\n${uploadedAttachments.length > 0 ? '📎 ' + uploadedAttachments.length + ' file(s) attached' : ''}`,
         read: false

@@ -149,7 +149,7 @@ const renderStarsFunc = (rating) => {
 
 
 export default function Explore({
-  mentors,
+  mentors = [],
   courses = [],
   onBack,
   renderStars,
@@ -561,8 +561,8 @@ export default function Explore({
                           padding: '4px 10px',
                           borderRadius: '20px',
                           fontSize: '10px',
-                          fontWeight: '700',
-                          color: '#333333',
+                          fontWeight: '600',
+                          color: '#64748b',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
                           marginBottom: '8px'
@@ -570,13 +570,13 @@ export default function Explore({
                           {course.career_field}
                         </span>
                       )}
-                      <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111827', margin: '0', lineHeight: '1.3' }}>
+                      <h3 style={{ fontSize: '17px', fontWeight: '600', color: '#334155', margin: '0 0 6px 0', lineHeight: '1.3' }}>
                         {course.title}
                       </h3>
 
                       <p style={{
                         fontSize: '13px',
-                        color: '#9ca3af',
+                        color: '#64748b',
                         fontWeight: '400',
                         margin: '0 0 0 0',
                         lineHeight: '1.5',
@@ -598,15 +598,15 @@ export default function Explore({
                           </div>
                         )}
                         {course.price_range && (
-                          <div style={{ fontSize: '14px', fontWeight: '800', color: '#2563eb' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '600', color: '#475569' }}>
                             {course.price_range.replace(/\$/g, '').trim().includes('₹') ? course.price_range.replace(/\$/g, '').trim() : `₹ ${course.price_range.replace(/\$/g, '').trim()}`}
                           </div>
                         )}
                       </div>
                       <button style={{
-                        background: '#2a7eff',
-                        color: 'white',
-                        border: 'none',
+                        background: '#f8fafc',
+                        color: '#475569',
+                        border: '1px solid #e2e8f0',
                         padding: '8px 16px',
                         borderRadius: '8px',
                         fontSize: '12px',
