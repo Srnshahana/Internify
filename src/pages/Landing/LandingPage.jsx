@@ -141,14 +141,79 @@ const topCourses = [
     type: 'small'
   }
 ]
-
 const mentorsList = [
-  { id: 1, name: "Sarah Jenkins", role: "Senior UX Designer", company: "Google", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-  { id: 2, name: "David Chen", role: "Staff Engineer", company: "Netflix", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80", rating: 4.8 },
-  { id: 3, name: "Emily Rodriguez", role: "Product Manager", company: "Airbnb", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-  { id: 4, name: "Michael Chang", role: "Frontend Lead", company: "Meta", image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff", rating: 4.7 },
-  { id: 5, name: "Jessica Lee", role: "Data Scientist", company: "Amazon", image: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=800&q=80", rating: 4.9 },
-  { id: 6, name: "Robert Fox", role: "Backend Developer", company: "Stripe", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80", rating: 4.8 }
+  {
+    id: 1,
+    name: "Sarah Jenkins",
+    role: "Senior UX Designer",
+    company: "Google",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+    rating: 4.9,
+    experience: "8+ Yrs Exp",
+    mentees: "120+",
+    about:
+      "Sarah has over eight years of experience designing intuitive digital experiences for enterprise products used by millions of users worldwide. She specializes in user research, design systems, and accessibility, helping designers create products that are both visually compelling and highly functional."
+  },
+  {
+    id: 2,
+    name: "David Chen",
+    role: "Staff Engineer",
+    company: "Netflix",
+    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80",
+    rating: 4.8,
+    experience: "10+ Yrs Exp",
+    mentees: "85+",
+    about:
+      "David is a seasoned software engineer with more than a decade of experience building highly scalable microservices and distributed systems. He enjoys mentoring developers on system design, backend architecture, and engineering best practices for large-scale applications."
+  },
+  {
+    id: 3,
+    name: "Emily Rodriguez",
+    role: "Product Manager",
+    company: "Airbnb",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
+    rating: 4.9,
+    experience: "6+ Yrs Exp",
+    mentees: "200+",
+    about:
+      "Emily is an experienced product leader who has guided cross-functional teams in building customer-centric products from idea to launch. She specializes in product strategy, agile methodologies, and data-driven decision-making, helping aspiring product managers develop impactful careers."
+  },
+  {
+    id: 4,
+    name: "Michael Chang",
+    role: "Frontend Lead",
+    company: "Meta",
+    image: "https://ui-avatars.com/api/?name=Mentor&background=0D0D0D&color=fff",
+    rating: 4.7,
+    experience: "7+ Yrs Exp",
+    mentees: "150+",
+    about:
+      "Michael has extensive experience leading frontend teams and building scalable web applications using modern JavaScript frameworks. He is passionate about performance optimization, clean architecture, and helping developers master React and frontend engineering principles."
+  },
+  {
+    id: 5,
+    name: "Jessica Lee",
+    role: "Data Scientist",
+    company: "Amazon",
+    image: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=800&q=80",
+    rating: 4.9,
+    experience: "9+ Yrs Exp",
+    mentees: "95+",
+    about:
+      "Jessica specializes in machine learning, predictive analytics, and big data infrastructure. With nearly a decade of industry experience, she has worked on developing intelligent systems that transform complex data into actionable insights and enjoys mentoring professionals entering the field of data science."
+  },
+  {
+    id: 6,
+    name: "Robert Fox",
+    role: "Backend Developer",
+    company: "Stripe",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80",
+    rating: 4.8,
+    experience: "5+ Yrs Exp",
+    mentees: "300+",
+    about:
+      "Robert is a backend engineer with deep expertise in designing secure, high-performance APIs and payment infrastructures. He enjoys teaching developers about scalable backend systems, database optimization, and writing clean, maintainable code that can handle millions of transactions reliably."
+  }
 ];
 
 
@@ -424,10 +489,17 @@ export default function LandingPage({
 
   const auraRef = useRef(null);
   const coursesCarouselRef = useRef(null);
-  const mentorsCarouselRef = useRef(null);
+  const mentorAccordionRef = useRef(null);
+
+  const scrollMentorAccordion = (direction) => {
+    if (mentorAccordionRef.current) {
+      const scrollAmount = 240;
+      mentorAccordionRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
-    // We moved the carousel animation to pure CSS for buttery smooth performance.
+    // Continuous carousel animation handled purely by CSS for smooth performance.
   }, []);
 
 
@@ -620,8 +692,8 @@ export default function LandingPage({
 
         {/* Popular Courses Section */}
         <section className="course-split-section stitch-courses-section" id="courses" style={{ backgroundColor: '#e5e7eb', margin: 0, paddingBottom: '60px', paddingTop: '60px' }}>
-          <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0', marginBottom: '1.5rem', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
-            <h2 className="stitch-courses-title" style={{ margin: 0, padding: '0 2rem' }}>Get Started with Popular Courses</h2>
+          <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2rem', marginBottom: '1.5rem', width: '100%' }}>
+            <h2 className="stitch-courses-title" style={{ margin: 0, padding: 0 }}>Get Started with Popular Courses</h2>
             <div className="stitch-carousel-nav" style={{ padding: '0 2rem' }}>
               <button className="stitch-nav-btn" onClick={() => scrollCarousel('left')}>
                 <ArrowBackIcon />
@@ -670,50 +742,82 @@ export default function LandingPage({
           </div>
         </section>
 
-        {/* Benefits Section */}
-        <section className="stitch-features-section" style={{ margin: 0, backgroundColor: '#ffffff', padding: '100px 0' }}>
-          <div className="stitch-features-grid">
-            {stitchFeatures.map((feat) => (
-              <div
-                key={feat.id}
-                className={`feature-card ${feat.size} feat-${feat.type}`}
-              >
-                {/* Sharp Floating Inner UI Module (Mockup Grid Reconstruction) */}
-                <div className="feature-card-inner">
-                  {feat.promptBar ? (
-                    <div className="prompt-bar-mockup">
-                      <div className="figma-grid-lines">
-                        <div className="line-v v1"></div>
-                        <div className="line-v v2"></div>
-                        <div className="line-h h1"></div>
-                        <div className="line-h h2"></div>
-                      </div>
-                      <div className="prompt-bar-capsule">
-                        <span className="prompt-text">your dream internship</span>
-                        <div className="prompt-btn">
-                          <span className="material-symbols-outlined">keyboard_return</span>
-                          <span className="prompt-return-text">_RETURN</span>
-                        </div>
-                      </div>
+        {/* Dark Bento Benefits Section */}
+        <div className="premium-bento-transition"></div>
+        <section className="premium-bento-section" id="benefits">
+          <div className="premium-bento-container">
+            <div className="premium-bento-header">
+              <h2>Accelerate Your Career</h2>
+              <p>Experience the future of mentorship and professional growth.</p>
+            </div>
+            
+            <div className="premium-bento-grid">
+              {stitchFeatures.map((feat, index) => (
+                <div
+                  key={feat.id}
+                  className={`bento-card bento-${feat.size} feat-${feat.type}`}
+                >
+                  {/* Cursor Glow Effect */}
+                  <div className="bento-glow"></div>
+                  
+                  {/* Content */}
+                  <div className="bento-content">
+                    <div className="bento-text">
+                      <span className="bento-label">{feat.label}</span>
+                      <h3 className="bento-title">{feat.title}</h3>
+                      <p className="bento-desc">{feat.description}</p>
                     </div>
-                  ) : feat.Icon ? (
-                    <feat.Icon className="feature-inner-svg" />
-                  ) : (
-                    feat.image && <img src={feat.image} alt="" className="feature-inner-img" />
-                  )}
+                    
+                    {/* Architectural Visuals */}
+                    <div className="bento-visual">
+                      {feat.promptBar ? (
+                        <div className="bento-mockup terminal">
+                          <div className="terminal-header">
+                            <span className="dot red"></span>
+                            <span className="dot yellow"></span>
+                            <span className="dot green"></span>
+                          </div>
+                          <div className="terminal-body">
+                            <code> init career_accelerator</code>
+                            <code className="success">✓ Mock Interviews Prepared</code>
+                            <code className="success">✓ Resume Reviewed</code>
+                            <code className="cursor-blink">_</code>
+                          </div>
+                        </div>
+                      ) : feat.type === 'easy-edits' ? (
+                         <div className="bento-mockup abstract-grid">
+                           <div className="glow-orb"></div>
+                           <div className="bento-profile-card">
+                             <div className="bpc-avatar"></div>
+                             <div className="bpc-lines">
+                               <div className="bpc-line w-100"></div>
+                               <div className="bpc-line w-60"></div>
+                             </div>
+                           </div>
+                         </div>
+                      ) : feat.type === 'verified' ? (
+                         <div className="bento-mockup glass-certificate">
+                           <feat.Icon className="bento-svg-accent" />
+                           <div className="glass-lines">
+                             <div className="g-line w-80"></div>
+                             <div className="g-line w-40"></div>
+                           </div>
+                         </div>
+                      ) : (
+                         <div className="bento-mockup floating-nodes">
+                           <div className="floating-node n1"><feat.Icon className="bento-svg-small" /></div>
+                           <div className="floating-node n2"></div>
+                           <div className="floating-node n3"></div>
+                           <svg className="connecting-lines" viewBox="0 0 100 100">
+                             <path d="M 20 50 Q 50 10 80 80" stroke="rgba(255,255,255,0.1)" fill="none" strokeWidth="2" strokeDasharray="4 4" />
+                           </svg>
+                         </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                {/* Text Layer (Bottom Left) */}
-                <div className="feature-content">
-                  <span className="feature-label">{feat.label || 'INTERNIFY FEATURE'}</span>
-                  <h3 className="feature-title">{feat.title}</h3>
-                  <p className="feature-desc">{feat.description}</p>
-                </div>
-
-                {/* Subtle Dot Grid Background */}
-                <div className="card-dot-grid"></div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
@@ -744,57 +848,69 @@ export default function LandingPage({
         {/* ─── STITCH MENTORS SECTION ─── */}
         <section className="stitch-mentors-section" id="mentors">
           <div className="stitch-mentors-container" style={{ maxWidth: '100%' }}>
-            <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0', marginBottom: '1.5rem' }}>
+            <div className="stitch-courses-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 4rem', marginBottom: '1.5rem' }}>
               <div>
                 <h2 className="stitch-courses-title" style={{ margin: 0, padding: 0, textAlign: 'left', color: '#f8fafc' }}>Meet Our Mentors</h2>
               </div>
             </div>
 
-            <div style={{ padding: '4rem 1rem 6rem 1rem', position: 'relative', overflow: 'visible' }}>
-              <div 
-                className="stitch-mentors-carousel-wrapper" 
-                ref={mentorsCarouselRef} 
-                style={{ 
-                  display: 'flex', 
-                  gap: '2rem',
-                  width: 'max-content',
-                  overflow: 'visible'
-                }}
+            <div className="mentor-accordion-wrapper" style={{ position: 'relative' }}>
+              <button 
+                className="mentor-scroll-btn left" 
+                onClick={() => scrollMentorAccordion('left')}
+                aria-label="Scroll left"
               >
-                {[...mentorsList, ...mentorsList].map((mentor, index) => {
-                  return (
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              
+              <div className="mentor-accordion-container" ref={mentorAccordionRef}>
+                {mentorsList.slice(0, 7).map((mentor, index) => (
                   <div 
-                    key={`${mentor.id}-${index}`} 
-                    className="mentor-stitch-card"
-                    style={{
-                      width: '320px',
-                      flexShrink: 0
-                    }}
+                    key={`acc-${mentor.id}-${index}`} 
+                    className="mentor-accordion-card"
+                    onClick={() => handleMentorClick(mentor.id)}
                   >
-                    <div className="mentor-card-inner">
-                      <div className="mentor-image-frame">
-                        <img src={mentor.image} alt={mentor.name} className="mentor-profile-img" />
-                        <div className="mentor-card-image-overlay"></div>
+                    <img src={mentor.image} alt={mentor.name} className="mentor-accordion-img" />
+                    <div className="mentor-accordion-overlay"></div>
+                    
+                    <div className="mentor-accordion-content">
+                      <div className="mentor-meta" style={{ marginBottom: '12px' }}>
+                        <span className="mentor-company-pill">{mentor.company}</span>
+                        <div className="mentor-card-rating-inline">
+                          <StarRating rating={mentor.rating} />
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="stitch-mentor-content">
-                      <div className="mentor-meta">
-                        <div className="mentor-company-and-rating">
-                          <span className="mentor-company-pill">{mentor.company}</span>
-                          <div className="mentor-card-rating-inline">
-                            <StarRating rating={mentor.rating} />
+                      <div className="mentor-accordion-text">
+                        <h3>{mentor.name} <span className="material-symbols-outlined verified-icon" style={{ fontSize: '1.2rem', verticalAlign: 'middle', marginLeft: '4px' }}>verified</span></h3>
+                        <p style={{ color: '#cbd5e1', fontWeight: '500', marginBottom: '12px' }}>{mentor.role}</p>
+                        
+                        {/* Extra details shown only on hover */}
+                        <div className="mentor-accordion-details" style={{ display: 'flex', gap: '16px', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '12px', marginTop: '4px' }}>
+                          <div>
+                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Experience</span>
+                            <strong style={{ fontSize: '1rem', color: '#fff' }}>{mentor.experience}</strong>
+                          </div>
+                          <div>
+                            <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Mentees</span>
+                            <strong style={{ fontSize: '1rem', color: '#fff' }}>{mentor.mentees}</strong>
                           </div>
                         </div>
-                        <span className="material-symbols-outlined verified-icon">verified</span>
+                        <p style={{ marginTop: '12px', fontSize: '0.9rem', color: '#e2e8f0', lineHeight: '1.4', whiteSpace: 'normal', opacity: '0.9' }}>
+                          "{mentor.about}"
+                        </p>
                       </div>
-                      <h3 className="mentor-name">{mentor.name}</h3>
-                      <p className="mentor-role">{mentor.role}</p>
                     </div>
                   </div>
-                  );
-                })}
+                ))}
               </div>
+
+              <button 
+                className="mentor-scroll-btn right" 
+                onClick={() => scrollMentorAccordion('right')}
+                aria-label="Scroll right"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
             </div>
           </div>
         </section>
