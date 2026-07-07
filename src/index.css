@@ -52306,3 +52306,30 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
     padding: 2rem;
   }
 }
+
+/* 
+  ========================================
+  HIGHLIGHT COLOR OVERRIDES 
+  (Must be at bottom to override !important)
+  ========================================
+*/
+.live-message.from-mentor .live-message-bubble.highlight-yellow,
+.live-message.from-learner .live-message-bubble.highlight-yellow {
+  background: #fef9c3 !important;
+  color: #111827 !important;
+  border: 1px solid #fbbf24 !important;
+}
+
+.live-message.from-mentor .live-message-bubble.highlight-green,
+.live-message.from-learner .live-message-bubble.highlight-green {
+  background: #dcfce7 !important;
+  color: #14532d !important;
+  border: 1px solid #22c55e !important;
+}
+
+.live-message.from-mentor .live-message-bubble.highlight-red,
+.live-message.from-learner .live-message-bubble.highlight-red {
+  background: #fee2e2 !important;
+  color: #7f1d1d !important;
+  border: 1px solid #ef4444 !important;
+}

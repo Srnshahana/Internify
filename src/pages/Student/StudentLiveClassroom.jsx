@@ -260,11 +260,21 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                 Object.assign(m, details)
               } catch (e) { }
             }
+            
+            let replyToObj = null
+            if (m.reply_to_id) {
+               const repliedMsg = data.find(orig => String(orig.id) === String(m.reply_to_id))
+               if (repliedMsg) replyToObj = { ...repliedMsg } 
+            }
+
             return {
               ...m,
               from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
               type: inferredType,
-              time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+              time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+              highlightColor: m.student_highlight || null,
+              selfNote: m.student_note || '',
+              replyTo: replyToObj
             }
           })
           setMessages(prev => {
@@ -719,6 +729,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       file_url: finalFileUrl,
       type: finalType,
       read: false,
+      reply_to_id: replyTo ? replyTo.id : null,
       tempId: tempId
     }
 
@@ -760,30 +771,42 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     setShowAttachOptions(false)
   }
 
-  const handleToggleHighlight = (id) => {
+  const handleToggleHighlight = async (id) => {
+    const currentMsg = messages.find(m => String(m.id) === String(id))
+    if (!currentMsg) return
+    const nextColor = currentMsg.highlightColor ? null : 'yellow'
+    
     setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m
-        const nextColor = m.highlightColor ? null : 'yellow'
-        return { ...m, highlightColor: nextColor }
-      })
+      prev.map((m) => (String(m.id) === String(id) ? { ...m, highlightColor: nextColor } : m))
     )
     setActiveMenuMessageId(null)
+    
+    try {
+      await supabase.from('messages').update({ student_highlight: nextColor }).eq('id', id)
+    } catch (err) {
+      console.error('Error updating highlight:', err)
+    }
   }
 
-  const handleSetHighlightColor = (id, color) => {
+  const handleSetHighlightColor = async (id, color) => {
+    const currentMsg = messages.find(m => String(m.id) === String(id))
+    if (!currentMsg) return
+    const nextColor = currentMsg.highlightColor === color ? null : color
+    
     setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m
-        const nextColor = m.highlightColor === color ? null : color
-        return { ...m, highlightColor: nextColor }
-      })
+      prev.map((m) => (String(m.id) === String(id) ? { ...m, highlightColor: nextColor } : m))
     )
     setActiveMenuMessageId(null)
+    
+    try {
+      await supabase.from('messages').update({ student_highlight: nextColor }).eq('id', id)
+    } catch (err) {
+      console.error('Error updating highlight:', err)
+    }
   }
 
   const handleAddSelfNote = (id) => {
-    const current = messages.find((m) => m.id === id)
+    const current = messages.find((m) => String(m.id) === String(id))
     setNoteDraft(current && current.selfNote ? current.selfNote : '')
     setNoteEditingId(id)
     setActiveMenuMessageId(null)
@@ -1226,6 +1249,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                   className={`live-message-bubble ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
                     }`}
                 >
+                  {message.replyTo && (
+                    <div className="live-reply-bubble-preview" style={{ padding: '6px 10px', background: 'rgba(0,0,0,0.1)', borderRadius: '6px', marginBottom: '8px', borderLeft: '3px solid #64748b', fontSize: '12px' }}>
+                      <strong style={{ display: 'block', marginBottom: '2px', color: 'inherit', opacity: 0.8 }}>Replying to</strong>
+                      <span style={{ opacity: 0.9 }}>{message.replyTo.content || message.replyTo.fileName || message.replyTo.linkLabel || message.replyTo.type}</span>
+                    </div>
+                  )}
                   {message.type === 'text' && <p>{message.content}</p>}
                   {message.type === 'file' && (
                     <div className="live-file-card">
@@ -1375,14 +1404,20 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       <div className="self-note-actions">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             const trimmed = noteDraft.trim()
                             if (trimmed) {
                               setMessages((prev) =>
                                 prev.map((m) =>
-                                  m.id === message.id ? { ...m, selfNote: trimmed } : m
+                                  String(m.id) === String(message.id) ? { ...m, selfNote: trimmed } : m
                                 )
                               )
+                              
+                              try {
+                                await supabase.from('messages').update({ student_note: trimmed }).eq('id', message.id)
+                              } catch (err) {
+                                console.error('Error updating note:', err)
+                              }
                             }
                             setNoteEditingId(null)
                             setNoteDraft('')
