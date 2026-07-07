@@ -80,6 +80,14 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   const allScheduled = scheduledSessions || []
   const liveUpcomingSessions = allScheduled
     .filter(s => !s.is_complete && !s.completed)
+    .filter(session => {
+      const matchedCourse = enrolledCourses.find((course) => {
+        const courseTitle = (course?.title || '').toLowerCase()
+        const sessionCourse = (session?.course || '').toLowerCase()
+        return courseTitle && sessionCourse && (courseTitle.includes(sessionCourse) || sessionCourse.includes(courseTitle))
+      })
+      return !matchedCourse || (matchedCourse.status !== 'rejected' && matchedCourse.status !== 'pending')
+    })
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
     .slice(0, 10)
 
@@ -413,7 +421,13 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   const handleContinueLearning = () => {
     if (enrolledCourses.length > 0) {
       const courseToContinue = enrolledCourses[activeCourseIndex] || enrolledCourses[0]
-      setActiveCourse(courseToContinue)
+      if (courseToContinue && courseToContinue.status !== 'rejected' && courseToContinue.status !== 'pending') {
+        setActiveCourse(courseToContinue)
+      } else {
+        // Find the first active course
+        const firstActive = enrolledCourses.find(c => c.status !== 'rejected' && c.status !== 'pending')
+        if (firstActive) setActiveCourse(firstActive)
+      }
     }
   }
 
@@ -436,13 +450,21 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   const handleJoinUpcomingSession = (session) => {
     // Try to find a matching enrolled course by title
     const matchedCourse = enrolledCourses.find((course) => {
-      const courseTitle = course.title.toLowerCase()
-      const sessionCourse = (session.course || '').toLowerCase()
-      return courseTitle.includes(sessionCourse) || sessionCourse.includes(courseTitle)
+      const courseTitle = (course?.title || '').toLowerCase()
+      const sessionCourse = (session?.course || '').toLowerCase()
+      return courseTitle && sessionCourse && (courseTitle.includes(sessionCourse) || sessionCourse.includes(courseTitle))
     })
 
     if (matchedCourse) {
-      setActiveCourse(matchedCourse)
+      if (matchedCourse.status !== 'rejected' && matchedCourse.status !== 'pending') {
+        setActiveCourse(matchedCourse)
+      } else {
+        // Show rejected/pending modal if needed, or do nothing
+        if (matchedCourse.status === 'rejected') {
+          setRejectedCourseName(matchedCourse.title)
+          setShowRejectedModal(true)
+        }
+      }
     } else if (onNavigate) {
       // Fallback: open full calendar view
       onNavigate('Calendar')
@@ -450,7 +472,9 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   }
 
   // Flatten assignments for a compact Tasks view
-  const allAssignments = enrolledCourses.flatMap((course) =>
+  const allAssignments = enrolledCourses
+    .filter(course => course.status !== 'rejected' && course.status !== 'pending')
+    .flatMap((course) =>
     (course.assignments || []).map((assignment) => ({
       ...assignment,
       courseTitle: course.title,
@@ -538,8 +562,8 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
     )
   }
 
-  // If course detail is shown
-  if (showCourseDetail && selectedCourse) {
+  // If course detail is shown (now handled by Routes, so we skip this block)
+  if (false) {
     return (
       <CourseDetail
         course={selectedCourse}
@@ -558,7 +582,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
   }
 
   // If active course is selected, show LiveClassroom
-  if (activeCourse) {
+  if (false) {
     return (
       <StudentLiveClassroom
         course={activeCourse}
@@ -691,8 +715,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                     setShowRejectedModal(true)
                     return
                   }
-                  setSelectedCourse(course)
-                  setShowCourseDetail(true)
+                  navigate('/dashboard/course/' + (course.id || course.title.toLowerCase().replace(/\\s+/g, '-')))
                 }}
               >
                 <div className="course-card-v2" style={{ cursor: 'pointer' }}>
@@ -795,7 +818,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                   className="btn-secondary btn-small"
                   onClick={() => {
                     const course = enrolledCourses.find((c) => c.title === assignment.courseTitle)
-                    if (course) { setSelectedCourse(course); setShowCourseDetail(true); }
+                    if (course) { navigate('/dashboard/course/' + (course.id || course.title.toLowerCase().replace(/\\s+/g, '-'))); }
                     else { setShowMyCourses(true); }
                   }}
                 >

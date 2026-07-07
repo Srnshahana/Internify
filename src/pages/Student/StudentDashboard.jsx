@@ -14,12 +14,54 @@ import { HomeIcon, ProfileIcon, NotificationIcon, LogoutIcon, SunIcon, MoonIcon,
 import OnboardingModal from '../../components/shared/OnboardingModal.jsx'
 import { courses } from '../../data/staticData.js'
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'
+import CourseDetail from './CourseDetail.jsx'
+import StudentLiveClassroom from './StudentLiveClassroom.jsx'
 // import Sidebar from '../../components/shared/Sidebar.jsx' // Removed
 
-const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, selectedMentor, setSelectedMentor, navItems, searchQuery, setSearchQuery }) => {
+
+function CourseDetailWrapper({ onMentorClick }) {
+  const { id } = useParams();
+  const { enrolledCourses } = useDashboardData();
+  const navigate = useNavigate();
+  // Find course or default to null
+  const course = enrolledCourses.find(c => String(c.id) === id) || enrolledCourses.find(c => c.title.toLowerCase().replace(/\s+/g, '-') === id) || enrolledCourses[0];
+  
+  if (!course) return <div style={{padding: '40px', textAlign: 'center'}}>Course not found</div>;
+  
+  return (
+    <CourseDetail
+      course={course}
+      onBack={() => navigate(-1)}
+      onEnterClassroom={(c) => navigate('/dashboard/classroom/' + c.id)}
+      onMentorClick={onMentorClick}
+    />
+  );
+}
+
+function LiveClassroomWrapper() {
+  const { id } = useParams();
+  const { enrolledCourses } = useDashboardData();
+  const navigate = useNavigate();
+  const course = enrolledCourses.find(c => String(c.id) === id) || enrolledCourses.find(c => c.title.toLowerCase().replace(/\s+/g, '-') === id) || enrolledCourses[0];
+  
+  if (!course) return <div style={{padding: '40px', textAlign: 'center'}}>Classroom not found</div>;
+
+  return (
+    <StudentLiveClassroom
+      course={course}
+      onBack={() => navigate(-1)}
+    />
+  );
+}
+
+const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems, searchQuery, setSearchQuery }) => {
   const { loading, enrolledCourses, studentProfile, authUser, refetch } = useDashboardData()
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [previousPage, setPreviousPage] = useState(null)
+
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     if (!loading && (!studentProfile || !studentProfile.onboarding_completed)) {
@@ -29,56 +71,59 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
     }
   }, [loading, studentProfile])
 
+
   if (loading) {
     return <Loading fullScreen={true} />
   }
 
   const handleMentorClick = (mentor) => {
-    setSelectedMentor(mentor)
+    navigate(`/mentor/${mentor.id || mentor.mentor_id || mentor.name}`)
   }
-
-  const renderPage = (page) => {
+  
+  const pathParts = location.pathname.split('/').filter(Boolean)
+  const lastPart = pathParts[1] || 'home'
+  
+  let currentActivePage = 'Home'
+  if (lastPart === 'classrooms') currentActivePage = 'Classrooms'
+  else if (lastPart === 'calendar') currentActivePage = 'Calendar'
+  else if (lastPart === 'explore') currentActivePage = 'Explore'
+  else if (lastPart === 'profile') currentActivePage = 'Profile'
+  else if (lastPart === 'notification') currentActivePage = 'Notification'
+  else if (lastPart === 'assessments') currentActivePage = 'Assessments'
+  else if (lastPart === 'course') currentActivePage = 'CourseDetail'
+  else if (lastPart === 'classroom') currentActivePage = 'LiveClassroom'
+  
+  const handleNavigate = (page) => {
     switch (page) {
-      case 'Home':
-        return <Home onNavigate={setActivePage} onMentorClick={handleMentorClick} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
-      case 'Classrooms':
-        return (
-          <MyCourses
-            courses={enrolledCourses}
-            onBack={() => setActivePage('Home')}
-            onEnterClassroom={() => setIsLiveClassroomActive(true)}
-            onMentorClick={handleMentorClick}
-            setIsCourseDetailActive={setIsCourseDetailActive}
-            onNavigate={setActivePage}
-          />
-        )
-      case 'Calendar':
-        return <Calendar />
-      case 'Explore':
-        return (
-          <Explore
-            onMentorClick={handleMentorClick}
-            initialQuery={searchQuery}
-            onBack={() => {
-              setActivePage('Home');
-              setSearchQuery('');
-            }}
-            isLoading={loading}
-          />
-        )
-      case 'Profile':
-        return <Profile onLogout={onLogout} onNavigate={setActivePage} />
-      case 'Notification':
-        return <Notification />
-      case 'Assessments':
-        return <Assessments onBack={() => setActivePage('Home')} />
-      default:
-        return <Home onNavigate={setActivePage} onMentorClick={handleMentorClick} setIsCourseDetailActive={setIsCourseDetailActive} setSearchQuery={setSearchQuery} />
+      case 'Home': navigate('/dashboard'); break;
+      case 'Classrooms': navigate('/dashboard/classrooms'); break;
+      case 'Calendar': navigate('/dashboard/calendar'); break;
+      case 'Explore': navigate('/dashboard/explore'); break;
+      case 'Profile': navigate('/dashboard/profile'); break;
+      case 'Notification': navigate('/dashboard/notification'); break;
+      case 'Assessments': navigate('/dashboard/assessments'); break;
+      default: navigate('/dashboard'); break;
     }
   }
 
+  const renderRoutes = () => (
+    <Routes>
+      <Route path="/" element={<Home onNavigate={handleNavigate} onMentorClick={handleMentorClick} setIsCourseDetailActive={() => {}} setSearchQuery={setSearchQuery} />} />
+      <Route path="classrooms" element={<MyCourses courses={enrolledCourses} onBack={() => navigate('/dashboard')} onEnterClassroom={(c) => navigate('/dashboard/classroom/' + (c?.id || ''))} onMentorClick={handleMentorClick} setIsCourseDetailActive={() => {}} onNavigate={handleNavigate} />} />
+      <Route path="calendar" element={<Calendar />} />
+      <Route path="explore" element={<Explore onMentorClick={handleMentorClick} initialQuery={searchQuery} onBack={() => { navigate('/dashboard'); setSearchQuery(''); }} isLoading={loading} />} />
+      <Route path="profile" element={<Profile onLogout={onLogout} onNavigate={handleNavigate} />} />
+      <Route path="notification" element={<Notification />} />
+      <Route path="assessments" element={<Assessments onBack={() => navigate('/dashboard')} />} />
+      <Route path="course/:id" element={<CourseDetailWrapper onMentorClick={handleMentorClick} />} />
+      <Route path="classroom/:id" element={<LiveClassroomWrapper />} />
+      <Route path="*" element={<Home onNavigate={handleNavigate} onMentorClick={handleMentorClick} setIsCourseDetailActive={() => {}} setSearchQuery={setSearchQuery} />} />
+    </Routes>
+  );
+
+
   return (
-    <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
+    <div className={`dashboard-layout-new ${currentActivePage === 'LiveClassroom' ? 'live-classroom-active' : ''}`}>
       {showOnboarding && (
         <OnboardingModal
           user={authUser}
@@ -93,7 +138,7 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
       {/* Top Header - Restored */}
       {/* Top Header - Restored */}
       {/* Top Header - Restored */}
-      {!isLiveClassroomActive && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Profile' && activePage !== 'Calendar' && activePage !== 'Explore' && (
+      {currentActivePage !== 'LiveClassroom' && currentActivePage !== 'Home' && currentActivePage !== 'Classrooms' && currentActivePage !== 'Profile' && currentActivePage !== 'Calendar' && currentActivePage !== 'Explore' && currentActivePage !== 'CourseDetail' && (
         <StudentAppBar
           onLogout={onLogout}
           isTransparent={false} // Traditional opaque bar
@@ -104,40 +149,35 @@ const DashboardContent = ({ onLogout, activePage, setActivePage, isLiveClassroom
 
       {/* Main Content - Full Width */}
       <main className="dashboard-main-new full-width-main" >
-        {selectedMentor && (
-          <div className="dashboard-content-new" style={{ padding: 0, maxWidth: '100%' }}>
-            <MentorProfile mentor={selectedMentor} onBack={() => setSelectedMentor(null)} />
-          </div>
-        )}
         <div 
-          className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`} 
+          className={`dashboard-content-new ${currentActivePage === 'Profile' ? 'student-profile-no-padding' : ''}`} 
           style={{
-            ...(activePage === 'Home' || activePage === 'Classrooms' || activePage === 'Calendar' ? { padding: 0, maxWidth: '100%' } : activePage === 'Explore' ? { padding: '0 20px', maxWidth: '100%' } : {}),
-            display: selectedMentor ? 'none' : 'block'
+            ...(currentActivePage === 'Home' || currentActivePage === 'Classrooms' || currentActivePage === 'Calendar' || currentActivePage === 'CourseDetail' || currentActivePage === 'LiveClassroom' ? { padding: 0, maxWidth: '100%' } : currentActivePage === 'Explore' ? { padding: '0 20px', maxWidth: '100%' } : {}),
+            display: 'block'
           }}
         >
-          {renderPage(activePage)}
+          {renderRoutes()}
         </div>
       </main>
 
       {/* Bottom Navigation for Mobile Only (optional if needed, user didn't mention it but requested traditional app bar, so assuming desktop focus) */}
-      {!isLiveClassroomActive && !isCourseDetailActive && (
+      {currentActivePage !== 'LiveClassroom' && currentActivePage !== 'CourseDetail' && (
         <nav className="premium-bottom-nav">
           <div className="bottom-nav-container">
             <div
               className="nav-glass-highlight"
               style={{
-                transform: `translateX(${navItems.findIndex(item => item.id === activePage) * 100}%)`
+                transform: `translateX(${navItems.findIndex(item => item.id === currentActivePage) * 100}%)`
               }}
             />
             {navItems.map((item) => {
               const IconComponent = item.icon
-              const isActive = activePage === item.id
+              const isActive = currentActivePage === item.id
               return (
                 <button
                   key={item.id}
                   className={`bottom-nav-item ${isActive ? 'active' : ''}`}
-                  onClick={() => setActivePage(item.id)}
+                  onClick={() => handleNavigate(item.id)}
                 >
                   <div className="nav-icon-wrapper">
                     <IconComponent />
@@ -157,7 +197,7 @@ function Dashboard({ onLogout }) {
   const [activePage, setActivePage] = useState('Home')
   const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
   const [isCourseDetailActive, setIsCourseDetailActive] = useState(false)
-  const [selectedMentor, setSelectedMentor] = useState(null)
+  
   const [searchQuery, setSearchQuery] = useState('')
   const [theme] = useState('light')
 
@@ -193,8 +233,6 @@ function Dashboard({ onLogout }) {
         setIsLiveClassroomActive={setIsLiveClassroomActive}
         isCourseDetailActive={isCourseDetailActive}
         setIsCourseDetailActive={setIsCourseDetailActive}
-        selectedMentor={selectedMentor}
-        setSelectedMentor={setSelectedMentor}
         navItems={navItems}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}

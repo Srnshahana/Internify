@@ -3,10 +3,12 @@ import Loading from '../../components/Loading'
 import CourseDetail from './CourseDetail.jsx'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
 function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorClick, setIsCourseDetailActive, onNavigate }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [activeTab, setActiveTab] = useState('active')
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (setIsCourseDetailActive) {
@@ -24,7 +26,7 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
     month: 'long'
   })
 
-  if (selectedCourse) {
+  if (false) {
     return (
       <CourseDetail
         course={selectedCourse}
@@ -161,7 +163,7 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
               <div
                 key={course.id}
                 className="premium-course-card"
-                onClick={() => setSelectedCourse(course)}
+                onClick={() => navigate('/dashboard/course/' + (course.id || course.title.toLowerCase().replace(/\s+/g, '-')))}
                 style={{
                   background: 'white',
                   borderRadius: '24px',

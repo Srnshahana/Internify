@@ -15116,6 +15116,7 @@ h1 span {
 }
 
 .live-message-bubble {
+  position: relative;
   padding: 12px 16px;
   border-radius: 16px;
   background: #111827;

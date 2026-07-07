@@ -260,9 +260,9 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
 
   const mentor = mentorData
   const stats = [
-    { label: 'Experience', value: mentor.experience?.length > 0 ? `${mentor.experience.length * 3}+ Years` : "5+ Years" },
+    { label: 'Experience', value: mentor.experience_years ? `${mentor.experience_years}y+` : "5y+" },
     { label: 'Rating', value: mentor.rating ? mentor.rating.toFixed(1) : "4.9" },
-    { label: 'Completed Internship', value: '100+' },
+    { label: 'Mentees', value: `${mentor.testimonials?.length || 10}+` },
     { label: 'Reviews', value: `${mentor.testimonials?.length || 0}` },
   ]
 
@@ -536,12 +536,6 @@ export default function MentorProfile({ mentor: propMentor, onBack, renderStars,
           <div className="profile-stats-linkedin">
             {stats.map((stat, idx) => (
               <div key={idx} className="stat-item-linkedin">
-                <div className="stat-icon-wrapper" style={{ color: '#2a7eff' }}>
-                  {stat.label === 'Experience' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>}
-                  {stat.label === 'Rating' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>}
-                  {stat.label === 'Completed Internship' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>}
-                  {stat.label === 'Reviews' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>}
-                </div>
                 <div className="stat-text-content">
                   <span className="stat-value-linkedin">{stat.value}</span>
                   <span className="stat-label-linkedin">{stat.label}</span>

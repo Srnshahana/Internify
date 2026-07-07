@@ -33,6 +33,7 @@ export default function ApplyMentor() {
         title: '',
         about: '',
         address: '',
+        experience_years: '',
         rating: 5,
         is_verified: false,
         is_platformAssured: false,
@@ -476,8 +477,8 @@ export default function ApplyMentor() {
         }
 
         if (step === 2) {
-            if (!formData.address.trim() || !formData.title.trim() || !formData.about.trim()) {
-                showModal('Profile Incomplete', 'Please provide your location, title, and "About" overview to continue.', 'warning')
+            if (!formData.address.trim() || !formData.title.trim() || !formData.about.trim() || !formData.experience_years.toString().trim()) {
+                showModal('Profile Incomplete', 'Please provide your location, title, years of experience, and "About" overview to continue.', 'warning')
                 return
             }
             if (formData.about.trim().length < 50 || formData.about.trim().length > 500) {
@@ -614,6 +615,10 @@ export default function ApplyMentor() {
                             <div className="input-group">
                                 <label>Professional Title <span className="required-star">*</span></label>
                                 <input type="text" value={formData.title} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g. Lead UI Designer" required />
+                            </div>
+                            <div className="input-group full-width">
+                                <label>Years of Experience <span className="required-star">*</span></label>
+                                <input type="number" min="0" value={formData.experience_years} onChange={(e) => handleInputChange('experience_years', e.target.value)} placeholder="e.g. 5" required />
                             </div>
                             <div className="input-group full-width">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>

@@ -534,7 +534,7 @@ function App() {
         />
         <Route path="/mentor/:id" element={<MentorProfilePage />} />
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
             <ProtectedRoute>
               <StudentDashboardPage />

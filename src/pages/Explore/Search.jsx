@@ -114,29 +114,31 @@ const getCompanyIcon = (companyName) => {
 // Helper function to render stars
 const renderStarsFunc = (rating) => {
   const fullStars = Math.floor(rating)
-  const hasHalfStar = rating % 1 >= 0.5
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+  const remainder = rating % 1
+  const hasPartialStar = remainder > 0
+  const emptyStars = 5 - fullStars - (hasPartialStar ? 1 : 0)
+  const percentage = Math.round(remainder * 100)
 
   return (
     <>
       {Array(fullStars).fill(0).map((_, i) => (
-        <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="#facc15">
+        <svg key={`full-${i}`} width="16" height="16" viewBox="0 0 24 24" fill="#facc15">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
-      {hasHalfStar && (
+      {hasPartialStar && (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <defs>
-            <linearGradient id="half-fill">
-              <stop offset="50%" stopColor="#facc15" />
-              <stop offset="50%" stopColor="transparent" />
+            <linearGradient id={`partial-fill-${percentage}`}>
+              <stop offset={`${percentage}%`} stopColor="#facc15" />
+              <stop offset={`${percentage}%`} stopColor="transparent" />
             </linearGradient>
           </defs>
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#half-fill)" />
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={`url(#partial-fill-${percentage})`} stroke="#facc15" strokeWidth="1" />
         </svg>
       )}
       {Array(emptyStars).fill(0).map((_, i) => (
-        <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" strokeWidth="1">
+        <svg key={`empty-${i}`} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" strokeWidth="1">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}

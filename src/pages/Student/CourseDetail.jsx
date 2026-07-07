@@ -205,6 +205,19 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                 >
                   Pending Approval
                 </button>
+              ) : courseDetails.status === 'rejected' ? (
+                <button
+                  className="enter-classroom-btn-v2"
+                  disabled
+                  style={{
+                    cursor: 'not-allowed',
+                    opacity: 0.7,
+                    background: '#ef4444',
+                    border: 'none'
+                  }}
+                >
+                  Enrollment Rejected
+                </button>
               ) : (
                 <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
                   Enter Classroom

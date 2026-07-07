@@ -398,6 +398,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const [showAttachOptions, setShowAttachOptions] = useState(false)
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
+  const [selectedAttachment, setSelectedAttachment] = useState(null)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [assessmentSubmission, setAssessmentSubmission] = useState({
@@ -439,7 +440,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         }
 
         if (data && data.length > 0) {
-          const progressMap = new Map(data.map(p => [p.session_id, p.is_completed]))
+          const progressMap = new Map(data.map(p => [String(p.session_id), p.is_completed]))
 
           setSessions(prev => prev.map(session => {
             const sid = String(session.id || session.sessionId)
@@ -643,26 +644,69 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
-    console.log('💬 Attempting to send message:', { messageInput, chatId, userRole, currentUserId })
-
-    if (!messageInput.trim()) {
+    if (!messageInput.trim() && !selectedAttachment) {
       console.warn('❌ Cannot send empty message')
       return
     }
 
     const trimmedInput = messageInput.trim()
-    // Detect Google Meet links
     if (trimmedInput.includes('meet.google.com')) {
-      console.log('📽️ Google Meet link detected. Blocking student from sending.')
       setMessageInput('')
       showModal('Action Resticted', 'Only mentors can schedule and share meeting links through the official classroom scheduler.', 'warning')
       return
     }
 
     if (!chatId) {
-      console.error('❌ Cannot send message: chatId is missing. Course data:', course)
       showModal('Entry Error', 'Chat session not found. Please re-enter the classroom.', 'error')
       return
+    }
+
+    let finalFileUrl = null
+    let finalFileName = null
+    let finalType = 'text'
+
+    if (selectedAttachment) {
+      const file = selectedAttachment.file
+      finalType = selectedAttachment.type
+      finalFileName = file.name
+
+      try {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${activeSessionId}/${finalType}s/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('course-files')
+          .upload(fileName, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-files')
+          .getPublicUrl(fileName)
+        
+        finalFileUrl = publicUrl
+
+        const courseId = course?.course_id || course?.id
+        const { error: attachmentError } = await supabase
+          .from('attachments')
+          .insert({
+            course_id: courseId,
+            session_id: activeSessionId,
+            uploaded_by: currentUserId,
+            type: finalType,
+            file_name: finalFileName,
+            file_url: finalFileUrl,
+            description: `${finalType === 'image' ? 'Image' : 'Document'} Attachment`,
+            created_at: new Date().toISOString()
+          })
+
+        if (attachmentError) throw attachmentError
+
+      } catch (err) {
+        console.error('Error uploading attachment:', err)
+        showModal('Error', 'Failed to upload attachment: ' + err.message, 'error')
+        return
+      }
     }
 
     const tempId = Date.now().toString()
@@ -671,7 +715,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       session_id: activeSessionId,
       role: userRole === 'mentor' ? 'mentor' : 'student',
       sender_id: currentUserId,
-      content: messageInput.trim(),
+      content: trimmedInput || finalFileName,
+      file_url: finalFileUrl,
+      type: finalType,
       read: false,
       tempId: tempId
     }
@@ -681,18 +727,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       ...pendingMsg,
       id: tempId, 
       from: 'learner', 
-      type: 'text',   
+      type: finalType,   
       time: getCurrentTime()
     }
     setMessages(prev => [...prev, optimisticMsg])
     setMessageInput('')
+    setSelectedAttachment(null)
 
     // 1. BROADCAST (Instant Path)
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'chat-message',
-        payload: { ...optimisticMsg, from: 'mentor' } // Recipient sees message from 'mentor' (the other side)
+        payload: { ...optimisticMsg, from: 'mentor' } 
       })
     }
 
@@ -709,7 +756,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
 
     console.log('✅ Message sent successfully')
-    setMessageInput('')
     setReplyTo(null)
     setShowAttachOptions(false)
   }
@@ -762,223 +808,21 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     if (imageInputRef.current) imageInputRef.current.click()
   }
 
-  const handleDocSelected = async (e) => {
-    console.log('📄 [Step 1] Document Selection Started')
+  const handleDocSelected = (e) => {
     const file = e.target.files && e.target.files[0]
-    if (!file) {
-      console.warn('⚠️ No file selected')
-      return
-    }
-
-    try {
-      console.log('📤 [Step 2] Uploading file to Storage:', file.name)
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file)
-
-      if (uploadError) {
-        console.error('❌ Upload Error:', uploadError)
-        throw uploadError
-      }
-      console.log('✅ Upload Success:', uploadData)
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName)
-
-      // Get course ID safely
-      const courseId = course?.course_id || course?.id
-
-      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
-      console.log('📦 Attachment payload to insert:', {
-        course_id: courseId,
-        session_id: activeSessionId,
-        uploaded_by: currentUserId,
-        type: 'file',
-        file_name: file.name,
-        file_url: publicUrl,
-        description: 'Document Attachment',
-        created_at: new Date().toISOString()
-      })
-      // Insert into Attachments
-      const { data: attachmentData, error: attachmentError } = await supabase
-        .from('attachments')
-        .insert({
-          course_id: courseId,
-          session_id: activeSessionId,
-          uploaded_by: currentUserId,
-          type: 'file', // Standard document type
-          file_name: file.name,
-          file_url: publicUrl,
-          description: 'Document Attachment',
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (attachmentError) {
-        console.error('❌ Attachment Insert Error:', attachmentError)
-        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
-      } else {
-        console.log('✅ Attachment Reserved:', attachmentData)
-      }
-
-      console.log('💬 [Step 3] Sending Message')
-      // STRICT DB SCHEMA PAYLOAD
-      const messagePayload = {
-        chat_id: chatId,
-        session_id: activeSessionId,
-        role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: currentUserId,
-        content: file.name, // Storing filename in content
-        file_url: publicUrl,
-        read: false
-        // Removed: type, fileName, fileSize, etc.
-      }
-
-      const { error: msgError } = await supabase
-        .from('messages')
-        .insert([messagePayload])
-
-      if (msgError) {
-        console.error('❌ Message Insert Error:', msgError)
-        throw msgError
-      }
-
-      console.log('✅ Message Sent Successfully')
-
-      // Optimistic Update
-      const newMessage = {
-        ...messagePayload,
-        id: Date.now(),
-        from: userRole === 'mentor' ? 'mentor' : 'learner',
-        fileName: file.name,
-        fileSize: `${Math.round(file.size / 1024)} KB`,
-        time: getCurrentTime(),
-        session_id: activeSessionId,
-        highlightColor: null,
-        selfNote: '',
-      }
-      setMessages((prev) => [...prev, newMessage])
-      showModal('Success', 'Document sent successfully!', 'success')
-
-    } catch (err) {
-      console.error('❌ Critical Error in Document Flow:', err)
-      showModal('Error', 'Error sending document: ' + err.message, 'error')
-    } finally {
-      e.target.value = ''
-      setShowAttachOptions(false)
-    }
+    if (!file) return
+    setSelectedAttachment({ file, type: 'file' })
+    e.target.value = ''
+    setShowAttachOptions(false)
   }
 
-  const handleImageSelected = async (e) => {
-    console.log('🖼️ [Step 1] Image Selection Started')
+  const handleImageSelected = (e) => {
     const file = e.target.files && e.target.files[0]
-    if (!file) {
-      console.warn('⚠️ No file selected')
-      return
-    }
-
-    try {
-      console.log('📤 [Step 2] Uploading image to Storage:', file.name)
-      const fileName = `${activeSessionId}/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file)
-
-      if (uploadError) {
-        console.error('❌ Upload Error:', uploadError)
-        throw uploadError
-      }
-      console.log('✅ Upload Success:', uploadData)
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName)
-
-      const courseId = course?.course_id || course?.id
-
-      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
-      console.log('📦 Attachment payload:', {
-        course_id: courseId,
-        session_id: activeSessionId,
-        uploaded_by: currentUserId,
-        type: 'image',
-        file_name: file.name,
-        file_url: publicUrl,
-        description: 'Image Attachment'
-      })
-
-      const { data: attachmentData, error: attachmentError } = await supabase
-        .from('attachments')
-        .insert({
-          course_id: courseId,
-          session_id: activeSessionId,
-          uploaded_by: currentUserId,
-          type: 'image',
-          file_name: file.name,
-          file_url: publicUrl,
-          description: 'Image Attachment',
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (attachmentError) {
-        console.error('❌ Attachment Insert Error:', attachmentError)
-        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
-      } else {
-        console.log('✅ Attachment Reserved:', attachmentData)
-      }
-
-      console.log('💬 [Step 3] Sending Message')
-      const messagePayload = {
-        chat_id: chatId,
-        session_id: activeSessionId,
-        role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: currentUserId,
-        content: file.name, // Filename as content
-        file_url: publicUrl,
-        read: false
-        // Removed: type, imageUrl, fileName
-      }
-
-      const { error: msgError } = await supabase
-        .from('messages')
-        .insert([messagePayload])
-
-      if (msgError) {
-        console.error('❌ Message Insert Error:', msgError)
-        throw msgError
-      }
-
-      console.log('✅ Message Sent Successfully')
-
-      const newMessage = {
-        ...messagePayload,
-        id: Date.now(),
-        from: userRole === 'mentor' ? 'mentor' : 'learner',
-        time: getCurrentTime(),
-        session_id: activeSessionId,
-        highlightColor: null,
-        selfNote: '',
-      }
-      setMessages((prev) => [...prev, newMessage])
-      showModal('Success', 'Image sent successfully!', 'success')
-
-    } catch (err) {
-      console.error('❌ Critical Error in Image Flow:', err)
-      showModal('Error', 'Error sending image: ' + err.message, 'error')
-    } finally {
-      e.target.value = ''
-      setShowAttachOptions(false)
-    }
+    if (!file) return
+    setSelectedAttachment({ file, type: 'image' })
+    e.target.value = ''
+    setShowAttachOptions(false)
   }
-
 
   const handleAttachLink = async () => {
     const url = window.prompt('Paste a link to share:')
@@ -1618,6 +1462,17 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             ))}
           </div>
 
+          {selectedAttachment && (
+            <div className="selectedAttachmentPreview" style={{ padding: '8px 12px', background: '#f1f5f9', borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="material-symbols-outlined">{selectedAttachment.type === 'image' ? 'image' : 'description'}</span>
+                <span style={{ fontSize: '14px', color: '#334155', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedAttachment.file.name}</span>
+              </div>
+              <button type="button" onClick={() => setSelectedAttachment(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+              </button>
+            </div>
+          )}
           <form className="live-message-input-container" onSubmit={handleSendMessage}>
             <button
               type="button"
