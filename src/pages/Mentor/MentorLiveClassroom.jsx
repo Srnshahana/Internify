@@ -243,7 +243,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               ...m,
               from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
               type: inferredType,
-              time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+              time: m.created_at ? new Date(m.created_at + (m.created_at.includes('Z') || m.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
               highlightColor: m.mentor_highlight || null,
               selfNote: m.mentor_note || '',
               replyTo: replyToObj
@@ -312,7 +312,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             ...newMessage,
             from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
             type: inferredType,
-            time: newMessage.created_at ? new Date(newMessage.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+            time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
           }
 
           if (optimisticMatchIndex !== -1) {

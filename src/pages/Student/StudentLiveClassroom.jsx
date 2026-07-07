@@ -271,7 +271,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               ...m,
               from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
               type: inferredType,
-              time: m.created_at ? new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+              time: m.created_at ? new Date(m.created_at + (m.created_at.includes('Z') || m.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
               highlightColor: m.student_highlight || null,
               selfNote: m.student_note || '',
               replyTo: replyToObj
@@ -330,7 +330,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               ...newMessage,
               from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
               type: newMessage.type || 'text',
-              time: newMessage.created_at ? new Date(newMessage.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+              time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
             }
             return [...prev, msgForState].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
           }
