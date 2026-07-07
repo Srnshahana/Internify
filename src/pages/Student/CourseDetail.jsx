@@ -84,8 +84,27 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
   }, [course, contextCourse])
 
   const renderStars = (rating) => {
-    const full = Math.round(rating)
-    return Array(5).fill(0).map((_, i) => i < full ? '★' : '☆').join('')
+    return (
+      <div style={{ display: 'inline-flex', gap: '2px', alignItems: 'center' }}>
+        {[1, 2, 3, 4, 5].map(index => {
+          const fillPercentage = Math.max(0, Math.min(100, (rating - index + 1) * 100));
+          return (
+            <div key={index} style={{ position: 'relative', display: 'inline-block', width: '16px', height: '16px' }}>
+              {/* Background empty star */}
+              <svg viewBox="0 0 24 24" fill="#e2e8f0" width="16" height="16" style={{ position: 'absolute', top: 0, left: 0, display: 'block' }}>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              {/* Foreground filled star (clipped) */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: `${fillPercentage}%`, overflow: 'hidden', height: '100%' }}>
+                <svg viewBox="0 0 24 24" fill="#fbbf24" width="16" height="16" style={{ display: 'block' }}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   const handleEnterClassroom = () => {
@@ -255,7 +274,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
               </p>
               <div className="mentor-rating-elegant">
                 <span className="rating-stars-elegant">★</span>
-                <span>{courseDetails.rating || 4.8} Rating</span>
+                <span>{courseDetails.mentorRating || courseDetails.mentor_rating || 4.5} Rating</span>
               </div>
             </div>
             <div className="mentor-view-icon">
@@ -328,7 +347,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                 {/* Legacy Fallback */}
                 {session.duration && (
                   <div className="session-meta-elegant">
-                    <span>{session.duration}</span>
+                    <span>{session.duration}{String(session.duration).match(/[a-zA-Z]/) ? '' : ' minutes'}</span>
                     {session.type && <span>•</span>}
                     {session.type && <span>{session.type}</span>}
                   </div>
