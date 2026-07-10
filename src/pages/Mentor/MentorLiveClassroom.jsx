@@ -1841,61 +1841,65 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  <button
-                    type="button"
-                    className="live-message-menu-btn"
-                    onClick={() =>
-                      setActiveMenuMessageId(
-                        activeMenuMessageId === message.id ? null : message.id
-                      )
-                    }
-                    aria-label="Message options"
-                  >
-                    ⋮
-                  </button>
-                  {activeMenuMessageId === message.id && (
+                  {message.type !== 'scheduled_class' && (
                     <>
-                      <div 
-                        className="live-menu-overlay"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setActiveMenuMessageId(null)
-                        }}
-                      />
-                      <div className="live-message-menu">
-                      <button type="button" onClick={() => handleToggleHighlight(message.id)}>
-                        {message.highlightColor ? 'Remove highlight' : 'Highlight'}
+                      <button
+                        type="button"
+                        className="live-message-menu-btn"
+                        onClick={() =>
+                          setActiveMenuMessageId(
+                            activeMenuMessageId === message.id ? null : message.id
+                          )
+                        }
+                        aria-label="Message options"
+                      >
+                        ⋮
                       </button>
-                      <div className="live-message-menu-section">
-                        <span className="live-menu-label">Highlight color</span>
-                        <div className="live-highlight-colors">
-                          <button
-                            type="button"
-                            className="live-highlight-color-btn yellow"
-                            onClick={() => handleSetHighlightColor(message.id, 'yellow')}
-                            aria-label="Highlight yellow"
+                      {activeMenuMessageId === message.id && (
+                        <>
+                          <div 
+                            className="live-menu-overlay"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setActiveMenuMessageId(null)
+                            }}
                           />
-                          <button
-                            type="button"
-                            className="live-highlight-color-btn red"
-                            onClick={() => handleSetHighlightColor(message.id, 'red')}
-                            aria-label="Highlight red"
-                          />
-                          <button
-                            type="button"
-                            className="live-highlight-color-btn green"
-                            onClick={() => handleSetHighlightColor(message.id, 'green')}
-                            aria-label="Highlight green"
-                          />
+                          <div className="live-message-menu">
+                          <button type="button" onClick={() => handleToggleHighlight(message.id)}>
+                            {message.highlightColor ? 'Remove highlight' : 'Highlight'}
+                          </button>
+                          <div className="live-message-menu-section">
+                            <span className="live-menu-label">Highlight color</span>
+                            <div className="live-highlight-colors">
+                              <button
+                                type="button"
+                                className="live-highlight-color-btn yellow"
+                                onClick={() => handleSetHighlightColor(message.id, 'yellow')}
+                                aria-label="Highlight yellow"
+                              />
+                              <button
+                                type="button"
+                                className="live-highlight-color-btn red"
+                                onClick={() => handleSetHighlightColor(message.id, 'red')}
+                                aria-label="Highlight red"
+                              />
+                              <button
+                                type="button"
+                                className="live-highlight-color-btn green"
+                                onClick={() => handleSetHighlightColor(message.id, 'green')}
+                                aria-label="Highlight green"
+                              />
+                            </div>
+                          </div>
+                          <button type="button" onClick={() => handleAddSelfNote(message.id)}>
+                            Add self note
+                          </button>
+                          <button type="button" onClick={() => handleReplyTo(message)}>
+                            Reply
+                          </button>
                         </div>
-                      </div>
-                      <button type="button" onClick={() => handleAddSelfNote(message.id)}>
-                        Add self note
-                      </button>
-                      <button type="button" onClick={() => handleReplyTo(message)}>
-                        Reply
-                      </button>
-                    </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
