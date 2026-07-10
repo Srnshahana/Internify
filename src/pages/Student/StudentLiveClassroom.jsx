@@ -411,6 +411,17 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   )
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (activeMenuMessageId !== null) {
+        setActiveMenuMessageId(null)
+      }
+    }
+    window.addEventListener('click', handleClickOutside)
+    return () => window.removeEventListener('click', handleClickOutside)
+  }, [activeMenuMessageId])
+
   const [replyTo, setReplyTo] = useState(null)
   const [showAttachOptions, setShowAttachOptions] = useState(false)
   const [noteEditingId, setNoteEditingId] = useState(null)
@@ -1450,25 +1461,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       <button
                         type="button"
                         className="live-message-menu-btn"
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation()
                           setActiveMenuMessageId(
                             activeMenuMessageId === message.id ? null : message.id
                           )
-                        }
+                        }}
                         aria-label="Message options"
                       >
                         ⋮
                       </button>
                       {activeMenuMessageId === message.id && (
                         <>
-                          <div 
-                            className="live-menu-overlay"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActiveMenuMessageId(null)
-                            }}
-                          />
-                          <div className="live-message-menu">
+                          <div className="live-message-menu" onClick={(e) => e.stopPropagation()}>
                           <button type="button" onClick={() => handleToggleHighlight(message.id)}>
                             {message.highlightColor ? 'Remove highlight' : 'Highlight'}
                           </button>
