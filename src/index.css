@@ -15378,9 +15378,10 @@ h1 span {
   position: absolute;
   top: 24px;
   right: 4px;
-  background: #111827;
+  background: #ffffff;
   border-radius: 8px;
-  border: 1px solid #374151;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   min-width: 150px;
@@ -15389,14 +15390,14 @@ h1 span {
 
 .live-message-menu-section {
   padding: 8px 10px;
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .live-menu-label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #9ca3af;
+  color: #6b7280;
   display: block;
   margin-bottom: 6px;
 }
@@ -15432,21 +15433,23 @@ h1 span {
 .live-highlight-color-btn:hover,
 .live-highlight-color-btn:focus-visible {
   transform: scale(1.15);
-  box-shadow: 0 0 0 2px #111827, 0 0 0 4px rgba(148, 163, 184, 0.6);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(148, 163, 184, 0.6);
 }
 
 .live-message-menu button {
   background: transparent;
   border: none;
-  color: #e5e7eb;
+  color: #374151;
   text-align: left;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .live-message-menu button:hover {
-  background: #1f2933;
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .live-file-name {
@@ -52334,17 +52337,4 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   border: 1px solid #ef4444 !important;
 }
 
-/* 
-  ========================================
-  MENU OVERFLOW FIX 
-  ========================================
-*/
-.live-message.from-mentor .live-message-menu {
-  left: 4px !important;
-  right: auto !important;
-}
 
-.live-message.from-learner .live-message-menu {
-  right: 4px !important;
-  left: auto !important;
-}
