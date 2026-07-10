@@ -62,12 +62,22 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
           console.log('Fetching detailed info from Supabase (optional)...')
         }
 
-        const contextProg = contextCourse?.progress || course?.progress || prev?.progress || 0
+        let fetchedMentorRating = null;
+        const mentorIdToFetch = course?.mentor_id || contextCourse?.mentor_id || detailsData?.mentor_id;
+        if (mentorIdToFetch) {
+          const { data: mentorData } = await supabase.from('mentors_details').select('rating').eq('mentor_id', mentorIdToFetch).single();
+          if (mentorData && mentorData.rating) {
+            fetchedMentorRating = mentorData.rating;
+          }
+        }
+
+        const contextProg = contextCourse?.progress || course?.progress || 0
         const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : contextProg
 
         setCourseDetails(prev => ({
           ...prev,
           ...(detailsData || {}),
+          ...(fetchedMentorRating ? { mentorRating: fetchedMentorRating } : {}),
           progress: progress,
           assignmentsCount: totalAssessments || prev?.assignmentsCount || 0,
           classesCount: totalSessions || prev?.classesCount || 0

@@ -1181,6 +1181,14 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
+  const formatExternalLink = (url) => {
+    if (!url || url === '#') return '#';
+    if (!/^https?:\/\//i.test(url)) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
   return (
     <div className="live-classroom-page">
       {/* Minimal top bar like inspo */}
@@ -1353,7 +1361,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           {new Date(message.classDate || (message.content && (() => { try { return JSON.parse(message.content).scheduled_date } catch (e) { return Date.now() } })())).toLocaleString()}
                         </div>
                         <a
-                          href={message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })())}
+                          href={formatExternalLink(message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })()))}
                           target="_blank"
                           rel="noreferrer"
                           className="assessment-view-btn"

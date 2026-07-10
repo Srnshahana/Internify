@@ -229,7 +229,7 @@ export const DashboardDataProvider = ({ children }) => {
                     .select(`
                         *,
                         courses (*, course_sessions (*)),
-                        mentors_details (mentor_id, name, profile_image, experience)
+                        mentors_details (mentor_id, name, profile_image, experience, rating)
                     `)
                     .eq('student_id', authId)
 
@@ -282,6 +282,7 @@ export const DashboardDataProvider = ({ children }) => {
                         mentor: mentor.name || 'Expert Mentor',
                         mentorImage: mentor.profile_image,
                         mentorExperience: mentor.experience,
+                        mentorRating: mentor.rating,
                         progress: sessionsFromDb.length > 0
                             ? Math.round((sessionsFromDb.filter(s => progressMap.get(String(s.id))).length / sessionsFromDb.length) * 100)
                             : (enrollment.progress || 0),
