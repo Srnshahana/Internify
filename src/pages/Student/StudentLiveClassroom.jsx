@@ -1180,12 +1180,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
         <div className="live-header-title-v2">{classroom.classroom_name || classroom.title}</div>
 
-        <div className={`live-status-badge ${subscriptionStatus}`}>
-          <div className="status-dot"></div>
-          {subscriptionStatus === 'SUBSCRIBED' ? 'Live' : 
-           subscriptionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
-        </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
           <button
             className="live-complete-btn-v2"
@@ -1463,7 +1457,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     ⋮
                   </button>
                   {activeMenuMessageId === message.id && (
-                    <div className="live-message-menu">
+                    <>
+                      <div 
+                        className="live-menu-overlay"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveMenuMessageId(null)
+                        }}
+                      />
+                      <div className="live-message-menu">
                       <button type="button" onClick={() => handleToggleHighlight(message.id)}>
                         {message.highlightColor ? 'Remove highlight' : 'Highlight'}
                       </button>
@@ -1497,6 +1499,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         Reply
                       </button>
                     </div>
+                    </>
                   )}
                 </div>
                 <div className="live-message-time">{message.time}</div>

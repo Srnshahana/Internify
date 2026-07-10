@@ -1053,6 +1053,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     try {
       console.log('📅 Scheduling Class...', scheduleClassData)
       const courseId = course?.course_id || course?.id
+      const studentId = course?.student_id || null
 
       // 2. Insert into scheduled_classes table
       const { data: classData, error: dbError } = await supabase
@@ -1061,6 +1062,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           course_id: courseId,
           session_id: activeSessionId,
           mentor_id: currentUserId,
+          student_id: studentId,
           title: scheduleClassData.title,
           scheduled_date: scheduleClassData.scheduled_date,
           meeting_link: scheduleClassData.meeting_link,
@@ -1852,7 +1854,15 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     ⋮
                   </button>
                   {activeMenuMessageId === message.id && (
-                    <div className="live-message-menu">
+                    <>
+                      <div 
+                        className="live-menu-overlay"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveMenuMessageId(null)
+                        }}
+                      />
+                      <div className="live-message-menu">
                       <button type="button" onClick={() => handleToggleHighlight(message.id)}>
                         {message.highlightColor ? 'Remove highlight' : 'Highlight'}
                       </button>
@@ -1886,6 +1896,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         Reply
                       </button>
                     </div>
+                    </>
                   )}
                 </div>
                 <div className="live-message-time">{message.time}</div>
