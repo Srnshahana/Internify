@@ -326,11 +326,17 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           }
 
           if (payload.eventType === 'INSERT') {
+            let replyToObj = null
+            if (newMessage.reply_to_id) {
+               const repliedMsg = prev.find(orig => String(orig.id) === String(newMessage.reply_to_id))
+               if (repliedMsg) replyToObj = { ...repliedMsg }
+            }
             const msgForState = {
               ...newMessage,
               from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
               type: newMessage.type || 'text',
-              time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+              time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+              replyTo: replyToObj
             }
             return [...prev, msgForState].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
           }
@@ -421,7 +427,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     if (chatFeedRef.current) {
       chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight
     }
-  }, [visibleMessages])
+  }, [messages.length, activeSessionId])
 
   // Fetch initial progress from course_session_progress
   useEffect(() => {
@@ -739,7 +745,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       id: tempId, 
       from: 'learner', 
       type: finalType,   
-      time: getCurrentTime()
+      time: getCurrentTime(),
+      replyTo: replyTo ? { ...replyTo } : null
     }
     setMessages(prev => [...prev, optimisticMsg])
     setMessageInput('')

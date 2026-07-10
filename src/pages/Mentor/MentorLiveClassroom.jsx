@@ -308,11 +308,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             inferredType = 'link'
           }
 
+          let replyToObj = null
+          if (newMessage.reply_to_id) {
+             const repliedMsg = prev.find(orig => String(orig.id) === String(newMessage.reply_to_id))
+             if (repliedMsg) replyToObj = { ...repliedMsg }
+          }
           const msgForState = {
             ...newMessage,
             from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
             type: inferredType,
-            time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime()
+            time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+            replyTo: replyToObj
           }
 
           if (optimisticMatchIndex !== -1) {
@@ -373,7 +379,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     if (chatFeedRef.current) {
       chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight
     }
-  }, [visibleMessages])
+  }, [messages.length, activeSessionId])
 
   // Fetch initial progress from course_session_progress
   useEffect(() => {
@@ -471,7 +477,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       id: Date.now(), // temporary ID
       from: 'learner', // Right side for YOU
       type: 'text',   // REQUIRED for UI to show the text
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      replyTo: replyTo ? { ...replyTo } : null
     }
     setMessages(prev => [...prev, optimisticMsg])
 
