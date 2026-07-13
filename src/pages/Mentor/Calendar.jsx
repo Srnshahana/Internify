@@ -90,7 +90,10 @@ function Calendar() {
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
   const handleJoin = (link) => {
-    if (link) window.open(link, '_blank')
+    if (link) {
+      const formattedLink = /^https?:\/\//i.test(link) ? link : `https://${link}`;
+      window.open(formattedLink, '_blank')
+    }
   }
 
   const handleRescheduleClick = (session) => {

@@ -542,7 +542,12 @@ function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, set
                       </button>
                       <button
                         className="session-btn session-btn-primary"
-                        onClick={() => session.meeting_link && window.open(session.meeting_link, '_blank')}
+                        onClick={() => {
+                          if (session.meeting_link) {
+                            const formattedLink = /^https?:\/\//i.test(session.meeting_link) ? session.meeting_link : `https://${session.meeting_link}`;
+                            window.open(formattedLink, '_blank');
+                          }
+                        }}
                         disabled={!session.meeting_link}
                         style={{ padding: '8px 16px', fontSize: '14px', opacity: session.meeting_link ? 1 : 0.5 }}
                       >

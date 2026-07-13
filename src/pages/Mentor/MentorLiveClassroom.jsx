@@ -2409,7 +2409,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                             <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                               {session.meeting_link && (
                                 <a
-                                  href={session.meeting_link}
+                                  href={formatExternalLink(session.meeting_link)}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn-primary"

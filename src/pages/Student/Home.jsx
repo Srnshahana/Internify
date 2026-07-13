@@ -951,7 +951,10 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                       {session.meeting_link ? (
                         <button
                           className="session-btn session-btn-primary"
-                          onClick={() => window.open(session.meeting_link, '_blank')}
+                          onClick={() => {
+                            const formattedLink = /^https?:\/\//i.test(session.meeting_link) ? session.meeting_link : `https://${session.meeting_link}`;
+                            window.open(formattedLink, '_blank');
+                          }}
                           style={{ padding: '8px 16px', fontSize: '14px' }}
                         >
                           Join
