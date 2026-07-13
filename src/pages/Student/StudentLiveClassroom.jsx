@@ -564,7 +564,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
-  const handleRescheduleConfirm = async (newDate, newTime, reason) => {
+  const handleRescheduleConfirm = async ({ newDate, newTime, reason }) => {
     try {
       if (!selectedSession) return;
 
@@ -2274,15 +2274,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                               </div>
                             </div>
                             <span style={{
-                              background: session.is_complete ? '#f1f5f9' : '#e0f2fe',
-                              color: session.is_complete ? '#64748b' : '#2a7eff',
-                              padding: '4px 8px',
+                              padding: '4px 10px',
+                              background: session.is_complete ? '#dcfce7' : (new Date().getTime() > new Date(session.scheduled_date).getTime() ? '#fef2f2' : '#e0f2fe'),
+                              color: session.is_complete ? '#166534' : (new Date().getTime() > new Date(session.scheduled_date).getTime() ? '#991b1b' : '#0369a1'),
                               borderRadius: '6px',
                               fontSize: '11px',
                               fontWeight: '600',
                               textTransform: 'uppercase'
                             }}>
-                              {session.is_complete ? 'Completed' : 'Upcoming'}
+                              {session.is_complete ? 'Completed' : (new Date().getTime() > new Date(session.scheduled_date).getTime() ? 'Missed' : 'Upcoming')}
                             </span>
                           </div>
 
@@ -2374,10 +2374,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn-primary"
-                                  style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none', padding: '8px 16px', fontSize: '13px' }}
+                                  style={{
+                                    flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none', padding: '8px 16px', fontSize: '13px',
+                                    ...(new Date().getTime() < new Date(session.scheduled_date).getTime() - 10 * 60000 ? { pointerEvents: 'none', opacity: 0.5 } : {})
+                                  }}
+                                  onClick={(e) => {
+                                    if (new Date().getTime() < new Date(session.scheduled_date).getTime() - 10 * 60000) {
+                                      e.preventDefault();
+                                      showModal('Too Early', 'You can only join the meeting 10 minutes before the scheduled time.', 'info');
+                                    }
+                                  }}
                                 >
                                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>video_call</span>
-                                  Join Meeting
+                                  {new Date().getTime() < new Date(session.scheduled_date).getTime() - 10 * 60000 ? 'Not Yet Started' : 'Join Meeting'}
                                 </a>
                               )}
                               <button
