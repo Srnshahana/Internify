@@ -1775,7 +1775,20 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                               width: '100%', textAlign: 'center', background: '#2a7eff', padding: '8px', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                             }}
                             onClick={() => {
-                              const sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                              let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                              if (!sessionToReschedule) {
+                                sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
+                              }
+                              if (!sessionToReschedule && classDateStr) {
+                                sessionToReschedule = {
+                                  id: message.session_id,
+                                  title: message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })()),
+                                  scheduled_date: classDateStr,
+                                  date: new Date(classDateStr).toLocaleDateString(),
+                                  time: new Date(classDateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                };
+                              }
+                              
                               if (sessionToReschedule) {
                                 localStorage.setItem('open_reschedule_session_id', sessionToReschedule.id);
                                 setSelectedSession(sessionToReschedule);
