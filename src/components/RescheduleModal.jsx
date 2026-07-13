@@ -99,8 +99,12 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                                     type="date"
                                     required
                                     value={newDate}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setNewDate(e.target.value)}
+                                    min={new Date().toLocaleDateString('en-CA')}
+                                    onInvalid={(e) => e.target.setCustomValidity('Please select a current or future date.')}
+                                    onInput={(e) => {
+                                        e.target.setCustomValidity('');
+                                        setNewDate(e.target.value);
+                                    }}
                                     style={{
                                         padding: '10px 12px 10px 40px',
                                         borderRadius: '8px',
