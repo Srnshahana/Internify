@@ -18,6 +18,28 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const getOriginalDate = () => sessionDetails.date || sessionDetails.original_date || 'Unknown Date';
+    const getOriginalTime = () => sessionDetails.time || sessionDetails.original_time || 'Unknown Time';
+    
+    const getNewDateTime = () => {
+        if (sessionDetails.rescheduled_date) {
+            return {
+                date: formatDate(sessionDetails.rescheduled_date),
+                time: formatTime(sessionDetails.rescheduled_date)
+            };
+        }
+        if (sessionDetails.new_date && sessionDetails.new_time) {
+            return {
+                date: formatDate(`${sessionDetails.new_date}T${sessionDetails.new_time}`),
+                time: formatTime(`${sessionDetails.new_date}T${sessionDetails.new_time}`)
+            };
+        }
+        return { date: 'Unknown Date', time: 'Unknown Time' };
+    };
+
+    const newDT = getNewDateTime();
+    const reason = sessionDetails.reschedule_reason || sessionDetails.reason;
+
     return (
         <div className="modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
             <div className="modal-content-centered" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', width: '90%' }}>
@@ -29,6 +51,9 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
                 </div>
 
                 <div className="reschedule-modal-body text-left">
+                    <p style={{ fontSize: '15px', color: '#1e293b', marginBottom: '4px', fontWeight: '600' }}>
+                        {sessionDetails.title || sessionDetails.classTitle || 'Live Class'}
+                    </p>
                     <p style={{ fontSize: '14px', color: '#475569', marginBottom: '20px' }}>
                         A reschedule has been requested for this session.
                     </p>
@@ -46,20 +71,20 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <div>
                                 <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Original Time</p>
-                                <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>{sessionDetails.date} at {sessionDetails.time}</p>
+                                <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>{getOriginalDate()} at {getOriginalTime()}</p>
                             </div>
                             <div>
                                 <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Proposed New Time</p>
                                 <p style={{ fontSize: '15px', fontWeight: '700', color: '#2a7eff', margin: 0 }}>
-                                    {formatDate(sessionDetails.rescheduled_date)} <br />
-                                    at {formatTime(sessionDetails.rescheduled_date)}
+                                    {newDT.date} <br />
+                                    at {newDT.time}
                                 </p>
                             </div>
-                            {sessionDetails.reschedule_reason && (
+                            {reason && (
                                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px', marginTop: '4px' }}>
                                     <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Reason</p>
                                     <p style={{ fontSize: '13px', color: '#475569', margin: 0, fontStyle: 'italic' }}>
-                                        "{sessionDetails.reschedule_reason}"
+                                        "{reason}"
                                     </p>
                                 </div>
                             )}

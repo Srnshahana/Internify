@@ -139,7 +139,6 @@ function Calendar() {
         .from('classes_enrolled')
         .select('id')
         .eq('course_id', selectedSession.course_id)
-        .eq('mentor_id', currentUserId)
 
       if (enrollError) throw enrollError
 
@@ -148,14 +147,15 @@ function Calendar() {
         return
       }
 
-      const rescheduleData = {
-        original_session_id: selectedSession.id,
-        new_date: newDate,
-        new_time: newTime,
-        reason: reason,
-        status: 'pending',
-        proposed_by: 'mentor'
-      }
+      const newScheduledDate = `${newDate}T${newTime}`;
+
+      const scheduleData = {
+        title: selectedSession.title,
+        scheduled_date: newScheduledDate,
+        link: selectedSession.meeting_link,
+        isRescheduled: true,
+        reason: reason
+      };
 
       // Propose to the first enrollment found (assuming 1-on-1 or batch leader?)
       // Implementation detail: we'll send it to ALL enrolled chats if it's a batch class.
@@ -167,22 +167,23 @@ function Calendar() {
             session_id: selectedSession.id,
             role: 'mentor',
             sender_id: Number(currentUserId),
-            content: JSON.stringify(rescheduleData),
-            type: 'reschedule_request',
+            content: JSON.stringify(scheduleData),
+            type: 'scheduled_class',
             read: false
           }])
       ))
 
       await Promise.all(insertPromises)
 
-      // Update the scheduled_classes table to set reschedule_request = true, reschedule_role = 'mentor', and store proposed date
+      // Update the scheduled_classes table directly to the new date
       const { error: updateError } = await supabase
         .from('scheduled_classes')
         .update({
-          reschedule_request: true,
-          reschedule_role: 'mentor',
-          rescheduled_date: `${newDate}T${newTime}`,
-          reschedule_reason: reason
+          scheduled_date: newScheduledDate,
+          reschedule_request: false,
+          reschedule_role: null,
+          rescheduled_date: null,
+          reschedule_reason: null
         })
         .eq('id', selectedSession.id)
 
@@ -191,13 +192,14 @@ function Calendar() {
       // Update local state
       setSessions(prev => prev.map(s => s.id === selectedSession.id ? {
         ...s,
-        reschedule_request: true,
-        reschedule_role: 'mentor',
-        rescheduled_date: `${newDate}T${newTime}`,
-        reschedule_reason: reason
+        scheduled_date: newScheduledDate,
+        reschedule_request: false,
+        reschedule_role: null,
+        rescheduled_date: null,
+        reschedule_reason: null
       } : s))
 
-      alert('Reschedule request sent to students!')
+      alert('Class successfully rescheduled!')
     } catch (err) {
       console.error('Error sending reschedule request:', err)
       alert('Failed to send reschedule request. Please try again.')
@@ -267,8 +269,8 @@ function Calendar() {
           role: 'mentor',
           sender_id: Number(currentUserId),
           content: isApproved
-            ? `Reschedule approved. The session is now set for ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
-            : `Reschedule request rejected.`,
+            ? `Reschedule request approved by mentor. The session is now set for ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+            : `Reschedule request rejected by mentor.`,
           type: 'text',
           read: false
         };

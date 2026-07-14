@@ -15096,7 +15096,6 @@ h1 span {
   overflow-y: auto;
   flex: 1;
   padding: 24px;
-  padding-bottom: 80px;
   min-height: 0;
   background: #000000;
 }
@@ -30172,8 +30171,8 @@ h1 span {
 /* Main Container - Light Theme */
 .live-classroom-page {
   background: #f8fafc !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
   max-width: none !important;
   align-items: stretch !important;
   position: fixed !important;
@@ -30331,18 +30330,7 @@ h1 span {
   transform: translateY(-2px) !important;
 }
 
-/* Assessment Card - Premium White */
-.live-assessment-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-}
 
-.assessment-card-header .assessment-badge {
-  background: rgba(12, 165, 233, 0.1) !important;
-  color: #41568c !important;
-  border: 1px solid rgba(12, 165, 233, 0.2) !important;
-}
 
 .assessment-card-title {
   color: #1e293b !important;

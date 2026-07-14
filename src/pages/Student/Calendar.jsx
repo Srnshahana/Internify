@@ -121,6 +121,9 @@ function Calendar() {
 
       const rescheduleData = {
         original_session_id: selectedSession.id,
+        title: selectedSession.title,
+        original_date: selectedSession.date,
+        original_time: selectedSession.time,
         new_date: newDate,
         new_time: newTime,
         reason: reason,
@@ -231,8 +234,8 @@ function Calendar() {
         role: 'student',
         sender_id: Number(currentUserId),
         content: isApproved
-          ? `Reschedule approved. The session is now set for ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
-          : `Reschedule request rejected.`,
+          ? `Reschedule request approved by student. The session is now set for ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+          : `Reschedule request rejected by student.`,
         type: 'text',
         read: false
       };

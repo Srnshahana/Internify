@@ -241,7 +241,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
             return {
               ...m,
-              from: m.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+              from: m.sender_id.toString() === currentUserId?.toString() ? 'mentor' : 'learner',
               type: inferredType,
               time: m.created_at ? new Date(m.created_at + (m.created_at.includes('Z') || m.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
               highlightColor: m.mentor_highlight || null,
@@ -272,17 +272,22 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         },
       })
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'messages',
         filter: `chat_id=eq.${chatId}`
       }, (payload) => {
         console.log('📥 NEW Realtime payload received:', payload)
-        const newMessage = payload.new
+        const newMessage = payload.new || payload.old
+        if (!newMessage) return;
 
         setMessages((prev) => {
-          // 1. Check if ID exists
-          if (prev.some(m => m.id === newMessage.id)) return prev
+          // 1. Check if ID exists and update if it's an UPDATE event
+          if (prev.some(m => m.id === newMessage.id)) {
+            return prev.map(m => m.id === newMessage.id ? { ...m, ...newMessage } : m);
+          }
+          
+          if (payload.eventType !== 'INSERT') return prev;
 
           // 2. Check if this payload is the "real" version of an optimistic message
           // (Matching content and sender and recent timestamp)
@@ -315,7 +320,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           }
           const msgForState = {
             ...newMessage,
-            from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+            from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'mentor' : 'learner',
             type: inferredType,
             time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
             replyTo: replyToObj
@@ -342,6 +347,15 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           return [...prev, { ...payload, from: 'learner' }].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
         })
       })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'scheduled_classes',
+        filter: course?.course_id || course?.id ? `course_id=eq.${course?.course_id || course?.id}` : undefined
+      }, (payload) => {
+        console.log('🔄 Realtime update for scheduled_classes:', payload)
+        fetchCourseSessions() // Trigger a re-fetch of sessions to ensure UI consistency
+      })
       .subscribe((status) => {
         console.log('📡 Subscription status update:', status)
         if (status === 'CHANNEL_ERROR') {
@@ -360,11 +374,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
   const [sessions, setSessions] = useState(initialSessions)
 
-  const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[1]
+  const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {}
   // Filter messages by activeSessionId
-  const visibleMessages = messages.filter(m =>
-    Number(m.session_id) === Number(activeSessionId)
-  )
+  const visibleMessages = messages.filter(m => {
+    if (m.type === 'reschedule_request' || m.type === 'scheduled_class') return true;
+    return Number(m.session_id) === Number(activeSessionId)
+  })
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
 
@@ -1386,36 +1401,43 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     try {
       if (!selectedSession) return;
 
-      const rescheduleData = {
-        original_session_id: selectedSession.id,
-        new_date: newDate,
-        new_time: newTime,
-        reason: reason,
-        status: 'pending',
-        proposed_by: 'mentor'
-      }
+      const newScheduledDate = `${newDate}T${newTime}`;
+
+      const scheduleData = {
+        title: selectedSession.title,
+        scheduled_date: newScheduledDate,
+        link: selectedSession.meeting_link,
+        isRescheduled: true,
+        reason: reason
+      };
 
       // Send to the current chat
-      await supabase
+      const { error: insertError } = await supabase
         .from('messages')
         .insert([{
           chat_id: Number(chatId),
           session_id: selectedSession.id,
           role: 'mentor',
           sender_id: Number(currentUserId),
-          content: JSON.stringify(rescheduleData),
-          type: 'reschedule_request',
+          content: JSON.stringify(scheduleData),
+          type: 'scheduled_class',
           read: false
         }])
 
-      // Update the scheduled_classes table
+      if (insertError) {
+        console.error('Error inserting scheduled_class message:', insertError);
+        throw insertError;
+      }
+
+      // Update the scheduled_classes table directly
       const { error: updateError } = await supabase
         .from('scheduled_classes')
         .update({
-          reschedule_request: true,
-          reschedule_role: 'mentor',
-          rescheduled_date: `${newDate}T${newTime}`,
-          reschedule_reason: reason
+          scheduled_date: newScheduledDate,
+          reschedule_request: false,
+          reschedule_role: null,
+          rescheduled_date: null,
+          reschedule_reason: null
         })
         .eq('id', selectedSession.id)
 
@@ -1476,14 +1498,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       if (schedError) throw schedError;
 
-      // 3. Send confirmation/rejection text message
+      // 3. Send confirmation/rejection message
       const textMsg = {
         chat_id: Number(chatId),
         session_id: Number(session.id),
         role: 'mentor',
         sender_id: Number(currentUserId),
         content: isApproved
-          ? `Reschedule approved. New time: ${new Date(session.rescheduled_date).toLocaleString()}`
+          ? `Reschedule request approved by mentor. New time: ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
           : `Reschedule request rejected by mentor.`,
         type: 'text',
         read: false
@@ -1580,7 +1602,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   };
 
   return (
-    <><div className="live-classroom-page">
+    <><div className="live-classroom-page" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', zIndex: 9999, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box' }}>
       {/* Minimal top bar like inspo */}
       {/* V2 Glass Header */}
       <header className="live-classroom-header-v2">
@@ -1643,18 +1665,18 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       </header>
 
       {/* Main chat area */}
-      <div className="live-main live-main-full">
+      <div className="live-main live-main-full" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
         <div className="live-session-label">{activeSession.title}</div>
 
-        <div className="live-chat-area">
-          <div className="live-chat-feed" ref={chatFeedRef}>
+        <div className="live-chat-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
+          <div className="live-chat-feed" ref={chatFeedRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px', boxSizing: 'border-box', width: '100%' }}>
             {visibleMessages.map((message) => (
               <div
                 key={message.id}
                 className={`live-message ${String(message.sender_id) === String(currentUserId) ? 'from-learner' : 'from-mentor'}`}
               >
                 <div
-                  className={`live-message-bubble ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
+                  className={`${['assessment', 'scheduled_class', 'reschedule_request'].includes(message.type) ? 'live-message-custom' : 'live-message-bubble'} ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
                     }`}
                 >
                   {message.replyTo && (
@@ -1746,28 +1768,60 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                   )}
                   {message.type === 'scheduled_class' && (() => {
-                    const classDateStr = message.classDate || (message.content && (() => { try { return JSON.parse(message.content).scheduled_date } catch (e) { return null } })());
+                    let contentObj = {};
+                    try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
+                    
+                    const classDateStr = message.classDate || contentObj?.scheduled_date;
                     const scheduledTime = classDateStr ? new Date(classDateStr).getTime() : null;
                     const now = new Date().getTime();
                     const tenMinsBefore = scheduledTime ? scheduledTime - 10 * 60000 : null;
                     const twentyFourHoursAfter = scheduledTime ? scheduledTime + 24 * 60 * 60000 : null;
                     const isExpired = scheduledTime ? now > twentyFourHoursAfter : false;
                     const isEarly = scheduledTime ? now < tenMinsBefore : false;
+                    const isRescheduled = contentObj?.isRescheduled;
+
+                    let borderColor = '#2a7eff';
+                    let bgColor = '#eff6ff';
+                    let badgeBg = '#dbeafe';
+                    let badgeColor = '#1d4ed8';
+                    let badgeText = 'Scheduled Class';
+                    let icon = '📅';
+
+                    if (isExpired) {
+                        borderColor = '#f87171';
+                        bgColor = '#fef2f2';
+                        badgeBg = '#fee2e2';
+                        badgeColor = '#991b1b';
+                        badgeText = 'Expired';
+                        icon = '⌛';
+                    } else if (isRescheduled) {
+                        borderColor = '#8b5cf6';
+                        bgColor = '#f5f3ff';
+                        badgeBg = '#ede9fe';
+                        badgeColor = '#6d28d9';
+                        badgeText = 'Class Rescheduled';
+                        icon = '🔄';
+                    }
 
                     return (
-                    <div className="live-assessment-card" style={{ borderColor: isExpired ? '#f87171' : '#2a7eff', background: isExpired ? '#fef2f2' : '#eff6ff' }}>
+                    <div className="live-assessment-card" style={{ borderLeft: `4px solid ${borderColor}`, background: bgColor, minWidth: '240px' }}>
                       <div className="assessment-card-header">
-                        <div className="assessment-icon">📅</div>
-                        <div className="assessment-badge" style={{ background: isExpired ? '#fee2e2' : '#dbeafe', color: isExpired ? '#991b1b' : '#1d4ed8' }}>
-                          {isExpired ? 'Expired' : 'Scheduled Class'}
+                        <div className="assessment-icon">{icon}</div>
+                        <div className="assessment-badge" style={{ background: badgeBg, color: badgeColor }}>
+                          {badgeText}
                         </div>
                       </div>
-                      <h4 className="assessment-card-title">{message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })())}</h4>
+                      <h4 className="assessment-card-title">{message.classTitle || contentObj?.title || 'Live Class'}</h4>
                       <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#475569' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
-                          {classDateStr ? new Date(classDateStr).toLocaleString() : 'No date'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
+                          {classDateStr ? new Date(classDateStr).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
                         </div>
+                        {isRescheduled && contentObj?.reason && (
+                          <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#ffffff80', padding: '6px', borderRadius: '4px', width: '100%', marginTop: '4px' }}>
+                            "{contentObj.reason}"
+                          </div>
+                        )}
                         {isExpired ? (
                           <button
                             className="btn-primary"
@@ -1828,37 +1882,123 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                   {message.type === 'reschedule_request' && (() => {
                     try {
                       const data = JSON.parse(message.content);
-                      if (data.status !== 'pending') return null;
+                      
+                      const isPending = data.status === 'pending';
+                      const isApproved = data.status === 'approved';
+                      const isRejected = data.status === 'rejected';
+
+                      let borderColor = '#f59e0b';
+                      let bgColor = '#fffef3';
+                      let badgeBg = '#fef3c7';
+                      let badgeColor = '#92400e';
+                      let badgeText = 'Reschedule Request';
+                      let icon = '⏳';
+
+                      if (isApproved) {
+                        borderColor = '#22c55e';
+                        bgColor = '#f0fdf4';
+                        badgeBg = '#dcfce7';
+                        badgeColor = '#166534';
+                        badgeText = 'Reschedule Approved';
+                        icon = '✅';
+                      } else if (isRejected) {
+                        borderColor = '#ef4444';
+                        bgColor = '#fef2f2';
+                        badgeBg = '#fee2e2';
+                        badgeColor = '#991b1b';
+                        badgeText = 'Reschedule Rejected';
+                        icon = '❌';
+                      }
+
                       return (
                         <div
                           className="live-assessment-card"
                           style={{
-                            borderLeft: '4px solid #f59e0b',
-                            background: '#fffef3',
+                            borderLeft: `4px solid ${borderColor}`,
+                            background: bgColor,
                             minWidth: '240px',
-                            cursor: 'pointer'
+                            cursor: isPending ? 'pointer' : 'default',
+                            opacity: isPending ? 1 : 0.8
                           }}
                           onClick={() => {
-                            localStorage.setItem('open_reschedule_session_id', message.session_id);
-                            if (onNavigate) onNavigate('Calendar');
+                            if (!isPending) return;
+                            const data = JSON.parse(message.content);
+                            const foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                            setSelectedSession(foundSession || {
+                                id: message.session_id,
+                                title: data.title,
+                                date: data.original_date,
+                                time: data.original_time,
+                                ...data 
+                            });
+                            setIsResponseModalOpen(true);
                           }}
                         >
                           <div className="assessment-card-header">
-                            <div className="assessment-icon">⏳</div>
-                            <div className="assessment-badge" style={{ background: '#fef3c7', color: '#92400e' }}>Reschedule Request</div>
+                            <div className="assessment-icon">{icon}</div>
+                            <div className="assessment-badge" style={{ background: badgeBg, color: badgeColor }}>{badgeText}</div>
                           </div>
-                          <h4 className="assessment-card-title">New Proposed Time</h4>
+                          <h4 className="assessment-card-title">{data.title || 'Live Class'}</h4>
                           <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                            <div style={{ fontSize: '14px', color: '#475569' }}>
-                              <strong>Date:</strong> {new Date(data.new_date).toLocaleDateString()}
-                            </div>
-                            <div style={{ fontSize: '14px', color: '#475569' }}>
-                              <strong>Time:</strong> {data.new_time}
+                            <div style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>New Proposed Time:</div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                              <div style={{ fontSize: '14px', color: '#1e293b' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'text-bottom', marginRight: '4px' }}>event</span>
+                                {new Date(data.new_date).toLocaleDateString()}
+                              </div>
+                              <div style={{ fontSize: '14px', color: '#1e293b' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'text-bottom', marginRight: '4px' }}>schedule</span>
+                                {data.new_time}
+                              </div>
                             </div>
                             {data.reason && (
                               <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '6px', borderRadius: '4px', width: '100%' }}>
                                 "{data.reason}"
                               </div>
+                            )}
+                            {isPending && (
+                              String(message.sender_id) === String(currentUserId) ? (
+                                <div style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '500', marginTop: '8px', textAlign: 'center' }}>
+                                  Waiting for Student to respond...
+                                </div>
+                              ) : (
+                                <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
+                                  <button
+                                    className="btn-primary"
+                                    style={{
+                                      flex: 1, padding: '8px', fontSize: '13px', borderRadius: '6px', background: '#22c55e', border: 'none', color: 'white', cursor: 'pointer'
+                                    }}
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        let foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                                        if (!foundSession) {
+                                            const { data: dbSession } = await supabase.from('scheduled_classes').select('*').eq('id', message.session_id).single();
+                                            if (dbSession) foundSession = dbSession;
+                                        }
+                                        if (foundSession) handleRescheduleResponse(foundSession, 'approve');
+                                    }}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    className="btn-secondary"
+                                    style={{
+                                      flex: 1, padding: '8px', fontSize: '13px', borderRadius: '6px', background: '#ef4444', border: 'none', color: 'white', cursor: 'pointer'
+                                    }}
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        let foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                                        if (!foundSession) {
+                                            const { data: dbSession } = await supabase.from('scheduled_classes').select('*').eq('id', message.session_id).single();
+                                            if (dbSession) foundSession = dbSession;
+                                        }
+                                        if (foundSession) handleRescheduleResponse(foundSession, 'reject');
+                                    }}
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              )
                             )}
                           </div>
                         </div>
@@ -2381,7 +2521,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                               filter: session.is_complete ? 'grayscale(0.5)' : 'none'
                             }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
                               <div style={{ flex: 1 }}>
                                 <h4 style={{ margin: '0 0 4px 0', color: '#1e293b' }}>{session.title}</h4>
                                 <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: '#64748b' }}>
@@ -2434,9 +2574,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                   <button
                                     className="btn-primary"
                                     style={{
-                                      width: '100%',
-                                      padding: '8px',
-                                      fontSize: '12px',
+                                      padding: '8px 16px',
+                                      fontSize: '13px',
                                       background: '#2a7eff',
                                       border: 'none',
                                       borderRadius: '6px',
@@ -2444,7 +2583,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                       cursor: 'pointer',
                                       display: 'flex',
                                       alignItems: 'center',
-                                      justifyContent: 'center',
                                       gap: '6px'
                                     }}
                                     onClick={() => {
@@ -2461,9 +2599,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                   <button
                                     className="btn-secondary"
                                     style={{
-                                      width: '100%',
-                                      padding: '8px',
-                                      fontSize: '12px',
+                                      padding: '8px 16px',
+                                      fontSize: '13px',
                                       background: '#f1f5f9',
                                       border: '1px solid #e2e8f0',
                                       borderRadius: '6px',
@@ -2471,7 +2608,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                       cursor: 'pointer',
                                       display: 'flex',
                                       alignItems: 'center',
-                                      justifyContent: 'center',
                                       gap: '6px'
                                     }}
                                     onClick={() => {
@@ -2489,15 +2625,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                             )}
 
                             {!session.is_complete && !session.reschedule_request && (
-                              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                              <div style={{ display: 'flex', gap: '8px', marginTop: '12px', width: '100%', justifyContent: 'flex-end' }}>
                                 {session.meeting_link && (
                                   <a
                                     href={formatExternalLink(session.meeting_link)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="btn-primary"
                                     style={{
-                                      flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none', padding: '8px 16px', fontSize: '13px',
+                                      background: isExpired ? '#94a3b8' : '#2a7eff',
+                                      color: 'white',
+                                      borderRadius: '6px',
+                                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none', padding: '8px 16px', fontSize: '13px',
                                       ...((isEarly || isExpired) ? { pointerEvents: 'none', opacity: 0.5 } : {})
                                     }}
                                     onClick={(e) => {
@@ -2514,11 +2652,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                   </a>
                                 )}
                                 <button
-                                  className={isExpired ? "btn-primary" : "btn-secondary"}
                                   style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    fontSize: '12px',
+                                    padding: '8px 16px',
+                                    fontSize: '13px',
                                     background: isExpired ? '#2a7eff' : 'white',
                                     border: isExpired ? 'none' : '1px solid #e2e8f0',
                                     borderRadius: '6px',
