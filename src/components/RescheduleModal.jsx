@@ -5,20 +5,24 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
     const [newTime, setNewTime] = useState('');
     const [reason, setReason] = useState('');
 
+    let originalDate = '';
+    let originalTime = '';
+    if (sessionDetails?.scheduled_date) {
+        const dateObj = new Date(sessionDetails.scheduled_date);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        originalDate = `${year}-${month}-${day}`;
+        
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        originalTime = `${hours}:${minutes}`;
+    }
+
     React.useEffect(() => {
-        if (sessionDetails?.scheduled_date) {
-            const dateObj = new Date(sessionDetails.scheduled_date);
-
-            // Format YYYY-MM-DD for <input type="date">
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            setNewDate(`${year}-${month}-${day}`);
-
-            // Format HH:mm for <input type="time">
-            const hours = String(dateObj.getHours()).padStart(2, '0');
-            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-            setNewTime(`${hours}:${minutes}`);
+        if (originalDate && originalTime) {
+            setNewDate(originalDate);
+            setNewTime(originalTime);
         } else {
             setNewDate('');
             setNewTime('');
@@ -30,6 +34,12 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        if (newDate === originalDate && newTime === originalTime) {
+            alert("Please choose a new date or time to reschedule.");
+            return;
+        }
+        
         onConfirm({ newDate, newTime, reason });
         onClose();
     };
@@ -172,10 +182,11 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Reason (Optional)</label>
+                            <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Reason</label>
                             <textarea
                                 placeholder="E.g., Medical emergency, power outage..."
                                 value={reason}
+                                required
                                 onChange={(e) => setReason(e.target.value)}
                                 style={{
                                     padding: '10px 12px',

@@ -90,10 +90,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   }, [showAssessmentListModal])
 
   useEffect(() => {
-    if (showSessionsModal) {
+    if (course?.course_id || course?.id) {
       fetchCourseSessions()
     }
-  }, [showSessionsModal])
+  }, [course?.course_id, course?.id])
 
   const fetchCourseSessions = async () => {
     try {
@@ -470,9 +470,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0]
   // Filter messages by activeSessionId, but always show system notifications if the session still exists
-  const visibleMessages = messages.filter(m =>
-    String(m.session_id) === String(activeSessionId) || m.type === 'reschedule_request' || m.type === 'scheduled_class'
-  )
+  const visibleMessages = messages.filter(m => {
+    if (String(m.session_id) === String(activeSessionId)) return true;
+    
+    // Backwards compatibility for messages inserted with the scheduled_classes.id instead of course_sessions.id
+    const scheduledClass = courseSessions?.find(s => String(s.session_id) === String(activeSessionId));
+    if (scheduledClass && String(m.session_id) === String(scheduledClass.id)) return true;
+    
+    return false;
+  })
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
 
@@ -572,36 +578,44 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         String(m.id) === String(message.id) ? { ...m, content: JSON.stringify(updatedData) } : m
       ));
 
+      // 1.5 Find the correct scheduled_classes ID
+      let targetId = data.original_session_id;
+      
+      const { data: byId } = await supabase.from('scheduled_classes').select('id').eq('id', targetId).single();
+      if (!byId) {
+          const { data: bySessionId } = await supabase.from('scheduled_classes').select('id').eq('session_id', targetId).single();
+          if (bySessionId) {
+              targetId = bySessionId.id;
+          }
+      }
+
       // 2. If approved, update the scheduled_classes table
       if (isApproved) {
         const { error: schedError } = await supabase
           .from('scheduled_classes')
           .update({
-            scheduled_date: `${data.new_date}T${data.new_time}`
-          })
-          .eq('id', data.original_session_id);
-
-        if (schedError) throw schedError;
-
-        // Reset all reschedule flags regardless of approval/rejection (it's handled now)
-        await supabase
-          .from('scheduled_classes')
-          .update({
+            scheduled_date: `${data.new_date}T${data.new_time}`,
             reschedule_request: false,
             reschedule_role: null,
             rescheduled_date: null,
             reschedule_reason: null
           })
-          .eq('id', data.original_session_id);
+          .eq('id', targetId);
+
+        if (schedError) {
+            console.error("Failed to update scheduled_classes:", schedError);
+            throw schedError;
+        }
       } else {
         // Reset the reschedule_request flag
         await supabase
           .from('scheduled_classes')
           .update({ reschedule_request: false, reschedule_role: null, rescheduled_date: null })
-          .eq('id', data.original_session_id);
+          .eq('id', targetId);
       }
 
       showModal('Success', `Reschedule ${action}d successfully!`, 'success');
+      fetchCourseSessions();
     } catch (err) {
       console.error('Error handling reschedule action:', err);
       showModal('Error', 'Failed to process reschedule action.', 'error');
@@ -625,22 +639,35 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       }
 
       // Send to the current chat
-      const { error: msgInsertError } = await supabase
-        .from('messages')
-        .insert([{
+      const messagePayload = {
           chat_id: Number(chatId),
-          session_id: selectedSession.id,
+          session_id: selectedSession.session_id || selectedSession.sessionId || activeSessionId,
           role: 'student',
           sender_id: Number(currentUserId),
           content: JSON.stringify(rescheduleData),
           type: 'reschedule_request',
           read: false
-        }]);
+      };
+
+      const { data: insertedMsg, error: msgInsertError } = await supabase
+        .from('messages')
+        .insert([messagePayload])
+        .select()
+        .single();
 
       if (msgInsertError) {
         console.error('Error inserting reschedule message:', msgInsertError);
         throw msgInsertError;
       }
+
+      const newMsgObj = { ...insertedMsg, from: 'learner', time: getCurrentTime() };
+      setMessages(prev => [...prev, newMsgObj]);
+
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'chat-message',
+        payload: { ...newMsgObj, from: 'student' } 
+      });
 
       // Update the scheduled_classes table
       const { error: updateError } = await supabase
@@ -1404,6 +1431,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
                     
+                    let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                    if (!sessionToReschedule) {
+                      sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
+                    }
+
                     const classDateStr = message.classDate || contentObj?.scheduled_date;
                     const scheduledTime = classDateStr ? new Date(classDateStr).getTime() : null;
                     const now = new Date().getTime();
@@ -1462,14 +1494,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                               width: '100%', textAlign: 'center', background: '#2a7eff', padding: '8px', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                             }}
                             onClick={() => {
-                              let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
-                              if (!sessionToReschedule) {
-                                sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
-                              }
                               if (!sessionToReschedule && classDateStr) {
                                 sessionToReschedule = {
                                   id: message.session_id,
-                                  title: message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })()),
+                                  title: message.classTitle || contentObj?.title || 'Live Class',
                                   scheduled_date: classDateStr,
                                   date: new Date(classDateStr).toLocaleDateString(),
                                   time: new Date(classDateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -1490,7 +1518,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           </button>
                         ) : (
                           <a
-                            href={formatExternalLink(message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })()))}
+                            href={formatExternalLink(message.classLink || contentObj?.meeting_link || contentObj?.link || sessionToReschedule?.meeting_link || '#')}
                             target="_blank"
                             rel="noreferrer"
                             className="assessment-view-btn"

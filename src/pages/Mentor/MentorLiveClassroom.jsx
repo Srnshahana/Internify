@@ -86,10 +86,10 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   }, [showAssessmentListModal])
 
   useEffect(() => {
-    if (showSessionsModal) {
+    if (course?.course_id || course?.id) {
       fetchCourseSessions()
     }
-  }, [showSessionsModal])
+  }, [course?.course_id, course?.id])
 
   const fetchCourseSessions = async () => {
     try {
@@ -418,8 +418,13 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {}
   // Filter messages by activeSessionId
   const visibleMessages = messages.filter(m => {
-    if (m.type === 'reschedule_request' || m.type === 'scheduled_class') return true;
-    return Number(m.session_id) === Number(activeSessionId)
+    if (Number(m.session_id) === Number(activeSessionId)) return true;
+    
+    // Backwards compatibility for messages inserted with the scheduled_classes.id instead of course_sessions.id
+    const scheduledClass = courseSessions?.find(s => Number(s.session_id) === Number(activeSessionId));
+    if (scheduledClass && Number(m.session_id) === Number(scheduledClass.id)) return true;
+    
+    return false;
   })
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
@@ -1377,61 +1382,45 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       if (msgError) throw msgError;
 
+      // 1.5 Find the correct scheduled_classes ID
+      let targetId = data.original_session_id;
+      
+      const { data: byId } = await supabase.from('scheduled_classes').select('id').eq('id', targetId).single();
+      if (!byId) {
+          const { data: bySessionId } = await supabase.from('scheduled_classes').select('id').eq('session_id', targetId).single();
+          if (bySessionId) {
+              targetId = bySessionId.id;
+          }
+      }
+
       // 2. If approved, update the scheduled_classes table
       if (isApproved) {
         const { error: schedError } = await supabase
           .from('scheduled_classes')
           .update({
-            scheduled_date: `${data.new_date}T${data.new_time}`
-          })
-          .eq('id', data.original_session_id);
-
-        if (schedError) throw schedError;
-
-        // Reset the reschedule_request flag regardless of approval/rejection (it's handled now)
-        await supabase
-          .from('scheduled_classes')
-          .update({
+            scheduled_date: `${data.new_date}T${data.new_time}`,
             reschedule_request: false,
             reschedule_role: null,
             rescheduled_date: null,
             reschedule_reason: null
           })
-          .eq('id', data.original_session_id);
+          .eq('id', targetId);
 
-        // 3. Send a confirmation message
-        const confirmationMsg = {
-          chat_id: Number(chatId),
-          session_id: Number(activeSessionId),
-          role: 'mentor',
-          sender_id: Number(currentUserId),
-          content: `Reschedule ${action}d. The session is now set for ${new Date(data.new_date).toLocaleDateString()} at ${data.new_time}.`,
-          type: 'text',
-          read: false
+        if (schedError) {
+            console.error("Failed to update scheduled_classes:", schedError);
+            throw schedError;
         }
 
-        await supabase.from('messages').insert([confirmationMsg]);
       } else {
-        // Send rejection message
-        const rejectionMsg = {
-          chat_id: Number(chatId),
-          session_id: Number(activeSessionId),
-          role: 'mentor',
-          sender_id: Number(currentUserId),
-          content: `Reschedule request rejected.`,
-          type: 'text',
-          read: false
-        }
-        await supabase.from('messages').insert([rejectionMsg]);
-
         // Reset the reschedule_request flag on rejection
         await supabase
           .from('scheduled_classes')
           .update({ reschedule_request: false, reschedule_role: null, rescheduled_date: null })
-          .eq('id', data.original_session_id);
+          .eq('id', targetId);
       }
 
       showModal('Success', `Reschedule ${action}d successfully!`, 'success');
+      fetchCourseSessions();
     } catch (err) {
       console.error('Error handling reschedule action:', err);
       showModal('Error', 'Failed to process reschedule action.', 'error');
@@ -1457,7 +1446,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         .from('messages')
         .insert([{
           chat_id: Number(chatId),
-          session_id: selectedSession.id,
+          session_id: selectedSession.session_id || selectedSession.sessionId || activeSessionId,
           role: 'mentor',
           sender_id: Number(currentUserId),
           content: JSON.stringify(scheduleData),
@@ -1803,6 +1792,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
                     
+                    let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                    if (!sessionToReschedule) {
+                      sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
+                    }
+
                     const classDateStr = message.classDate || contentObj?.scheduled_date;
                     const scheduledTime = classDateStr ? new Date(classDateStr).getTime() : null;
                     const now = new Date().getTime();
@@ -1861,14 +1855,10 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                               width: '100%', textAlign: 'center', background: '#2a7eff', padding: '8px', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                             }}
                             onClick={() => {
-                              let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
-                              if (!sessionToReschedule) {
-                                sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
-                              }
                               if (!sessionToReschedule && classDateStr) {
                                 sessionToReschedule = {
                                   id: message.session_id,
-                                  title: message.classTitle || (message.content && (() => { try { return JSON.parse(message.content).title } catch (e) { return 'Live Class' } })()),
+                                  title: message.classTitle || contentObj?.title || 'Live Class',
                                   scheduled_date: classDateStr,
                                   date: new Date(classDateStr).toLocaleDateString(),
                                   time: new Date(classDateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -1889,7 +1879,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                           </button>
                         ) : (
                           <a
-                            href={formatExternalLink(message.classLink || (message.content && (() => { try { return JSON.parse(message.content).meeting_link } catch (e) { return '#' } })()))}
+                            href={formatExternalLink(message.classLink || contentObj?.meeting_link || contentObj?.link || sessionToReschedule?.meeting_link || '#')}
                             target="_blank"
                             rel="noreferrer"
                             className="assessment-view-btn"
@@ -2000,14 +1990,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                     style={{
                                       flex: 1, padding: '8px', fontSize: '13px', borderRadius: '6px', background: '#22c55e', border: 'none', color: 'white', cursor: 'pointer'
                                     }}
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        let foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id));
-                                        if (!foundSession) {
-                                            const { data: dbSession } = await supabase.from('scheduled_classes').select('*').eq('id', message.session_id).single();
-                                            if (dbSession) foundSession = dbSession;
-                                        }
-                                        if (foundSession) handleRescheduleResponse(foundSession, 'approve');
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRescheduleAction(message, 'approve');
                                     }}
                                   >
                                     Approve
@@ -2017,14 +2002,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                                     style={{
                                       flex: 1, padding: '8px', fontSize: '13px', borderRadius: '6px', background: '#ef4444', border: 'none', color: 'white', cursor: 'pointer'
                                     }}
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        let foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id));
-                                        if (!foundSession) {
-                                            const { data: dbSession } = await supabase.from('scheduled_classes').select('*').eq('id', message.session_id).single();
-                                            if (dbSession) foundSession = dbSession;
-                                        }
-                                        if (foundSession) handleRescheduleResponse(foundSession, 'reject');
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRescheduleAction(message, 'reject');
                                     }}
                                   >
                                     Reject
