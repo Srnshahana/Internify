@@ -391,7 +391,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             time: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
           };
 
-          setCourseSessions(prev => {
+          setScheduledClasses(prev => {
              let updated = [...prev];
              const idx = updated.findIndex(s => String(s.id) === String(newRow.id));
              if (idx > -1) {
@@ -405,14 +405,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
              });
              return updated;
           });
-
-          setSessions(prev => prev.map(session => {
-             const sid = String(session.id || session.sessionId);
-             if (String(newRow.session_id) === sid) {
-                return { ...session, ...mappedRow, id: session.id || session.sessionId };
-             }
-             return session;
-          }));
         }
       })
       .subscribe((status) => {
@@ -1865,7 +1857,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                             "{contentObj.reason}"
                           </div>
                         )}
-                        {isExpired ? (
+                        {isExpired && (
                           <button
                             className="btn-primary"
                             style={{
@@ -1894,25 +1886,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_month</span>
                             Reschedule
                           </button>
-                        ) : (
-                          <a
-                            href={formatExternalLink(message.classLink || contentObj?.meeting_link || contentObj?.link || sessionToReschedule?.meeting_link || '#')}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="assessment-view-btn"
-                            style={{
-                              width: '100%', textAlign: 'center', textDecoration: 'none', background: '#2a7eff',
-                              ...(isEarly ? { pointerEvents: 'none', opacity: 0.5 } : {})
-                            }}
-                            onClick={(e) => {
-                              if (isEarly) {
-                                e.preventDefault();
-                                showModal('Too Early', 'You can only join the meeting 10 minutes before the scheduled time.', 'info');
-                              }
-                            }}
-                          >
-                            {isEarly ? 'Not Yet Started' : 'Join Class'}
-                          </a>
                         )}
                       </div>
                     </div>
