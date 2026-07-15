@@ -122,6 +122,16 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         });
 
         setCourseSessions(mapped)
+
+        // Also sync the local sessions state so the bottom bar and activeSession update instantly without reload
+        setSessions(prevSessions => prevSessions.map(session => {
+          const sid = String(session.id || session.sessionId);
+          const updatedSession = mapped.find(m => String(m.session_id) === sid);
+          if (updatedSession) {
+            return { ...session, ...updatedSession, id: session.id || session.sessionId };
+          }
+          return session;
+        }))
       }
     } catch (err) {
       console.error('Error fetching course sessions:', err)
@@ -321,27 +331,41 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         if (String(newMessage?.chat_id) !== String(chatId)) return
 
         setMessages((prev) => {
-          // Deduplicate by database ID or temp trace ID
-          if (prev.some(m => String(m.id) === String(newMessage.id) || (m.tempId && m.tempId === newMessage.tempId))) {
-            return prev.map(m => (m.tempId === newMessage.tempId || String(m.id) === String(newMessage.id)) ? { ...m, ...newMessage, tempId: undefined } : m)
+          // 1. Check if ID exists and update if it's an UPDATE event
+          if (prev.some(m => String(m.id) === String(newMessage.id))) {
+            return prev.map(m => String(m.id) === String(newMessage.id) ? { ...m, ...newMessage, tempId: undefined } : m)
           }
 
-          if (payload.eventType === 'INSERT') {
-            let replyToObj = null
-            if (newMessage.reply_to_id) {
-               const repliedMsg = prev.find(orig => String(orig.id) === String(newMessage.reply_to_id))
-               if (repliedMsg) replyToObj = { ...repliedMsg }
-            }
-            const msgForState = {
-              ...newMessage,
-              from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
-              type: newMessage.type || 'text',
-              time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
-              replyTo: replyToObj
-            }
-            return [...prev, msgForState].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
+          if (payload.eventType !== 'INSERT') return prev;
+
+          let replyToObj = null
+          if (newMessage.reply_to_id) {
+             const repliedMsg = prev.find(orig => String(orig.id) === String(newMessage.reply_to_id))
+             if (repliedMsg) replyToObj = { ...repliedMsg }
           }
-          return prev
+          
+          const msgForState = {
+            ...newMessage,
+            from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
+            type: newMessage.type || 'text',
+            time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
+            replyTo: replyToObj
+          }
+
+          // 2. Check if this payload is the "real" version of an optimistic message
+          const optimisticMatchIndex = prev.findIndex(m =>
+            m.content === newMessage.content &&
+            String(m.sender_id) === String(newMessage.sender_id) &&
+            Number(m.id) > 1700000000000 // Treat as number, handles Date.now() strings and numbers
+          )
+
+          if (optimisticMatchIndex !== -1) {
+            const newState = [...prev]
+            newState[optimisticMatchIndex] = { ...newState[optimisticMatchIndex], ...msgForState }
+            return newState
+          }
+
+          return [...prev, msgForState].sort((a, b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id))
         })
       })
       .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
@@ -358,7 +382,38 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         filter: course?.course_id || course?.id ? `course_id=eq.${course?.course_id || course?.id}` : undefined
       }, (payload) => {
         console.log('🔄 Realtime update for scheduled_classes:', payload)
-        fetchCourseSessions() // Trigger a re-fetch of sessions to ensure UI consistency
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+          const newRow = payload.new;
+          if (!newRow) return;
+          const mappedRow = {
+            ...newRow,
+            date: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleDateString() : '',
+            time: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+          };
+
+          setCourseSessions(prev => {
+             let updated = [...prev];
+             const idx = updated.findIndex(s => String(s.id) === String(newRow.id));
+             if (idx > -1) {
+                updated[idx] = { ...updated[idx], ...mappedRow };
+             } else {
+                updated.push(mappedRow);
+             }
+             updated.sort((a, b) => {
+               if (a.is_complete === b.is_complete) return 0;
+               return a.is_complete ? 1 : -1;
+             });
+             return updated;
+          });
+
+          setSessions(prev => prev.map(session => {
+             const sid = String(session.id || session.sessionId);
+             if (String(newRow.session_id) === sid) {
+                return { ...session, ...mappedRow, id: session.id || session.sessionId };
+             }
+             return session;
+          }));
+        }
       })
       .subscribe((status) => {
         console.log(`🔌 Student Subscription status for chat ${chatId}:`, status)
@@ -511,6 +566,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         .eq('id', message.id);
 
       if (msgError) throw msgError;
+      
+      // Optimistic UI Update for Student
+      setMessages(prev => prev.map(m => 
+        String(m.id) === String(message.id) ? { ...m, content: JSON.stringify(updatedData) } : m
+      ));
 
       // 2. If approved, update the scheduled_classes table
       if (isApproved) {
@@ -533,31 +593,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             reschedule_reason: null
           })
           .eq('id', data.original_session_id);
-
-        // 3. Send a confirmation message
-        const confirmationMsg = {
-          chat_id: Number(chatId),
-          session_id: Number(data.original_session_id),
-          role: 'student',
-          sender_id: Number(currentUserId),
-          content: `Reschedule request approved by student. New time: ${new Date(data.new_date).toLocaleDateString()} at ${data.new_time}`,
-          type: 'text',
-          read: false
-        };
-        await supabase.from('messages').insert([confirmationMsg]);
       } else {
-        // Send rejection message
-        const rejectionMsg = {
-          chat_id: chatId,
-          session_id: activeSessionId,
-          role: 'student',
-          sender_id: currentUserId,
-          content: `Reschedule request rejected by student.`,
-          type: 'text',
-          read: false
-        };
-        await supabase.from('messages').insert([rejectionMsg]);
-
         // Reset the reschedule_request flag
         await supabase
           .from('scheduled_classes')
@@ -1643,7 +1679,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  {message.type !== 'scheduled_class' && (
+                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && (
                     <>
                       <button
                         type="button"

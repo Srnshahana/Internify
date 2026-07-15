@@ -116,6 +116,16 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           return a.is_complete ? 1 : -1;
         });
         setCourseSessions(mapped)
+
+        // Also sync the local sessions state so the bottom bar and activeSession update instantly without reload
+        setSessions(prevSessions => prevSessions.map(session => {
+          const sid = String(session.id || session.sessionId);
+          const updatedSession = mapped.find(m => String(m.session_id) === sid);
+          if (updatedSession) {
+            return { ...session, ...updatedSession, id: session.id || session.sessionId };
+          }
+          return session;
+        }))
       }
     } catch (err) {
       console.error('Error fetching course sessions:', err)
@@ -283,8 +293,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
         setMessages((prev) => {
           // 1. Check if ID exists and update if it's an UPDATE event
-          if (prev.some(m => m.id === newMessage.id)) {
-            return prev.map(m => m.id === newMessage.id ? { ...m, ...newMessage } : m);
+          if (prev.some(m => String(m.id) === String(newMessage.id))) {
+            return prev.map(m => String(m.id) === String(newMessage.id) ? { ...m, ...newMessage } : m);
           }
           
           if (payload.eventType !== 'INSERT') return prev;
@@ -293,8 +303,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           // (Matching content and sender and recent timestamp)
           const optimisticMatchIndex = prev.findIndex(m =>
             m.content === newMessage.content &&
-            m.sender_id === newMessage.sender_id &&
-            typeof m.id === 'number' && m.id > 1700000000000 // Simple check for Date.now() style IDs
+            String(m.sender_id) === String(newMessage.sender_id) &&
+            Number(m.id) > 1700000000000 // Treat as number, handles Date.now() strings and numbers
           )
 
           // Infer type from file_url or content if type is missing from DB
@@ -354,7 +364,38 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         filter: course?.course_id || course?.id ? `course_id=eq.${course?.course_id || course?.id}` : undefined
       }, (payload) => {
         console.log('🔄 Realtime update for scheduled_classes:', payload)
-        fetchCourseSessions() // Trigger a re-fetch of sessions to ensure UI consistency
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+          const newRow = payload.new;
+          if (!newRow) return;
+          const mappedRow = {
+            ...newRow,
+            date: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleDateString() : '',
+            time: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+          };
+
+          setCourseSessions(prev => {
+             let updated = [...prev];
+             const idx = updated.findIndex(s => String(s.id) === String(newRow.id));
+             if (idx > -1) {
+                updated[idx] = { ...updated[idx], ...mappedRow };
+             } else {
+                updated.push(mappedRow);
+             }
+             updated.sort((a, b) => {
+               if (a.is_complete === b.is_complete) return 0;
+               return a.is_complete ? 1 : -1;
+             });
+             return updated;
+          });
+
+          setSessions(prev => prev.map(session => {
+             const sid = String(session.id || session.sessionId);
+             if (String(newRow.session_id) === sid) {
+                return { ...session, ...mappedRow, id: session.id || session.sessionId };
+             }
+             return session;
+          }));
+        }
       })
       .subscribe((status) => {
         console.log('📡 Subscription status update:', status)
@@ -1477,6 +1518,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           .from('messages')
           .update({ content: JSON.stringify(updatedData) })
           .eq('id', message.id);
+          
+        // Optimistic UI Update for Mentor
+        setMessages(prev => prev.map(m => 
+          String(m.id) === String(message.id) ? { ...m, content: JSON.stringify(updatedData) } : m
+        ));
       }
 
       // 2. Update scheduled_classes
@@ -1497,20 +1543,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         .eq('id', session.id);
 
       if (schedError) throw schedError;
-
-      // 3. Send confirmation/rejection message
-      const textMsg = {
-        chat_id: Number(chatId),
-        session_id: Number(session.id),
-        role: 'mentor',
-        sender_id: Number(currentUserId),
-        content: isApproved
-          ? `Reschedule request approved by mentor. New time: ${new Date(session.rescheduled_date).toLocaleDateString()} at ${new Date(session.rescheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-          : `Reschedule request rejected by mentor.`,
-        type: 'text',
-        read: false
-      };
-      await supabase.from('messages').insert([textMsg]);
 
       showModal('Success', `Reschedule request ${action}d successfully!`, 'success');
       setIsResponseModalOpen(false);
@@ -2056,7 +2088,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  {message.type !== 'scheduled_class' && (
+                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && (
                     <>
                       <button
                         type="button"
