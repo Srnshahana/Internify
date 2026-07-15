@@ -26,7 +26,7 @@ const MessageModal = ({ isOpen, onClose, title, message, type = 'info', onConfir
             <div
                 className={`course-modal-content message-modal ${typeClass}`}
                 onClick={(e) => e.stopPropagation()}
-                style={{ maxWidth: '400px', width: '90%', padding: '0', textAlign: 'center', overflow: 'hidden' }}
+                style={{ maxWidth: '400px', width: '90%', padding: '0', textAlign: 'center', overflow: 'hidden', margin: 'auto', borderRadius: '24px' }}
             >
                 <div style={{ padding: '32px 24px 24px' }}>
                     <div style={{

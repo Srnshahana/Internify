@@ -48,7 +48,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   // Removed mentor assessment creation state
   const [showAssessmentListModal, setShowAssessmentListModal] = useState(false)
   const [showSessionsModal, setShowSessionsModal] = useState(false)
+  const [sessions, setSessions] = useState(initialSessions)
   const [courseSessions, setCourseSessions] = useState([])
+  const [scheduledClasses, setScheduledClasses] = useState([])
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
@@ -92,12 +94,40 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   useEffect(() => {
     if (course?.course_id || course?.id) {
       fetchCourseSessions()
+      fetchScheduledClasses()
     }
   }, [course?.course_id, course?.id])
 
   const fetchCourseSessions = async () => {
     try {
       setLoadingSessions(true)
+      const courseId = course?.course_id || course?.id
+      const { data, error } = await supabase
+        .from('course_sessions')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('order_index', { ascending: true })
+
+      if (error) throw error
+
+      if (data) {
+        setCourseSessions(data)
+
+        // Also sync the local sessions state so the bottom bar and activeSession update instantly without reload
+        setSessions(data.map(session => ({
+          ...session,
+          status: 'upcoming'
+        })))
+      }
+    } catch (err) {
+      console.error('Error fetching course sessions:', err)
+    } finally {
+      setLoadingSessions(false)
+    }
+  }
+
+  const fetchScheduledClasses = async () => {
+    try {
       const courseId = course?.course_id || course?.id
       const { data, error } = await supabase
         .from('scheduled_classes')
@@ -121,22 +151,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           return a.is_complete ? 1 : -1;
         });
 
-        setCourseSessions(mapped)
-
-        // Also sync the local sessions state so the bottom bar and activeSession update instantly without reload
-        setSessions(prevSessions => prevSessions.map(session => {
-          const sid = String(session.id || session.sessionId);
-          const updatedSession = mapped.find(m => String(m.session_id) === sid);
-          if (updatedSession) {
-            return { ...session, ...updatedSession, id: session.id || session.sessionId };
-          }
-          return session;
-        }))
+        setScheduledClasses(mapped)
       }
     } catch (err) {
-      console.error('Error fetching course sessions:', err)
-    } finally {
-      setLoadingSessions(false)
+      console.error('Error fetching scheduled classes:', err)
     }
   }
 
@@ -391,7 +409,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             time: newRow.scheduled_date ? new Date(newRow.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
           };
 
-          setCourseSessions(prev => {
+          setScheduledClasses(prev => {
              let updated = [...prev];
              const idx = updated.findIndex(s => String(s.id) === String(newRow.id));
              if (idx > -1) {
@@ -466,15 +484,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }, [currentUserId])
 
-  const [sessions, setSessions] = useState(initialSessions)
-
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0]
   // Filter messages by activeSessionId, but always show system notifications if the session still exists
   const visibleMessages = messages.filter(m => {
     if (String(m.session_id) === String(activeSessionId)) return true;
     
     // Backwards compatibility for messages inserted with the scheduled_classes.id instead of course_sessions.id
-    const scheduledClass = courseSessions?.find(s => String(s.session_id) === String(activeSessionId));
+    const scheduledClass = scheduledClasses?.find(s => String(s.session_id) === String(activeSessionId));
     if (scheduledClass && String(m.session_id) === String(scheduledClass.id)) return true;
     
     return false;
@@ -615,7 +631,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       }
 
       showModal('Success', `Reschedule ${action}d successfully!`, 'success');
-      fetchCourseSessions();
+      fetchScheduledClasses();
     } catch (err) {
       console.error('Error handling reschedule action:', err);
       showModal('Error', 'Failed to process reschedule action.', 'error');
@@ -1283,34 +1299,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           <button
             className="live-complete-btn-v2"
             onClick={() => setShowSessionsModal(true)}
-            title="Upcoming Sessions"
+            title="Upcoming Classes"
             style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
           >
             <span className="material-symbols-outlined">event_list</span>
           </button>
-          {userRole === 'mentor' && (
-            <>
-              <button
-                className="live-complete-btn-v2"
-                onClick={() => {
-                  setShowAssessmentForm(true)
-                  setShowAttachOptions(false)
-                }}
-                title="Create Assessment"
-                style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)' }}
-              >
-                <span className="material-symbols-outlined">assignment</span>
-              </button>
-              <button
-                className="live-complete-btn-v2"
-                onClick={handleAttachStudyMaterial}
-                title="Upload Study Material"
-                style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.2)' }}
-              >
-                <span className="material-symbols-outlined">folder_open</span>
-              </button>
-            </>
-          )}
           {userRole === 'student' && (
             <button
               className="live-complete-btn-v2"
@@ -1431,7 +1424,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
                     
-                    let sessionToReschedule = courseSessions?.find(s => String(s.id) === String(message.session_id));
+                    let sessionToReschedule = scheduledClasses?.find(s => String(s.id) === String(message.session_id));
                     if (!sessionToReschedule) {
                       sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
                     }
@@ -1584,7 +1577,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           onClick={() => {
                             if (!isPending) return;
                             const data = JSON.parse(message.content);
-                            const foundSession = courseSessions?.find(s => String(s.id) === String(message.session_id)) || sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
+                            const foundSession = scheduledClasses?.find(s => String(s.id) === String(message.session_id));
                             setSelectedSession(foundSession || {
                                 id: message.session_id,
                                 title: data.title,
@@ -2443,7 +2436,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             </div>
           )}
 
-          {/* Upcoming Sessions Modal */}
+          {/* Upcoming Classes Modal */}
           {showSessionsModal && (
             <div className="live-assessment-modal-overlay" style={{ zIndex: 10001 }} onClick={() => setShowSessionsModal(false)}>
               <div className="live-assessment-modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
@@ -2466,7 +2459,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     }}>
                       <span className="material-symbols-outlined">event_list</span>
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Upcoming Sessions</h2>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Upcoming Classes</h2>
                   </div>
                   <button
                     className="assessment-modal-close-btn"
@@ -2478,18 +2471,21 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
                 <div className="assessment-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '16px' }}>
                   {loadingSessions ? (
-                    <div style={{ textAlign: 'center', padding: '40px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
-                      <p>Loading sessions...</p>
+                    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite', color: '#64748b' }}>sync</span>
+                      <p style={{ color: '#64748b', marginTop: '12px', fontSize: '15px' }}>Loading classes...</p>
                     </div>
-                  ) : courseSessions.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>event_busy</span>
-                      <p>No sessions scheduled for this course.</p>
+                  ) : scheduledClasses.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                      <div style={{ width: '64px', height: '64px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#94a3b8' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>event_busy</span>
+                      </div>
+                      <p style={{ color: '#1e293b', fontWeight: '600', fontSize: '16px', margin: '0 0 8px 0' }}>No Classes Scheduled</p>
+                      <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Your mentor hasn't scheduled any classes yet.</p>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {courseSessions.map((session) => {
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {scheduledClasses.map((session) => {
                         const now = new Date().getTime();
                         const scheduledTime = new Date(session.scheduled_date).getTime();
                         const tenMinsBefore = scheduledTime - 10 * 60000;
@@ -2744,9 +2740,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                 onClick={() => setActiveSessionId(session.id)}
               >
                 <span className="live-session-title">{session.title}</span>
-                <span className="live-session-status">
-                  {displayStatus}
-                </span>
               </button>
             );
           })}

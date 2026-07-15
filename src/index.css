@@ -52358,3 +52358,12 @@ input[type="date"].onboarding-input::-webkit-calendar-picker-indicator:hover {
   inset: 0;
   z-index: 10;
 }
+
+/* Force centering for MessageModal on all screens */
+@media (max-width: 768px) {
+  .course-modal-content.message-modal {
+    margin: auto !important;
+    border-radius: 24px !important;
+    max-height: 90vh !important;
+  }
+}
