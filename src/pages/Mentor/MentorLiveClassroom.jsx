@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import supabase from '../../supabaseClient'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import RescheduleModal from '../../components/RescheduleModal.jsx'
@@ -151,6 +151,13 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       console.error('Error fetching scheduled classes:', err)
     }
   }
+
+  // --- Dynamic Imminent Class Time Tick ---
+  const [timeTick, setTimeTick] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setTimeTick(Date.now()), 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   // --- Helper to clean legacy file links from submission text ---
   const cleanSubmissionText = (text) => {
@@ -425,16 +432,38 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || {}
+  
+  const imminentClasses = useMemo(() => {
+    const now = new Date(timeTick);
+    const classes = [];
+    
+    scheduledClasses?.forEach(cls => {
+        if (cls.is_complete || !cls.scheduled_date) return;
+        if (String(cls.session_id) !== String(activeSessionId)) return; // Only show for current session
+        
+        const schedTime = new Date(cls.scheduled_date);
+        const diffMins = (schedTime - now) / 60000;
+        
+        // Show 5 mins before, disappear 15 mins after scheduled time
+        if (diffMins <= 5 && diffMins > -15) {
+            classes.push(cls);
+        }
+    });
+    return classes;
+  }, [scheduledClasses, activeSessionId, timeTick]);
+
   // Filter messages by activeSessionId
-  const visibleMessages = messages.filter(m => {
-    if (Number(m.session_id) === Number(activeSessionId)) return true;
-    
-    // Backwards compatibility for messages inserted with the scheduled_classes.id instead of course_sessions.id
-    const scheduledClass = scheduledClasses?.find(s => Number(s.session_id) === Number(activeSessionId));
-    if (scheduledClass && Number(m.session_id) === Number(scheduledClass.id)) return true;
-    
-    return false;
-  })
+  const visibleMessages = useMemo(() => {
+    const cleanMessages = messages.filter(m => m.type !== 'class_imminent');
+    return cleanMessages.filter(m => {
+      if (Number(m.session_id) === Number(activeSessionId)) return true;
+      
+      const scheduledClass = scheduledClasses?.find(s => Number(s.session_id) === Number(activeSessionId));
+      if (scheduledClass && Number(m.session_id) === Number(scheduledClass.id)) return true;
+      
+      return false;
+    }).sort((a,b) => new Date(a.created_at || a.id) - new Date(b.created_at || b.id));
+  }, [messages, scheduledClasses, activeSessionId]);
 
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null)
 
@@ -1430,6 +1459,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       showModal('Success', `Reschedule ${action}d successfully!`, 'success');
       fetchCourseSessions();
+      fetchScheduledClasses();
     } catch (err) {
       console.error('Error handling reschedule action:', err);
       showModal('Error', 'Failed to process reschedule action.', 'error');
@@ -1484,7 +1514,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       showModal('Success', 'Reschedule request sent to student!', 'success')
       setShowRescheduleModal(false)
-      if (showSessionsModal) fetchScheduledClasses() // Refresh sessions if modal open
+      fetchScheduledClasses() // ALWAYS refresh scheduled classes
     } catch (err) {
       console.error('Error sending reschedule request:', err)
       showModal('Error', 'Failed to send reschedule request.', 'error')
@@ -1694,6 +1724,71 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         </div>
       </header>
 
+      {/* Imminent Class Banners */}
+      {imminentClasses.length > 0 && (
+        <div style={{ padding: '0 16px', marginTop: '16px' }}>
+          {imminentClasses.map(cls => (
+            <div key={cls.id} style={{
+              background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              padding: '12px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+              borderRadius: '12px',
+              marginBottom: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span className="material-symbols-outlined" style={{ animation: 'pulse 2s infinite' }}>emergency_recording</span>
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '15px' }}>Class Starting Now!</div>
+                  <div style={{ fontSize: '13px', opacity: 0.9 }}>{cls.courses?.title || 'Live Class'}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <a
+                  href={formatExternalLink(cls.meeting_link || '#')}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    background: 'white',
+                    color: '#059669',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                    display: 'inline-block'
+                  }}
+                >
+                  Join Class
+                </a>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('open_reschedule_session_id', cls.id);
+                    setSelectedSession(cls);
+                    setShowRescheduleModal(true);
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Reschedule
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Main chat area */}
       <div className="live-main live-main-full" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
         <div className="live-session-label">{activeSession.title}</div>
@@ -1706,7 +1801,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                 className={`live-message ${String(message.sender_id) === String(currentUserId) ? 'from-learner' : 'from-mentor'}`}
               >
                 <div
-                  className={`${['assessment', 'scheduled_class', 'reschedule_request'].includes(message.type) ? 'live-message-custom' : 'live-message-bubble'} ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
+                  className={`${['assessment', 'scheduled_class', 'reschedule_request', 'class_imminent'].includes(message.type) ? 'live-message-custom' : 'live-message-bubble'} ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
                     }`}
                 >
                   {message.replyTo && (
@@ -1801,19 +1896,31 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
                     
-                    let sessionToReschedule = scheduledClasses?.find(s => String(s.id) === String(message.session_id));
-                    if (!sessionToReschedule) {
-                      sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
+                    let classDateStr = message.classDate || contentObj?.scheduled_date || contentObj?.date || null;
+                    if (contentObj && contentObj.date && contentObj.time) {
+                      classDateStr = `${contentObj.date}T${contentObj.time}`;
                     }
 
-                    const classDateStr = message.classDate || contentObj?.scheduled_date;
-                    const scheduledTime = classDateStr ? new Date(classDateStr).getTime() : null;
+                    // Dynamically check if rescheduled
+                    const liveSessionData = scheduledClasses?.find(s => String(s.session_id) === String(message.session_id));
+                    let isDynamicallyRescheduled = false;
+                    let currentScheduledDateStr = classDateStr;
+                    let dynamicRescheduleReason = null;
+
+                    if (liveSessionData && liveSessionData.scheduled_date) {
+                      const origDate = classDateStr ? new Date(classDateStr).getTime() : 0;
+                      const liveDate = new Date(liveSessionData.scheduled_date).getTime();
+                      if (Math.abs(origDate - liveDate) > 60000) {
+                        isDynamicallyRescheduled = true;
+                        currentScheduledDateStr = liveSessionData.scheduled_date;
+                        dynamicRescheduleReason = liveSessionData.reschedule_reason;
+                      }
+                    }
+
+                    const scheduledTime = currentScheduledDateStr ? new Date(currentScheduledDateStr) : null;
                     const now = new Date().getTime();
-                    const tenMinsBefore = scheduledTime ? scheduledTime - 10 * 60000 : null;
-                    const twentyFourHoursAfter = scheduledTime ? scheduledTime + 24 * 60 * 60000 : null;
-                    const isExpired = scheduledTime ? now > twentyFourHoursAfter : false;
-                    const isEarly = scheduledTime ? now < tenMinsBefore : false;
-                    const isRescheduled = contentObj?.isRescheduled;
+                    const isExpired = scheduledTime ? now > new Date(scheduledTime.getTime() + 60 * 60000) : false; // expired if 1 hour past
+                    const isRescheduled = contentObj?.isRescheduled || isDynamicallyRescheduled;
 
                     let borderColor = '#2a7eff';
                     let bgColor = '#eff6ff';
@@ -1850,11 +1957,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
                           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
-                          {classDateStr ? new Date(classDateStr).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                          {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
+                          {currentScheduledDateStr ? new Date(currentScheduledDateStr).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
                         </div>
-                        {isRescheduled && contentObj?.reason && (
+                        {isRescheduled && (contentObj?.reason || dynamicRescheduleReason) && (
                           <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#ffffff80', padding: '6px', borderRadius: '4px', width: '100%', marginTop: '4px' }}>
-                            "{contentObj.reason}"
+                            "{contentObj?.reason || dynamicRescheduleReason}"
                           </div>
                         )}
                         {isExpired && (
@@ -1891,6 +1999,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                     );
                   })()}
+
                   {message.type === 'reschedule_request' && (() => {
                     try {
                       const data = JSON.parse(message.content);
@@ -2058,7 +2167,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && (
+                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && message.type !== 'class_imminent' && (
                     <>
                       <button
                         type="button"
