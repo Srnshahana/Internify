@@ -1496,7 +1496,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         <div className="assessment-badge">Assessment</div>
                       </div>
                       <h4 className="assessment-card-title">{message.assessmentTitle}</h4>
-                      <p className="assessment-card-description">{message.assessmentDescription}</p>
+                      <p className="assessment-card-description" style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>{message.assessmentDescription}</p>
                       <div className="assessment-card-footer">
                         <span className="assessment-due-date">Due: {new Date(message.assessmentDueDate).toLocaleDateString()}</span>
                         {userRole === 'student' && (
@@ -1520,22 +1526,41 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     }
                     
                     // Dynamically check if rescheduled
-                    const liveSessionData = scheduledClasses?.find(s => String(s.session_id) === String(message.session_id));
+                    const liveSessionData = scheduledClasses?.find(s => {
+                        if (contentObj?.class_id) {
+                            return String(s.id) === String(contentObj.class_id);
+                        }
+                        return String(s.session_id) === String(message.session_id);
+                    });
+                    
                     let isDynamicallyRescheduled = false;
                     let currentScheduledDateStr = classDateStr;
                     let dynamicRescheduleReason = null;
 
                     if (liveSessionData && liveSessionData.scheduled_date) {
-                      const origDate = classDateStr ? new Date(classDateStr).getTime() : 0;
-                      const liveDate = new Date(liveSessionData.scheduled_date).getTime();
-                      if (Math.abs(origDate - liveDate) > 60000) {
-                        isDynamicallyRescheduled = true;
-                        currentScheduledDateStr = liveSessionData.scheduled_date;
-                        dynamicRescheduleReason = liveSessionData.reschedule_reason;
+                      const stripTz = (str) => str ? str.replace(' ', 'T').replace(/Z|[+-]\d{2}:\d{2}$/, '') : null;
+                      
+                      const origTimeStr = stripTz(classDateStr);
+                      const dbTimeStr = stripTz(liveSessionData.scheduled_date);
+                      
+                      if (origTimeStr && dbTimeStr) {
+                        const origTime = new Date(origTimeStr).getTime();
+                        const dbTime = new Date(dbTimeStr).getTime();
+                        
+                        // If differing by > 1 minute, the class was rescheduled after this message was sent
+                        if (Math.abs(origTime - dbTime) > 60000) {
+                          isDynamicallyRescheduled = true;
+                          currentScheduledDateStr = dbTimeStr;
+                          dynamicRescheduleReason = liveSessionData.reschedule_reason;
+                        }
+                      } else {
+                        currentScheduledDateStr = dbTimeStr;
                       }
                     }
 
-                    const scheduledTime = currentScheduledDateStr ? new Date(currentScheduledDateStr) : null;
+                    // Always evaluate in local time by stripping timezone suffix to match exact user input
+                    const localTimeStr = currentScheduledDateStr ? currentScheduledDateStr.replace(' ', 'T').replace(/Z|[+-]\d{2}:\d{2}$/, '') : null;
+                    const scheduledTime = localTimeStr ? new Date(localTimeStr) : null;
                     const now = new Date().getTime();
                     const isExpired = scheduledTime ? now > new Date(scheduledTime.getTime() + 60 * 60000) : false;
                     const tenMinsBefore = scheduledTime ? new Date(scheduledTime.getTime() - 10 * 60000) : null;
@@ -1577,7 +1602,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
                           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
                           {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
-                          {currentScheduledDateStr ? new Date(currentScheduledDateStr).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                          {scheduledTime ? scheduledTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
                         </div>
                         {isRescheduled && (contentObj?.reason || dynamicRescheduleReason) && (
                           <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#ffffff80', padding: '6px', borderRadius: '4px', width: '100%', marginTop: '4px' }}>

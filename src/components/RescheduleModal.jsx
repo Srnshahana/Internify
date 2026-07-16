@@ -39,6 +39,12 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
             alert("Please choose a new date or time to reschedule.");
             return;
         }
+
+        const selectedDateTime = new Date(`${newDate}T${newTime}`).getTime();
+        if (selectedDateTime < Date.now()) {
+            alert("You cannot schedule a class in the past. Please select a future time.");
+            return;
+        }
         
         onConfirm({ newDate, newTime, reason });
         onClose();
