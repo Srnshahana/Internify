@@ -1178,6 +1178,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       return
     }
 
+    const TWENTY_MINUTES_MS = 20 * 60 * 1000;
+    const isOverlap = scheduledClasses.some(cls => {
+      const clsTime = new Date(cls.scheduled_date).getTime();
+      return Math.abs(clsTime - selectedTime) < TWENTY_MINUTES_MS;
+    });
+
+    if (isOverlap) {
+      showModal('Validation Error', 'There is already a class scheduled within 20 minutes of this time. Please choose another time.', 'error');
+      return;
+    }
+
     try {
       console.log('📅 Scheduling Class...', scheduleClassData)
       const courseId = course?.course_id || course?.id
@@ -1475,7 +1486,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           .eq('id', targetId);
       }
 
-      showModal('Success', `Reschedule ${action}d successfully!`, 'success');
+      showModal('Success', `Reschedule ${action === 'reject' ? 'rejected' : action + 'd'} successfully!`, 'success');
       fetchCourseSessions();
       fetchScheduledClasses();
     } catch (err) {
@@ -1489,13 +1500,28 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       if (!selectedSession) return;
 
       const newScheduledDate = `${newDate}T${newTime}`;
+      const selectedTime = new Date(newScheduledDate).getTime();
+      const TWENTY_MINUTES_MS = 20 * 60 * 1000;
+
+      const isOverlap = scheduledClasses.some(cls => {
+        // Don't compare against the class we are rescheduling
+        if (cls.id === selectedSession.id) return false;
+        const clsTime = new Date(cls.scheduled_date).getTime();
+        return Math.abs(clsTime - selectedTime) < TWENTY_MINUTES_MS;
+      });
+
+      if (isOverlap) {
+        showModal('Validation Error', 'There is already a class scheduled within 20 minutes of this time. Please choose another time.', 'error');
+        return;
+      }
 
       const scheduleData = {
         title: selectedSession.title,
         scheduled_date: newScheduledDate,
         link: selectedSession.meeting_link,
         isRescheduled: true,
-        reason: reason
+        reason: reason,
+        class_id: selectedSession.id
       };
 
       // Send to the current chat
@@ -1932,6 +1958,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         }
                         return String(s.session_id) === String(message.session_id);
                     });
+
+                    let sessionToReschedule = liveSessionData;
                     
                     let isDynamicallyRescheduled = false;
                     let currentScheduledDateStr = classDateStr;

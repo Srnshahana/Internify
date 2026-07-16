@@ -649,8 +649,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           .update({ reschedule_request: false, reschedule_role: null, rescheduled_date: null })
           .eq('id', targetId);
       }
-
-      showModal('Success', `Reschedule ${action}d successfully!`, 'success');
+      showModal('Success', `Reschedule ${action === 'reject' ? 'rejected' : action + 'd'} successfully!`, 'success');
       fetchScheduledClasses();
     } catch (err) {
       console.error('Error handling reschedule action:', err);
@@ -1089,7 +1088,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     const newAttachments = files.map(file => ({
       name: file.name,
       type: file.name.split('.').pop(),
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      size: file.size, // Keep raw number for DB insertion
       file: file,
     }))
     setAssessmentSubmission({
@@ -1515,10 +1514,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
                     
-                    let sessionToReschedule = scheduledClasses?.find(s => String(s.id) === String(message.session_id));
-                    if (!sessionToReschedule) {
-                      sessionToReschedule = sessions?.find(s => String(s.id || s.sessionId) === String(message.session_id));
-                    }
                     
                     let classDateStr = message.classDate || contentObj?.scheduled_date || contentObj?.date || null;
                     if (contentObj && contentObj.date && contentObj.time) {
@@ -1532,6 +1527,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         }
                         return String(s.session_id) === String(message.session_id);
                     });
+                    
+                    let sessionToReschedule = liveSessionData;
                     
                     let isDynamicallyRescheduled = false;
                     let currentScheduledDateStr = classDateStr;
@@ -2349,6 +2346,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         </button>
                       </div>
                     </div>
+                  ) : new Date() > new Date(selectedAssessment.assessmentDueDate) ? (
+                    <div className="assessment-submission-form" style={{ textAlign: 'center', padding: '48px 24px', background: '#fff', borderRadius: '16px', marginTop: '16px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }}>event_busy</span>
+                      <h4 style={{ color: '#1e293b', fontSize: '20px', marginBottom: '8px', fontWeight: '600' }}>Deadline Passed</h4>
+                      <p style={{ color: '#64748b', marginBottom: '24px' }}>The deadline for this assessment was {new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()}. You can no longer submit.</p>
+                      <button
+                        className="btn-secondary"
+                        style={{ padding: '12px 32px', borderRadius: '8px', cursor: 'pointer', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '600' }}
+                        onClick={() => setSelectedAssessment(null)}
+                      >
+                        Close
+                      </button>
+                    </div>
                   ) : (
                     <div className="assessment-submission-form">
                       <h4>Your Submission</h4>
@@ -2400,7 +2410,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                                 </div>
                                 <div className="attachment-info">
                                   <span className="attachment-name">{attachment.name}</span>
-                                  <span className="attachment-size">{attachment.size}</span>
+                                  <span className="attachment-size">
+                                    {attachment.size ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : ''}
+                                  </span>
                                 </div>
                                 <button
                                   className="btn-danger btn-small"
@@ -2418,6 +2430,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         <button
                           className="btn-primary btn-full"
                           onClick={handleSubmitAssessment}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2427,6 +2440,16 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         </button>
                         <button
                           className="btn-secondary btn-full"
+                          style={{
+                            background: '#f1f5f9',
+                            color: '#64748b',
+                            border: '1px solid #e2e8f0',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer'
+                          }}
                           onClick={() => {
                             setSelectedAssessment(null)
                             setAssessmentSubmission({ textSubmission: '', attachments: [] })

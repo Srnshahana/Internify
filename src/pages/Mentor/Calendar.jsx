@@ -309,7 +309,7 @@ function Calendar() {
       });
 
       setIsResponseModalOpen(false);
-      alert(`Reschedule request ${action}d successfully!`);
+      alert(`Reschedule request ${action === 'reject' ? 'rejected' : 'approved'} successfully!`);
 
     } catch (err) {
       console.error('Error handling reschedule response:', err);
