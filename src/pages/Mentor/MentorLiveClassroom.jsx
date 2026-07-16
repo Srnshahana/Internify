@@ -2848,6 +2848,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       type="datetime-local"
                       className="form-input"
                       value={scheduleClassData.scheduled_date}
+                      min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                       onChange={(e) => setScheduleClassData({ ...scheduleClassData, scheduled_date: e.target.value })}
                     />
                   </div>
