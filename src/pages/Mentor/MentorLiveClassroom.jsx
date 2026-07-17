@@ -3131,9 +3131,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         <p className="submission-meta">Submitted: {formatDate(selectedSubmission.submitted_at)}</p>
                       </div>
                       <div className="submission-status-badge-wrapper">
-                        <span className={`status-badge-large ${['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'badge-completed' : 'badge-pending'
+                        <span className={`status-badge-large ${['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'badge-completed' : selectedSubmission.status?.toLowerCase() === 'rejected' ? 'badge-rejected' : 'badge-pending'
                           }`}>
-                          {['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'Completed' : 'Pending Review'}
+                          {['completed', 'graded'].includes(selectedSubmission.status?.toLowerCase()) ? 'Completed' : selectedSubmission.status?.toLowerCase() === 'rejected' ? 'Rejected' : 'Pending Review'}
                         </span>
                       </div>
                     </div>
@@ -3463,8 +3463,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                               </div>
 
                               <div className="submission-card-footer">
-                                <span className={`mini-status ${sub.status === 'completed' ? 'status-completed' : 'status-pending'}`}>
-                                  {sub.status}
+                                <span className={`mini-status ${['completed', 'graded'].includes(sub.status?.toLowerCase()) ? 'status-completed' : sub.status?.toLowerCase() === 'rejected' ? 'status-rejected' : 'status-pending'}`}>
+                                  {sub.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1) : 'Pending Review'}
                                 </span>
                                 <span className="review-link">
                                   Review ➔

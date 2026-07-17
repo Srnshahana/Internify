@@ -44948,6 +44948,11 @@ body {
   color: #a16207 !important;
 }
 
+.status-rejected {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+}
+
 .review-link {
   color: #1a2b4b !important;
   font-size: 0.875rem !important;
@@ -45033,6 +45038,11 @@ body {
 .badge-pending {
   background-color: #fef9c3 !important;
   color: #854d0e !important;
+}
+
+.badge-rejected {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
 }
 
 .mentor-text-submission-card,
