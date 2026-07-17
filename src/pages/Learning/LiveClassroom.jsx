@@ -374,7 +374,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
     try {
       console.log('📤 [Step 2] Uploading file to Storage:', file.name)
       const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-files')
@@ -485,7 +485,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
 
     try {
       console.log('📤 [Step 2] Uploading image to Storage:', file.name)
-      const fileName = `${activeSessionId}/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-files')
@@ -685,7 +685,7 @@ function LiveClassroom({ course, onBack, userRole = 'student' }) {
 
       // 1. Upload to Storage
       const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       console.log('📄 Generated storage path:', fileName)
 

@@ -689,7 +689,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     try {
       console.log('📤 [Step 2] Uploading file to Storage:', file.name)
       const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-files')
@@ -800,7 +800,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     try {
       console.log('📤 [Step 2] Uploading image to Storage:', file.name)
-      const fileName = `${activeSessionId}/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-files')
@@ -1000,7 +1000,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
       // 1. Upload to Storage
       const fileExt = file.name.split('.').pop()
-      const fileName = `${activeSessionId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const fileName = `study-materials/${activeSessionId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
       console.log('📄 Generated storage path:', fileName)
 
@@ -2026,10 +2026,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                       <h4 className="assessment-card-title">{message.classTitle || contentObj?.title || 'Live Class'}</h4>
                       <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
-                          {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
-                          {scheduledTime ? scheduledTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px', marginTop: '2px', flexShrink: 0 }}>event</span>
+                          <span style={{ lineHeight: '1.4' }}>
+                            {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
+                            {scheduledTime ? scheduledTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                          </span>
                         </div>
                         {isRescheduled && (contentObj?.reason || dynamicRescheduleReason) && (
                           <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#ffffff80', padding: '6px', borderRadius: '4px', width: '100%', marginTop: '4px' }}>

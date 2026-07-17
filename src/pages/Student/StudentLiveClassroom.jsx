@@ -376,6 +376,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             replyTo: replyToObj
           }
 
+          if (msgForState.type === 'assessment') {
+            try {
+              const details = JSON.parse(msgForState.content)
+              Object.assign(msgForState, details)
+            } catch (e) { }
+          }
+
           // 2. Check if this payload is the "real" version of an optimistic message
           const optimisticMatchIndex = prev.findIndex(m =>
             m.content === newMessage.content &&
@@ -815,7 +822,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
       try {
         const fileExt = file.name.split('.').pop()
-        const fileName = `${activeSessionId}/${finalType}s/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+        const fileName = `study-materials/${activeSessionId}/${finalType}s/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('course-files')
@@ -1111,7 +1118,17 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
 
     try {
-      console.log('🚀 Submitting Assessment:', selectedAssessment.id)
+      let targetAssessmentId = selectedAssessment.id;
+      if (selectedAssessment.assessmentId) {
+        targetAssessmentId = selectedAssessment.assessmentId;
+      } else if (selectedAssessment.content) {
+        try {
+          const parsed = JSON.parse(selectedAssessment.content);
+          if (parsed.assessmentId) targetAssessmentId = parsed.assessmentId;
+        } catch (e) {}
+      }
+      
+      console.log('🚀 Submitting Assessment:', targetAssessmentId)
 
       const uploadedAttachments = []
 
@@ -1120,7 +1137,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         console.log('📤 Uploading attachments...')
         for (const attachment of assessmentSubmission.attachments) {
           const file = attachment.file
-          const fileName = `assessments/${selectedAssessment.id}/${currentUserId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+          const fileName = `assessments/${targetAssessmentId}/${currentUserId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
           const { error: uploadError } = await supabase.storage
             .from('course-files')
@@ -1128,7 +1145,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
           if (uploadError) {
             console.error('❌ Attachment Upload Error:', uploadError)
-            continue // Skip failed uploads or throw? Let's skip for resilience
+            showModal('Upload Error', `Failed to upload ${file.name}. Ensure 'course-files' bucket exists in Supabase and allows uploads.`, 'error')
+            return // Stop submission since upload failed
           }
 
           const { data: { publicUrl } } = supabase.storage
@@ -1150,7 +1168,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       const finalSubmissionText = assessmentSubmission.textSubmission || ''
 
       const submissionPayload = {
-        assessment_id: selectedAssessment.id,
+        assessment_id: targetAssessmentId,
         student_id: currentUserId,
         text_submission: finalSubmissionText, // Using text column to store everything
         // attachments: uploadedAttachments, // REMOVED: Column does not exist
@@ -1179,7 +1197,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           submission_id: submissionData.id,
           file_name: att.name,
           file_url: att.url,
-          file_size: att.size,
           file_type: att.type,
           created_at: new Date().toISOString()
         }))
@@ -1596,10 +1613,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                       <h4 className="assessment-card-title">{message.classTitle || contentObj?.title || 'Live Class'}</h4>
                       <div className="assessment-card-footer" style={{ marginTop: '8px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
-                          {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
-                          {scheduledTime ? scheduledTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px', marginTop: '2px', flexShrink: 0 }}>event</span>
+                          <span style={{ lineHeight: '1.4' }}>
+                            {isDynamicallyRescheduled ? 'Rescheduled for: ' : ''}
+                            {scheduledTime ? scheduledTime.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date'}
+                          </span>
                         </div>
                         {isRescheduled && (contentObj?.reason || dynamicRescheduleReason) && (
                           <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', background: '#ffffff80', padding: '6px', borderRadius: '4px', width: '100%', marginTop: '4px' }}>

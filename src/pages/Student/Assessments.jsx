@@ -140,7 +140,7 @@ function StudentAssessments({ onBack }) {
       // 2. Upload and Link Attachments
       if (submissionData.attachments.length > 0) {
         for (const att of submissionData.attachments) {
-          const fileName = `${submission.id}/${Date.now()}_${att.name.replace(/\s+/g, '_')}`
+          const fileName = `assessments/${submission.id}/${Date.now()}_${att.name.replace(/\s+/g, '_')}`
 
           // Upload
           const { error: uploadError } = await supabase.storage
