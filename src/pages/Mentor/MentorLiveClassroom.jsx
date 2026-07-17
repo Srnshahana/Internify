@@ -2268,7 +2268,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && message.type !== 'class_imminent' && (
+                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && message.type !== 'class_imminent' && message.type !== 'assessment' && (
                     <>
                       <button
                         type="button"
