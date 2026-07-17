@@ -1066,7 +1066,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
 
   const handleViewAssessment = (assessmentMessage) => {
-    const assessmentId = assessmentMessage.assessmentId || assessmentMessage.id
+    let assessmentId = assessmentMessage.assessmentId || assessmentMessage.id;
+    if (!assessmentMessage.assessmentId && assessmentMessage.content) {
+      try {
+        const parsed = JSON.parse(assessmentMessage.content);
+        if (parsed.assessmentId) assessmentId = parsed.assessmentId;
+      } catch (e) {
+        // ignore
+      }
+    }
 
     // Find full assessment from state (includes submission and attachments)
     const fullAssessment = dbAssessments.find(a => String(a.id) === String(assessmentId))
@@ -1501,11 +1509,20 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       </a>
                     </div>
                   )}
-                  {message.type === 'assessment' && (
+                  {message.type === 'assessment' && (() => {
+                    const assessmentId = message.assessmentId || (message.content && (() => { try { return JSON.parse(message.content).assessmentId; } catch(e) { return null; } })()) || message.id;
+                    const fullAssessment = dbAssessments.find(a => String(a.id) === String(assessmentId));
+                    const submissionStatus = fullAssessment?.mySubmission?.status?.toLowerCase();
+                    const isCompletedOrRejected = submissionStatus === 'completed' || submissionStatus === 'rejected';
+
+                    return (
                     <div
                       className="live-assessment-card"
-                      onClick={() => userRole === 'student' && handleViewAssessment(message)}
-                      style={{ cursor: userRole === 'student' ? 'pointer' : 'default' }}
+                      onClick={() => !isCompletedOrRejected && userRole === 'student' && handleViewAssessment(message)}
+                      style={{ 
+                        cursor: (!isCompletedOrRejected && userRole === 'student') ? 'pointer' : 'default',
+                        opacity: isCompletedOrRejected ? 0.8 : 1
+                      }}
                     >
                       <div className="assessment-card-header">
                         <div className="assessment-icon">📝</div>
@@ -1520,13 +1537,33 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         textOverflow: 'ellipsis'
                       }}>{message.assessmentDescription}</p>
                       <div className="assessment-card-footer">
-                        <span className="assessment-due-date">Due: {new Date(message.assessmentDueDate).toLocaleDateString()}</span>
-                        {userRole === 'student' && (
-                          <button className="assessment-view-btn">View & Submit</button>
-                        )}
+                        <span className="assessment-due-date">Due: {(() => {
+                          let d = message.assessmentDueDate;
+                          if (!d && message.content) {
+                            try { d = JSON.parse(message.content).assessmentDueDate; } catch(e) {}
+                          }
+                          return d ? new Date(d).toLocaleDateString() : 'To be announced';
+                        })()}</span>
+                        {userRole === 'student' && (() => {
+                          const assessmentId = message.assessmentId || (message.content && (() => { try { return JSON.parse(message.content).assessmentId; } catch(e) { return null; } })()) || message.id;
+                          const fullAssessment = dbAssessments.find(a => String(a.id) === String(assessmentId));
+                          const submissionStatus = fullAssessment?.mySubmission?.status?.toLowerCase();
+
+                          let buttonText = 'View & Submit';
+                          if (submissionStatus === 'completed') buttonText = 'Completed';
+                          else if (submissionStatus === 'rejected') buttonText = 'Rejected';
+                          else if (submissionStatus === 'submitted') buttonText = 'Already Submitted';
+
+                          return <button className="assessment-view-btn" style={{
+                            background: submissionStatus === 'completed' ? '#dcfce7' : submissionStatus === 'rejected' ? '#fee2e2' : submissionStatus === 'submitted' ? '#dbeafe' : undefined,
+                            color: submissionStatus === 'completed' ? '#166534' : submissionStatus === 'rejected' ? '#991b1b' : submissionStatus === 'submitted' ? '#1e40af' : undefined,
+                            border: submissionStatus ? 'none' : undefined,
+                            fontWeight: submissionStatus ? '600' : undefined
+                          }}>{buttonText}</button>;
+                        })()}
                       </div>
                     </div>
-                  )}
+                  ); })()}
                   {message.type === 'scheduled_class' && (() => {
                     let contentObj = {};
                     try { contentObj = JSON.parse(message.content || '{}'); } catch (e) { }
@@ -2085,19 +2122,20 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                   </div>
 
                   {/* Submission Form OR Status View */}
-                  {selectedAssessment.mySubmission && ['submitted', 'completed', 'graded'].includes(selectedAssessment.mySubmission.status?.toLowerCase()) ? (
-                    <div className="assessment-submission-form disabled-submission" style={{ opacity: 0.9 }}>
+                  {selectedAssessment.mySubmission && ['submitted', 'completed', 'graded', 'rejected'].includes(selectedAssessment.mySubmission.status?.toLowerCase()) ? (
+                    <div className="assessment-submission-view">
+                      {/* Submission Details Header */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                         <h4 style={{ margin: 0 }}>Your Submission</h4>
                         <span style={{
                           fontSize: '12px',
                           fontWeight: '600',
-                          color: selectedAssessment.mySubmission.status === 'completed' ? '#166534' : '#1e40af',
-                          background: selectedAssessment.mySubmission.status === 'completed' ? '#dcfce7' : '#dbeafe',
+                          color: selectedAssessment.mySubmission.status === 'completed' ? '#166534' : selectedAssessment.mySubmission.status === 'rejected' ? '#991b1b' : '#1e40af',
+                          background: selectedAssessment.mySubmission.status === 'completed' ? '#dcfce7' : selectedAssessment.mySubmission.status === 'rejected' ? '#fee2e2' : '#dbeafe',
                           padding: '4px 12px',
                           borderRadius: '12px'
                         }}>
-                          {selectedAssessment.mySubmission.status === 'completed' ? '✓ Completed' : '✓ Submitted'}
+                          {selectedAssessment.mySubmission.status === 'completed' ? '✓ Completed' : selectedAssessment.mySubmission.status === 'rejected' ? '✗ Rejected' : '✓ Submitted'}
                         </span>
                       </div>
 
@@ -2337,29 +2375,49 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         })()}
                       </div>
 
-                      <div className="assessment-view-actions">
+                      <div className="assessment-view-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                         <button
-                          className="btn-secondary btn-full"
+                          className="btn-secondary"
                           disabled
                           style={{
-                            opacity: 1,
-                            background: '#e2e8f0',
-                            color: '#475569',
+                            flex: 1,
+                            background: selectedAssessment.mySubmission.status === 'rejected' ? '#fef2f2' : selectedAssessment.mySubmission.status === 'completed' ? '#f0fdf4' : '#f8fafc',
+                            color: selectedAssessment.mySubmission.status === 'rejected' ? '#ef4444' : selectedAssessment.mySubmission.status === 'completed' ? '#22c55e' : '#94a3b8',
                             cursor: 'not-allowed',
                             fontWeight: '600',
-                            border: '1px solid #cbd5e1',
-                            height: '44px' // Ensure normal height
+                            border: `1px solid ${selectedAssessment.mySubmission.status === 'rejected' ? '#fecaca' : selectedAssessment.mySubmission.status === 'completed' ? '#bbf7d0' : '#e2e8f0'}`,
+                            height: '44px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
                           }}
                         >
-                          Already Submitted
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                            {selectedAssessment.mySubmission.status === 'rejected' ? 'cancel' : 'check_circle'}
+                          </span>
+                          {selectedAssessment.mySubmission.status === 'completed' ? 'Completed' : selectedAssessment.mySubmission.status === 'rejected' ? 'Rejected' : 'Already Submitted'}
                         </button>
                         <button
-                          className="btn-secondary btn-full"
-                          style={{ pointerEvents: 'auto', opacity: 1, cursor: 'pointer' }}
+                          className="btn-secondary"
+                          style={{ 
+                            flex: 1,
+                            background: '#fff',
+                            color: '#0f172a',
+                            border: '1px solid #e2e8f0',
+                            height: '44px',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
                           onClick={() => {
                             setSelectedAssessment(null)
                             setAssessmentSubmission({ textSubmission: '', attachments: [] })
                           }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1' }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0' }}
                         >
                           Close
                         </button>
@@ -2372,8 +2430,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       <p style={{ color: '#64748b', marginBottom: '24px' }}>The deadline for this assessment was {new Date(selectedAssessment.assessmentDueDate).toLocaleDateString()}. You can no longer submit.</p>
                       <button
                         className="btn-secondary"
-                        style={{ padding: '12px 32px', borderRadius: '8px', cursor: 'pointer', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '600' }}
+                        style={{ padding: '12px 32px', borderRadius: '8px', cursor: 'pointer', background: '#fff', color: '#0f172a', border: '1px solid #e2e8f0', fontWeight: '600', transition: 'all 0.2s' }}
                         onClick={() => setSelectedAssessment(null)}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1' }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0' }}
                       >
                         Close
                       </button>
@@ -2445,11 +2505,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         )}
                       </div>
 
-                      <div className="assessment-view-actions">
+                      <div className="assessment-view-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                         <button
-                          className="btn-primary btn-full"
+                          className="btn-primary"
                           onClick={handleSubmitAssessment}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', height: '48px', borderRadius: '8px', fontWeight: '600' }}
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2458,12 +2518,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           Submit Assessment
                         </button>
                         <button
-                          className="btn-secondary btn-full"
+                          className="btn-secondary"
                           style={{
-                            background: '#f1f5f9',
-                            color: '#64748b',
+                            flex: 1,
+                            background: '#fff',
+                            color: '#0f172a',
                             border: '1px solid #e2e8f0',
-                            padding: '12px',
+                            height: '48px',
                             borderRadius: '8px',
                             fontWeight: '600',
                             transition: 'all 0.2s',
@@ -2473,6 +2534,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                             setSelectedAssessment(null)
                             setAssessmentSubmission({ textSubmission: '', attachments: [] })
                           }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1' }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0' }}
                         >
                           Cancel
                         </button>
@@ -2560,11 +2623,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.title}</h4>
                             <span style={{
-                              fontSize: '12px',
-                              padding: '4px 8px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              padding: '2px 8px',
                               borderRadius: '12px',
-                              background: assessment.mySubmission?.status === 'completed' ? '#dcfce7' : assessment.mySubmission?.status === 'submitted' ? '#dbeafe' : '#f1f5f9',
-                              color: assessment.mySubmission?.status === 'completed' ? '#166534' : assessment.mySubmission?.status === 'submitted' ? '#1e40af' : '#64748b'
+                              background: assessment.mySubmission?.status === 'completed' ? '#dcfce7' : assessment.mySubmission?.status === 'rejected' ? '#fee2e2' : assessment.mySubmission?.status === 'submitted' ? '#dbeafe' : '#f1f5f9',
+                              color: assessment.mySubmission?.status === 'completed' ? '#166534' : assessment.mySubmission?.status === 'rejected' ? '#991b1b' : assessment.mySubmission?.status === 'submitted' ? '#1e40af' : '#64748b'
                             }}>
                               {assessment.mySubmission?.status ? (assessment.mySubmission.status.charAt(0).toUpperCase() + assessment.mySubmission.status.slice(1)) : 'Pending'}
                             </span>

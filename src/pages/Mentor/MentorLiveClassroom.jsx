@@ -1415,6 +1415,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
+  const [isMarkingRejected, setIsMarkingRejected] = useState(false)
+
   const handleMarkComplete = async (submissionId) => {
     setIsMarkingComplete(true)
     try {
@@ -1431,6 +1433,25 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
     } finally {
       setIsMarkingComplete(false)
+    }
+  }
+
+  const handleMarkRejected = async (submissionId) => {
+    setIsMarkingRejected(true)
+    try {
+      const { error } = await supabase
+        .from('assessment_submissions')
+        .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+        .eq('id', submissionId)
+
+      if (error) throw error
+
+      setSubmissions(prev => prev.map(s => s.id === submissionId ? { ...s, status: 'rejected' } : s))
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'rejected' }))
+      }
+    } finally {
+      setIsMarkingRejected(false)
     }
   }
 
@@ -1928,7 +1949,13 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         textOverflow: 'ellipsis'
                       }}>{message.assessmentDescription}</p>
                       <div className="assessment-card-footer">
-                        <span className="assessment-due-date">Due: {new Date(message.assessmentDueDate).toLocaleDateString()}</span>
+                        <span className="assessment-due-date">Due: {(() => {
+                          let d = message.assessmentDueDate;
+                          if (!d && message.content) {
+                            try { d = JSON.parse(message.content).assessmentDueDate; } catch(e) {}
+                          }
+                          return d ? new Date(d).toLocaleDateString() : 'To be announced';
+                        })()}</span>
                         {userRole === 'mentor' ? (
                           <button
                             className="assessment-view-btn"
@@ -3346,18 +3373,33 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     })()}
 
                     {
-                      selectedSubmission.status !== 'completed' && (
-                        <div className="mentor-action-footer">
+                      !['completed', 'rejected'].includes(selectedSubmission.status?.toLowerCase()) && (
+                        <div className="mentor-action-footer" style={{ display: 'flex', gap: '12px' }}>
                           <button
                             onClick={() => handleMarkComplete(selectedSubmission.id)}
                             className="mark-complete-btn"
-                            disabled={isMarkingComplete}
+                            disabled={isMarkingComplete || isMarkingRejected}
                             style={{
+                              flex: 1,
                               opacity: isMarkingComplete ? 0.7 : 1,
-                              cursor: isMarkingComplete ? 'not-allowed' : 'pointer'
+                              cursor: (isMarkingComplete || isMarkingRejected) ? 'not-allowed' : 'pointer'
                             }}
                           >
                             {isMarkingComplete ? '⏳ Marking...' : '✓ Mark as Complete'}
+                          </button>
+                          <button
+                            onClick={() => handleMarkRejected(selectedSubmission.id)}
+                            className="btn-danger"
+                            disabled={isMarkingComplete || isMarkingRejected}
+                            style={{
+                              flex: 1,
+                              padding: '12px',
+                              borderRadius: '8px',
+                              opacity: isMarkingRejected ? 0.7 : 1,
+                              cursor: (isMarkingComplete || isMarkingRejected) ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {isMarkingRejected ? '⏳ Rejecting...' : '✗ Reject Submission'}
                           </button>
                         </div>
                       )
