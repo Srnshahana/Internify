@@ -1118,7 +1118,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         .insert({
           title: newAssessment.title,
           description: newAssessment.description,
-          due_date: newAssessment.dueDate,
+          due_date: newAssessment.dueDate.includes('T') ? newAssessment.dueDate : newAssessment.dueDate + 'T23:59:59',
           course_id: courseId,
           mentor_id: currentUserId,
           student_id: Number(course?.student_id), // CRITICAL: Links the assessment to this specific student
@@ -1143,7 +1143,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           assessmentId: createdAssessment.id,
           assessmentTitle: createdAssessment.title,
           assessmentDescription: createdAssessment.description,
-          assessmentDueDate: createdAssessment.due_date
+          assessmentDueDate: newAssessment.dueDate.includes('T') ? newAssessment.dueDate : newAssessment.dueDate + 'T23:59:59'
         }),
         read: false
       }
@@ -1347,6 +1347,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         .from('assessment_submissions')
         .select('*')
         .eq('assessment_id', assessmentId)
+        .order('submitted_at', { ascending: false })
 
       if (subError) {
         console.error('❌ Error fetching submissions:', subError)
@@ -2519,13 +2520,27 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                 </div>
                 <div className="assessment-modal-actions">
                   <button
-                    className="btn-primary"
+                    className="btn-primary btn-full"
                     onClick={handleSendAssessment}
                   >
                     Send Assessment
                   </button>
                   <button
-                    className="btn-secondary"
+                    className="btn-secondary btn-full"
+                    style={{
+                      padding: '12px 24px',
+                      background: '#f1f5f9',
+                      color: '#64748b',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      flex: 1
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#334155' }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b' }}
                     onClick={() => {
                       setShowAssessmentForm(false)
                       setNewAssessment({ title: '', description: '', dueDate: '' })
@@ -3011,19 +3026,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           );
         })}
-          {userRole === 'mentor' && (
-          <button
-            type="button"
-            className="live-course-complete-btn"
-            style={{ backgroundColor: '#8b5cf6', color: '#ffffff', marginLeft: '12px', border: 'none' }}
-            onClick={() => {
-              setShowAssessmentListModal(true)
-              setShowAttachOptions(false)
-            }}
-          >
-            <span className="live-session-title">Test</span>
-          </button>
-        )}
         <button
           type="button"
           className="live-course-complete-btn"

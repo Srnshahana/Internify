@@ -214,6 +214,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           .select('*, assessment_attachments(*)')
           .eq('student_id', currentUserId)
           .in('assessment_id', assessments.map(a => a.id))
+          .order('submitted_at', { ascending: false })
 
         if (subError) console.warn('Error fetching submissions:', subError)
         console.log('📥 Fetched Submissions:', submissions)
@@ -1059,18 +1060,19 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }
 
-
-
-
-
-
-
   const handleViewAssessment = (assessmentMessage) => {
     let assessmentId = assessmentMessage.assessmentId || assessmentMessage.id;
+    let fallbackTitle = assessmentMessage.assessmentTitle;
+    let fallbackDesc = assessmentMessage.assessmentDescription;
+    let fallbackDate = assessmentMessage.assessmentDueDate;
+
     if (!assessmentMessage.assessmentId && assessmentMessage.content) {
       try {
         const parsed = JSON.parse(assessmentMessage.content);
         if (parsed.assessmentId) assessmentId = parsed.assessmentId;
+        if (parsed.assessmentTitle && !fallbackTitle) fallbackTitle = parsed.assessmentTitle;
+        if (parsed.assessmentDescription && !fallbackDesc) fallbackDesc = parsed.assessmentDescription;
+        if (parsed.assessmentDueDate && !fallbackDate) fallbackDate = parsed.assessmentDueDate;
       } catch (e) {
         // ignore
       }
@@ -1085,13 +1087,18 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       setSelectedAssessment({
         ...assessmentMessage,
         id: fullAssessment.id,
-        assessmentTitle: assessmentMessage.assessmentTitle || fullAssessment.title,
-        assessmentDescription: assessmentMessage.assessmentDescription || fullAssessment.description,
-        assessmentDueDate: assessmentMessage.assessmentDueDate || fullAssessment.due_date,
+        assessmentTitle: fallbackTitle || fullAssessment.title,
+        assessmentDescription: fallbackDesc || fullAssessment.description,
+        assessmentDueDate: fallbackDate || fullAssessment.due_date,
         mySubmission: fullAssessment.mySubmission
       })
     } else {
-      setSelectedAssessment(assessmentMessage)
+      setSelectedAssessment({
+        ...assessmentMessage,
+        assessmentTitle: fallbackTitle,
+        assessmentDescription: fallbackDesc,
+        assessmentDueDate: fallbackDate
+      })
     }
 
     // Reset submission form when opening assessment
@@ -1184,7 +1191,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         status: 'submitted'
       }
 
-      // Try inserting. If submission_text also fails, we will need to know the correct column name.
+      // Always insert new submission for resubmissions instead of updating
       const { data: submissionData, error: dbError } = await supabase
         .from('assessment_submissions')
         .insert([submissionPayload])
@@ -1513,15 +1520,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     const assessmentId = message.assessmentId || (message.content && (() => { try { return JSON.parse(message.content).assessmentId; } catch(e) { return null; } })()) || message.id;
                     const fullAssessment = dbAssessments.find(a => String(a.id) === String(assessmentId));
                     const submissionStatus = fullAssessment?.mySubmission?.status?.toLowerCase();
-                    const isCompletedOrRejected = submissionStatus === 'completed' || submissionStatus === 'rejected';
+                    const isCompleted = submissionStatus === 'completed';
 
                     return (
                     <div
                       className="live-assessment-card"
-                      onClick={() => !isCompletedOrRejected && userRole === 'student' && handleViewAssessment(message)}
+                      onClick={() => !isCompleted && userRole === 'student' && handleViewAssessment(message)}
                       style={{ 
-                        cursor: (!isCompletedOrRejected && userRole === 'student') ? 'pointer' : 'default',
-                        opacity: isCompletedOrRejected ? 0.8 : 1
+                        cursor: (!isCompleted && userRole === 'student') ? 'pointer' : 'default',
+                        opacity: isCompleted ? 0.8 : 1
                       }}
                     >
                       <div className="assessment-card-header">
@@ -1551,7 +1558,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
                           let buttonText = 'View & Submit';
                           if (submissionStatus === 'completed') buttonText = 'Completed';
-                          else if (submissionStatus === 'rejected') buttonText = 'Rejected';
+                          else if (submissionStatus === 'rejected') buttonText = 'Resubmit (Rejected)';
                           else if (submissionStatus === 'submitted') buttonText = 'Already Submitted';
 
                           return <button className="assessment-view-btn" style={{
@@ -2122,7 +2129,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                   </div>
 
                   {/* Submission Form OR Status View */}
-                  {selectedAssessment.mySubmission && ['submitted', 'completed', 'graded', 'rejected'].includes(selectedAssessment.mySubmission.status?.toLowerCase()) ? (
+                  {selectedAssessment.mySubmission && ['submitted', 'completed', 'graded'].includes(selectedAssessment.mySubmission.status?.toLowerCase()) ? (
                     <div className="assessment-submission-view">
                       {/* Submission Details Header */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -2423,7 +2430,14 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         </button>
                       </div>
                     </div>
-                  ) : new Date() > new Date(selectedAssessment.assessmentDueDate) ? (
+                  ) : (() => {
+                    if (!selectedAssessment.assessmentDueDate) return false;
+                    const now = new Date();
+                    now.setHours(0, 0, 0, 0);
+                    const due = new Date(selectedAssessment.assessmentDueDate);
+                    due.setHours(0, 0, 0, 0);
+                    return now > due;
+                  })() ? (
                     <div className="assessment-submission-form" style={{ textAlign: 'center', padding: '48px 24px', background: '#fff', borderRadius: '16px', marginTop: '16px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }}>event_busy</span>
                       <h4 style={{ color: '#1e293b', fontSize: '20px', marginBottom: '8px', fontWeight: '600' }}>Deadline Passed</h4>
@@ -2440,6 +2454,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                   ) : (
                     <div className="assessment-submission-form">
+                      {selectedAssessment.mySubmission?.status === 'rejected' && (
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '16px', borderRadius: '8px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span className="material-symbols-outlined" style={{ color: '#ef4444', fontSize: '24px' }}>error</span>
+                          <div>
+                            <h4 style={{ color: '#991b1b', margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600' }}>Submission Rejected</h4>
+                            <p style={{ color: '#b91c1c', margin: 0, fontSize: '13px' }}>Your previous submission was rejected. Please review any feedback and submit again.</p>
+                          </div>
+                        </div>
+                      )}
                       <h4>Your Submission</h4>
 
                       <div className="form-group">
