@@ -1898,13 +1898,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       padding: '16px',
                       background: 'rgba(128, 128, 128, 0.1)',
                       borderRadius: '12px',
-                      width: '120px',
+                      minWidth: '200px',
+                      maxWidth: '300px',
                       gap: '8px',
                       border: '1px solid rgba(128, 128, 128, 0.2)',
                       textAlign: 'center',
                       margin: '4px 0'
                     }}>
-                      <div style={{ background: '#ef4444', color: 'white', padding: '10px 14px', borderRadius: '10px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                      <div style={{ background: '#ef4444', color: 'white', padding: '10px 14px', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', width: '100%', boxSizing: 'border-box' }}>
                         PDF
                       </div>
                       <div style={{ fontSize: '12px', color: 'inherit', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500' }}>
@@ -1915,9 +1916,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                         href={message.file_url || message.fileUrl || '#'}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ marginTop: '4px', background: 'rgba(128,128,128,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
+                        style={{ marginTop: '4px', background: 'rgba(128,128,128,0.15)', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: '600', width: '100%', boxSizing: 'border-box', transition: 'background 0.2s' }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>download</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
                         Open
                       </a>
                     </div>
@@ -1951,7 +1952,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     </div>
                   )}
                   {message.type === 'video' && (
-                    <div className="live-video-card" style={{
+                    <div style={{
                       margin: '4px 0',
                       borderRadius: '12px',
                       overflow: 'hidden',
@@ -1959,12 +1960,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       display: 'flex',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
                       border: '1px solid rgba(226,232,240,0.5)',
-                      width: 'max-content'
-                    }}>
+                      width: 'max-content',
+                      position: 'relative',
+                      cursor: 'pointer'
+                    }} onClick={() => setPreviewImage(message.videoUrl || message.file_url)}>
                       <video
                         src={message.videoUrl || message.file_url}
-                        controls
                         preload="metadata"
+                        autoPlay={false}
+                        loop={false}
+                        muted={true}
+                        playsInline
                         style={{
                           maxWidth: '280px',
                           maxHeight: '320px',
@@ -1974,6 +1980,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                           borderRadius: '12px'
                         }}
                       />
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+                        <span className="material-symbols-outlined" style={{ color: 'white', fontSize: '48px', opacity: 0.9 }}>play_circle</span>
+                      </div>
                     </div>
                   )}
                   {message.type === 'link' && (
@@ -3554,7 +3563,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           </div >
         )
       }
-      {/* Image Preview Modal */}
+      {/* Image/Video Preview Modal */}
       {previewImage && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -3569,10 +3578,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>close</span>
             </button>
-            <img src={previewImage} alt="Fullscreen Preview" style={{
-              maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
-            }} onClick={(e) => e.stopPropagation()} />
+            {previewImage.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+              <video src={previewImage} controls autoPlay style={{
+                maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+              }} onClick={(e) => e.stopPropagation()} />
+            ) : (
+              <img src={previewImage} alt="Fullscreen Preview" style={{
+                maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+              }} onClick={(e) => e.stopPropagation()} />
+            )}
           </div>
         </div>
       )}

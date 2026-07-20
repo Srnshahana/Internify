@@ -1566,7 +1566,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       textAlign: 'center',
                       margin: '4px 0'
                     }}>
-                      <div style={{ background: '#ef4444', color: 'white', padding: '10px 14px', borderRadius: '10px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                      <div style={{ background: '#ef4444', color: 'white', padding: '10px 14px', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', width: '100%', boxSizing: 'border-box' }}>
                         PDF
                       </div>
                       <div style={{ fontSize: '12px', color: 'inherit', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500' }}>
@@ -1577,9 +1577,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         href={message.file_url || message.fileUrl || '#'}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ marginTop: '4px', background: 'rgba(128,128,128,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
+                        style={{ marginTop: '4px', background: 'rgba(128,128,128,0.15)', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: '600', width: '100%', boxSizing: 'border-box', transition: 'background 0.2s' }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>download</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
                         Open
                       </a>
                     </div>
@@ -1628,6 +1628,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       <video
                         src={message.videoUrl || message.file_url}
                         preload="metadata"
+                        autoPlay={false}
+                        loop={false}
+                        muted={true}
+                        playsInline
                         style={{
                           maxWidth: '280px',
                           maxHeight: '320px',
