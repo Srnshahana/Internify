@@ -44,6 +44,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }, [course?.sessions])
   const [messageInput, setMessageInput] = useState('')
+  const [previewImage, setPreviewImage] = useState(null)
 
   // Removed mentor assessment creation state
   const [showAssessmentListModal, setShowAssessmentListModal] = useState(false)
@@ -283,8 +284,10 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             let inferredType = m.type || 'text'
             // Infer type logic
             if (!m.type && m.file_url) {
-              const ext = m.file_url.split('.').pop().toLowerCase()
+              const urlNoQuery = m.file_url.split('?')[0]
+              const ext = urlNoQuery.split('.').pop().toLowerCase()
               if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) inferredType = 'image'
+              else if (['mp4', 'webm', 'ogg', 'mov'].includes(ext)) inferredType = 'video'
               else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext)) inferredType = 'file'
             } else if (!m.type && (m.content || '').match(/^https?:\/\//)) {
               inferredType = 'link'
@@ -369,10 +372,21 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
              if (repliedMsg) replyToObj = { ...repliedMsg }
           }
           
+          let inferredType = newMessage.type || 'text'
+          if (!newMessage.type && newMessage.file_url) {
+            const urlNoQuery = newMessage.file_url.split('?')[0]
+            const ext = urlNoQuery.split('.').pop().toLowerCase()
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) inferredType = 'image'
+            else if (['mp4', 'webm', 'ogg', 'mov'].includes(ext)) inferredType = 'video'
+            else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext)) inferredType = 'file'
+          } else if (!newMessage.type && (newMessage.content || '').match(/^https?:\/\//)) {
+            inferredType = 'link'
+          }
+
           const msgForState = {
             ...newMessage,
             from: newMessage.sender_id.toString() === currentUserId?.toString() ? 'learner' : 'mentor',
-            type: newMessage.type || 'text',
+            type: inferredType,
             time: newMessage.created_at ? new Date(newMessage.created_at + (newMessage.created_at.includes('Z') || newMessage.created_at.includes('+') ? '' : 'Z')).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : getCurrentTime(),
             replyTo: replyToObj
           }
@@ -843,7 +857,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           .insert({
             course_id: courseId,
             session_id: activeSessionId,
-            uploaded_by: currentUserId,
+            uploaded_by: userid,
             type: finalType,
             file_name: finalFileName,
             file_url: finalFileUrl,
@@ -973,18 +987,89 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     if (imageInputRef.current) imageInputRef.current.click()
   }
 
-  const handleDocSelected = (e) => {
+  const handleDocSelected = async (e) => {
+    console.log('📄 [Step 1] Document Selection Started')
     const file = e.target.files && e.target.files[0]
     if (!file) return
-    setSelectedAttachment({ file, type: 'file' })
-    e.target.value = ''
-    setShowAttachOptions(false)
+
+    try {
+      console.log('📤 [Step 2] Uploading PDF to Storage:', file.name)
+      const fileExt = file.name.split('.').pop()
+      const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('course-files')
+        .upload(fileName, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-files')
+        .getPublicUrl(fileName)
+
+      const courseId = course?.course_id || course?.id
+
+      const { error: attachmentError } = await supabase
+        .from('attachments')
+        .insert({
+          course_id: courseId,
+          session_id: activeSessionId,
+          uploaded_by: userid,
+          type: 'file',
+          file_name: file.name,
+          file_url: publicUrl,
+          description: 'Document Attachment',
+          created_at: new Date().toISOString()
+        })
+
+      if (attachmentError) throw attachmentError
+
+      const messagePayload = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: userRole === 'mentor' ? 'mentor' : 'learner',
+        sender_id: Number(currentUserId),
+        type: 'file',
+        content: file.name,
+        file_url: publicUrl,
+        read: false
+      }
+
+      const { error: msgError } = await supabase
+        .from('messages')
+        .insert([messagePayload])
+
+      if (msgError) throw msgError
+
+      const newMessage = {
+        ...messagePayload,
+        type: 'file',
+        id: Date.now(),
+        from: userRole === 'mentor' ? 'mentor' : 'learner',
+        fileName: file.name,
+        fileSize: `${Math.round(file.size / 1024)} KB`,
+        time: getCurrentTime(),
+        session_id: activeSessionId,
+        highlightColor: null,
+        selfNote: '',
+      }
+      setMessages((prev) => [...prev, newMessage])
+      e.target.value = ''
+      setShowAttachOptions(false)
+    } catch (err) {
+      console.error('Upload error:', err)
+      showModal('Upload Error', 'Failed to upload PDF. Please try again.', 'error')
+    }
   }
 
   const handleImageSelected = (e) => {
     const file = e.target.files && e.target.files[0]
     if (!file) return
-    setSelectedAttachment({ file, type: 'image' })
+    
+    let type = 'image'
+    if (file.type && file.type.startsWith('video/')) type = 'video'
+    
+    setSelectedAttachment({ file, type })
     e.target.value = ''
     setShowAttachOptions(false)
   }
@@ -1455,8 +1540,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                 className={`live-message ${message.from === 'mentor' ? 'from-mentor' : 'from-learner'}`}
               >
                 <div
-                  className={`${['assessment', 'scheduled_class', 'reschedule_request', 'class_imminent'].includes(message.type) ? 'live-message-custom' : 'live-message-bubble'} ${message.highlightColor ? `highlight-${message.highlightColor}` : ''
-                    }`}
+                  className={`${['assessment', 'scheduled_class', 'reschedule_request', 'class_imminent'].includes(message.type) ? 'live-message-custom' : (['image', 'video', 'file'].includes(message.type) ? 'live-message-media-container' : 'live-message-bubble')} ${message.highlightColor ? `highlight-${message.highlightColor}` : ''}`}
+                  style={['image', 'video', 'file'].includes(message.type) ? { padding: '4px', background: 'transparent', border: 'none', boxShadow: 'none', position: 'relative', minWidth: '120px' } : {}}
                 >
                   {message.replyTo && (
                     <div className="live-reply-bubble-preview" style={{ padding: '6px 10px', background: 'rgba(0,0,0,0.1)', borderRadius: '6px', marginBottom: '8px', borderLeft: '3px solid #64748b', fontSize: '12px' }}>
@@ -1466,30 +1551,95 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                   )}
                   {message.type === 'text' && <p>{message.content}</p>}
                   {message.type === 'file' && (
-                    <div className="live-file-card">
-                      <div className="live-file-icon">DOC</div>
-                      <div className="live-file-info">
-                        <div className="live-file-name">{message.fileName || message.content}</div>
-                        {message.fileSize && <div className="live-file-meta">{message.fileSize}</div>}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '16px',
+                      background: 'rgba(128, 128, 128, 0.1)',
+                      borderRadius: '12px',
+                      minWidth: '200px',
+                      maxWidth: '300px',
+                      gap: '8px',
+                      border: '1px solid rgba(128, 128, 128, 0.2)',
+                      textAlign: 'center',
+                      margin: '4px 0'
+                    }}>
+                      <div style={{ background: '#ef4444', color: 'white', padding: '10px 14px', borderRadius: '10px', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        PDF
                       </div>
+                      <div style={{ fontSize: '12px', color: 'inherit', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500' }}>
+                        {message.fileName || message.content || 'Document'}
+                      </div>
+                      {message.fileSize && <div style={{ fontSize: '10px', opacity: 0.7 }}>{message.fileSize}</div>}
                       <a
                         href={message.file_url || message.fileUrl || '#'}
                         target="_blank"
                         rel="noreferrer"
-                        className="live-file-download-btn"
-                        style={{ marginLeft: 'auto', color: '#64748b' }}
+                        style={{ marginTop: '4px', background: 'rgba(128,128,128,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
                       >
-                        <span className="material-symbols-outlined">download</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>download</span>
+                        Open
                       </a>
                     </div>
                   )}
                   {message.type === 'image' && (
-                    <div className="live-image-card">
+                    <div className="live-image-card" style={{
+                      margin: '4px 0',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      background: 'rgba(0,0,0,0.03)',
+                      display: 'flex',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                      border: '1px solid rgba(226,232,240,0.5)',
+                      width: 'max-content'
+                    }}>
                       <img
                         src={message.imageUrl || message.file_url}
                         alt={message.fileName || message.content || 'Image'}
-                        style={{ maxWidth: '100%', borderRadius: '8px' }}
+                        style={{
+                          maxWidth: '280px',
+                          maxHeight: '320px',
+                          width: 'auto',
+                          height: 'auto',
+                          display: 'block',
+                          objectFit: 'contain',
+                          borderRadius: '12px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setPreviewImage(message.imageUrl || message.file_url)}
                       />
+                    </div>
+                  )}
+                  {message.type === 'video' && (
+                    <div style={{
+                      margin: '4px 0',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      background: 'rgba(0,0,0,0.03)',
+                      display: 'flex',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                      border: '1px solid rgba(226,232,240,0.5)',
+                      width: 'max-content',
+                      position: 'relative',
+                      cursor: 'pointer'
+                    }} onClick={() => setPreviewImage(message.videoUrl || message.file_url)}>
+                      <video
+                        src={message.videoUrl || message.file_url}
+                        preload="metadata"
+                        style={{
+                          maxWidth: '280px',
+                          maxHeight: '320px',
+                          width: 'auto',
+                          height: 'auto',
+                          display: 'block',
+                          borderRadius: '12px'
+                        }}
+                      />
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+                        <span className="material-symbols-outlined" style={{ color: 'white', fontSize: '48px', opacity: 0.9 }}>play_circle</span>
+                      </div>
                     </div>
                   )}
                   {message.type === 'link' && (
@@ -1870,7 +2020,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       </div>
                     )
                   )}
-                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && message.type !== 'class_imminent' && message.type !== 'assessment' && (
+                  {message.type !== 'scheduled_class' && message.type !== 'reschedule_request' && message.type !== 'class_imminent' && message.type !== 'assessment' && message.type !== 'file' && message.type !== 'image' && message.type !== 'video' && (
                     <>
                       <button
                         type="button"
@@ -1932,12 +2082,38 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           </div>
 
           {selectedAttachment && (
-            <div className="selectedAttachmentPreview" style={{ padding: '8px 12px', background: '#f1f5f9', borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="material-symbols-outlined">{selectedAttachment.type === 'image' ? 'image' : 'description'}</span>
-                <span style={{ fontSize: '14px', color: '#334155', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedAttachment.file.name}</span>
+            <div className="selectedAttachmentPreview" style={{ 
+              padding: '12px', 
+              background: '#ffffff', 
+              borderRadius: '12px', 
+              marginBottom: '12px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              border: '1px solid #e2e8f0',
+              margin: '0 24px 12px 24px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {selectedAttachment.type === 'image' ? (
+                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
+                     <img src={URL.createObjectURL(selectedAttachment.file)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ) : (
+                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', flexShrink: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>description</span>
+                  </div>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '250px' }}>
+                    {selectedAttachment.file.name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    {(selectedAttachment.file.size / 1024 / 1024).toFixed(2)} MB
+                  </div>
+                </div>
               </div>
-              <button type="button" onClick={() => setSelectedAttachment(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+              <button type="button" onClick={() => setSelectedAttachment(null)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', color: '#64748b', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', flexShrink: 0 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
               </button>
             </div>
@@ -1974,7 +2150,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
             />
-            <button type="submit" className="live-send-btn" disabled={!messageInput.trim()}>
+            <button type="submit" className="live-send-btn" disabled={!messageInput.trim() && !selectedAttachment}>
               ➤
             </button>
           </form>
@@ -2021,9 +2197,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
                 <button className="attach-option-btn" onClick={handleAttachImage}>
                   <div className="attach-icon-circle pink">
-                    <span className="material-symbols-outlined">image</span>
+                    <span className="material-symbols-outlined">perm_media</span>
                   </div>
-                  <span className="attach-label">Gallery</span>
+                  <span className="attach-label">Media</span>
                 </button>
               </div>
             </>
@@ -2035,14 +2211,14 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             ref={docInputRef}
             onChange={handleDocSelected}
             style={{ display: 'none' }}
-            accept=".pdf,.doc,.docx,.txt"
+            accept=".pdf"
           />
           <input
             type="file"
             ref={imageInputRef}
             onChange={handleImageSelected}
             style={{ display: 'none' }}
-            accept="image/*"
+            accept="image/*,video/*"
           />
 
 
@@ -2935,14 +3111,14 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           <input
             ref={docInputRef}
             type="file"
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+            accept=".pdf"
             style={{ display: 'none' }}
             onChange={handleDocSelected}
           />
           <input
             ref={imageInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             style={{ display: 'none' }}
             onChange={handleImageSelected}
           />
@@ -3030,6 +3206,36 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           </div>
         )}
       </div>
+      {/* Image/Video Preview Modal */}
+      {previewImage && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '24px', backdropFilter: 'blur(4px)'
+        }} onClick={() => setPreviewImage(null)}>
+          <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '100%' }}>
+            <button onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }} style={{
+              position: 'absolute', top: '-40px', right: 0, background: 'none', border: 'none',
+              color: 'white', cursor: 'pointer', padding: '8px'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>close</span>
+            </button>
+            {previewImage.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+              <video src={previewImage} controls autoPlay style={{
+                maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+              }} onClick={(e) => e.stopPropagation()} />
+            ) : (
+              <img src={previewImage} alt="Fullscreen Preview" style={{
+                maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+              }} onClick={(e) => e.stopPropagation()} />
+            )}
+          </div>
+        </div>
+      )}
+
       <RescheduleModal
         isOpen={showRescheduleModal}
         onClose={() => setShowRescheduleModal(false)}
