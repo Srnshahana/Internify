@@ -44,6 +44,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     }
   }, [course?.sessions])
   const [messageInput, setMessageInput] = useState('')
+  const [isSending, setIsSending] = useState(false)
   const [previewImage, setPreviewImage] = useState(null)
 
   // Removed mentor assessment creation state
@@ -554,7 +555,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const [showAttachOptions, setShowAttachOptions] = useState(false)
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
-  const [selectedAttachment, setSelectedAttachment] = useState(null)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [assessmentSubmission, setAssessmentSubmission] = useState({
@@ -809,122 +809,85 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!messageInput.trim() && !selectedAttachment) {
+    if (!messageInput.trim()) {
       console.warn('❌ Cannot send empty message')
       return
     }
+
+    if (isSending) return
+    setIsSending(true)
 
     const trimmedInput = messageInput.trim()
     if (trimmedInput.includes('meet.google.com')) {
       setMessageInput('')
       showModal('Action Resticted', 'Only mentors can schedule and share meeting links through the official classroom scheduler.', 'warning')
+      setIsSending(false)
       return
     }
 
     if (!chatId) {
       showModal('Entry Error', 'Chat session not found. Please re-enter the classroom.', 'error')
+      setIsSending(false)
       return
     }
 
-    let finalFileUrl = null
-    let finalFileName = null
-    let finalType = 'text'
-
-    if (selectedAttachment) {
-      const file = selectedAttachment.file
-      finalType = selectedAttachment.type
-      finalFileName = file.name
-
-      try {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `study-materials/${activeSessionId}/${finalType}s/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('course-files')
-          .upload(fileName, file)
-
-        if (uploadError) throw uploadError
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('course-files')
-          .getPublicUrl(fileName)
-        
-        finalFileUrl = publicUrl
-
-        const courseId = course?.course_id || course?.id
-        const { error: attachmentError } = await supabase
-          .from('attachments')
-          .insert({
-            course_id: courseId,
-            session_id: activeSessionId,
-            uploaded_by: userid,
-            type: finalType,
-            file_name: finalFileName,
-            file_url: finalFileUrl,
-            description: `${finalType === 'image' ? 'Image' : 'Document'} Attachment`,
-            created_at: new Date().toISOString()
-          })
-
-        if (attachmentError) throw attachmentError
-
-      } catch (err) {
-        console.error('Error uploading attachment:', err)
-        showModal('Error', 'Failed to upload attachment: ' + err.message, 'error')
-        return
-      }
-    }
-
-    const tempId = Date.now().toString()
-    const pendingMsg = {
+    const messagesToSend = []
+    const baseMsg = {
       chat_id: chatId,
       session_id: activeSessionId,
       role: userRole === 'mentor' ? 'mentor' : 'student',
       sender_id: currentUserId,
-      content: trimmedInput || finalFileName,
-      file_url: finalFileUrl,
-      type: finalType,
       read: false,
       reply_to_id: replyTo ? replyTo.id : null,
-      tempId: tempId
     }
 
+    messagesToSend.push({
+      ...baseMsg,
+      content: trimmedInput,
+      file_url: null,
+      type: 'text',
+      tempId: Date.now().toString() + '-text'
+    })
+
     // Optimistically update the UI 
-    const optimisticMsg = {
-      ...pendingMsg,
-      id: tempId, 
+    const optimisticMsgs = messagesToSend.map(msg => ({
+      ...msg,
+      id: msg.tempId, 
       from: 'learner', 
-      type: finalType,   
       time: getCurrentTime(),
       replyTo: replyTo ? { ...replyTo } : null
-    }
-    setMessages(prev => [...prev, optimisticMsg])
+    }))
+    
+    setMessages(prev => [...prev, ...optimisticMsgs])
     setMessageInput('')
-    setSelectedAttachment(null)
+    setReplyTo(null)
+    setShowAttachOptions(false)
 
     // 1. BROADCAST (Instant Path)
     if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'chat-message',
-        payload: { ...optimisticMsg, from: 'mentor' } 
+      optimisticMsgs.forEach(msg => {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'chat-message',
+          payload: { ...msg, from: 'mentor' } 
+        })
       })
     }
 
     // 2. SUPABASE DB (Persistent Path)
-    const { tempId: _temp, ...dbMsg } = pendingMsg
+    const dbMsgs = messagesToSend.map(({ tempId: _temp, ...dbMsg }) => dbMsg)
     const { error } = await supabase
       .from('messages')
-      .insert([dbMsg])
+      .insert(dbMsgs)
 
     if (error) {
       console.error('❌ Error sending message to Supabase:', error)
       showModal('Error', 'Failed to send message: ' + error.message, 'error')
-      return
+    } else {
+      console.log('✅ Messages sent successfully')
     }
 
-    console.log('✅ Message sent successfully')
-    setReplyTo(null)
-    setShowAttachOptions(false)
+    setIsSending(false)
   }
 
   const handleToggleHighlight = async (id) => {
@@ -989,89 +952,195 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleDocSelected = async (e) => {
     console.log('📄 [Step 1] Document Selection Started')
-    const file = e.target.files && e.target.files[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+
+    if (isSending) return
+    setIsSending(true)
 
     try {
-      console.log('📤 [Step 2] Uploading PDF to Storage:', file.name)
-      const fileExt = file.name.split('.').pop()
-      const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const dbMsgs = []
+      const uiMsgs = []
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file)
+      for (const file of files) {
+        console.log('📤 [Step 2] Uploading PDF to Storage:', file.name)
+        const fileExt = file.name.split('.').pop()
+        const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
-      if (uploadError) throw uploadError
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('course-files')
+          .upload(fileName, file)
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName)
+        if (uploadError) throw uploadError
 
-      const courseId = course?.course_id || course?.id
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-files')
+          .getPublicUrl(fileName)
 
-      const { error: attachmentError } = await supabase
-        .from('attachments')
-        .insert({
-          course_id: courseId,
-          session_id: activeSessionId,
-          uploaded_by: userid,
+        const courseId = course?.course_id || course?.id
+
+        const { error: attachmentError } = await supabase
+          .from('attachments')
+          .insert({
+            course_id: courseId,
+            session_id: activeSessionId,
+            uploaded_by: userid,
+            type: 'file',
+            file_name: file.name,
+            file_url: publicUrl,
+            description: 'Document Attachment',
+            created_at: new Date().toISOString()
+          })
+
+        if (attachmentError) throw attachmentError
+
+        const messagePayload = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
           type: 'file',
-          file_name: file.name,
+          content: file.name,
           file_url: publicUrl,
-          description: 'Document Attachment',
-          created_at: new Date().toISOString()
-        })
+          read: false
+        }
+        dbMsgs.push(messagePayload)
 
-      if (attachmentError) throw attachmentError
-
-      const messagePayload = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
-        role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: Number(currentUserId),
-        type: 'file',
-        content: file.name,
-        file_url: publicUrl,
-        read: false
+        const newMessage = {
+          ...messagePayload,
+          type: 'file',
+          id: Date.now() + Math.random(),
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          session_id: activeSessionId,
+          highlightColor: null,
+          selfNote: '',
+        }
+        uiMsgs.push(newMessage)
       }
 
       const { error: msgError } = await supabase
         .from('messages')
-        .insert([messagePayload])
+        .insert(dbMsgs)
 
       if (msgError) throw msgError
 
-      const newMessage = {
-        ...messagePayload,
-        type: 'file',
-        id: Date.now(),
-        from: userRole === 'mentor' ? 'mentor' : 'learner',
-        fileName: file.name,
-        fileSize: `${Math.round(file.size / 1024)} KB`,
-        time: getCurrentTime(),
-        session_id: activeSessionId,
-        highlightColor: null,
-        selfNote: '',
+      if (channelRef.current) {
+        uiMsgs.forEach(msg => {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'chat-message',
+            payload: { ...msg, from: userRole === 'mentor' ? 'mentor' : 'learner' } 
+          })
+        })
       }
-      setMessages((prev) => [...prev, newMessage])
+
+      setMessages((prev) => [...prev, ...uiMsgs])
       e.target.value = ''
       setShowAttachOptions(false)
     } catch (err) {
       console.error('Upload error:', err)
       showModal('Upload Error', 'Failed to upload PDF. Please try again.', 'error')
+    } finally {
+      setIsSending(false)
     }
   }
 
-  const handleImageSelected = (e) => {
-    const file = e.target.files && e.target.files[0]
-    if (!file) return
-    
-    let type = 'image'
-    if (file.type && file.type.startsWith('video/')) type = 'video'
-    
-    setSelectedAttachment({ file, type })
-    e.target.value = ''
-    setShowAttachOptions(false)
+  const handleImageSelected = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+
+    if (isSending) return
+    setIsSending(true)
+
+    try {
+      const dbMsgs = []
+      const uiMsgs = []
+
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop()
+        let finalType = 'image'
+        if (file.type && file.type.startsWith('video/')) finalType = 'video'
+
+        const fileName = `study-materials/${activeSessionId}/${finalType}s/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('course-files')
+          .upload(fileName, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-files')
+          .getPublicUrl(fileName)
+
+        const courseId = course?.course_id || course?.id
+        const { error: attachmentError } = await supabase
+          .from('attachments')
+          .insert({
+            course_id: courseId,
+            session_id: activeSessionId,
+            uploaded_by: userid,
+            type: finalType,
+            file_name: file.name,
+            file_url: publicUrl,
+            description: `${finalType === 'image' ? 'Image' : 'Video'} Attachment`,
+            created_at: new Date().toISOString()
+          })
+
+        if (attachmentError) throw attachmentError
+
+        const messagePayload = {
+          chat_id: chatId,
+          session_id: activeSessionId,
+          role: userRole === 'mentor' ? 'mentor' : 'student',
+          sender_id: currentUserId,
+          content: file.name,
+          file_url: publicUrl,
+          type: finalType,
+          read: false
+        }
+        dbMsgs.push(messagePayload)
+
+        const newMessage = {
+          ...messagePayload,
+          id: Date.now() + Math.random(),
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          time: getCurrentTime(),
+          session_id: activeSessionId,
+          highlightColor: null,
+          selfNote: '',
+        }
+        uiMsgs.push(newMessage)
+      }
+
+      const { error: msgError } = await supabase
+        .from('messages')
+        .insert(dbMsgs)
+
+      if (msgError) throw msgError
+
+      if (channelRef.current) {
+        uiMsgs.forEach(msg => {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'chat-message',
+            payload: { ...msg, from: userRole === 'mentor' ? 'mentor' : 'learner' } 
+          })
+        })
+      }
+
+      setMessages((prev) => [...prev, ...uiMsgs])
+      e.target.value = ''
+      setShowAttachOptions(false)
+    } catch (err) {
+      console.error('Error uploading media:', err)
+      showModal('Upload Error', 'Failed to upload media: ' + err.message, 'error')
+    } finally {
+      setIsSending(false)
+    }
   }
 
   const handleAttachLink = async () => {
@@ -2085,43 +2154,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             ))}
           </div>
 
-          {selectedAttachment && (
-            <div className="selectedAttachmentPreview" style={{ 
-              padding: '12px', 
-              background: '#ffffff', 
-              borderRadius: '12px', 
-              marginBottom: '12px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #e2e8f0',
-              margin: '0 24px 12px 24px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {selectedAttachment.type === 'image' ? (
-                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
-                     <img src={URL.createObjectURL(selectedAttachment.file)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                ) : (
-                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', flexShrink: 0 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>description</span>
-                  </div>
-                )}
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '250px' }}>
-                    {selectedAttachment.file.name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                    {(selectedAttachment.file.size / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-              </div>
-              <button type="button" onClick={() => setSelectedAttachment(null)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', color: '#64748b', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', flexShrink: 0 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
-              </button>
-            </div>
-          )}
           <form className="live-message-input-container" onSubmit={handleSendMessage}>
             <button
               type="button"
@@ -2150,12 +2182,13 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             <input
               type="text"
               className="live-message-input"
-              placeholder="Type your message..."
+              placeholder={isSending ? "Sending..." : "Type your message..."}
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
+              disabled={isSending}
             />
-            <button type="submit" className="live-send-btn" disabled={!messageInput.trim() && !selectedAttachment}>
-              ➤
+            <button type="submit" className="live-send-btn" disabled={!messageInput.trim() || isSending}>
+              {isSending ? '...' : '➤'}
             </button>
           </form>
           {showAttachOptions && (
@@ -2216,6 +2249,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             onChange={handleDocSelected}
             style={{ display: 'none' }}
             accept=".pdf"
+            multiple
           />
           <input
             type="file"
@@ -2223,6 +2257,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             onChange={handleImageSelected}
             style={{ display: 'none' }}
             accept="image/*,video/*"
+            multiple
           />
 
 
@@ -3118,6 +3153,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             accept=".pdf"
             style={{ display: 'none' }}
             onChange={handleDocSelected}
+            multiple
           />
           <input
             ref={imageInputRef}
@@ -3125,6 +3161,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             accept="image/*,video/*"
             style={{ display: 'none' }}
             onChange={handleImageSelected}
+            multiple
           />
           {/* Recording Overlay UI */}
         </div>
