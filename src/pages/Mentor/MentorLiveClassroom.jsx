@@ -23,6 +23,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
   ]
 
+  // Check if course is completed
+  const isCourseCompleted = 
+    course?.status?.toLowerCase() === 'completed' || 
+    course?.course_status?.toLowerCase() === 'completed' || 
+    course?.enrollment_status?.toLowerCase() === 'completed';
+
   // Find first pending or default to first session ID
   const firstPendingId = initialSessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
     initialSessions.find(s => s.sessionId)?.sessionId ||
@@ -693,114 +699,145 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
   const handleDocSelected = async (e) => {
     console.log('📄 [Step 1] Document Selection Started')
-    const file = e.target.files && e.target.files[0]
-    if (!file) {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) {
       console.warn('⚠️ No file selected')
       return
     }
 
+    setShowAttachOptions(false)
+    if (e.target) e.target.value = ''
+
+    if (isSending) return
+    setIsSending(true)
+
     try {
-      console.log('📤 [Step 2] Uploading file to Storage:', file.name)
-      const fileExt = file.name.split('.').pop()
-      const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const dbMsgs = []
+      const uiMsgs = []
+      const tempMsgs = []
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file)
-
-      if (uploadError) {
-        console.error('❌ Upload Error:', uploadError)
-        throw uploadError
+      // Instantly generate temporary UI for feedback
+      for (const file of files) {
+        const tempMsg = {
+          id: Date.now() + Math.random(),
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
+          type: 'file',
+          content: file.name,
+          file_url: null, // no preview for pdf initially, just show it's there
+          read: false,
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          highlightColor: null,
+          selfNote: '',
+        }
+        tempMsgs.push(tempMsg)
       }
-      console.log('✅ Upload Success:', uploadData)
+      
+      setMessages((prev) => [...prev, ...tempMsgs])
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName)
+      for (const file of files) {
+        console.log('📤 [Step 2] Uploading file to Storage:', file.name)
+        const fileExt = file.name.split('.').pop()
+        const fileName = `study-materials/${activeSessionId}/docs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
 
-      // Get course ID safely
-      const courseId = course?.course_id || course?.id
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('course-files')
+          .upload(fileName, file)
 
-      console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
-      console.log('📦 Attachment payload to insert:', {
-        course_id: courseId,
-        session_id: activeSessionId,
-        uploaded_by: currentUserId,
-        type: 'file',
-        file_name: file.name,
-        file_url: publicUrl,
-        description: 'Document Attachment',
-        created_at: new Date().toISOString()
-      })
-      // Insert into Attachments
-      const { data: attachmentData, error: attachmentError } = await supabase
-        .from('attachments')
-        .insert({
-          course_id: courseId,
-          session_id: activeSessionId,
-          uploaded_by: userid,
-          type: 'file', // Standard document type
-          file_name: file.name,
+        if (uploadError) {
+          console.error('❌ Upload Error:', uploadError)
+          throw uploadError
+        }
+        console.log('✅ Upload Success:', uploadData)
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-files')
+          .getPublicUrl(fileName)
+
+        // Get course ID safely
+        const courseId = course?.course_id || course?.id
+
+        console.log('💾 [Step 3] Saving to Attachments Table, User ID:', currentUserId)
+        const { data: attachmentData, error: attachmentError } = await supabase
+          .from('attachments')
+          .insert({
+            course_id: courseId,
+            session_id: activeSessionId,
+            uploaded_by: userid,
+            type: 'file', // Standard document type
+            file_name: file.name,
+            file_url: publicUrl,
+            description: 'Document Attachment',
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (attachmentError) {
+          console.error('❌ Attachment Insert Error:', attachmentError)
+          showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
+        } else {
+          console.log('✅ Attachment Reserved:', attachmentData)
+        }
+
+        console.log('💬 [Step 3] Sending Message')
+        const messagePayload = {
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
+          type: 'file',
+          content: file.name, // Storing filename in content
           file_url: publicUrl,
-          description: 'Document Attachment',
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+          read: false
+        }
+        dbMsgs.push(messagePayload)
 
-      if (attachmentError) {
-        console.error('❌ Attachment Insert Error:', attachmentError)
-        showModal('Error', 'Failed to save attachment info: ' + attachmentError.message, 'error')
-      } else {
-        console.log('✅ Attachment Reserved:', attachmentData)
-      }
-
-      console.log('💬 [Step 3] Sending Message')
-      // STRICT DB SCHEMA PAYLOAD
-      const messagePayload = {
-        chat_id: Number(chatId),
-        session_id: Number(activeSessionId),
-        role: userRole === 'mentor' ? 'mentor' : 'learner',
-        sender_id: Number(currentUserId),
-        type: 'file',
-        content: file.name, // Storing filename in content
-        file_url: publicUrl,
-        read: false
+        const newMessage = {
+          ...messagePayload,
+          type: 'file',
+          id: Date.now() + Math.random(),
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          session_id: activeSessionId,
+          highlightColor: null,
+          selfNote: '',
+        }
+        uiMsgs.push(newMessage)
       }
 
       const { error: msgError } = await supabase
         .from('messages')
-        .insert([messagePayload])
+        .insert(dbMsgs)
 
       if (msgError) {
         console.error('❌ Message Insert Error:', msgError)
         throw msgError
       }
 
-      console.log('✅ Message Sent Successfully')
-
-      // Optimistic Update
-      const newMessage = {
-        ...messagePayload,
-        type: 'file',
-        id: Date.now(),
-        from: userRole === 'mentor' ? 'mentor' : 'learner',
-        fileName: file.name,
-        fileSize: `${Math.round(file.size / 1024)} KB`,
-        time: getCurrentTime(),
-        session_id: activeSessionId,
-        highlightColor: null,
-        selfNote: '',
+      if (channelRef.current) {
+        uiMsgs.forEach(msg => {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'chat-message',
+            payload: { ...msg, from: 'mentor' } 
+          })
+        })
       }
-      setMessages((prev) => [...prev, newMessage])
-      showModal('Success', 'Document sent successfully!', 'success')
 
+      console.log('✅ Message Sent Successfully')
     } catch (err) {
       console.error('❌ Critical Error in Document Flow:', err)
       showModal('Error', 'Error sending document: ' + err.message, 'error')
     } finally {
-      e.target.value = ''
-      setShowAttachOptions(false)
+      setIsSending(false)
     }
   }
 
@@ -812,12 +849,45 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       return
     }
 
+    setShowAttachOptions(false)
+    if (e.target) e.target.value = ''
+
     if (isSending) return
     setIsSending(true)
 
     try {
       const dbMsgs = []
       const uiMsgs = []
+      const tempMsgs = []
+
+      // Instantly generate temporary UI for feedback
+      for (const file of files) {
+        let type = 'image'
+        if (file.type && file.type.startsWith('video/')) type = 'video'
+        
+        const tempUrl = URL.createObjectURL(file)
+
+        const tempMsg = {
+          id: Date.now() + Math.random(),
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
+          type: type,
+          content: file.name,
+          file_url: tempUrl,
+          read: false,
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          highlightColor: null,
+          selfNote: '',
+        }
+        tempMsgs.push(tempMsg)
+      }
+
+      setMessages((prev) => [...prev, ...tempMsgs])
 
       for (const file of files) {
         console.log('📤 [Step 2] Uploading image/video to Storage:', file.name)
@@ -909,16 +979,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
 
       console.log('✅ Messages Sent Successfully')
-      setMessages((prev) => [...prev, ...uiMsgs])
-      showModal('Success', 'Media sent successfully!', 'success')
 
     } catch (err) {
       console.error('❌ Critical Error in Image Flow:', err)
       showModal('Error', 'Error sending image: ' + err.message, 'error')
     } finally {
       setIsSending(false)
-      e.target.value = ''
-      setShowAttachOptions(false)
     }
   }
 
@@ -1768,14 +1834,16 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
           {userRole === 'mentor' && (
             <>
-              <button
-                className="live-complete-btn-v2"
-                onClick={() => setShowScheduleClassModal(true)}
-                title="Schedule Class"
-                style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
-              >
-                <span className="material-symbols-outlined">calendar_month</span>
-              </button>
+              {!isCourseCompleted && (
+                <button
+                  className="live-complete-btn-v2"
+                  onClick={() => setShowScheduleClassModal(true)}
+                  title="Schedule Class"
+                  style={{ background: 'rgba(42, 126, 255, 0.1)', color: '#2a7eff', border: '1px solid rgba(42, 126, 255, 0.2)' }}
+                >
+                  <span className="material-symbols-outlined">calendar_month</span>
+                </button>
+              )}
               <button
                 className="live-complete-btn-v2"
                 onClick={() => setShowSessionsModal(true)}
@@ -1784,14 +1852,16 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               >
                 <span className="material-symbols-outlined">event_list</span>
               </button>
-              <button
-                className="live-complete-btn-v2"
-                onClick={() => setShowAssessmentListModal(true)}
-                title="Assessments"
-                style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)' }}
-              >
-                <span className="material-symbols-outlined">assignment</span>
-              </button>
+              {!isCourseCompleted && (
+                <button
+                  className="live-complete-btn-v2"
+                  onClick={() => setShowAssessmentListModal(true)}
+                  title="Assessments"
+                  style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)' }}
+                >
+                  <span className="material-symbols-outlined">assignment</span>
+                </button>
+              )}
             </>
           )}
           {userRole === 'student' && (
@@ -2425,10 +2495,15 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             ))}
           </div>
 
-          <form className="live-message-input-container" onSubmit={handleSendMessage}>
-            <button
-              type="button"
-              className="live-attach-btn"
+          {isCourseCompleted ? (
+            <div className="live-message-input-container" style={{ justifyContent: 'center', padding: '16px', color: '#64748b', background: '#f8fafc', borderRadius: '12px', borderTop: '1px solid #e2e8f0', margin: '20px' }}>
+              Course completed. Chat is closed.
+            </div>
+          ) : (
+            <form className="live-message-input-container" onSubmit={handleSendMessage}>
+              <button
+                type="button"
+                className="live-attach-btn"
               aria-label="Add message attachment"
               onClick={() => setShowAttachOptions((prev) => !prev)}
             >
@@ -2471,6 +2546,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               {isSending ? '...' : '➤'}
             </button>
           </form>
+          )}
           {showAttachOptions && (
             <>
               <div
@@ -3100,7 +3176,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           const tenMinsBefore = scheduledTime ? scheduledTime - 10 * 60000 : null;
           const twentyFourHoursAfter = scheduledTime ? scheduledTime + 24 * 60 * 60000 : null;
           const isExpired = scheduledTime ? now > twentyFourHoursAfter : false;
-          const isEarly = scheduledTime ? now < tenMinsBefore : false;
+          const isEarly = scheduledTime ? now < tenMinsBefore : null;
 
           let displayStatus = 'Upcoming';
           if (session.status === 'current') {

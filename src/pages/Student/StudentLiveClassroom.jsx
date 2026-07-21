@@ -24,6 +24,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     { id: 3, title: 'State & Hooks', status: 'upcoming' },
   ]
 
+  // Check if course is completed
+  const isCourseCompleted = 
+    course?.status?.toLowerCase() === 'completed' || 
+    course?.course_status?.toLowerCase() === 'completed' || 
+    course?.enrollment_status?.toLowerCase() === 'completed';
+
   // Find first pending or default to first session ID
   const firstPendingId = initialSessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
     initialSessions.find(s => s.sessionId)?.sessionId ||
@@ -954,6 +960,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     console.log('📄 [Step 1] Document Selection Started')
     const files = Array.from(e.target.files || [])
     if (!files.length) return
+    
+    setShowAttachOptions(false)
+    if (e.target) e.target.value = ''
 
     if (isSending) return
     setIsSending(true)
@@ -961,6 +970,31 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     try {
       const dbMsgs = []
       const uiMsgs = []
+      const tempMsgs = []
+
+      // Instantly generate temporary UI for feedback
+      for (const file of files) {
+        const tempMsg = {
+          id: Date.now() + Math.random(),
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
+          type: 'file',
+          content: file.name,
+          file_url: null, // no preview for pdf initially, just show it's there
+          read: false,
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          highlightColor: null,
+          selfNote: '',
+        }
+        tempMsgs.push(tempMsg)
+      }
+      
+      setMessages((prev) => [...prev, ...tempMsgs])
 
       for (const file of files) {
         console.log('📤 [Step 2] Uploading PDF to Storage:', file.name)
@@ -1037,9 +1071,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         })
       }
 
-      setMessages((prev) => [...prev, ...uiMsgs])
-      e.target.value = ''
-      setShowAttachOptions(false)
     } catch (err) {
       console.error('Upload error:', err)
       showModal('Upload Error', 'Failed to upload PDF. Please try again.', 'error')
@@ -1051,6 +1082,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const handleImageSelected = async (e) => {
     const files = Array.from(e.target.files || [])
     if (!files.length) return
+    
+    setShowAttachOptions(false)
+    if (e.target) e.target.value = ''
 
     if (isSending) return
     setIsSending(true)
@@ -1058,6 +1092,36 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     try {
       const dbMsgs = []
       const uiMsgs = []
+      const tempMsgs = []
+
+      // Instantly generate temporary UI for feedback
+      for (const file of files) {
+        let type = 'image'
+        if (file.type && file.type.startsWith('video/')) type = 'video'
+        
+        const tempUrl = URL.createObjectURL(file)
+
+        const tempMsg = {
+          id: Date.now() + Math.random(),
+          chat_id: Number(chatId),
+          session_id: Number(activeSessionId),
+          role: userRole === 'mentor' ? 'mentor' : 'learner',
+          sender_id: Number(currentUserId),
+          type: type,
+          content: file.name,
+          file_url: tempUrl,
+          read: false,
+          from: userRole === 'mentor' ? 'mentor' : 'learner',
+          fileName: file.name,
+          fileSize: `${Math.round(file.size / 1024)} KB`,
+          time: getCurrentTime(),
+          highlightColor: null,
+          selfNote: '',
+        }
+        tempMsgs.push(tempMsg)
+      }
+
+      setMessages((prev) => [...prev, ...tempMsgs])
 
       for (const file of files) {
         const fileExt = file.name.split('.').pop()
@@ -1132,9 +1196,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         })
       }
 
-      setMessages((prev) => [...prev, ...uiMsgs])
-      e.target.value = ''
-      setShowAttachOptions(false)
     } catch (err) {
       console.error('Error uploading media:', err)
       showModal('Upload Error', 'Failed to upload media: ' + err.message, 'error')
@@ -1521,15 +1582,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           )}
 
-          <div
-            className={`live-complete-btn-v2 ${activeSession.status === 'completed' ? 'completed' : ''}`}
-            style={{ cursor: 'default' }}
-          >
-            <span className="material-symbols-outlined">
-              {activeSession.status === 'completed' ? 'check_circle' : 'hourglass_empty'}
-            </span>
-            {activeSession.status === 'completed' ? 'Completed' : 'Pending'}
-          </div>
         </div>
       </header>
 
@@ -2154,10 +2206,15 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             ))}
           </div>
 
-          <form className="live-message-input-container" onSubmit={handleSendMessage}>
-            <button
-              type="button"
-              className="live-attach-btn"
+          {isCourseCompleted ? (
+            <div className="live-message-input-container" style={{ justifyContent: 'center', padding: '16px', color: '#64748b', background: '#f8fafc', borderRadius: '12px', borderTop: '1px solid #e2e8f0', margin: '20px' }}>
+              Course completed. Chat is closed.
+            </div>
+          ) : (
+            <form className="live-message-input-container" onSubmit={handleSendMessage}>
+              <button
+                type="button"
+                className="live-attach-btn"
               aria-label="Add message attachment"
               onClick={() => setShowAttachOptions((prev) => !prev)}
             >
@@ -2185,12 +2242,14 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               placeholder={isSending ? "Sending..." : "Type your message..."}
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
-              disabled={isSending}
+              disabled={isSending || isCourseCompleted}
             />
-            <button type="submit" className="live-send-btn" disabled={!messageInput.trim() || isSending}>
+            <button type="submit" className="live-send-btn" disabled={!messageInput.trim() || isSending || isCourseCompleted}>
               {isSending ? '...' : '➤'}
             </button>
-          </form>
+            </form>
+          )}
+
           {showAttachOptions && (
             <>
               <div 
@@ -3199,14 +3258,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
               </button>
             );
           })}
-          <div
-            className="live-course-complete-btn"
-            style={{ cursor: 'default', opacity: 0.8 }}
-          >
-            <span className="live-session-title">Course Complete</span>
-          </div>
-
-
         </div>
 
         {/* Course Completion Modal */}
