@@ -24,10 +24,32 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   ]
 
   // Check if course is completed
-  const isCourseCompleted = 
+  const [isCourseCompleted, setIsCourseCompleted] = useState(
     course?.status?.toLowerCase() === 'completed' || 
     course?.course_status?.toLowerCase() === 'completed' || 
-    course?.enrollment_status?.toLowerCase() === 'completed';
+    course?.enrollment_status?.toLowerCase() === 'completed' ||
+    !!course?.is_complete
+  );
+
+  useEffect(() => {
+    const fetchCompletionStatus = async () => {
+      const enrollmentId = Number(course?.enrollment_id || course?.id);
+      if (!enrollmentId) return;
+      try {
+        const { data, error } = await supabase
+          .from('classes_enrolled')
+          .select('is_complete')
+          .eq('id', enrollmentId)
+          .single();
+        if (data && data.is_complete) {
+          setIsCourseCompleted(true);
+        }
+      } catch (err) {
+        console.log('Error checking course completion:', err);
+      }
+    };
+    fetchCompletionStatus();
+  }, [course?.enrollment_id, course?.id]);
 
   // Find first pending or default to first session ID
   const firstPendingId = initialSessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
@@ -1819,6 +1841,58 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     }
     return url;
   };
+  const validateCourseCompletion = async () => {
+    try {
+      // 1. Check if all sessions are marked completed
+      const allSessionsCompleted = sessions.every(s => s.status === 'completed');
+      if (!allSessionsCompleted) {
+        showModal('Cannot Complete Course', 'Please ensure all course sessions are marked as completed before finalizing.', 'warning');
+        return;
+      }
+
+      // 2. Check if all scheduled classes are marked completed
+      const allScheduledCompleted = scheduledClasses.every(c => c.is_complete === true);
+      if (!allScheduledCompleted && scheduledClasses.length > 0) {
+        showModal('Cannot Complete Course', 'There are still pending scheduled classes. Please mark them as completed.', 'warning');
+        return;
+      }
+
+      // 3. Check if all assigned assessments are completed
+      const courseId = course?.course_id || course?.id;
+      const studentId = Number(course?.student_id);
+      
+      const { data: assessments, error } = await supabase
+        .from('assessments')
+        .select('id, title, assessment_submissions(status)')
+        .eq('course_id', courseId)
+        .eq('student_id', studentId);
+        
+      if (error) throw error;
+      
+      let pendingAssessments = 0;
+      if (assessments) {
+        for (const asm of assessments) {
+          const subs = asm.assessment_submissions || [];
+          const hasCompletedSub = subs.some(s => s.status === 'completed');
+          if (!hasCompletedSub) {
+            pendingAssessments++;
+          }
+        }
+      }
+      
+      if (pendingAssessments > 0) {
+        showModal('Cannot Complete Course', `There are ${pendingAssessments} assessment(s) pending submission or review. Please ensure all assessments are marked as completed.`, 'warning');
+        return;
+      }
+      
+      // All checks passed
+      setShowCompletionModal(true);
+    } catch (err) {
+      console.error('Validation error:', err);
+      showModal('Error', 'Failed to validate course completion status.', 'error');
+    }
+  };
+
 
   return (
     <><div className="live-classroom-page" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', zIndex: 9999, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box' }}>
@@ -3205,7 +3279,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           type="button"
           className="live-course-complete-btn"
           style={{ backgroundColor: '#10b981', color: '#ffffff', marginLeft: '12px', border: 'none' }}
-          onClick={() => setShowCompletionModal(true)}
+          onClick={validateCourseCompletion}
         >
           <span className="live-session-title">Course Complete</span>
         </button>

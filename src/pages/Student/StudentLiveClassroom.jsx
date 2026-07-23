@@ -25,10 +25,32 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   ]
 
   // Check if course is completed
-  const isCourseCompleted = 
+  const [isCourseCompleted, setIsCourseCompleted] = useState(
     course?.status?.toLowerCase() === 'completed' || 
     course?.course_status?.toLowerCase() === 'completed' || 
-    course?.enrollment_status?.toLowerCase() === 'completed';
+    course?.enrollment_status?.toLowerCase() === 'completed' ||
+    !!course?.is_complete
+  );
+
+  useEffect(() => {
+    const fetchCompletionStatus = async () => {
+      const enrollmentId = Number(course?.enrollment_id || course?.id);
+      if (!enrollmentId) return;
+      try {
+        const { data, error } = await supabase
+          .from('classes_enrolled')
+          .select('is_complete')
+          .eq('id', enrollmentId)
+          .single();
+        if (data && data.is_complete) {
+          setIsCourseCompleted(true);
+        }
+      } catch (err) {
+        console.log('Error checking course completion:', err);
+      }
+    };
+    fetchCompletionStatus();
+  }, [course?.enrollment_id, course?.id]);
 
   // Find first pending or default to first session ID
   const firstPendingId = initialSessions.find(s => s.status === 'pending' || s.status === 'upcoming')?.id ||
