@@ -30,11 +30,19 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     course?.enrollment_status?.toLowerCase() === 'completed' ||
     !!course?.is_complete
   );
+  const [isCheckingCompletion, setIsCheckingCompletion] = useState(!isCourseCompleted);
 
   useEffect(() => {
     const fetchCompletionStatus = async () => {
+      if (isCourseCompleted) {
+        setIsCheckingCompletion(false);
+        return;
+      }
       const enrollmentId = Number(course?.enrollment_id || course?.id);
-      if (!enrollmentId) return;
+      if (!enrollmentId) {
+        setIsCheckingCompletion(false);
+        return;
+      }
       try {
         const { data, error } = await supabase
           .from('classes_enrolled')
@@ -46,6 +54,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         }
       } catch (err) {
         console.log('Error checking course completion:', err);
+      } finally {
+        setIsCheckingCompletion(false);
       }
     };
     fetchCompletionStatus();
@@ -141,10 +151,27 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       if (data) {
         setCourseSessions(data)
 
+        const mentorId = userRole === 'mentor' ? localStorage.getItem('auth_id') : (course?.mentor_id || course?.mentor_details?.mentor_id)
+        const studentId = userRole === 'student' ? localStorage.getItem('auth_id') : course?.student_id
+        
+        let progressMap = new Map();
+        if (courseId && mentorId && studentId) {
+          const { data: progData } = await supabase
+            .from('course_session_progress')
+            .select('session_id, is_completed')
+            .eq('course_id', courseId)
+            .eq('mentor_id', mentorId)
+            .eq('student_id', studentId);
+            
+          if (progData) {
+            progressMap = new Map(progData.map(p => [Number(p.session_id), p.is_completed]));
+          }
+        }
+
         // Also sync the local sessions state so the bottom bar and activeSession update instantly without reload
         setSessions(data.map(session => ({
           ...session,
-          status: 'upcoming'
+          status: progressMap.get(Number(session.id || session.sessionId)) ? 'completed' : 'upcoming'
         })))
       }
     } catch (err) {
@@ -527,52 +554,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     }
   }, [messages.length, activeSessionId])
 
-  // Fetch initial progress from course_session_progress
-  useEffect(() => {
-    const fetchProgress = async () => {
-      const courseId = course?.course_id || course?.id
-      // Ensure we have correct IDs based on role
-      const mentorId = userRole === 'mentor' ? localStorage.getItem('auth_id') : (course?.mentor_id || course?.mentor_details?.mentor_id)
-      const studentId = userRole === 'student' ? localStorage.getItem('auth_id') : course?.student_id
 
-      if (!courseId || !mentorId || !studentId) {
-        console.warn('Missing context IDs for progress fetch:', { courseId, mentorId, studentId })
-        return
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('course_session_progress')
-          .select('session_id, is_completed')
-          .eq('course_id', courseId)
-          .eq('mentor_id', mentorId)
-          .eq('student_id', studentId)
-
-        if (error) {
-          console.error('Error fetching session progress:', error)
-          return
-        }
-
-        if (data && data.length > 0) {
-          const progressMap = new Map(data.map(p => [Number(p.session_id), p.is_completed]))
-
-          setSessions(prev => prev.map(session => {
-            const sid = Number(session.id || session.sessionId)
-            const isCompleted = progressMap.get(sid)
-            return {
-              ...session,
-              status: isCompleted ? 'completed' : 'upcoming'
-            }
-          }))
-          console.log(`📊 Loaded progress for ${data.length} sessions`)
-        }
-      } catch (err) {
-        console.error('Unexpected error fetching session progress:', err)
-      }
-    }
-
-    fetchProgress()
-  }, [course, userRole])
 
   const getCurrentTime = () => {
     const now = new Date()
@@ -591,72 +573,78 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     if (isSending) return
     setIsSending(true)
 
-    const trimmedInput = messageInput.trim()
-    // Detect Google Meet links
-    if (trimmedInput.includes('meet.google.com')) {
-      console.log('📽️ Google Meet link detected. Redirecting to schedule modal.')
+    try {
+      const trimmedInput = messageInput.trim()
+      // Detect Google Meet links
+      if (trimmedInput.includes('meet.google.com')) {
+        console.log('📽️ Google Meet link detected. Redirecting to schedule modal.')
+        setMessageInput('')
+        setScheduleClassData(prev => ({ ...prev, meeting_link: trimmedInput }))
+        setShowScheduleClassModal(true)
+        showModal('Official Scheduler', 'Please use the schedule classroom feature for meeting links. We have pre-filled the link for you.', 'info')
+        return
+      }
+
+      if (!chatId) {
+        console.error('❌ Missing chatId')
+        showModal('Error', 'Chat session not found', 'error')
+        return
+      }
+
+      const pendingMsg = {
+        chat_id: Number(chatId),
+        session_id: Number(activeSessionId),
+        role: userRole === 'mentor' ? 'mentor' : 'student',
+        sender_id: Number(currentUserId),
+        content: messageInput.trim(),
+        read: false,
+        reply_to_id: replyTo ? replyTo.id : null
+      }
+
+      console.log('📤 Sending to DB (type is omitted for DB):', pendingMsg)
+
+      // Optimistically update the UI so the user sees it immediately
+      const optimisticMsg = {
+        ...pendingMsg,
+        id: Date.now(), // temporary ID
+        from: 'learner', // Right side for YOU
+        type: 'text',   // REQUIRED for UI to show the text
+        time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        replyTo: replyTo ? { ...replyTo } : null
+      }
+      setMessages(prev => [...prev, optimisticMsg])
+
+      // 1. BROADCAST (Instant Path)
+      if (channelRef.current) {
+        try {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'chat-message',
+            payload: { ...optimisticMsg, from: 'mentor' } // Recipient sees message from 'mentor'
+          })
+        } catch (e) {
+          console.warn('Broadcast send failed', e)
+        }
+      }
+
+      // Insert to Supabase
+      const { error } = await supabase
+        .from('messages')
+        .insert([pendingMsg])
+
+      if (error) {
+        console.error('❌ Error sending message to Supabase:', error)
+        showModal('Error', 'Failed to send message: ' + error.message, 'error')
+        return
+      }
+
+      console.log('✅ Message sent successfully')
       setMessageInput('')
-      setScheduleClassData(prev => ({ ...prev, meeting_link: trimmedInput }))
-      setShowScheduleClassModal(true)
-      showModal('Official Scheduler', 'Please use the schedule classroom feature for meeting links. We have pre-filled the link for you.', 'info')
+      setReplyTo(null)
+      setShowAttachOptions(false)
+    } finally {
       setIsSending(false)
-      return
     }
-
-    if (!chatId) {
-      console.error('❌ Missing chatId')
-      showModal('Error', 'Chat session not found', 'error')
-      setIsSending(false)
-      return
-    }
-
-    const pendingMsg = {
-      chat_id: Number(chatId),
-      session_id: Number(activeSessionId),
-      role: userRole === 'mentor' ? 'mentor' : 'student',
-      sender_id: Number(currentUserId),
-      content: messageInput.trim(),
-      read: false,
-      reply_to_id: replyTo ? replyTo.id : null
-    }
-
-    console.log('📤 Sending to DB (type is omitted for DB):', pendingMsg)
-
-    // Optimistically update the UI so the user sees it immediately
-    const optimisticMsg = {
-      ...pendingMsg,
-      id: Date.now(), // temporary ID
-      from: 'learner', // Right side for YOU
-      type: 'text',   // REQUIRED for UI to show the text
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      replyTo: replyTo ? { ...replyTo } : null
-    }
-    setMessages(prev => [...prev, optimisticMsg])
-
-    // 1. BROADCAST (Instant Path)
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'chat-message',
-        payload: { ...optimisticMsg, from: 'mentor' } // Recipient sees message from 'mentor'
-      })
-    }
-
-    // Insert to Supabase
-    const { error } = await supabase
-      .from('messages')
-      .insert([pendingMsg])
-
-    if (error) {
-      console.error('❌ Error sending message to Supabase:', error)
-      showModal('Error', 'Failed to send message: ' + error.message, 'error')
-      return
-    }
-
-    console.log('✅ Message sent successfully')
-    setMessageInput('')
-    setReplyTo(null)
-    setShowAttachOptions(false)
   }
 
   const handleToggleHighlight = async (id) => {
@@ -2569,7 +2557,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             ))}
           </div>
 
-          {isCourseCompleted ? (
+          {isCheckingCompletion ? (
+            <div className="live-message-input-container" style={{ justifyContent: 'center', padding: '16px', color: '#64748b', background: '#f8fafc', borderRadius: '12px', borderTop: '1px solid #e2e8f0', margin: '20px' }}>
+              Verifying course status...
+            </div>
+          ) : isCourseCompleted ? (
             <div className="live-message-input-container" style={{ justifyContent: 'center', padding: '16px', color: '#64748b', background: '#f8fafc', borderRadius: '12px', borderTop: '1px solid #e2e8f0', margin: '20px' }}>
               Course completed. Chat is closed.
             </div>
