@@ -2031,7 +2031,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         <div className="live-session-label">{activeSession.title}</div>
 
         <div className="live-chat-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
-          <div className="live-chat-feed" ref={chatFeedRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px', boxSizing: 'border-box', width: '100%' }}>
+          <div className="live-chat-feed" ref={chatFeedRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px 24px 120px 24px', boxSizing: 'border-box', width: '100%' }}>
             {visibleMessages.map((message) => (
               <div
                 key={message.id}
@@ -2582,15 +2582,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               onClick={() => setShowAttachOptions((prev) => !prev)}
             >
               +
-            </button>
-            <button
-              type="button"
-              className="live-attach-btn"
-              aria-label="Send audio"
-              onClick={handleAttachVoice}
-              style={{ marginLeft: '8px', color: '#f97316' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>mic</span>
             </button>
             {replyTo && (
               <div className="live-reply-indicator">

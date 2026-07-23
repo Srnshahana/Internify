@@ -1676,7 +1676,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
         <div className="live-session-label">{activeSession.title}</div>
 
         <div className="live-chat-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
-          <div className="live-chat-feed" ref={chatFeedRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px', boxSizing: 'border-box', width: '100%' }}>
+          <div className="live-chat-feed" ref={chatFeedRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px 24px 120px 24px', boxSizing: 'border-box', width: '100%' }}>
             {visibleMessages.map((message) => (
               <div
                 key={message.id}
@@ -2941,16 +2941,21 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h4 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>{assessment.title}</h4>
-                            <span style={{
-                              fontSize: '11px',
-                              fontWeight: '600',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              background: assessment.mySubmission?.status === 'completed' ? '#dcfce7' : assessment.mySubmission?.status === 'rejected' ? '#fee2e2' : assessment.mySubmission?.status === 'submitted' ? '#dbeafe' : '#f1f5f9',
-                              color: assessment.mySubmission?.status === 'completed' ? '#166534' : assessment.mySubmission?.status === 'rejected' ? '#991b1b' : assessment.mySubmission?.status === 'submitted' ? '#1e40af' : '#64748b'
-                            }}>
-                              {assessment.mySubmission?.status ? (assessment.mySubmission.status.charAt(0).toUpperCase() + assessment.mySubmission.status.slice(1)) : 'Pending'}
-                            </span>
+                            {(() => {
+                              const isOverdue = !assessment.mySubmission && assessment.due_date && new Date(assessment.due_date) < new Date();
+                              return (
+                                <span style={{
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  padding: '2px 8px',
+                                  borderRadius: '12px',
+                                  background: assessment.mySubmission?.status === 'completed' ? '#dcfce7' : assessment.mySubmission?.status === 'rejected' || isOverdue ? '#fee2e2' : assessment.mySubmission?.status === 'submitted' ? '#dbeafe' : '#f1f5f9',
+                                  color: assessment.mySubmission?.status === 'completed' ? '#166534' : assessment.mySubmission?.status === 'rejected' || isOverdue ? '#991b1b' : assessment.mySubmission?.status === 'submitted' ? '#1e40af' : '#64748b'
+                                }}>
+                                  {assessment.mySubmission?.status ? (assessment.mySubmission.status.charAt(0).toUpperCase() + assessment.mySubmission.status.slice(1)) : (isOverdue ? 'Overdue' : 'Pending')}
+                                </span>
+                              );
+                            })()}
                           </div>
                           <p style={{ margin: 0, fontSize: '14px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {assessment.description}
