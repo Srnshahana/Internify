@@ -11,7 +11,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
   // Try to find the latest data from context, fallback to prop
   const contextCourse = enrolledCourses?.find(c => c.id === course?.id)
   const [courseDetails, setCourseDetails] = useState(contextCourse || course)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!(contextCourse || course))
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true)
 
   useEffect(() => {
     // If context has the data (especially sessions), use it immediately
@@ -22,6 +23,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
 
   useEffect(() => {
     const checkCompletion = async () => {
+      setIsCheckingStatus(true);
       const enrollmentId = Number(courseDetails?.id || courseDetails?.enrollment_id);
       if (enrollmentId) {
         const { data } = await supabase
@@ -33,6 +35,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
           setCourseDetails(prev => ({ ...prev, is_complete: data.is_complete }));
         }
       }
+      setIsCheckingStatus(false);
     };
     if (!showLiveClassroom) {
       checkCompletion();
@@ -44,7 +47,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
       if (!course?.id) return
 
       try {
-        setLoading(true)
+        if (!courseDetails) setLoading(true)
         const currentUserId = localStorage.getItem('auth_id')
         const courseId = course.course_id || course.id // Use course_id from enrollment if available
 
@@ -271,12 +274,15 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                 <button 
                   className="enter-classroom-btn-v2" 
                   onClick={handleEnterClassroom}
+                  disabled={isCheckingStatus}
                   style={{
-                    background: courseDetails.is_complete ? '#059669' : '',
-                    boxShadow: courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : ''
+                    background: isCheckingStatus ? '#94a3b8' : (courseDetails.is_complete ? '#059669' : ''),
+                    boxShadow: isCheckingStatus ? 'none' : (courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : ''),
+                    opacity: isCheckingStatus ? 0.9 : 1,
+                    cursor: isCheckingStatus ? 'default' : 'pointer'
                   }}
                 >
-                  {courseDetails.is_complete ? 'Course Completed' : 'Enter Classroom'}
+                  {isCheckingStatus ? 'Checking course status...' : (courseDetails.is_complete ? 'Course Completed' : 'Enter Classroom')}
                 </button>
               )}
             </div>
@@ -340,7 +346,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
             <h3 className="section-title-elegant">Course Stats</h3>
             <div className="info-card-elegant">
               <div className="info-item-elegant">
-                <span className="info-label-elegant">Assignments live:</span>
+                <span className="info-label-elegant">Assignments</span>
                 <span className="info-value-elegant">{courseDetails.assignmentsCount || 0}</span>
               </div>
               <div className="info-item-elegant">

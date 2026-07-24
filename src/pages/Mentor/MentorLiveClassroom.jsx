@@ -77,6 +77,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     dueDate: '',
   })
   const [showScheduleClassModal, setShowScheduleClassModal] = useState(false)
+  const [isSchedulingClass, setIsSchedulingClass] = useState(false)
+  const [isSchedulingAssessment, setIsSchedulingAssessment] = useState(false)
+  const [isConfirmingCompletion, setIsConfirmingCompletion] = useState(false)
   const [scheduleClassData, setScheduleClassData] = useState({
     title: '',
     date: '',
@@ -92,6 +95,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const studyMaterialInputRef = useRef(null)
   const assessmentFileInputRef = useRef(null)
   const channelRef = useRef(null)
+  const messageInputRef = useRef(null)
 
   const [dbAssessments, setDbAssessments] = useState([])
   const [selectedAssessment, setSelectedAssessment] = useState(null)
@@ -390,7 +394,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           const optimisticMatchIndex = prev.findIndex(m =>
             m.content === newMessage.content &&
             String(m.sender_id) === String(newMessage.sender_id) &&
-            Number(m.id) > 1700000000000 // Treat as number, handles Date.now() strings and numbers
+            m.tempId
           )
 
           // Infer type from file_url or content if type is missing from DB
@@ -692,6 +696,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const handleReplyTo = (message) => {
     setReplyTo(message)
     setActiveMenuMessageId(null)
+    setTimeout(() => {
+      messageInputRef.current?.focus()
+    }, 0)
   }
 
   console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', currentUserId)
@@ -1196,10 +1203,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   }
 
   const handleSendAssessment = async () => {
+    if (isSchedulingAssessment) return;
     if (!newAssessment.title || !newAssessment.description || !newAssessment.dueDate) {
       showModal('Validation Error', 'Please fill in all fields', 'error')
       return
     }
+    setIsSchedulingAssessment(true);
 
     const titleWords = newAssessment.title.trim().split(/\s+/);
     if (titleWords.length > 15) {
@@ -1266,15 +1275,19 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     } catch (err) {
       console.error('❌ Error creating assessment:', err)
       showModal('Error', 'Failed to create assessment: ' + err.message, 'error')
+    } finally {
+      setIsSchedulingAssessment(false)
     }
   }
 
   const handleScheduleClass = async () => {
+    if (isSchedulingClass) return;
     // 1. Validation
     if (!scheduleClassData.title || !scheduleClassData.scheduled_date || !scheduleClassData.meeting_link) {
       showModal('Validation Error', 'Please fill in all fields (Title, Date, Link)', 'error')
       return
     }
+    setIsSchedulingClass(true);
 
     const selectedTime = new Date(scheduleClassData.scheduled_date).getTime();
     if (selectedTime < Date.now()) {
@@ -1367,6 +1380,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     } catch (err) {
       console.error('❌ Error scheduling class:', err)
       showModal('Error', 'Failed to schedule class: ' + err.message, 'error')
+    } finally {
+      setIsSchedulingClass(false)
     }
   }
 
@@ -1877,7 +1892,17 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
       
       // All checks passed
-      // Update backend
+      setShowCompletionModal(true);
+    } catch (err) {
+      console.error('Validation error:', err);
+      showModal('Error', 'Failed to validate course completion status.', 'error');
+    }
+  };
+
+  const confirmCourseCompletion = async () => {
+    if (isConfirmingCompletion) return;
+    setIsConfirmingCompletion(true);
+    try {
       const enrollmentId = Number(course?.enrollment_id || course?.id);
       if (enrollmentId) {
         const { error: updateError } = await supabase
@@ -1893,13 +1918,16 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
       
       setIsCourseCompleted(true);
-      setShowCompletionModal(true);
+      setShowCompletionModal(false);
+      if (onBack) onBack();
+      window.location.reload();
     } catch (err) {
-      console.error('Validation error:', err);
-      showModal('Error', 'Failed to validate course completion status.', 'error');
+      console.error('Error confirming course completion:', err);
+      showModal('Error', 'Failed to confirm course completion.', 'error');
+    } finally {
+      setIsConfirmingCompletion(false);
     }
   };
-
 
   return (
     <><div className="live-classroom-page" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', zIndex: 9999, margin: 0, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box' }}>
@@ -2538,9 +2566,6 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       {activeMenuMessageId === message.id && (
                         <>
                           <div className="live-message-menu" onClick={(e) => e.stopPropagation()}>
-                          <button type="button" onClick={() => handleToggleHighlight(message.id)}>
-                            {message.highlightColor ? 'Remove highlight' : 'Highlight'}
-                          </button>
                           <div className="live-message-menu-section">
                             <span className="live-menu-label">Highlight color</span>
                             <div className="live-highlight-colors">
@@ -2617,6 +2642,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             )}
             <input
               type="text"
+              ref={messageInputRef}
               className="live-message-input"
               placeholder={isSending ? "Sending..." : "Type your message..."}
               value={messageInput}
@@ -2778,8 +2804,10 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                   <button
                     className="btn-primary btn-full"
                     onClick={handleSendAssessment}
+                    disabled={isSchedulingAssessment}
+                    style={{ background: isSchedulingAssessment ? '#94a3b8' : '#2a7eff' }}
                   >
-                    Send Assessment
+                    {isSchedulingAssessment ? 'Sending...' : 'Send Assessment'}
                   </button>
                   <button
                     className="btn-secondary btn-full"
@@ -3237,9 +3265,9 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                   </div>
                 </div>
                 <div className="assessment-modal-actions">
-                  <button className="btn-secondary" onClick={() => setShowScheduleClassModal(false)}>Cancel</button>
-                  <button className="btn-primary" onClick={handleScheduleClass} style={{ background: '#2a7eff' }}>
-                    Save & Schedule
+                  <button className="btn-secondary" onClick={() => setShowScheduleClassModal(false)} disabled={isSchedulingClass}>Cancel</button>
+                  <button className="btn-primary" onClick={handleScheduleClass} disabled={isSchedulingClass} style={{ background: isSchedulingClass ? '#94a3b8' : '#2a7eff' }}>
+                    {isSchedulingClass ? 'Scheduling...' : 'Save & Schedule'}
                   </button>
                 </div>
               </div>
@@ -3352,12 +3380,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
               <button
                 type="button"
                 className="live-completion-modal-primary"
-                onClick={() => {
-                  if (onBack) onBack()
-                  window.location.reload()
-                }}
+                onClick={confirmCourseCompletion}
+                disabled={isConfirmingCompletion}
+                style={{ background: isConfirmingCompletion ? '#94a3b8' : undefined }}
               >
-                ✅ Close Classroom
+                {isConfirmingCompletion ? 'Closing...' : '✅ Close Classroom'}
               </button>
             </div>
           </div>

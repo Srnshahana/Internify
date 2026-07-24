@@ -99,6 +99,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const channelRef = useRef(null)
   const chatFeedRef = useRef(null)
   const docInputRef = useRef(null)
+  const messageInputRef = useRef(null)
 
   const imageInputRef = useRef(null)
   // Removed study material ref
@@ -458,7 +459,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
           const optimisticMatchIndex = prev.findIndex(m =>
             m.content === newMessage.content &&
             String(m.sender_id) === String(newMessage.sender_id) &&
-            Number(m.id) > 1700000000000 // Treat as number, handles Date.now() strings and numbers
+            m.tempId
           )
 
           if (optimisticMatchIndex !== -1) {
@@ -612,6 +613,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const [noteDraft, setNoteDraft] = useState('')
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [selectedAssessment, setSelectedAssessment] = useState(null)
+  const [isSubmittingAssessment, setIsSubmittingAssessment] = useState(false)
   const [assessmentSubmission, setAssessmentSubmission] = useState({
     textSubmission: '',
   })
@@ -948,6 +950,9 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   const handleReplyTo = (message) => {
     setReplyTo(message)
     setActiveMenuMessageId(null)
+    setTimeout(() => {
+      messageInputRef.current?.focus()
+    }, 0)
   }
 
   console.log('💾 [Step 3] Saving to Attachments Table, Course ID:', currentUserId)
@@ -1350,10 +1355,12 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
   }
 
   const handleSubmitAssessment = async () => {
+    if (isSubmittingAssessment) return;
     if (!assessmentSubmission.textSubmission && assessmentSubmission.attachments.length === 0) {
       showModal('Submission Error', 'Please provide either text submission or attach files', 'error')
       return
     }
+    setIsSubmittingAssessment(true);
 
     try {
       let targetAssessmentId = selectedAssessment.id;
@@ -1485,6 +1492,8 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
     } catch (err) {
       console.error('❌ Submission Failed:', err)
       showModal('Error', 'Failed to submit assessment: ' + err.message, 'error')
+    } finally {
+      setIsSubmittingAssessment(false)
     }
   }
 
@@ -2171,9 +2180,6 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                       {activeMenuMessageId === message.id && (
                         <>
                           <div className="live-message-menu" onClick={(e) => e.stopPropagation()}>
-                          <button type="button" onClick={() => handleToggleHighlight(message.id)}>
-                            {message.highlightColor ? 'Remove highlight' : 'Highlight'}
-                          </button>
                           <div className="live-message-menu-section">
                             <span className="live-menu-label">Highlight color</span>
                             <div className="live-highlight-colors">
@@ -2250,6 +2256,7 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
             )}
             <input
               type="text"
+              ref={messageInputRef}
               className="live-message-input"
               placeholder={isSending ? "Sending..." : "Type your message..."}
               value={messageInput}
@@ -2818,13 +2825,16 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
                         <button
                           className="btn-primary"
                           onClick={handleSubmitAssessment}
-                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', height: '48px', borderRadius: '8px', fontWeight: '600' }}
+                          disabled={isSubmittingAssessment}
+                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', height: '48px', borderRadius: '8px', fontWeight: '600', background: isSubmittingAssessment ? '#94a3b8' : undefined }}
                         >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                          </svg>
-                          Submit Assessment
+                          {!isSubmittingAssessment && (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <line x1="22" y1="2" x2="11" y2="13"></line>
+                              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                          )}
+                          {isSubmittingAssessment ? 'Submitting...' : 'Submit Assessment'}
                         </button>
                         <button
                           className="btn-secondary"

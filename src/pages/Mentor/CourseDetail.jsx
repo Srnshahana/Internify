@@ -14,6 +14,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   const contextCourse = enrolledCourses?.find(c => course?.id ? (String(c.id) === String(course.id)) : (String(c.course_id) === String(course?.course_id)))
   const [courseDetails, setCourseDetails] = useState(contextCourse || course)
   const [loading, setLoading] = useState(true)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true)
   const [classroomName, setClassroomName] = useState(courseDetails.classroom_name || '')
   const [isApprovedSuccessfully, setIsApprovedSuccessfully] = useState(false)
   const [modalConfig, setModalConfig] = useState({
@@ -40,6 +41,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
 
   useEffect(() => {
     const checkCompletion = async () => {
+      setIsCheckingStatus(true);
       const enrollmentId = Number(courseDetails?.id || courseDetails?.enrollment_id);
       if (enrollmentId) {
         const { data } = await supabase
@@ -51,6 +53,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
           setCourseDetails(prev => ({ ...prev, is_complete: data.is_complete }));
         }
       }
+      setIsCheckingStatus(false);
     };
     if (!showLiveClassroom) {
       checkCompletion();
@@ -219,15 +222,15 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
               <button 
                 className="enter-classroom-btn-v2" 
                 onClick={handleEnterClassroom}
-                disabled={courseDetails.status === 'pending'}
+                disabled={courseDetails.status === 'pending' || isCheckingStatus}
                 style={{ 
-                  background: courseDetails.status === 'pending' ? '#f59e0b' : (courseDetails.is_complete ? '#059669' : ''), 
-                  opacity: courseDetails.status === 'pending' ? 0.9 : 1,
-                  cursor: courseDetails.status === 'pending' ? 'default' : 'pointer',
-                  boxShadow: courseDetails.status === 'pending' ? 'none' : (courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : '')
+                  background: isCheckingStatus ? '#94a3b8' : (courseDetails.status === 'pending' ? '#f59e0b' : (courseDetails.is_complete ? '#059669' : '')), 
+                  opacity: (courseDetails.status === 'pending' || isCheckingStatus) ? 0.9 : 1,
+                  cursor: (courseDetails.status === 'pending' || isCheckingStatus) ? 'default' : 'pointer',
+                  boxShadow: (courseDetails.status === 'pending' || isCheckingStatus) ? 'none' : (courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : '')
                 }}
               >
-                {courseDetails.status === 'pending' ? 'Pending' : (courseDetails.is_complete ? 'Course Completed' : 'Start Session')}
+                {isCheckingStatus ? 'Checking course status...' : (courseDetails.status === 'pending' ? 'Pending' : (courseDetails.is_complete ? 'Course Completed' : 'Start Session'))}
               </button>
             </div>
           </div>
