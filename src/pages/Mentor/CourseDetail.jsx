@@ -152,9 +152,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
         <div className="course-hero-v2 single-column">
           <div className="hero-info-column">
             <div className="course-badges-v2">
-              <span className="course-badge-v2 badge-category-v2">{courseDetails.category || 'General'}</span>
-              <span className="course-badge-v2 badge-level-v2">{courseDetails.level || 'Expert'}</span>
-              <span className="course-badge-v2 badge-type-v2">Live</span>
+              <span className="course-badge-v2 badge-level-v2">{courseDetails.skill_level || courseDetails.level || 'Expert'}</span>
             </div>
 
             <h1 className="course-title-v2">{courseDetails.title}</h1>
@@ -166,10 +164,6 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
                 <div className="course-rating-v2">
                   <span className="rating-star-icon-v2">★</span>
                   <span className="rating-value-v2">{courseDetails.rating || 4.8}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#64748b' }}>group</span>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{studentCount} Students</span>
                 </div>
               </div>
 
@@ -338,20 +332,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
 
 
 
-        {/* Manage Work Section */}
-        <div className="course-section-elegant">
-          <h3 className="section-title-elegant">Quick Actions</h3>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button className="compact-action-btn" onClick={() => onNavigate && onNavigate('Assessments')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Assessments</span>
-            </button>
-            <button className="compact-action-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              <span>Student List</span>
-            </button>
-          </div>
-        </div>
+
       </div>
     </div>
   )
