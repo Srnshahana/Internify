@@ -38,6 +38,25 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
     }
   }, [contextCourse])
 
+  useEffect(() => {
+    const checkCompletion = async () => {
+      const enrollmentId = Number(courseDetails?.id || courseDetails?.enrollment_id);
+      if (enrollmentId) {
+        const { data } = await supabase
+          .from('classes_enrolled')
+          .select('is_complete')
+          .eq('id', enrollmentId)
+          .single();
+        if (data && data.is_complete !== courseDetails.is_complete) {
+          setCourseDetails(prev => ({ ...prev, is_complete: data.is_complete }));
+        }
+      }
+    };
+    if (!showLiveClassroom) {
+      checkCompletion();
+    }
+  }, [showLiveClassroom, courseDetails?.id, courseDetails?.enrollment_id]);
+
   const studentCount = enrolledCourses?.filter(e => String(e.course_id) === String(courseDetails.course_id || courseDetails.id)).length || 0
 
   const renderStars = (rating) => {
@@ -194,12 +213,12 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
                 onClick={handleEnterClassroom}
                 disabled={courseDetails.status === 'pending'}
                 style={{ 
-                  background: courseDetails.status === 'pending' ? '#f59e0b' : '', 
+                  background: courseDetails.status === 'pending' ? '#f59e0b' : (courseDetails.is_complete ? '#059669' : ''), 
                   opacity: courseDetails.status === 'pending' ? 0.9 : 1,
                   cursor: courseDetails.status === 'pending' ? 'default' : 'pointer'
                 }}
               >
-                {courseDetails.status === 'pending' ? 'Pending' : 'Start Session'}
+                {courseDetails.status === 'pending' ? 'Pending' : (courseDetails.is_complete ? 'Course Completed' : 'Start Session')}
               </button>
             </div>
           </div>

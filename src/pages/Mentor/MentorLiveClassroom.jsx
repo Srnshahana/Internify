@@ -545,6 +545,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
   const [noteEditingId, setNoteEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [showSectionCompleteModal, setShowSectionCompleteModal] = useState(false)
   // Removed student assessment view states
 
   // Auto-scroll to bottom when new messages arrive
@@ -1763,14 +1764,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     // 1. Locally update the UI state
     const currentSession = sessions.find((s) => s.id === activeSessionId)
     const isCurrentlyCompleted = currentSession?.status === 'completed'
-    const newCompletionStatus = !isCurrentlyCompleted
+
+    if (isCurrentlyCompleted) {
+      setShowSectionCompleteModal(false)
+      return
+    }
 
     setSessions((prev) => {
       if (!prev.length) return prev
-
-      if (isCurrentlyCompleted) {
-        return prev.map((s) => (s.id === activeSessionId ? { ...s, status: 'upcoming' } : s))
-      }
 
       const updated = prev.map((s) => (s.id === activeSessionId ? { ...s, status: 'completed' } : s))
       const currentIndex = updated.findIndex((s) => s.id === activeSessionId)
@@ -1780,6 +1781,8 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
       return updated
     })
+    
+    setShowSectionCompleteModal(false)
 
     // 2. Persist to course_session_progress table if mentor
     if (userRole === 'mentor') {
@@ -1805,7 +1808,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             session_id: sessionId,
             mentor_id: mentorId,
             student_id: studentId,
-            is_completed: newCompletionStatus
+            is_completed: true
           }, {
             onConflict: 'course_id,session_id,mentor_id,student_id'
           })
@@ -1813,7 +1816,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         if (error) {
           console.error('Error updating session progress:', error)
         } else {
-          console.log(`✅ Session ${sessionId} progress updated to ${newCompletionStatus}`)
+          console.log(`✅ Session ${sessionId} progress updated to true`)
           if (refetch) refetch()
         }
       } catch (err) {
@@ -1874,6 +1877,22 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
       }
       
       // All checks passed
+      // Update backend
+      const enrollmentId = Number(course?.enrollment_id || course?.id);
+      if (enrollmentId) {
+        const { error: updateError } = await supabase
+          .from('classes_enrolled')
+          .update({ is_complete: true })
+          .eq('id', enrollmentId);
+          
+        if (updateError) {
+          console.error('Error updating course completion status:', updateError);
+          showModal('Error', 'Failed to update course completion status in database.', 'error');
+          return;
+        }
+      }
+      
+      setIsCourseCompleted(true);
       setShowCompletionModal(true);
     } catch (err) {
       console.error('Validation error:', err);
@@ -1939,7 +1958,12 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
           <button
             className={`live-complete-btn-v2 ${activeSession.status === 'completed' ? 'completed' : ''}`}
-            onClick={handleCompleteSession}
+            onClick={() => {
+              if (activeSession.status !== 'completed') {
+                setShowSectionCompleteModal(true)
+              }
+            }}
+            style={activeSession.status === 'completed' ? { cursor: 'default' } : {}}
           >
             <span className="material-symbols-outlined">
               {activeSession.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'}
@@ -3258,17 +3282,57 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
             </button>
           );
         })}
-        <button
-          type="button"
-          className="live-course-complete-btn"
-          style={{ backgroundColor: '#10b981', color: '#ffffff', marginLeft: '12px', border: 'none' }}
-          onClick={validateCourseCompletion}
-        >
-          <span className="live-session-title">Course Complete</span>
-        </button>
+        {isCourseCompleted ? (
+          <div
+            className="live-course-complete-btn"
+            style={{ backgroundColor: '#059669', color: '#ffffff', border: '2px solid transparent', cursor: 'default', opacity: 0.9, display: 'flex', alignItems: 'center' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '6px' }}>verified</span>
+            <span className="live-session-title">Class Completed</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="live-course-complete-btn"
+            style={{ backgroundColor: '#10b981', color: '#ffffff', border: '2px solid transparent' }}
+            onClick={validateCourseCompletion}
+          >
+            <span className="live-session-title">Course Complete</span>
+          </button>
+        )}
 
       
       </div>
+
+      {/* Section Completion Modal */}
+      {showSectionCompleteModal && (
+        <div className="live-completion-modal-overlay" onClick={() => setShowSectionCompleteModal(false)}>
+          <div className="live-completion-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="live-completion-modal-title">Mark Section as Completed?</h2>
+            <p className="live-completion-modal-description">
+              Are you sure you want to mark this section as completed? You will not be able to undo this action.
+            </p>
+            <div className="live-completion-modal-actions" style={{ flexDirection: 'row' }}>
+              <button
+                type="button"
+                className="live-completion-modal-secondary"
+                onClick={() => setShowSectionCompleteModal(false)}
+                style={{ flex: 1 }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="live-completion-modal-primary"
+                onClick={handleCompleteSession}
+                style={{ flex: 1 }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Course Completion Modal */}
       {showCompletionModal && (

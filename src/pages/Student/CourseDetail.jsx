@@ -18,7 +18,28 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
     if (contextCourse) {
       setCourseDetails(prev => ({ ...prev, ...contextCourse }))
     }
+  }, [contextCourse])
 
+  useEffect(() => {
+    const checkCompletion = async () => {
+      const enrollmentId = Number(courseDetails?.id || courseDetails?.enrollment_id);
+      if (enrollmentId) {
+        const { data } = await supabase
+          .from('classes_enrolled')
+          .select('is_complete')
+          .eq('id', enrollmentId)
+          .single();
+        if (data && data.is_complete !== courseDetails.is_complete) {
+          setCourseDetails(prev => ({ ...prev, is_complete: data.is_complete }));
+        }
+      }
+    };
+    if (!showLiveClassroom) {
+      checkCompletion();
+    }
+  }, [showLiveClassroom, courseDetails?.id, courseDetails?.enrollment_id]);
+
+  useEffect(() => {
     const fetchCourseDetails = async () => {
       if (!course?.id) return
 
@@ -248,8 +269,14 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                   Enrollment Rejected
                 </button>
               ) : (
-                <button className="enter-classroom-btn-v2" onClick={handleEnterClassroom}>
-                  Enter Classroom
+                <button 
+                  className="enter-classroom-btn-v2" 
+                  onClick={handleEnterClassroom}
+                  style={{
+                    background: courseDetails.is_complete ? '#059669' : '',
+                  }}
+                >
+                  {courseDetails.is_complete ? 'Course Completed' : 'Enter Classroom'}
                 </button>
               )}
             </div>

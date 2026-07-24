@@ -15658,8 +15658,10 @@ h1 span {
   border-top: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
   overflow-x: auto;
+  gap: 12px;
   flex-shrink: 0;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -15691,6 +15693,8 @@ h1 span {
   font-size: 13px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
   gap: 8px;
   cursor: pointer;
   background: var(--bg-tertiary);
@@ -15755,6 +15759,8 @@ h1 span {
   font-size: 13px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
   gap: 8px;
   cursor: pointer;
   white-space: nowrap;
@@ -15762,7 +15768,6 @@ h1 span {
   font-weight: 500;
   background: #e0f2fe;
   color: #0f172a;
-  flex-shrink: 0;
 }
 
 .live-course-complete-btn:hover {
