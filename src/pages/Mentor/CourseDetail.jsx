@@ -162,7 +162,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
             <div className="hero-actions-row-v2">
               <div className="hero-meta-group">
                 <div className="course-rating-v2">
-                  <span className="rating-star-icon-v2">★</span>
+                  <span className="rating-star-icon-v2" style={{letterSpacing: '2px', color: '#f59e0b'}}>{renderStars(courseDetails.rating || 4.8)}</span>
                   <span className="rating-value-v2">{courseDetails.rating || 4.8}</span>
                 </div>
               </div>
@@ -209,7 +209,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
                 style={{ 
                   background: courseDetails.status === 'pending' ? '#f59e0b' : (courseDetails.is_complete ? '#059669' : ''), 
                   opacity: courseDetails.status === 'pending' ? 0.9 : 1,
-                  cursor: courseDetails.status === 'pending' ? 'default' : 'pointer'
+                  cursor: courseDetails.status === 'pending' ? 'default' : 'pointer',
+                  boxShadow: courseDetails.status === 'pending' ? 'none' : (courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : '')
                 }}
               >
                 {courseDetails.status === 'pending' ? 'Pending' : (courseDetails.is_complete ? 'Course Completed' : 'Start Session')}
@@ -287,7 +288,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Scheduled:</span>
                 <span className="info-value-elegant">
-                  {courseDetails.sessions?.find(s => s.status === 'pending')?.title || 'Check Calendar'}
+                  {courseDetails.is_complete ? 'All Sessions Completed' : (courseDetails.sessions?.find(s => s.status === 'pending' || !s.completed)?.title || 'All Sections Completed')}
                 </span>
               </div>
             </div>

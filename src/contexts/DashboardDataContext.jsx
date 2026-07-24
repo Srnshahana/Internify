@@ -278,6 +278,7 @@ export const DashboardDataProvider = ({ children }) => {
                         category: course.category || 'General',
                         image: course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                         rating: course.rating || 4.8,
+                        skill_level: course.skill_level,
                         level: course.level || 'Beginner',
                         mentor: mentor.name || 'Expert Mentor',
                         mentorImage: mentor.profile_image,

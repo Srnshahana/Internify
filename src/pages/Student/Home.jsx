@@ -721,7 +721,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                 <div className="course-card-v2" style={{ cursor: 'pointer' }}>
                   <div className="course-thumb-v2" style={{ height: '160px' }}>
                     <img src={course.image} alt={course.title} />
-                    <div className="course-tag-v2">{course.level || 'Course'}</div>
+                    <div className="course-tag-v2">{course.skill_level || course.level || 'Course'}</div>
                     {course.status && (course.status === 'pending' || course.status === 'rejected') && (
                       <div style={{
                         position: 'absolute',

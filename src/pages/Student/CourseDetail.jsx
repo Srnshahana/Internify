@@ -184,8 +184,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
         <div className="course-hero-v2 single-column">
           <div className="hero-info-column">
             <div className="course-badges-v2">
-              {courseDetails.level && <span className="course-badge-v2 badge-level-v2">{courseDetails.level} Level</span>}
-              {courseDetails.type && <span className="course-badge-v2 badge-type-v2">{courseDetails.type} Internship</span>}
+              <span className="course-badge-v2 badge-level-v2">{courseDetails.skill_level || courseDetails.level || 'Expert'}</span>
             </div>
 
             <h1 className="course-title-v2">{courseDetails.title}</h1>
@@ -274,6 +273,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
                   onClick={handleEnterClassroom}
                   style={{
                     background: courseDetails.is_complete ? '#059669' : '',
+                    boxShadow: courseDetails.is_complete ? '0 10px 20px rgba(5, 150, 105, 0.3)' : ''
                   }}
                 >
                   {courseDetails.is_complete ? 'Course Completed' : 'Enter Classroom'}
@@ -330,10 +330,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onMentorClick, onNavig
               <div className="info-item-elegant">
                 <span className="info-label-elegant">Next Session:</span>
                 <span className="info-value-elegant">
-                  {courseDetails.sessions?.find(s => s.status === 'pending')?.title ||
-                    courseDetails.sessions?.[0]?.title ||
-                    courseDetails.nextSession ||
-                    'Coming Soon'}
+                  {courseDetails.is_complete ? 'All Sessions Completed' : (courseDetails.sessions?.find(s => s.status === 'pending' || !s.completed)?.title || 'All Sections Completed')}
                 </span>
               </div>
             </div>

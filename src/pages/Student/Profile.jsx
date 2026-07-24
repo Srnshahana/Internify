@@ -533,7 +533,7 @@ function Profile({ onLogout, onNavigate }) {
                           <span className="program-card-rating">
                             ⭐ {course.rating || 4.8}
                           </span>
-                          <span className="program-card-level">{course.level || 'Beginner'}</span>
+                          <span className="program-card-level">{course.skill_level || course.level || 'Beginner'}</span>
                         </div>
                         <button className="btn-continue-learning" onClick={() => onNavigate?.('Classroom')}>
                           Continue Learning

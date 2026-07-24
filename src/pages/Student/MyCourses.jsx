@@ -202,7 +202,7 @@ function MyCourses({ courses: staticCourses, onBack, onEnterClassroom, onMentorC
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em'
                   }}>
-                    {course.level || 'Expert Path'}
+                    {course.skill_level || course.level || 'Expert Path'}
                   </div>
 
                   {activeTab !== 'active' && (
