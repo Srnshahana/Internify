@@ -60,13 +60,27 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
   const studentCount = enrolledCourses?.filter(e => String(e.course_id) === String(courseDetails.course_id || courseDetails.id)).length || 0
 
   const renderStars = (rating) => {
-    const full = Math.floor(rating)
-    const half = rating - full >= 0.5
-    return Array(5).fill(0).map((_, i) => {
-      if (i < full) return '★'
-      if (i === full && half) return '½'
-      return '☆'
-    }).join('')
+    return (
+      <div style={{ display: 'inline-flex', gap: '2px', alignItems: 'center' }}>
+        {[1, 2, 3, 4, 5].map(index => {
+          const fillPercentage = Math.max(0, Math.min(100, (rating - index + 1) * 100));
+          return (
+            <div key={index} style={{ position: 'relative', display: 'inline-block', width: '16px', height: '16px' }}>
+              {/* Background empty star */}
+              <svg viewBox="0 0 24 24" fill="#e2e8f0" width="16" height="16" style={{ position: 'absolute', top: 0, left: 0, display: 'block' }}>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              {/* Foreground filled star (clipped) */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: `${fillPercentage}%`, overflow: 'hidden', height: '100%' }}>
+                <svg viewBox="0 0 24 24" fill="#fbbf24" width="16" height="16" style={{ display: 'block' }}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   const handleEnterClassroom = () => {
@@ -162,7 +176,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
             <div className="hero-actions-row-v2">
               <div className="hero-meta-group">
                 <div className="course-rating-v2">
-                  <span className="rating-star-icon-v2" style={{letterSpacing: '2px', color: '#f59e0b'}}>{renderStars(courseDetails.rating || 4.8)}</span>
+                  <span className="rating-star-icon-v2">{renderStars(courseDetails.rating || 4.8)}</span>
                   <span className="rating-value-v2">{courseDetails.rating || 4.8}</span>
                 </div>
               </div>
