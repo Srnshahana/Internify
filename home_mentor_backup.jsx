@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import Loading from '../../components/Loading'
 import MyCourses from './MyCourses.jsx'
+import CourseDetail from './CourseDetail.jsx'
 import StudentRequests from './StudentRequests.jsx'
 import PendingWork from './PendingWork.jsx'
 import Messages from './Messages.jsx'
 import Assessments from './Assessments.jsx'
-import { useNavigate } from 'react-router-dom'
+import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import StudentProfileTemplate from '../../components/StudentProfileTemplate.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
+import { useNavigate } from 'react-router-dom'
 import MessageModal from '../../components/shared/MessageModal.jsx'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
@@ -56,7 +58,7 @@ const useDragScroll = () => {
   return { ref, events: { onMouseDown, onMouseLeave, onMouseUp, onMouseMove }, scroll }
 }
 
-function MentorHome({ onNavigate, onEnterClassroom }) {
+function MentorHome({ onNavigate, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive }) {
   const { userProfile, providedCourses, mentorshipEnrollments, scheduledSessions, loading, refetch } = useDashboardData()
   const navigate = useNavigate()
 
@@ -66,7 +68,16 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
   const [showPendingWork, setShowPendingWork] = useState(false)
   const [showMessages, setShowMessages] = useState(false)
   const [showAssessments, setShowAssessments] = useState(false)
+  const [showCourseDetail, setShowCourseDetail] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const [activeCourse, setActiveCourse] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    if (setIsCourseDetailActive) {
+      setIsCourseDetailActive(showCourseDetail)
+    }
+  }, [showCourseDetail, setIsCourseDetailActive])
 
   // The actual templates the mentor offers (from onboarding)
   const offeredCoursesTemplates = providedCourses || []
@@ -239,8 +250,45 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
   if (showStudentRequests) return <StudentRequests onBack={() => setShowStudentRequests(false)} />
   if (showPendingWork) return <PendingWork onBack={() => setShowPendingWork(false)} />
   if (showMessages) return <Messages onBack={() => setShowMessages(false)} />
+  if (activeCourse) return (
+    <MentorLiveClassroom
+      course={activeCourse}
+      onNavigate={onNavigate}
+      onBack={() => {
+        setActiveCourse(null)
+        if (setIsLiveClassroomActive) setIsLiveClassroomActive(false)
+      }}
+    />
+  )
   if (showAssessments) return <Assessments onBack={() => setShowAssessments(false)} />
-  if (showMyCourses) return <MyCourses onBack={() => setShowMyCourses(false)} />
+  if (showMyCourses) return <MyCourses onBack={() => setShowMyCourses(false)} setIsCourseDetailActive={setIsCourseDetailActive} />
+
+  if (showCourseDetail && selectedCourse) {
+    return (
+      <CourseDetail
+        course={selectedCourse}
+        onBack={() => {
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+        }}
+        onEnterClassroom={(course) => {
+          setActiveCourse(course)
+          setShowCourseDetail(false)
+          setSelectedCourse(null)
+          if (onEnterClassroom) onEnterClassroom()
+        }}
+        onNavigate={(pageName) => {
+          if (pageName === 'Assessments') {
+            setShowAssessments(true)
+            setShowCourseDetail(false)
+            setSelectedCourse(null)
+          } else if (onNavigate) {
+            onNavigate(pageName)
+          }
+        }}
+      />
+    )
+  }
 
   // Format current date for the header
   const currentDateFormatted = new Date().toLocaleDateString('en-US', {
@@ -351,7 +399,10 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
               <div
                 key={course.id || course.classroom_id}
                 className="dashboard-course-card-v2"
-                onClick={() => navigate('/mentor-dashboard/course/' + (course.id || course.course_id || course.classroom_id))}
+                onClick={() => {
+                  setSelectedCourse(course);
+                  setShowCourseDetail(true);
+                }}
               >
                 <div className="course-card-v2" style={{ cursor: 'pointer' }}>
                   <div className="course-thumb-v2" style={{ height: '160px' }}>

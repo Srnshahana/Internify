@@ -6,7 +6,6 @@ import Assessments from './Assessments.jsx'
 import MessageModal from '../../components/shared/MessageModal.jsx'
 
 function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
-  const [showLiveClassroom, setShowLiveClassroom] = useState(false)
   const [showAssessments, setShowAssessments] = useState(false)
   const { enrolledCourses } = useDashboardData()
 
@@ -55,10 +54,8 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
       }
       setIsCheckingStatus(false);
     };
-    if (!showLiveClassroom) {
-      checkCompletion();
-    }
-  }, [showLiveClassroom, courseDetails?.id, courseDetails?.enrollment_id]);
+    checkCompletion();
+  }, [courseDetails?.id, courseDetails?.enrollment_id]);
 
   const studentCount = enrolledCourses?.filter(e => String(e.course_id) === String(courseDetails.course_id || courseDetails.id)).length || 0
 
@@ -88,7 +85,7 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
 
   const handleEnterClassroom = () => {
     if (courseDetails.status === 'pending') return
-    setShowLiveClassroom(true)
+    if (onEnterClassroom) onEnterClassroom(courseDetails)
   }
 
   const handleApprove = async () => {
@@ -135,10 +132,6 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
 
   if (showAssessments) {
     return <Assessments onBack={() => setShowAssessments(false)} />
-  }
-
-  if (showLiveClassroom) {
-    return <MentorLiveClassroom course={courseDetails} onBack={() => setShowLiveClassroom(false)} onNavigate={onNavigate} />
   }
 
   if (!courseDetails) {

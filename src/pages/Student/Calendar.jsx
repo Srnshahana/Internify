@@ -305,7 +305,7 @@ function Calendar() {
   }
 
   return (
-    <div className="calendar-dashboard-wrapper" >
+    <div className="calendar-dashboard-wrapper" style={{ paddingBottom: '100px' }}>
       <div className="calendar-glass-card">
         {/* Header - synced with mentor style */}
         <header className="live-classroom-header-v2" style={{
@@ -359,7 +359,10 @@ function Calendar() {
                 <div
                   key={date}
                   className={`calendar-day-elegant ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setClickedDate(new Date(year, month, date))}
+                  onClick={() => {
+                    const newDate = new Date(year, month, date)
+                    setClickedDate(prev => prev && prev.getTime() === newDate.getTime() ? null : newDate)
+                  }}
                 >
                   {date}
                 </div>
@@ -370,13 +373,40 @@ function Calendar() {
       </div>
       {/* Section 3: Upcoming Sessions List */}
       <div className="sessions-section-elegant">
-        <h3 className="sessions-title-elegant">
-          Upcoming Sessions
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 className="sessions-title-elegant" style={{ margin: 0 }}>
+            {clickedDate ? `Sessions on ${clickedDate.toLocaleDateString()}` : 'Upcoming Sessions'}
+          </h3>
+          {clickedDate && (
+            <button onClick={() => setClickedDate(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          )}
+        </div>
 
         <div className="sessions-list-elegant">
-          {sessions.length > 0 ? (
-            sessions.map((session) => (
+          {(() => {
+            const filteredSessions = clickedDate
+              ? sessions.filter(session => {
+                  const sDate = new Date(session.scheduled_date || session.date)
+                  return sDate.getDate() === clickedDate.getDate() &&
+                         sDate.getMonth() === clickedDate.getMonth() &&
+                         sDate.getFullYear() === clickedDate.getFullYear()
+                })
+              : sessions;
+
+            if (filteredSessions.length === 0) {
+              return (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
+                  <p style={{ fontSize: '16px', fontWeight: '500' }}>No {clickedDate ? 'sessions on this date' : 'upcoming sessions'}</p>
+                </div>
+              )
+            }
+
+            return filteredSessions.map((session) => {
+              const canJoin = session.scheduled_date ? (new Date(session.scheduled_date).getTime() - Date.now() <= 15 * 60 * 1000) : true;
+              return (
               <div
                 key={session.id}
                 className="session-card-elegant"
@@ -461,19 +491,20 @@ function Calendar() {
                       )}
                       <button
                         className="session-btn"
+                        disabled={!canJoin}
                         onClick={() => handleJoin(session.joinLink)}
                         style={{
-                          background: session.reschedule_request && session.reschedule_role !== 'student' ? '#fff' : '#2a7eff',
-                          color: session.reschedule_request && session.reschedule_role !== 'student' ? '#2a7eff' : '#fff',
-                          border: session.reschedule_request && session.reschedule_role !== 'student' ? '1px solid #2a7eff' : 'none',
+                          background: !canJoin ? '#cbd5e1' : session.reschedule_request && session.reschedule_role !== 'student' ? '#fff' : '#2a7eff',
+                          color: !canJoin ? '#64748b' : session.reschedule_request && session.reschedule_role !== 'student' ? '#2a7eff' : '#fff',
+                          border: !canJoin ? 'none' : session.reschedule_request && session.reschedule_role !== 'student' ? '1px solid #2a7eff' : 'none',
                           padding: '10px 16px',
                           borderRadius: '8px',
-                          cursor: 'pointer',
+                          cursor: canJoin ? 'pointer' : 'not-allowed',
                           fontWeight: '500',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          opacity: 0.8
+                          opacity: canJoin ? 0.8 : 0.6
                         }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -487,15 +518,9 @@ function Calendar() {
                   )}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="calendar-empty-state">
-              <div className="empty-state-icon">
-                <span className="material-symbols-outlined">event_busy</span>
-              </div>
-              <p>No upcoming sessions.</p>
-            </div>
-          )}
+            )
+            })
+          })()}
         </div>
       </div>
 

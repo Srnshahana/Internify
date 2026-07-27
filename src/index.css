@@ -31330,7 +31330,7 @@ h1 span {
   background: #ffffff;
 }
 
-.calendar-day-elegant:hover:not(.empty) {
+.calendar-day-elegant:hover:not(.empty):not(.selected) {
   background: #eff9ff;
   /* Subtle sky blue tint on hover */
   transform: translateY(-2px);

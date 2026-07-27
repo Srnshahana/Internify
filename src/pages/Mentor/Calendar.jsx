@@ -11,6 +11,8 @@ function Calendar() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
+  const [showCompleteModal, setShowCompleteModal] = useState(false)
+  const [sessionToComplete, setSessionToComplete] = useState(null)
 
   const currentUserId = localStorage.getItem('auth_id')
 
@@ -101,8 +103,14 @@ function Calendar() {
     setShowRescheduleModal(true)
   }
 
-  const handleMarkComplete = async (session) => {
-    if (!window.confirm('Mark this session as complete? This will remove it from the upcoming list for you and the student.')) return
+  const handleMarkCompleteClick = (session) => {
+    setSessionToComplete(session)
+    setShowCompleteModal(true)
+  }
+
+  const handleConfirmComplete = async () => {
+    if (!sessionToComplete) return
+    const session = sessionToComplete
 
     try {
       const { error } = await supabase
@@ -119,7 +127,8 @@ function Calendar() {
           return a.is_complete ? 1 : -1;
         });
       });
-      alert('Session marked as complete!')
+      setShowCompleteModal(false)
+      setSessionToComplete(null)
     } catch (err) {
       console.error('Error marking session as complete:', err)
       alert('Failed to mark session as complete.')
@@ -318,7 +327,7 @@ function Calendar() {
   }
 
   return (
-    <div className="calendar-dashboard-wrapper" >
+    <div className="calendar-dashboard-wrapper" style={{ paddingBottom: '100px' }}>
       <div className="calendar-glass-card">
         {/* Header - V2 Glass Style */}
         <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px', width: '100%', padding: '1rem 24px' }}>
@@ -372,7 +381,10 @@ function Calendar() {
                   <div
                     key={date}
                     className={`calendar-day-elegant ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setClickedDate(new Date(year, month, date))}
+                    onClick={() => {
+                      const newDate = new Date(year, month, date)
+                      setClickedDate(prev => prev && prev.getTime() === newDate.getTime() ? null : newDate)
+                    }}
                   >
                     {date}
                   </div>
@@ -384,27 +396,54 @@ function Calendar() {
       </div>
 
       <div className="sessions-section-elegant">
-        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px', width: '100%', padding: '1rem 24px' }}>
-          <div className="live-header-title-v2" style={{ fontSize: '18px', textAlign: 'left', width: '100%' }}>Upcoming Mentorship Sessions</div>
+        <header className="live-classroom-header-v2" style={{ background: 'linear-gradient(to right, #eff6ff, #dbeafe)', marginBottom: '24px', borderRadius: '16px', width: '100%', padding: '1rem 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="live-header-title-v2" style={{ fontSize: '18px', textAlign: 'left', margin: 0 }}>
+            {clickedDate ? `Sessions on ${clickedDate.toLocaleDateString()}` : 'Upcoming Mentorship Sessions'}
+          </div>
+          {clickedDate && (
+            <button onClick={() => setClickedDate(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          )}
         </header>
 
         <div className="sessions-content-scrollable" style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
-              <p style={{ marginTop: '10px' }}>Loading schedule...</p>
-            </div>
-          ) : sessions.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
-              <p style={{ fontSize: '16px', fontWeight: '500' }}>No upcoming sessions</p>
-              <p style={{ fontSize: '14px', marginTop: '4px' }}>Schedule a class from the Live Classroom</p>
-            </div>
-          ) : (
-            <div className="sessions-list-elegant">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
+          {(() => {
+            const filteredSessions = clickedDate
+              ? sessions.filter(session => {
+                  const sDate = new Date(session.scheduled_date || session.date)
+                  return sDate.getDate() === clickedDate.getDate() &&
+                         sDate.getMonth() === clickedDate.getMonth() &&
+                         sDate.getFullYear() === clickedDate.getFullYear()
+                })
+              : sessions;
+
+            if (loading) {
+              return (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite' }}>sync</span>
+                  <p style={{ marginTop: '10px' }}>Loading schedule...</p>
+                </div>
+              )
+            }
+
+            if (filteredSessions.length === 0) {
+              return (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'rgba(255,255,255,0.5)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>event_busy</span>
+                  <p style={{ fontSize: '16px', fontWeight: '500' }}>No {clickedDate ? 'sessions on this date' : 'upcoming sessions'}</p>
+                  {!clickedDate && <p style={{ fontSize: '14px', marginTop: '4px' }}>Schedule a class from the Live Classroom</p>}
+                </div>
+              )
+            }
+
+            return (
+              <div className="sessions-list-elegant">
+                {filteredSessions.map((session) => {
+                  const canJoin = session.scheduled_date ? (new Date(session.scheduled_date).getTime() - Date.now() <= 15 * 60 * 1000) : true;
+                  return (
+                  <div
+                    key={session.id}
                   className="session-card-elegant"
                   style={session.is_complete ? { opacity: 0.5, filter: 'grayscale(0.5)' } : {}}
                 >
@@ -487,7 +526,7 @@ function Calendar() {
                         {!session.is_complete && (
                           <button
                             className="session-btn"
-                            onClick={() => handleMarkComplete(session)}
+                            onClick={() => handleMarkCompleteClick(session)}
                             style={{
                               marginRight: '8px',
                               background: '#10b981',
@@ -510,19 +549,20 @@ function Calendar() {
                         )}
                         <button
                           className="session-btn"
+                          disabled={!canJoin}
                           onClick={() => handleJoin(session.joinLink)}
                           style={{
-                            background: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#fff' : '#2a7eff',
-                            color: session.reschedule_request && session.reschedule_role !== 'mentor' ? '#2a7eff' : '#fff',
-                            border: session.reschedule_request && session.reschedule_role !== 'mentor' ? '1px solid #2a7eff' : 'none',
+                            background: !canJoin ? '#cbd5e1' : session.reschedule_request && session.reschedule_role !== 'mentor' ? '#fff' : '#2a7eff',
+                            color: !canJoin ? '#64748b' : session.reschedule_request && session.reschedule_role !== 'mentor' ? '#2a7eff' : '#fff',
+                            border: !canJoin ? 'none' : session.reschedule_request && session.reschedule_role !== 'mentor' ? '1px solid #2a7eff' : 'none',
                             padding: '10px 16px',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: canJoin ? 'pointer' : 'not-allowed',
                             fontWeight: '500',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
-                            opacity: 0.8
+                            opacity: canJoin ? 0.8 : 0.6
                           }}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -536,9 +576,10 @@ function Calendar() {
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+                )})}
+              </div>
+            )
+          })()}
         </div>
 
         <RescheduleModal
@@ -555,6 +596,38 @@ function Calendar() {
           onApprove={(session) => handleRescheduleResponse(session, 'approve')}
           onReject={(session) => handleRescheduleResponse(session, 'reject')}
         />
+
+        {showCompleteModal && (
+          <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div className="modal-content" style={{ background: 'white', padding: '32px', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                <span className="material-symbols-outlined" style={{ color: '#10b981', fontSize: '32px' }}>check_circle</span>
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>Mark Session Complete?</h3>
+              <p style={{ color: '#64748b', fontSize: '15px', lineHeight: '1.5', marginBottom: '32px' }}>
+                This will remove it from the upcoming list for you and the student.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setShowCompleteModal(false)}
+                  style={{ flex: 1, padding: '12px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseOver={(e) => e.target.style.background = '#e2e8f0'}
+                  onMouseOut={(e) => e.target.style.background = '#f1f5f9'}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmComplete}
+                  style={{ flex: 1, padding: '12px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseOver={(e) => e.target.style.background = '#059669'}
+                  onMouseOut={(e) => e.target.style.background = '#10b981'}
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

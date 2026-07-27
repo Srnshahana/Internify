@@ -3264,9 +3264,25 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                     />
                   </div>
                 </div>
-                <div className="assessment-modal-actions">
-                  <button className="btn-secondary" onClick={() => setShowScheduleClassModal(false)} disabled={isSchedulingClass}>Cancel</button>
-                  <button className="btn-primary" onClick={handleScheduleClass} disabled={isSchedulingClass} style={{ background: isSchedulingClass ? '#94a3b8' : '#2a7eff' }}>
+                <div className="assessment-modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                  <button
+                    className="btn-secondary"
+                    onClick={() => setShowScheduleClassModal(false)}
+                    disabled={isSchedulingClass}
+                    style={{ flex: 1, padding: '12px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', transition: 'background 0.2s' }}
+                    onMouseOver={(e) => e.target.style.background = '#e2e8f0'}
+                    onMouseOut={(e) => e.target.style.background = '#f1f5f9'}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={handleScheduleClass}
+                    disabled={isSchedulingClass}
+                    style={{ flex: 1, padding: '12px', background: isSchedulingClass ? '#94a3b8' : '#2a7eff', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', transition: 'background 0.2s' }}
+                    onMouseOver={(e) => { if(!isSchedulingClass) e.target.style.background = '#1d4ed8' }}
+                    onMouseOut={(e) => { if(!isSchedulingClass) e.target.style.background = '#2a7eff' }}
+                  >
                     {isSchedulingClass ? 'Scheduling...' : 'Save & Schedule'}
                   </button>
                 </div>

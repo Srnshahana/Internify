@@ -1473,9 +1473,11 @@ function StudentLiveClassroom({ course, onBack, onNavigate }) {
       if (msgError) console.error('Error posting submission msg:', msgError)
 
       // Optimistic Chat Update
+      const tempId = Date.now().toString() + '-submit'
       const optimisticMsg = {
         ...submissionMessage,
-        id: Date.now(),
+        id: tempId,
+        tempId: tempId,
         from: 'learner',
         time: getCurrentTime(),
         highlightColor: null,

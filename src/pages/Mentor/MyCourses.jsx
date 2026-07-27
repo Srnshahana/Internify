@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
-import CourseDetail from './CourseDetail.jsx'
+import { useState } from 'react'
 import { SearchIcon } from '../../components/Icons.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
-function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClassroom, setIsLiveClassroomActive, onNavigate }) {
-  const [selectedCourse, setSelectedCourse] = useState(null)
+function MyCourses({ onBack }) {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('active')
 
   // Use global dashboard data from context
@@ -13,32 +13,12 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
   // Filter courses based on active tab
   const filteredTaughtCourses = taughtCourses ? taughtCourses.filter(c => (c.status || 'active') === activeTab) : []
 
-  useEffect(() => {
-    if (setIsCourseDetailActive) {
-      setIsCourseDetailActive(!!selectedCourse)
-    }
-  }, [selectedCourse, setIsCourseDetailActive])
-
   // Format current date
   const currentDateFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long'
   })
-
-  if (selectedCourse) {
-    return (
-      <CourseDetail
-        course={selectedCourse}
-        onBack={() => setSelectedCourse(null)}
-        onMentorClick={onMentorClick}
-        onEnterClassroom={(course) => {
-          if (onEnterClassroom) onEnterClassroom(course)
-        }}
-        onNavigate={onNavigate}
-      />
-    )
-  }
 
   return (
     <div className="dashboard-page-v2 font-sans">
@@ -177,7 +157,7 @@ function MyCourses({ onBack, onMentorClick, setIsCourseDetailActive, onEnterClas
             <div
               key={course.id}
               className="premium-course-card"
-              onClick={() => setSelectedCourse(course)}
+              onClick={() => navigate('/mentor-dashboard/course/' + (course.id || course.course_id || course.classroom_id))}
               style={{
                 background: 'white',
                 borderRadius: '24px',

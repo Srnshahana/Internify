@@ -542,7 +542,7 @@ function App() {
           }
         />
         <Route
-          path="/mentor-dashboard"
+          path="/mentor-dashboard/*"
           element={
             <ProtectedRoute requiredRole="mentor">
               <MentorDashboardPage />

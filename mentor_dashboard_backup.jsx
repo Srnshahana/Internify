@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Loading from '../../components/Loading.jsx'
 import StudentAppBar from '../../components/shared/StudentAppBar.jsx'
 import Home from './Home.jsx'
@@ -7,8 +7,6 @@ import Calendar from './Calendar.jsx'
 import Profile from './Profile.jsx'
 import Notification from './Notification.jsx'
 import MyCourses from './MyCourses.jsx'
-import CourseDetail from './CourseDetail.jsx'
-import MentorLiveClassroom from './MentorLiveClassroom.jsx'
 import { HomeIcon, CalendarIcon, ProfileIcon, ClassroomIcon } from '../../components/Icons.jsx'
 
 import { DashboardDataProvider, useDashboardData } from '../../contexts/DashboardDataContext.jsx'
@@ -69,64 +67,9 @@ function ApprovalRejectedView({ onLogout }) {
   )
 }
 
-function CourseDetailWrapper() {
-  const { id } = useParams();
-  const { mentorshipEnrollments } = useDashboardData();
-  const navigate = useNavigate();
-  // Find course or default to null
-  const course = mentorshipEnrollments.find(c => String(c.id) === id) || mentorshipEnrollments.find(c => c.title.toLowerCase().replace(/\s+/g, '-') === id) || mentorshipEnrollments[0];
-  
-  if (!course) return <div style={{padding: '40px', textAlign: 'center'}}>Course not found</div>;
-  
-  return (
-    <CourseDetail
-      course={course}
-      onBack={() => navigate(-1)}
-      onEnterClassroom={(c) => navigate('/mentor-dashboard/classroom/' + (c?.id || ''))}
-      onNavigate={(path) => {
-        switch (path) {
-          case 'Home': navigate('/mentor-dashboard'); break;
-          case 'Classrooms': navigate('/mentor-dashboard/classrooms'); break;
-          case 'Calendar': navigate('/mentor-dashboard/calendar'); break;
-          case 'Profile': navigate('/mentor-dashboard/profile'); break;
-          case 'Notification': navigate('/mentor-dashboard/notification'); break;
-          default: navigate('/mentor-dashboard'); break;
-        }
-      }}
-    />
-  );
-}
-
-function LiveClassroomWrapper() {
-  const { id } = useParams();
-  const { mentorshipEnrollments } = useDashboardData();
-  const navigate = useNavigate();
-  const course = mentorshipEnrollments.find(c => String(c.id) === id) || mentorshipEnrollments.find(c => c.title.toLowerCase().replace(/\s+/g, '-') === id) || mentorshipEnrollments[0];
-  
-  if (!course) return <div style={{padding: '40px', textAlign: 'center'}}>Classroom not found</div>;
-
-  return (
-    <MentorLiveClassroom
-      course={course}
-      onBack={() => navigate(-1)}
-      onNavigate={(path) => {
-        switch (path) {
-          case 'Home': navigate('/mentor-dashboard'); break;
-          case 'Classrooms': navigate('/mentor-dashboard/classrooms'); break;
-          case 'Calendar': navigate('/mentor-dashboard/calendar'); break;
-          case 'Profile': navigate('/mentor-dashboard/profile'); break;
-          case 'Notification': navigate('/mentor-dashboard/notification'); break;
-          default: navigate('/mentor-dashboard'); break;
-        }
-      }}
-    />
-  );
-}
-
-function DashboardContent({ onLogout, navItems }) {
+function DashboardContent({ onLogout, activePage, setActivePage, isLiveClassroomActive, setIsLiveClassroomActive, isCourseDetailActive, setIsCourseDetailActive, navItems }) {
   const { loading, mentorshipEnrollments, userProfile } = useDashboardData()
   const navigate = useNavigate()
-  const location = useLocation()
 
   useEffect(() => {
     // If user is a mentor but hasn't completed onboarding or profile is missing, send them back to the application page
@@ -145,50 +88,47 @@ function DashboardContent({ onLogout, navItems }) {
   const isApproved = approvalValue === true || (typeof approvalValue === 'string' && approvalValue.toLowerCase() === 'approved')
   const isRejected = typeof approvalValue === 'string' && approvalValue.toLowerCase() === 'rejected'
 
-  const pathSegments = location.pathname.split('/').filter(Boolean)
-  let currentActivePage = 'Home'
-  if (pathSegments.length > 1) {
-    const route = pathSegments[1]
-    if (route === 'classrooms') currentActivePage = 'Classrooms'
-    else if (route === 'calendar') currentActivePage = 'Calendar'
-    else if (route === 'profile') currentActivePage = 'Profile'
-    else if (route === 'notification') currentActivePage = 'Notification'
-    else if (route === 'course') currentActivePage = 'CourseDetail'
-    else if (route === 'classroom') currentActivePage = 'LiveClassroom'
-  }
-
-  const handleNavigate = (path) => {
-    switch (path) {
-      case 'Home': navigate('/mentor-dashboard'); break;
-      case 'Classrooms': navigate('/mentor-dashboard/classrooms'); break;
-      case 'Calendar': navigate('/mentor-dashboard/calendar'); break;
-      case 'Profile': navigate('/mentor-dashboard/profile'); break;
-      case 'Notification': navigate('/mentor-dashboard/notification'); break;
-      default: navigate('/mentor-dashboard'); break;
+  const renderPage = (page) => {
+    switch (page) {
+      case 'Home':
+        return (
+          <Home
+            onNavigate={setActivePage}
+            setIsCourseDetailActive={setIsCourseDetailActive}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            setIsLiveClassroomActive={setIsLiveClassroomActive}
+          />
+        )
+      case 'Classrooms':
+        return (
+          <MyCourses
+            courses={mentorshipEnrollments}
+            onBack={() => setActivePage('Home')}
+            onEnterClassroom={() => setIsLiveClassroomActive(true)}
+            setIsCourseDetailActive={setIsCourseDetailActive}
+            setIsLiveClassroomActive={setIsLiveClassroomActive}
+            onNavigate={setActivePage}
+          />
+        )
+      case 'Calendar':
+        return <Calendar />
+      case 'Profile':
+        return <Profile onLogout={onLogout} />
+      case 'Notification':
+        return <Notification />
+      default:
+        return <Home onNavigate={setActivePage} setIsCourseDetailActive={setIsCourseDetailActive} onEnterClassroom={() => setIsLiveClassroomActive(true)} />
     }
   }
 
-  const renderRoutes = () => (
-    <Routes>
-      <Route path="/" element={<Home onNavigate={handleNavigate} onEnterClassroom={(c) => navigate('/mentor-dashboard/classroom/' + (c?.id || ''))} />} />
-      <Route path="classrooms" element={<MyCourses courses={mentorshipEnrollments} onBack={() => navigate('/mentor-dashboard')} onEnterClassroom={(c) => navigate('/mentor-dashboard/classroom/' + (c?.id || ''))} onNavigate={handleNavigate} />} />
-      <Route path="calendar" element={<Calendar />} />
-      <Route path="profile" element={<Profile onLogout={onLogout} />} />
-      <Route path="notification" element={<Notification />} />
-      <Route path="course/:id" element={<CourseDetailWrapper />} />
-      <Route path="classroom/:id" element={<LiveClassroomWrapper />} />
-      <Route path="*" element={<Home onNavigate={handleNavigate} onEnterClassroom={(c) => navigate('/mentor-dashboard/classroom/' + (c?.id || ''))} />} />
-    </Routes>
-  );
-
   return (
-    <div className={`dashboard-layout-new ${currentActivePage === 'LiveClassroom' ? 'live-classroom-active' : ''}`}>
+    <div className={`dashboard-layout-new ${isLiveClassroomActive ? 'live-classroom-active' : ''}`}>
       {!isApproved && (
         <div className="approval-status-modal">
           {isRejected ? <ApprovalRejectedView onLogout={onLogout} /> : <ApprovalPendingView onLogout={onLogout} />}
         </div>
       )}
-      {currentActivePage !== 'LiveClassroom' && currentActivePage !== 'CourseDetail' && isApproved && (
+      {!isLiveClassroomActive && !isCourseDetailActive && isApproved && (
         <>
           {/* Bottom Navigation Bar */}
           <nav className="premium-bottom-nav">
@@ -197,18 +137,18 @@ function DashboardContent({ onLogout, navItems }) {
               <div
                 className="nav-glass-highlight"
                 style={{
-                  transform: `translateX(${navItems.findIndex(item => item.id === currentActivePage) * 100}%)`
+                  transform: `translateX(${navItems.findIndex(item => item.id === activePage) * 100}%)`
                 }}
               />
 
               {navItems.map((item) => {
                 const IconComponent = item.icon
-                const isActive = currentActivePage === item.id
+                const isActive = activePage === item.id
                 return (
                   <button
                     key={item.id}
                     className={`bottom-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => handleNavigate(item.id)}
+                    onClick={() => setActivePage(item.id)}
                   >
                     <div className="nav-icon-wrapper">
                       <IconComponent />
@@ -221,7 +161,7 @@ function DashboardContent({ onLogout, navItems }) {
           </nav>
 
           {/* Top Header */}
-          {currentActivePage !== 'Profile' && currentActivePage !== 'Home' && currentActivePage !== 'Classrooms' && currentActivePage !== 'Calendar' && (
+          {activePage !== 'Profile' && activePage !== 'Home' && activePage !== 'Classrooms' && activePage !== 'Calendar' && (
             <StudentAppBar onLogout={onLogout} />
           )}
         </>
@@ -229,10 +169,10 @@ function DashboardContent({ onLogout, navItems }) {
 
       <main className="dashboard-main-new">
         <div
-          className={`dashboard-content-new ${currentActivePage === 'Profile' ? 'student-profile-no-padding' : ''}`}
-          style={(currentActivePage === 'Home' || currentActivePage === 'Classrooms' || currentActivePage === 'Calendar' || currentActivePage === 'CourseDetail') ? { padding: 0, maxWidth: '100%' } : {}}
+          className={`dashboard-content-new ${activePage === 'Profile' ? 'student-profile-no-padding' : ''}`}
+          style={(activePage === 'Home' || activePage === 'Classrooms' || activePage === 'Calendar') ? { padding: 0, maxWidth: '100%' } : {}}
         >
-          {renderRoutes()}
+          {renderPage(activePage)}
         </div>
       </main>
     </div>
@@ -240,6 +180,11 @@ function DashboardContent({ onLogout, navItems }) {
 }
 
 function MentorDashboard({ onLogout }) {
+  const [activePage, setActivePage] = useState('Home')
+  const [isLiveClassroomActive, setIsLiveClassroomActive] = useState(false)
+  const [isCourseDetailActive, setIsCourseDetailActive] = useState(false)
+  const [theme] = useState('light')
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light')
     localStorage.setItem('dashboard-theme', 'light')
@@ -261,6 +206,12 @@ function MentorDashboard({ onLogout }) {
       `}</style>
       <DashboardContent
         onLogout={onLogout}
+        activePage={activePage}
+        setActivePage={setActivePage}
+        isLiveClassroomActive={isLiveClassroomActive}
+        setIsLiveClassroomActive={setIsLiveClassroomActive}
+        isCourseDetailActive={isCourseDetailActive}
+        setIsCourseDetailActive={setIsCourseDetailActive}
         navItems={navItems}
       />
     </DashboardDataProvider>
