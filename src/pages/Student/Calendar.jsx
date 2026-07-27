@@ -344,10 +344,10 @@ function Calendar() {
 
               // Check live events from sessions
               const hasEvent = sessions.some(s => {
-                const sDate = new Date(s.date)
+                const sDate = new Date(s.date || s.scheduled_date)
                 return sDate.getDate() === date &&
                   sDate.getMonth() === month &&
-                  sDate.getFullYear() === year
+                  sDate.getFullYear() === year && !s.is_complete && !s.completed
               })
 
               const isSelected = clickedDate &&

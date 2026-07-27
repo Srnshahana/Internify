@@ -369,8 +369,8 @@ function Calendar() {
 
                 // Check if any session falls on this day
                 const hasEvent = sessions.some(s => {
-                  const sDate = new Date(s.date)
-                  return sDate.getDate() === date && sDate.getMonth() === month && sDate.getFullYear() === year
+                  const sDate = new Date(s.date || s.scheduled_date)
+                  return sDate.getDate() === date && sDate.getMonth() === month && sDate.getFullYear() === year && !s.is_complete && !s.completed
                 })
 
                 const isSelected = clickedDate && date === clickedDate.getDate() &&

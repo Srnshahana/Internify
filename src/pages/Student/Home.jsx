@@ -911,7 +911,24 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
             <div className="sessions-list-elegant">
               {liveUpcomingSessions.length > 0 ? (
                 liveUpcomingSessions.map((session) => (
-                  <div key={session.id} className="session-card-elegant">
+                  <div 
+                    key={session.id} 
+                    className="session-card-elegant"
+                    style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                    onClick={() => {
+                      localStorage.setItem('open_reschedule_session_id', session.id);
+                      if (onNavigate) onNavigate('Calendar');
+                      setShowUpcomingSessionsModal(false);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)';
+                    }}
+                  >
                     <div className="session-main-content">
                       <div className="session-time-box">
                         <span className="time-main">
@@ -932,36 +949,6 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                           <span>{session.courses?.title || session.classroom_name || session.course}</span>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="session-actions-buttons" style={{ marginTop: '12px', width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-                      <button
-                        className="session-btn session-btn-secondary"
-                        style={{ padding: '8px 16px', fontSize: '14px', marginRight: '8px' }}
-                        onClick={() => {
-                          localStorage.setItem('open_reschedule_session_id', session.id);
-                          if (onNavigate) onNavigate('Calendar');
-                          setShowUpcomingSessionsModal(false);
-                        }}
-                      >
-                        Reschedule
-                      </button>
-                      {session.meeting_link ? (
-                        <button
-                          className="session-btn session-btn-primary"
-                          onClick={() => {
-                            const formattedLink = /^https?:\/\//i.test(session.meeting_link) ? session.meeting_link : `https://${session.meeting_link}`;
-                            window.open(formattedLink, '_blank');
-                          }}
-                          style={{ padding: '8px 16px', fontSize: '14px' }}
-                        >
-                          Join
-                        </button>
-                      ) : (
-                        <button className="session-btn session-btn-secondary" disabled style={{ opacity: 0.5, padding: '8px 16px', fontSize: '14px' }}>
-                          TBA
-                        </button>
-                      )}
                     </div>
                   </div>
                 ))
