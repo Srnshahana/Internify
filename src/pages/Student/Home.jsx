@@ -82,9 +82,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
     .filter(s => !s.is_complete && !s.completed)
     .filter(session => {
       const matchedCourse = enrolledCourses.find((course) => {
-        const courseTitle = (course?.title || '').toLowerCase()
-        const sessionCourse = (session?.course || '').toLowerCase()
-        return courseTitle && sessionCourse && (courseTitle.includes(sessionCourse) || sessionCourse.includes(courseTitle))
+        return String(course.course_id) === String(session.course_id) || String(course.id) === String(session.course_id)
       })
       return !matchedCourse || (matchedCourse.status !== 'rejected' && matchedCourse.status !== 'pending')
     })
@@ -891,7 +889,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
       {/* Modals */}
       {showUpcomingSessionsModal && (
         <div className="modal-overlay" onClick={() => setShowUpcomingSessionsModal(false)}>
-          <div className="modal-content-centered shadow-lg ring-1 ring-black/5" style={{ borderRadius: '24px', border: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-centered shadow-lg ring-1 ring-black/5" style={{ borderRadius: '24px', border: '1px solid #e2e8f0', maxWidth: '650px', padding: '32px' }} onClick={(e) => e.stopPropagation()}>
             <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h2 className="modal-title" style={{ margin: 0 }}>Upcoming Sessions</h2>
               <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%' }}>
@@ -931,7 +929,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
                       <div className="session-info-elegant">
                         <h4 style={{ margin: 0 }}>{session.title}</h4>
                         <div className="session-meta-elegant">
-                          <span>{session.courses?.title || session.course}</span>
+                          <span>{session.courses?.title || session.classroom_name || session.course}</span>
                         </div>
                       </div>
                     </div>

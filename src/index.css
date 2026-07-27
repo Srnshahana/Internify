@@ -25982,7 +25982,9 @@ h1 span {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26206,8 +26208,8 @@ h1 span {
 }
 
 .modal-stats-summary {
-  background: rgba(42, 126, 255, 0.05);
-  border: 1px solid rgba(42, 126, 255, 0.1);
+  background: rgba(65, 86, 140, 0.08);
+  border: 1px solid rgba(65, 86, 140, 0.15);
   border-radius: 20px;
   padding: 20px;
   display: flex;
@@ -31418,8 +31420,8 @@ h1 span {
   justify-content: space-between;
   align-items: center;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   margin-bottom: 4px;
@@ -32823,8 +32825,9 @@ h1 span {
    ========================================================================== */
 
 /* Calendar Session Card Improvements */
-.session-card-elegant {
+.sessions-list-elegant .session-card-elegant {
   flex-direction: column !important;
+  align-items: flex-start !important;
   gap: 16px;
 }
 

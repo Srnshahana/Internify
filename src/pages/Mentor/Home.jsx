@@ -84,6 +84,7 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
   const [showUpcomingSessionsModal, setShowUpcomingSessionsModal] = useState(false)
   const [showApprovalModal, setShowApprovalModal] = useState(false)
   const [approvalCourse, setApprovalCourse] = useState(null)
+  const [isCompletingSession, setIsCompletingSession] = useState(false)
   const [showStudentProfile, setShowStudentProfile] = useState(false)
   const [viewingStudent, setViewingStudent] = useState(null)
   const [studentProfileData, setStudentProfileData] = useState(null)
@@ -143,6 +144,24 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
       )
       return { ...session, enrollmentStatus: enrollment?.status }
     })
+
+  const handleMarkComplete = async (sessionId) => {
+    try {
+      setIsCompletingSession(true)
+      const { error } = await supabase
+        .from('scheduled_classes')
+        .update({ is_complete: true })
+        .eq('id', sessionId)
+      
+      if (error) throw error
+      await refetch() // Refresh the context data so it disappears from upcoming
+    } catch (err) {
+      console.error('Error marking session complete:', err)
+      alert('Failed to mark session as complete. Please try again.')
+    } finally {
+      setIsCompletingSession(false)
+    }
+  }
 
   // Calculate session completion progress
   const completedCount = allScheduled.filter(s => s.is_complete || s.completed).length
@@ -430,11 +449,11 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
       {/* Upcoming Sessions Modal */}
       {showUpcomingSessionsModal && (
         <div className="modal-overlay" onClick={() => setShowUpcomingSessionsModal(false)}>
-          <div className="modal-content-centered" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-centered" style={{ maxWidth: '650px', padding: '32px' }} onClick={(e) => e.stopPropagation()}>
             <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <h2 className="modal-title" style={{ margin: 0 }}>Upcoming Sessions</h2>
-              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button className="progress-modal-close" onClick={() => setShowUpcomingSessionsModal(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
 
@@ -488,6 +507,17 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
                         }}
                       >
                         Reschedule
+                      </button>
+                      <button
+                        className="session-btn session-btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '14px', marginRight: '8px', background: '#10b981', borderColor: '#10b981' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkComplete(session.id);
+                        }}
+                        disabled={isCompletingSession}
+                      >
+                        {isCompletingSession ? 'Marking...' : 'Mark Complete'}
                       </button>
                       <button
                         className="session-btn session-btn-primary"
