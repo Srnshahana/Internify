@@ -31206,10 +31206,9 @@ h1 span {
   .calendar-dashboard-wrapper {
     flex-direction: row;
     align-items: flex-start;
-    height: 100vh;
+    min-height: 100vh;
     padding: 24px 32px;
     gap: 32px;
-    overflow: hidden;
   }
 }
 
@@ -31231,10 +31230,7 @@ h1 span {
 @media (min-width: 1024px) {
   .calendar-glass-card {
     flex: 1.4;
-    min-height: calc(100vh - 84px);
-    /* Increased min-height to push card to bottom */
-    max-height: calc(100vh - 84px);
-    overflow-y: auto;
+    height: fit-content;
     padding: 32px !important;
     /* Slightly more padding on desktop */
   }

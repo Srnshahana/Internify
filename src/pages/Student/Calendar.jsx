@@ -405,7 +405,7 @@ function Calendar() {
             }
 
             return filteredSessions.map((session) => {
-              const canJoin = session.scheduled_date ? (new Date(session.scheduled_date).getTime() - Date.now() <= 15 * 60 * 1000) : true;
+              const canJoin = true;
               return (
               <div
                 key={session.id}
@@ -504,7 +504,7 @@ function Calendar() {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          opacity: canJoin ? 0.8 : 0.6
+                          opacity: canJoin ? 1 : 0.6
                         }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
