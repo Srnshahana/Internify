@@ -394,7 +394,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           const optimisticMatchIndex = prev.findIndex(m =>
             m.content === newMessage.content &&
             String(m.sender_id) === String(newMessage.sender_id) &&
-            m.tempId
+            (m.tempId || (!isNaN(Number(m.id)) && Number(m.id) > 1700000000000))
           )
 
           // Infer type from file_url or content if type is missing from DB
