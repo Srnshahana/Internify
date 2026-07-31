@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
+const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails, submitText }) => {
     const [newDate, setNewDate] = useState('');
     const [newTime, setNewTime] = useState('');
     const [reason, setReason] = useState('');
@@ -237,7 +237,7 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, sessionDetails }) => {
                                     boxShadow: '0 4px 6px -1px rgba(42, 126, 255, 0.2)'
                                 }}
                             >
-                                Send Request
+                                {submitText || 'Send Request'}
                             </button>
                         </div>
                     </form>

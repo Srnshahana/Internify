@@ -1992,6 +1992,11 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
           <button
             className={`live-complete-btn-v2 ${activeSession.status === 'completed' ? 'completed' : ''}`}
             onClick={() => {
+              const isScheduled = scheduledClasses.some(cls => String(cls.session_id) === String(activeSessionId) || String(cls.id) === String(activeSessionId));
+              if (!isScheduled && activeSession.status !== 'completed') {
+                 showModal('Notice', 'You need to schedule this class before marking it as completed.', 'info');
+                 return;
+              }
               if (activeSession.status !== 'completed') {
                 setShowSectionCompleteModal(true)
               }
@@ -3861,6 +3866,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
         onClose={() => setShowRescheduleModal(false)}
         onConfirm={handleRescheduleConfirm}
         sessionDetails={selectedSession}
+        submitText="Reschedule"
       />
 
       <RescheduleResponseModal

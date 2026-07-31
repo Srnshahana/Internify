@@ -3,6 +3,7 @@ import supabase from '../../supabaseClient'
 import RescheduleModal from '../../components/RescheduleModal'
 import RescheduleResponseModal from '../../components/RescheduleResponseModal'
 import JoinAlertModal from '../../components/JoinAlertModal'
+import MessageModal from '../../components/shared/MessageModal'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -15,6 +16,11 @@ function Calendar() {
   const [showCompleteModal, setShowCompleteModal] = useState(false)
   const [sessionToComplete, setSessionToComplete] = useState(null)
   const [joinAlert, setJoinAlert] = useState({ isOpen: false, title: '', message: '', type: 'warning' })
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', type: 'info' })
+  
+  const showModal = (title, message, type = 'info') => {
+    setModalConfig({ isOpen: true, title, message, type })
+  }
 
   const currentUserId = localStorage.getItem('auth_id')
 
@@ -241,16 +247,18 @@ function Calendar() {
       setSessions(prev => prev.map(s => s.id === selectedSession.id ? {
         ...s,
         scheduled_date: newScheduledDate,
+        date: new Date(newScheduledDate).toLocaleDateString(),
+        time: new Date(newScheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         reschedule_request: false,
         reschedule_role: null,
         rescheduled_date: null,
         reschedule_reason: null
       } : s))
 
-      alert('Class successfully rescheduled!')
+      showModal('Success', 'Class successfully rescheduled!', 'success')
     } catch (err) {
       console.error('Error sending reschedule request:', err)
-      alert('Failed to send reschedule request. Please try again.')
+      showModal('Error', 'Failed to send reschedule request. Please try again.', 'error')
     }
   }
 
@@ -626,6 +634,7 @@ function Calendar() {
           onClose={() => setShowRescheduleModal(false)}
           onConfirm={handleRescheduleConfirm}
           sessionDetails={selectedSession}
+          submitText="Reschedule"
         />
 
         <RescheduleResponseModal
@@ -675,6 +684,13 @@ function Calendar() {
           type={joinAlert.type}
           scheduledDate={joinAlert.scheduledDate}
           onClose={() => setJoinAlert({ ...joinAlert, isOpen: false })}
+        />
+        <MessageModal
+          isOpen={modalConfig.isOpen}
+          onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+          title={modalConfig.title}
+          message={modalConfig.message}
+          type={modalConfig.type}
         />
       </div>
     </div>
