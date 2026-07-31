@@ -77,6 +77,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     dueDate: '',
   })
   const [showScheduleClassModal, setShowScheduleClassModal] = useState(false)
+  const minScheduleDateTime = useMemo(() => showScheduleClassModal ? new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '', [showScheduleClassModal]);
   const [isSchedulingClass, setIsSchedulingClass] = useState(false)
   const [isSchedulingAssessment, setIsSchedulingAssessment] = useState(false)
   const [isConfirmingCompletion, setIsConfirmingCompletion] = useState(false)
@@ -1213,12 +1214,14 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     const titleWords = newAssessment.title.trim().split(/\s+/);
     if (titleWords.length > 15) {
       showModal('Validation Error', 'Assessment Title cannot exceed 15 words.', 'error')
+      setIsSchedulingAssessment(false);
       return
     }
 
     const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     if (newAssessment.dueDate < todayStr) {
       showModal('Validation Error', 'Due Date cannot be in the past.', 'error')
+      setIsSchedulingAssessment(false);
       return
     }
 
@@ -1292,6 +1295,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
     const selectedTime = new Date(scheduleClassData.scheduled_date).getTime();
     if (selectedTime < Date.now()) {
       showModal('Validation Error', 'You cannot schedule a class in the past. Please select a future time.', 'error')
+      setIsSchedulingClass(false);
       return
     }
 
@@ -1303,6 +1307,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
 
     if (isOverlap) {
       showModal('Validation Error', 'There is already a class scheduled within 20 minutes of this time. Please choose another time.', 'error');
+      setIsSchedulingClass(false);
       return;
     }
 
@@ -3249,7 +3254,7 @@ function MentorLiveClassroom({ course, onBack, onNavigate }) {
                       type="datetime-local"
                       className="form-input"
                       value={scheduleClassData.scheduled_date}
-                      min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                      min={minScheduleDateTime}
                       onChange={(e) => setScheduleClassData({ ...scheduleClassData, scheduled_date: e.target.value })}
                     />
                   </div>
