@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const JoinAlertModal = ({ isOpen, onClose, title, message, type = 'warning' }) => {
+const JoinAlertModal = ({ isOpen, onClose, title, message, type = 'warning', scheduledDate }) => {
   if (!isOpen) return null;
 
   const getIcon = () => {
@@ -45,9 +45,18 @@ const JoinAlertModal = ({ isOpen, onClose, title, message, type = 'warning' }) =
           {title}
         </h3>
         
-        <p style={{ color: '#64748b', fontSize: '14px', lineHeight: '1.5', marginBottom: '24px' }}>
+        <p style={{ color: '#64748b', fontSize: '14px', lineHeight: '1.5', marginBottom: scheduledDate ? '16px' : '24px' }}>
           {message}
         </p>
+
+        {scheduledDate && (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scheduled Time</span>
+            <span style={{ fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
+              {new Date(scheduledDate).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        )}
 
         <button 
           onClick={onClose}

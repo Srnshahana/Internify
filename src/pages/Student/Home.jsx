@@ -471,7 +471,8 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
           isOpen: true,
           title: 'Session Not Started',
           message: 'This session hasn\'t started yet. You can join 15 minutes before the scheduled time.',
-          type: 'warning'
+          type: 'warning',
+          scheduledDate: scheduledDate
         });
         return
       }
@@ -1202,6 +1203,7 @@ function Home({ onNavigate, onMentorClick, setIsCourseDetailActive, setSearchQue
         title={joinAlert.title}
         message={joinAlert.message}
         type={joinAlert.type}
+        scheduledDate={joinAlert.scheduledDate}
         onClose={() => setJoinAlert({ ...joinAlert, isOpen: false })}
       />
     </div>
