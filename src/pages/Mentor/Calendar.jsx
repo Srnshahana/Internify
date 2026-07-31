@@ -149,6 +149,13 @@ function Calendar() {
   }
 
   const handleMarkCompleteClick = (session) => {
+    if (session.scheduled_date) {
+      const classTime = new Date(session.scheduled_date).getTime();
+      if (Date.now() < classTime) {
+        showModal('Notice', 'You cannot mark this class as complete before its scheduled time.', 'info');
+        return;
+      }
+    }
     setSessionToComplete(session)
     setShowCompleteModal(true)
   }
