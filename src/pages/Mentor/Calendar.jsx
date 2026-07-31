@@ -463,14 +463,15 @@ function Calendar() {
 
         <div className="sessions-content-scrollable" style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
           {(() => {
+            const activeSessions = sessions.filter(s => !s.is_complete && !s.completed);
             const filteredSessions = clickedDate
-              ? sessions.filter(session => {
+              ? activeSessions.filter(session => {
                   const sDate = new Date(session.scheduled_date || session.date)
                   return sDate.getDate() === clickedDate.getDate() &&
                          sDate.getMonth() === clickedDate.getMonth() &&
                          sDate.getFullYear() === clickedDate.getFullYear()
                 })
-              : sessions;
+              : activeSessions;
 
             if (loading) {
               return (
