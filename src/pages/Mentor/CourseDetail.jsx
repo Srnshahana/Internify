@@ -324,11 +324,11 @@ function CourseDetail({ course, onBack, onEnterClassroom, onNavigate }) {
           <div className="course-section-elegant">
             <h3 className="section-title-elegant">All Sections</h3>
             {courseDetails.sessions.map((session, index) => (
-              <div key={session.id || index} className={`session-item-elegant ${session.completed ? 'completed' : ''}`}>
+              <div key={session.id || index} className={`session-item-elegant ${session.completed || session.is_complete ? 'completed' : ''}`}>
                 <div className="session-header-elegant">
                   <h4 className="session-title-elegant">{session.title}</h4>
-                  <span className={`session-status-elegant ${session.completed ? 'status-completed' : 'status-pending'}`}>
-                    {session.completed ? '✓ Done' : '○ Pending'}
+                  <span className={`session-status-elegant ${session.completed || session.is_complete ? 'status-completed' : 'status-pending'}`}>
+                    {session.completed || session.is_complete ? '✓ Done' : '○ Pending'}
                   </span>
                 </div>
                 {session.description && (

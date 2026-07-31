@@ -122,12 +122,22 @@ export const DashboardDataProvider = ({ children }) => {
                     const sessionsFromDb = course.course_sessions || []
                     const student = Array.isArray(enrollment.student_details) ? enrollment.student_details[0] || {} : enrollment.student_details || {}
 
-                    // Filter progress for this specific course AND student
-                    const studentCourseProgress = progressData?.filter(p =>
+                    // Filter progress for this specific course AND student using scheduled_classes
+                    const completedSessionsForCourse = (mentorScheduled || []).filter(s =>
+                        String(s.course_id) === String(enrollment.course_id) &&
+                        String(s.student_id) === String(enrollment.student_id) &&
+                        (s.is_complete || s.completed)
+                    )
+                    
+                    const progressFromDb = (progressData || []).filter(p => 
                         String(p.course_id) === String(enrollment.course_id) &&
-                        String(p.student_id) === String(enrollment.student_id)
-                    ) || []
-                    const progressMap = new Map(studentCourseProgress.map(p => [String(p.session_id), p.is_completed]))
+                        String(p.student_id) === String(enrollment.student_id) &&
+                        p.is_completed
+                    )
+
+                    const progressMap = new Map()
+                    completedSessionsForCourse.forEach(s => progressMap.set(String(s.session_id), true))
+                    progressFromDb.forEach(p => progressMap.set(String(p.session_id), true))
 
                     return {
                         // Enrollment context
@@ -264,9 +274,20 @@ export const DashboardDataProvider = ({ children }) => {
                     const mentor = Array.isArray(enrollment.mentors_details) ? enrollment.mentors_details[0] || {} : enrollment.mentors_details || {}
                     const sessionsFromDb = course.course_sessions || []
 
-                    // Filter progress for this specific course
-                    const courseProgress = progressData?.filter(p => String(p.course_id) === String(enrollment.course_id)) || []
-                    const progressMap = new Map(courseProgress.map(p => [String(p.session_id), p.is_completed]))
+                    // Filter progress for this specific course using scheduled_classes and course_session_progress
+                    const completedSessionsForCourse = (studentScheduled || []).filter(s => 
+                        String(s.course_id) === String(enrollment.course_id) &&
+                        (s.is_complete || s.completed)
+                    )
+
+                    const progressFromDb = (progressData || []).filter(p => 
+                        String(p.course_id) === String(enrollment.course_id) &&
+                        p.is_completed
+                    )
+
+                    const progressMap = new Map()
+                    completedSessionsForCourse.forEach(s => progressMap.set(String(s.session_id), true))
+                    progressFromDb.forEach(p => progressMap.set(String(p.session_id), true))
 
                     return {
                         ...enrollment,

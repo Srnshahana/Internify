@@ -412,7 +412,7 @@ function Profile({ onLogout, onNavigate }) {
         </div>
 
         {/* Projects Section */}
-        <div className="profile-section-elegant">
+        <div className="profile-section-card">
           <div className="profile-section-header-elegant">
             <h2 className="profile-section-title-elegant">Projects</h2>
             {isEditing && <button className="section-edit-btn-elegant">Add project</button>}
@@ -458,7 +458,7 @@ function Profile({ onLogout, onNavigate }) {
         </div>
 
         {/* Education Section */}
-        <div className="profile-section-elegant">
+        <div className="profile-section-card">
           <div className="profile-section-header-elegant">
             <h2 className="profile-section-title-elegant">Education</h2>
             {isEditing && <button className="section-edit-btn-elegant">Add education</button>}

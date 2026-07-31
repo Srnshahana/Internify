@@ -24850,7 +24850,7 @@ h1 span {
   border-radius: 40px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   z-index: 1000;
   overflow: hidden;
@@ -24864,34 +24864,34 @@ h1 span {
   /* Use relative for absolute positioning context */
 }
 
-/* The Sliding Liquid Glass Highlight */
 .nav-glass-highlight {
   position: absolute;
-  top: 8px;
-  /* Slightly more spacing */
-  bottom: 8px;
-  left: 1%;
-  /* Start slightly in */
-  width: 24%;
-  height: fit-content;
-  /* Reduce from 25% to be slightly smaller than the 1/4 slot */
-  margin-left: 24%;
-  /* Handled by left offset */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.15) 100%);
-  /* Gradient for depth */
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  /* border-radius: 15px; */
-  /* Fuller pill */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0.5px rgba(255, 255, 255, 0.9),
-    /* Strong top light */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  /* Subtle border */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 25%; /* Exactly one slot width */
   z-index: 1;
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  /* Smoother, slightly slower glide */
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Extremely smooth fluid glide */
   pointer-events: none;
+}
+
+.nav-glass-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 40px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.15) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.05),
+    inset 0 4px 6px rgba(255, 255, 255, 0.9),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.03),
+    inset -2px -2px 8px rgba(255, 255, 255, 0.5);
 }
 
 .bottom-nav-item {
@@ -32300,13 +32300,14 @@ h1 span {
   background: #0f172a;
   /* Deep Navy Base */
   width: 100%;
-  max-width: 500px;
-  height: 340px;
+  max-width: 650px;
+  height: auto;
+  min-height: 380px;
   border-radius: 4px;
   padding: 10px;
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-40-39c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm29 55c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM3 31c1.38 0 2.5-1.12 2.5-2.5S4.38 26 3 26s-2.5 1.12-2.5 2.5S1.62 31 3 31zm89 19c1.38 0 2.5-1.12 2.5-2.5S90.38 45 89 45s-2.5 1.12-2.5 2.5S87.62 50 89 50zM27 63c1.38 0 2.5-1.12 2.5-2.5S28.38 58 27 58s-2.5 1.12-2.5 2.5S25.62 63 27 63zm53-29c1.38 0 2.5-1.12 2.5-2.5S78.38 29 77 29s-2.5 1.12-2.5 2.5S75.62 34 77 34zm-47 1c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm23-17c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23334155' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
   border: 1px solid #1e293b;
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  box-shadow: none;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -32314,7 +32315,7 @@ h1 span {
 
 .certificate-card-formal:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.6);
+  box-shadow: none;
   border-color: #334155;
 }
 
@@ -32702,6 +32703,7 @@ h1 span {
   gap: 24px;
   overflow-x: auto;
   cursor: grab;
+  padding-top: 20px;
   padding-bottom: 20px;
   /* Space for shadow/hover effects */
   -ms-overflow-style: none;
@@ -32728,6 +32730,11 @@ h1 span {
   min-width: 300px;
   display: flex;
   /* Allow children to fill height */
+}
+
+.draggable-carousel .carousel-slide.certification-slide {
+  flex: 0 0 calc(50% - 16px);
+  min-width: 500px;
 }
 
 @media (max-width: 1024px) {
@@ -39875,13 +39882,13 @@ html {
   background: rgba(255, 255, 255, 0.2);
   /* FIXED overrides: Glass Opacity */
   backdrop-filter: blur(20px);
-  padding: 12px 20px;
-  border-radius: 2rem;
+  padding: 0;
+  border-radius: 40px;
   box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: stretch;
   z-index: 2147483647 !important;
   /* Max Z-Index to ensure visibility */
   display: flex !important;
