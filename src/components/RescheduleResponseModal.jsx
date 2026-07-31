@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, onReject }) => {
     if (!isOpen || !sessionDetails) return null;
@@ -40,9 +41,9 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
     const newDT = getNewDateTime();
     const reason = sessionDetails.reschedule_reason || sessionDetails.reason;
 
-    return (
-        <div className="modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
-            <div className="modal-content-centered" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', width: '90%' }}>
+    return createPortal(
+        <div className="modal-overlay" onClick={onClose} style={{ zIndex: 2147483647, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="modal-content-centered" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
                 <div className="progress-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h2 className="modal-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Reschedule Request</h2>
                     <button className="progress-modal-close" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
@@ -129,7 +130,8 @@ const RescheduleResponseModal = ({ isOpen, onClose, sessionDetails, onApprove, o
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

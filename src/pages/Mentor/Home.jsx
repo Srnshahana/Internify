@@ -10,6 +10,7 @@ import StudentProfileTemplate from '../../components/StudentProfileTemplate.jsx'
 import { useDashboardData } from '../../contexts/DashboardDataContext.jsx'
 import supabase from '../../supabaseClient'
 import MessageModal from '../../components/shared/MessageModal.jsx'
+import JoinAlertModal from '../../components/JoinAlertModal'
 import Lottie from 'lottie-react'
 import educationJson from '../../assets/lottie/banner.json'
 import landingIllustration from '../../assets/images/landingpage-illlustration.svg'
@@ -67,6 +68,7 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
   const [showMessages, setShowMessages] = useState(false)
   const [showAssessments, setShowAssessments] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [joinAlert, setJoinAlert] = useState({ isOpen: false, title: '', message: '', type: 'warning' })
 
   // The actual templates the mentor offers (from onboarding)
   const offeredCoursesTemplates = providedCourses || []
@@ -280,6 +282,50 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
     }
   }
 
+
+  const handleJoin = (link, scheduledDate) => {
+    if (!link) {
+      setJoinAlert({
+        isOpen: true,
+        title: 'Link Unavailable',
+        message: 'No join link available for this session yet.',
+        type: 'error'
+      });
+      return
+    }
+
+    if (scheduledDate) {
+      const now = new Date()
+      const sessionStart = new Date(scheduledDate)
+      
+      const diffMs = sessionStart.getTime() - now.getTime()
+      const diffMins = Math.floor(diffMs / 60000)
+      
+      if (diffMins > 15) {
+        setJoinAlert({
+          isOpen: true,
+          title: 'Session Not Started',
+          message: 'This session hasn\'t started yet. You can join 15 minutes before the scheduled time.',
+          type: 'warning'
+        });
+        return
+      }
+      
+      if (diffMins < -60) {
+        setJoinAlert({
+          isOpen: true,
+          title: 'Session Expired',
+          message: 'This session has already ended or expired.',
+          type: 'error'
+        });
+        return
+      }
+    }
+
+    const formattedLink = /^https?:\/\//i.test(link) ? link : `https://${link}`
+    window.open(formattedLink, '_blank')
+  }
+
   return (
     <div className="dashboard-page-v2 font-sans">
       <div className="dashboard-background-v2">
@@ -474,12 +520,7 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
                   <div 
                     key={session.id} 
                     className="session-card-elegant" 
-                    style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                    onClick={() => {
-                      localStorage.setItem('open_reschedule_session_id', session.id);
-                      if (onNavigate) onNavigate('Calendar');
-                      setShowUpcomingSessionsModal(false);
-                    }}
+                    style={{ transition: 'transform 0.2s, box-shadow 0.2s' }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-2px)';
                       e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
@@ -511,6 +552,28 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
                           <span>{session.courses?.title || session.courseTitle}</span>
                         </div>
                       </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '16px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          localStorage.setItem('open_reschedule_session_id', session.id);
+                          if (onNavigate) onNavigate('Calendar');
+                          setShowUpcomingSessionsModal(false);
+                        }}
+                        style={{ flex: 1, padding: '10px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '100px', color: '#475569', fontWeight: '600', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' }}
+                      >
+                        Reschedule
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleJoin(session.meeting_link || session.joinLink || session.join_link, session.scheduled_date);
+                        }}
+                        style={{ flex: 1, padding: '10px 16px', background: '#2a7eff', border: 'none', borderRadius: '100px', color: '#fff', fontWeight: '600', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 12px rgba(42, 126, 255, 0.25)', transition: 'all 0.2s' }}
+                      >
+                        Join
+                      </button>
                     </div>
                   </div>
                 ))
@@ -1139,6 +1202,14 @@ function MentorHome({ onNavigate, onEnterClassroom }) {
         title={modalConfig.title}
         message={modalConfig.message}
         type={modalConfig.type}
+      />
+
+      <JoinAlertModal
+        isOpen={joinAlert.isOpen}
+        title={joinAlert.title}
+        message={joinAlert.message}
+        type={joinAlert.type}
+        onClose={() => setJoinAlert({ ...joinAlert, isOpen: false })}
       />
     </div>
   )

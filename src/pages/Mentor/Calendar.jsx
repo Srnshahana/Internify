@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import supabase from '../../supabaseClient'
 import RescheduleModal from '../../components/RescheduleModal'
 import RescheduleResponseModal from '../../components/RescheduleResponseModal'
+import JoinAlertModal from '../../components/JoinAlertModal'
 
 function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -13,6 +14,7 @@ function Calendar() {
   const [selectedSession, setSelectedSession] = useState(null)
   const [showCompleteModal, setShowCompleteModal] = useState(false)
   const [sessionToComplete, setSessionToComplete] = useState(null)
+  const [joinAlert, setJoinAlert] = useState({ isOpen: false, title: '', message: '', type: 'warning' })
 
   const currentUserId = localStorage.getItem('auth_id')
 
@@ -76,8 +78,8 @@ function Calendar() {
       const sessionIdToOpen = localStorage.getItem('open_reschedule_session_id');
       if (sessionIdToOpen) {
         const session = sessions.find(s => String(s.id) === String(sessionIdToOpen));
-        if (session && session.reschedule_request) {
-          if (session.reschedule_role === 'student') {
+        if (session) {
+          if (session.reschedule_request && session.reschedule_role === 'student') {
             handleResponseClick(session);
           } else {
             handleRescheduleClick(session);
@@ -91,11 +93,47 @@ function Calendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const currentMonth = selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })
 
-  const handleJoin = (link) => {
-    if (link) {
-      const formattedLink = /^https?:\/\//i.test(link) ? link : `https://${link}`;
-      window.open(formattedLink, '_blank')
+  const handleJoin = (link, scheduledDate) => {
+    if (!link) {
+      setJoinAlert({
+        isOpen: true,
+        title: 'Link Unavailable',
+        message: 'No join link available for this session yet.',
+        type: 'error'
+      });
+      return
     }
+
+    if (scheduledDate) {
+      const now = new Date()
+      const sessionStart = new Date(scheduledDate)
+      
+      const diffMs = sessionStart.getTime() - now.getTime()
+      const diffMins = Math.floor(diffMs / 60000)
+      
+      if (diffMins > 15) {
+        setJoinAlert({
+          isOpen: true,
+          title: 'Session Not Started',
+          message: 'This session hasn\'t started yet. You can join 15 minutes before the scheduled time.',
+          type: 'warning'
+        });
+        return
+      }
+      
+      if (diffMins < -60) {
+        setJoinAlert({
+          isOpen: true,
+          title: 'Session Expired',
+          message: 'This session has already ended or expired.',
+          type: 'error'
+        });
+        return
+      }
+    }
+
+    const formattedLink = /^https?:\/\//i.test(link) ? link : `https://${link}`
+    window.open(formattedLink, '_blank')
   }
 
   const handleRescheduleClick = (session) => {
@@ -550,7 +588,7 @@ function Calendar() {
                         <button
                           className="session-btn"
                           disabled={!canJoin}
-                          onClick={() => handleJoin(session.joinLink)}
+                          onClick={() => handleJoin(session.joinLink, session.scheduled_date)}
                           style={{
                             background: !canJoin ? '#cbd5e1' : session.reschedule_request && session.reschedule_role !== 'mentor' ? '#fff' : '#2a7eff',
                             color: !canJoin ? '#64748b' : session.reschedule_request && session.reschedule_role !== 'mentor' ? '#2a7eff' : '#fff',
@@ -628,11 +666,18 @@ function Calendar() {
             </div>
           </div>
         )}
+
+        <JoinAlertModal
+          isOpen={joinAlert.isOpen}
+          title={joinAlert.title}
+          message={joinAlert.message}
+          type={joinAlert.type}
+          onClose={() => setJoinAlert({ ...joinAlert, isOpen: false })}
+        />
       </div>
     </div>
   )
 }
 
+
 export default Calendar
-
-

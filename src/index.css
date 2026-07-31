@@ -39889,8 +39889,8 @@ html {
   display: flex;
   justify-content: space-around;
   align-items: stretch;
-  z-index: 2147483647 !important;
-  /* Max Z-Index to ensure visibility */
+  z-index: 9999 !important;
+  /* Reduced Z-Index to allow modals on top */
   display: flex !important;
   /* Force display on all screens */
 }
